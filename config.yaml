@@ -25,3 +25,57 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
+  intent_profiles:
+    - tag: model-edit
+      description: 查找大模型安全领域的模型编辑方向论文
+      enabled: true
+      paper_sources:
+        - arxiv
+      keywords:
+        - keyword: large language model editing
+          keyword_cn: 大语言模型编辑
+          query: large language model editing
+        - keyword: model editing safety
+          keyword_cn: 模型编辑安全
+          query: model editing safety
+        - keyword: knowledge editing
+          keyword_cn: 知识编辑
+          query: knowledge editing
+        - keyword: safety alignment editing
+          keyword_cn: 安全对齐编辑
+          query: safety alignment editing
+        - keyword: jailbreak editing
+          keyword_cn: 越狱编辑
+          query: jailbreak editing
+      intent_queries:
+        - query: Find papers about model editing for safety in large language models
+          query_cn: 查找关于大语言模型安全模型编辑的论文
+          enabled: true
+          source: manual
+          note: ''
+        - query: Research on knowledge editing to improve LLM safety
+          query_cn: 用知识编辑提升大语言模型安全性的研究
+          enabled: true
+          source: manual
+          note: ''
+        - query: How can model editing prevent attacks on large language models
+          query_cn: 模型编辑如何防止对大语言模型的攻击
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-06-04T15:23:23.829Z'
+source_backends:
+  arxiv:
+    papers_table: arxiv_papers
+    use_vector_rpc: true
+    vector_rpc: match_arxiv_papers
+    vector_rpc_exact: match_arxiv_papers_exact
+    use_bm25_rpc: true
+    bm25_rpc: match_arxiv_papers_bm25
+    sync_table: arxiv_sync_status
+    sync_success_value: success
+    schema: public
+    kind: supabase
+    enabled: true
+    url: https://lyucdwgefyfbmaiopjbk.supabase.co
+    anon_key: sb_publishable_lX-oi64Uxyd7SIVv3_w2Uw_MTOojeKq
