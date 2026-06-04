@@ -1,0 +1,1473 @@
+{
+  "top_k": 200,
+  "generated_at": "2026-06-04T15:58:24.997803+00:00",
+  "papers": [
+    {
+      "id": "openreview-neurips-2025-whm5j9uanv",
+      "source": "NeurIPS-2025-Accepted",
+      "title": "Conflict-Aware Knowledge Editing in the Wild: Semantic-Augmented Graph Representation for Unstructured Text",
+      "abstract": "Large Language Models (LLMs) have demonstrated broad applications but suffer from issues like hallucinations, erroneous outputs and outdated knowledge. Model editing emerges as an effective solution to refine knowledge in LLMs, yet existing methods typically depend on structured knowledge representations.  \nHowever, real-world knowledge is primarily embedded within complex, unstructured text. Existing structured knowledge editing approaches face significant challenges when handling the entangled and intricate knowledge present in unstructured text, resulting in issues such as representation ambiguity and editing conflicts. \nTo address these challenges, we propose a Conflict-Aware Knowledge Editing in the Wild (CAKE) framework, the first framework explicitly designed for editing knowledge extracted from wild unstructured text. \nCAKE comprises two core components: a Semantic-augmented Graph Representation module and a Conflict-aware Knowledge Editing strategy. The Semantic-augmented Graph Representation module enhances knowledge encoding through structural disambiguation, relational enrichment, and semantic diversification. Meanwhile, the Conflict-aware Knowledge Editing strategy utilizes a graph-theoretic coloring algorithm to disentangle conflicted edits by allocating them to orthogonal parameter subspaces, thereby effectively mitigating editing conflicts. Experimental results on the AKEW benchmark demonstrate that CAKE significantly outperforms existing methods, achieving a 15.43\\% improvement in accuracy on llama3 editing tasks. Our framework successfully bridges the gap between unstructured textual knowledge and reliable model editing, enabling more robust and scalable updates for practical LLM applications.",
+      "authors": [
+        "Zhange Zhang",
+        "Zhicheng Geng",
+        "Yuqing Ma",
+        "Tianbo Wang",
+        "Kai Lv",
+        "Xianglong Liu"
+      ],
+      "primary_category": "Large Language Models",
+      "categories": [
+        "Large Language Models",
+        "Model Editing",
+        "Unstructured Text",
+        "Conflict-Aware"
+      ],
+      "published": "2025-09-18T17:33:26.37+00:00",
+      "link": "https://openreview.net/forum?id=wHm5J9uanV",
+      "pdf_url": null,
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ]
+    },
+    {
+      "id": "openreview-neurips-2025-feazllt9to",
+      "source": "NeurIPS-2025-Accepted",
+      "title": "Edit Less, Achieve More: Dynamic Sparse Neuron Masking for Lifelong Knowledge Editing in LLMs",
+      "abstract": "Lifelong knowledge editing enables continuous, precise updates to outdated knowledge in large language models (LLMs) without computationally expensive full retraining. However, existing methods often accumulate errors throughout the editing process, causing a gradual decline in both editing accuracy and generalization.  To tackle this problem, we propose Neuron-Specific Masked Knowledge Editing (NMKE), a novel fine-grained editing framework that combines neuron-level attribution with dynamic sparse masking. \nLeveraging neuron functional attribution, we identify two key types of knowledge neurons, with knowledge-general neurons activating consistently across prompts and knowledge-specific neurons activating to specific prompts.\nNMKE further introduces an entropy-guided dynamic sparse mask, locating relevant neurons to the target knowledge. This strategy enables precise neuron-level knowledge editing with fewer parameter modifications.\nExperimental results from thousands of sequential edits demonstrate that NMKE outperforms existing methods in maintaining high editing success rates and preserving model general capabilities in lifelong editing.",
+      "authors": [
+        "Jinzhe Liu",
+        "Junshu Sun",
+        "Shufan Shen",
+        "Chenxue Yang",
+        "Shuhui Wang"
+      ],
+      "primary_category": "Lifelong model editing",
+      "categories": [
+        "Lifelong model editing",
+        "fine-grained editing",
+        "knowledge editing",
+        "large language models"
+      ],
+      "published": "2025-09-18T17:29:19.601+00:00",
+      "link": "https://openreview.net/forum?id=feAzLLT9to",
+      "pdf_url": null,
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ]
+    },
+    {
+      "id": "openreview-neurips-2025-tqrigodq79",
+      "source": "NeurIPS-2025-Accepted",
+      "title": "Hippocampal-like Sequential Editing for Continual Knowledge Updates in Large Language Models",
+      "abstract": "Large language models (LLMs) are now pivotal in real-world applications. Model editing has emerged as a promising paradigm for efficiently modifying LLMs without full retraining. However, current editing approaches face significant limitations due to parameter drift, which stems from inconsistencies between newly edited knowledge and the model's existing knowledge. In sequential editing scenarios, cumulative drifts progressively lead to model collapse characterized by general capability degradation and balance between acquiring new knowledge and catastrophic forgetting of existing knowledge. Drawing inspiration from the hippocampal trisynaptic circuit for continual memorizing and forgetting, we propose a Hippocampal-like Sequential Editing (HSE) framework that designs the unlearning of obsolete knowledge, domain-specific knowledge update separation and replay for edited knowledge. Specifically, the HSE framework designs three core mechanisms: (1) Machine unlearning selectively erases outdated knowledge to facilitate integration of new information, (2) Fisher Information Matrix-guided parameter updates prevents cross-domain knowledge interference, and (3) Parameter replay consolidates long-term editing memory through lightweight and global replay of editing data in a parametric form. Theoretical analysis demonstrates that HSE achieves smaller generalization error bounds, more stable convergence and higher computational efficiency. Experimental results validate its effective balance between acquiring new knowledge and mitigating catastrophic forgetting, maintaining or even slightly enhancing general capabilities. In practical applications, experiments confirm its effectiveness in multi-domain hallucination mitigation, healthcare knowledge injecting, and societal bias reduction.",
+      "authors": [
+        "Quntian Fang",
+        "Zhen Huang",
+        "Zhiliang Tian",
+        "Minghao Hu",
+        "Dongsheng Li",
+        "Yiping Yao",
+        "Xinyue Fang",
+        "Menglong Lu",
+        "Guotong Geng"
+      ],
+      "primary_category": "Large Language Models",
+      "categories": [
+        "Large Language Models",
+        "Hippocampal Mechanisms",
+        "Machine Unlearning",
+        "Catastrophic Forgetting",
+        "Hallucination Mitigation",
+        "Long-term Editing Memory"
+      ],
+      "published": "2025-09-18T17:37:45.388+00:00",
+      "link": "https://openreview.net/forum?id=tqriGodQ79",
+      "pdf_url": null,
+      "tags": [
+        "keyword:model-edit"
+      ]
+    },
+    {
+      "id": "openreview-neurips-2025-hdjxzkzjy9",
+      "source": "NeurIPS-2025-Accepted",
+      "title": "Reliable Lifelong Multimodal Editing: Conflict-Aware Retrieval Meets Multi-Level Guidance",
+      "abstract": "The dynamic nature of real-world information demands efficient knowledge editing in multimodal large language models (MLLMs) to ensure continuous knowledge updates. However, existing methods often struggle with precise matching in large-scale knowledge retrieval and lack multi-level guidance for coordinated editing, leading to less reliable outcomes. To tackle these challenges, we propose CARML, a novel retrieval-augmented editing framework that integrates conflict-aware dynamic retrieval with multi-level implicit and explicit guidance for reliable lifelong multimodal editing. Specifically, CARML introduces intra-modal uncertainty and inter-modal conflict quantification to dynamically integrate multi-channel retrieval results, so as to pinpoint the most relevant knowledge to the incoming edit samples. Afterwards, an edit scope classifier discerns whether the edit sample semantically aligns with the edit scope of the retrieved knowledge. If deemed in-scope, CARML refines the retrieved knowledge into information-rich continuous prompt prefixes, serving as the implicit knowledge guide. These prefixes not only include static knowledge prompt that capture key textual semantics but also incorporate token-level, context-aware dynamic prompt to explore fine-grained cross-modal associations between the edit sample and retrieved knowledge. To further enhance reliability, CARML incorporates a \"hard correction\" mechanism, leveraging explicit label knowledge to adjust the model’s output logits. Extensive experiments across multiple MLLMs and datasets indicate the superior performance of CARML in lifelong multimodal editing scenarios.",
+      "authors": [
+        "Qiang Zhang",
+        "Fanrui Zhang",
+        "Jiawei Liu",
+        "Ming Hu",
+        "Junjun He",
+        "Zheng-Jun Zha"
+      ],
+      "primary_category": "Knowledge editing",
+      "categories": [
+        "Knowledge editing",
+        "Multimodal understanding",
+        "Retrieval-augmented"
+      ],
+      "published": "2025-09-18T17:32:51.571+00:00",
+      "link": "https://openreview.net/forum?id=hdJXzKZjY9",
+      "pdf_url": null,
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ]
+    },
+    {
+      "id": "openreview-neurips-2025-7pevq8yn3u",
+      "source": "NeurIPS-2025-Rejected-Public",
+      "title": "PropMEND: Hypernetworks for Knowledge Propagation in LLMs",
+      "abstract": "Knowledge editing techniques for large language models (LLMs) can inject knowledge that is later reproducible verbatim, but they fall short on *propagating* that knowledge: models cannot answer questions that require them to reason with the injected knowledge. We present a hypernetwork-based approach for knowledge propagation, where we meta-learn how to modify gradients of a language modeling loss to encourage injected information to propagate. Our approach, PropMEND, extends the meta-objective of MEND so that gradient updates on a piece of knowledge are transformed to allow answering of multi-hop questions involving that knowledge.\nOn the RippleEdit dataset, our method significantly improves performance on propagation questions whose answers are not explicitly stated in the injected fact, in contrast to existing methods that only improve on propagation questions where the answer can be copied verbatim.\nTo study the extent of generalization that our propagation achieves, we construct StoryPropagation, a controlled dataset focusing on entities and relations that the model already understands well. We find that PropMEND generalizes effectively to partially unseen entity-relation pairs, indicating the effectiveness of our meta-trained hypernetwork for knowledge propagation.",
+      "authors": [
+        "Zeyu Leo Liu",
+        "Greg Durrett",
+        "Eunsol Choi"
+      ],
+      "primary_category": "Knowledge Editing",
+      "categories": [
+        "Knowledge Editing",
+        "Knowledge Propagation",
+        "Entity",
+        "Large Language Model"
+      ],
+      "published": "2025-05-11T08:06:34.16+00:00",
+      "link": "https://openreview.net/forum?id=7pEVq8yN3U",
+      "pdf_url": null,
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ]
+    },
+    {
+      "id": "openreview-neurips-2025-t94talzvze",
+      "source": "NeurIPS-2025-Accepted",
+      "title": "MEMOIR: Lifelong Model Editing with Minimal Overwrite and Informed Retention for LLMs",
+      "abstract": "Language models deployed in real-world systems often require post-hoc updates to incorporate new or corrected knowledge. However, editing such models efficiently and reliably—without retraining or forgetting previous information—remains a major challenge. Existing methods for lifelong model editing either compromise generalization, interfere with past edits, or fail to scale to long editing sequences. We propose MEMOIR, a novel scalable framework that injects knowledge through a residual memory, i.e., a dedicated parameter module, while preserving the core capabilities of the pre-trained model. By sparsifying input activations through data-dependent masks, MEMOIR confines each edit to a distinct subset of the memory parameters, minimizing interference among edits. At inference, it identifies relevant edits by comparing the sparse activation patterns of new queries to those stored during editing. This enables generalization to rephrased queries by activating only the relevant knowledge while suppressing unnecessary memory activation for unrelated prompts. Experiments on question answering, hallucination correction, and out-of-distribution generalization benchmarks  across LLaMA-3 and Mistral demonstrate that MEMOIR achieves state-of-the-art performance across reliability, generalization, and locality metrics, scaling to thousands of sequential edits with minimal forgetting.",
+      "authors": [
+        "Ke Wang",
+        "Yiming QIN",
+        "Nikolaos Dimitriadis",
+        "Alessandro Favero",
+        "Pascal Frossard"
+      ],
+      "primary_category": "Lifelong model editing",
+      "categories": [
+        "Lifelong model editing",
+        "Catastrophic forgetting",
+        "Large language model",
+        "LLM"
+      ],
+      "published": "2025-09-18T17:42:42.913+00:00",
+      "link": "https://openreview.net/forum?id=t94tALZvZE",
+      "pdf_url": null,
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ]
+    },
+    {
+      "id": "openreview-neurips-2025-owu0mgfkui",
+      "source": "NeurIPS-2025-Accepted",
+      "title": "A$^3$E: Towards Compositional Model Editing",
+      "abstract": "Model editing has become a *de-facto* practice to address hallucinations and outdated knowledge of large language models (LLMs). However, existing methods are predominantly evaluated in isolation, i.e., one edit at a time, failing to consider a critical scenario of compositional model editing, where multiple edits must be integrated and jointly utilized to answer real-world multifaceted questions. For instance, in medical domains, if one edit informs LLMs that COVID-19 causes \"fever\" and another that it causes \"loss of taste\", a qualified compositional editor should enable LLMs to answer the question \"What are the symptoms of COVID-19?\" with both \"fever\" and \"loss of taste\" (and potentially more). In this work, we define and systematically benchmark this compositional model editing (CME) task, identifying three key undesirable issues that existing methods struggle with: *knowledge loss*, *incorrect preceding* and *knowledge sinking*. To overcome these issues, we propose A$^3$E, a novel compositional editor that (1) ***a**daptively combines and **a**daptively regularizes* pre-trained foundation knowledge in LLMs in the stage of edit training and (2) ***a**daptively merges* multiple edits to better meet compositional needs in the stage of edit composing. Extensive experiments demonstrate that A$^3$E improves the composability by at least 22.45\\% without sacrificing the performance of non-compositional model editing.",
+      "authors": [
+        "Hongming Piao",
+        "Hao Wang",
+        "Dapeng Wu",
+        "Ying Wei"
+      ],
+      "primary_category": "Model Editing",
+      "categories": [
+        "Model Editing"
+      ],
+      "published": "2025-09-18T17:37:20.552+00:00",
+      "link": "https://openreview.net/forum?id=OwU0mgfKUi",
+      "pdf_url": null,
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ]
+    },
+    {
+      "id": "openreview-neurips-2025-p9gy05bdkw",
+      "source": "NeurIPS-2025-Accepted",
+      "title": "Rethinking Residual Distribution in Locate-then-Edit Model Editing",
+      "abstract": "Model editing enables targeted updates to the knowledge of large language models (LLMs) with minimal retraining. Among existing approaches, locate-then-edit methods constitute a prominent paradigm: they first identify critical layers, then compute residuals at the final critical layer based on the target edit, and finally apply least-squares-based multi-layer updates via $\\textbf{residual distribution}$. While empirically effective, we identify a counterintuitive failure mode: residual distribution, a core mechanism in these methods, introduces weight shift errors that undermine editing precision. Through theoretical and empirical analysis, we show that such errors increase with the distribution distance, batch size, and edit sequence length, ultimately leading to inaccurate or suboptimal edits. To address this, we propose the $\\textbf{B}$oundary $\\textbf{L}$ayer $\\textbf{U}$pdat$\\textbf{E (BLUE)}$ strategy to enhance locate-then-edit methods. Sequential batch editing experiments on three LLMs and two datasets demonstrate that BLUE not only delivers an average performance improvement of 35.59\\%, significantly advancing the state of the art in model editing, but also enhances the preservation of LLMs' general capabilities. Our code is available at https://github.com/xpq-tech/BLUE.",
+      "authors": [
+        "Xiaopeng Li",
+        "Shangwen Wang",
+        "Shasha Li",
+        "Shezheng Song",
+        "Bin Ji",
+        "Ma Jun",
+        "Jie Yu"
+      ],
+      "primary_category": "Model Editing; Large Language Models; Knowledge Editing; Locate-then-edit",
+      "categories": [
+        "Model Editing; Large Language Models; Knowledge Editing; Locate-then-edit"
+      ],
+      "published": "2025-09-18T17:31:18.473+00:00",
+      "link": "https://openreview.net/forum?id=P9gY05BDkW",
+      "pdf_url": null,
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ]
+    },
+    {
+      "id": "openreview-neurips-2025-iuhogh0wil",
+      "source": "NeurIPS-2025-Accepted",
+      "title": "Detoxifying Large Language Models via Autoregressive Reward Guided Representation Editing",
+      "abstract": "Large Language Models (LLMs) have demonstrated impressive performance across various tasks, yet they remain vulnerable to generating toxic content, necessitating detoxification strategies to ensure safe and responsible deployment. Test-time detoxification methods, which typically introduce static or dynamic interventions into LLM representations, offer a promising solution due to their flexibility and minimal invasiveness. However, current approaches often suffer from imprecise interventions, primarily due to their insufficient exploration of the transition space between toxic and non-toxic outputs. To address this challenge, we propose \\textsc{A}utoregressive \\textsc{R}eward \\textsc{G}uided \\textsc{R}epresentation \\textsc{E}diting (ARGRE), a novel test-time detoxification framework that explicitly models toxicity transitions within the latent representation space, enabling stable and precise reward-guided editing. ARGRE identifies non-toxic semantic directions and interpolates between toxic and non-toxic representations to reveal fine-grained transition trajectories. These trajectories transform sparse toxicity annotations into dense training signals, enabling the construction of an autoregressive reward model that delivers stable and precise editing guidance. At inference, the reward model guides an adaptive two-step editing process to obtain detoxified representations: it first performs directional steering based on expected reward gaps to shift representations toward non-toxic regions, followed by lightweight gradient-based refinements. Extensive experiments across 8 widely used LLMs show that ARGRE significantly outperforms leading baselines in effectiveness (-62.21\\% toxicity) and efficiency (-47.58\\% inference time), while preserving the core capabilities of the original model with minimal degradation. Our code is available at the \\href{https://anonymous.4open.science/r/ARGRE-6291}{anonymous website}.",
+      "authors": [
+        "Yisong Xiao",
+        "Aishan Liu",
+        "Siyuan Liang",
+        "Zonghao Ying",
+        "Xianglong Liu",
+        "Dacheng Tao"
+      ],
+      "primary_category": "toxicity mitigation",
+      "categories": [
+        "toxicity mitigation",
+        "large language model"
+      ],
+      "published": "2025-09-18T17:31:16.659+00:00",
+      "link": "https://openreview.net/forum?id=IUhOGH0WiL",
+      "pdf_url": null,
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ]
+    },
+    {
+      "id": "openreview-neurips-2025-paivwoaanq",
+      "source": "NeurIPS-2025-Accepted",
+      "title": "Shape it Up! Restoring LLM Safety during Finetuning",
+      "abstract": "Finetuning large language models (LLMs) enables user-specific customization but introduces important safety risks: even a few harmful examples can compromise safety alignment. A common mitigation strategy is to update the model more strongly on examples deemed safe, while downweighting or excluding those flagged as unsafe. However, because safety context can shift within a single example, updating the model equally on both harmful and harmless parts of a response is suboptimal — an atomic treatment we term static safety shaping. In contrast, we propose dynamic safety shaping (DSS), a dynamic shaping framework that uses fine-grained safety signals to reinforce learning from safe segments of a response while suppressing unsafe content. To enable such fine-grained control during finetuning, we introduce a key insight: guardrail models, traditionally used for filtering, can be repurposed to evaluate partial responses, tracking how safety risk evolves throughout the response, segment by segment. This leads to the Safety Trajectory Assessment of Response (STAR), a token-level signal that enables shaping to operate dynamically over the training sequence. Building on this, we present ★DSS, a DSS method guided by STAR scores that robustly mitigates finetuning risks and delivers substantial safety improvements across diverse threats, datasets, and model families, all without compromising capability on intended tasks. We encourage future safety research to build on dynamic shaping principles for stronger mitigation against evolving finetuning risks. Our code is publicly available at https://github.com/poloclub/star-dss",
+      "authors": [
+        "ShengYun Peng",
+        "Pin-Yu Chen",
+        "Jianfeng Chi",
+        "Seongmin Lee",
+        "Duen Horng Chau"
+      ],
+      "primary_category": "LLM",
+      "categories": [
+        "LLM",
+        "LLM finetuning",
+        "LLM finetuning risks",
+        "harmful finetuning",
+        "guardrail",
+        "safe guard",
+        "safety shaping"
+      ],
+      "published": "2025-09-18T17:30:48.978+00:00",
+      "link": "https://openreview.net/forum?id=PAIVwOaAnq",
+      "pdf_url": null,
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ]
+    },
+    {
+      "id": "openreview-neurips-2025-smtigb2yzt",
+      "source": "NeurIPS-2025-Accepted",
+      "title": "Panacea: Mitigating Harmful Fine-tuning for Large Language Models via Post-fine-tuning Perturbation",
+      "abstract": "Harmful fine-tuning attack introduces significant security risks to the fine-tuning services. Main-stream defenses aim to vaccinate the model such that the later harmful fine-tuning attack is less effective. However, our evaluation results show that such defenses are fragile-- with a few fine-tuning steps, the model still can learn the harmful knowledge. To this end, we do further experiment and find that an embarrassingly simple solution-- adding purely random perturbations to the fine-tuned model, can recover the model from harmful behaviors, though it leads to a degradation in the model’s fine-tuning performance. To address the degradation of fine-tuning performance, we further propose \\methodname, which optimizes an adaptive perturbation that will be applied to the model after fine-tuning. \\methodname maintains model's safety alignment performance without compromising downstream fine-tuning performance. Comprehensive experiments are conducted on different harmful ratios, fine-tuning tasks and mainstream LLMs, where the average harmful scores are reduced by up-to 21.2%, while maintaining fine-tuning performance. As a by-product, we analyze the adaptive perturbation and show that different layers in various LLMs have distinct safety coefficients. Source code available at https://github.com/w-yibo/Panacea.",
+      "authors": [
+        "Yibo Wang",
+        "Tiansheng Huang",
+        "Li Shen",
+        "Huanjin Yao",
+        "Haotian Luo",
+        "Rui Liu",
+        "Naiqiang Tan",
+        "Jiaxing Huang",
+        "Dacheng Tao"
+      ],
+      "primary_category": "Harmful fine-tuning",
+      "categories": [
+        "Harmful fine-tuning",
+        "LLM",
+        "Safety alignment"
+      ],
+      "published": "2025-09-18T17:37:30.596+00:00",
+      "link": "https://openreview.net/forum?id=sMtiGB2YZT",
+      "pdf_url": null,
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ]
+    },
+    {
+      "id": "openreview-neurips-2025-vwsxmcmyg5",
+      "source": "NeurIPS-2025-Accepted",
+      "title": "SAFEx: Analyzing Vulnerabilities of MoE-Based LLMs via Stable Safety-critical Expert Identification",
+      "abstract": "Large language models with Mixture-of-Experts (MoE) architectures achieve efficiency and scalability, yet their routing mechanisms introduce safety alignment challenges insufficiently addressed by techniques developed for dense models. In this work, the MoE-specific safety risk of positional vulnerability—that safety-aligned behaviors rely on specific expert modules—is formalized and systematically analyzed. An analytical framework, SAFEx, is presented to robustly identify, characterize, and validate safety-critical experts via a stability-based expert selection procedure, and to decompose them into two functional groups: the Harmful Content Detection Group (HCDG), which specializes in identifying and recognizing harmful content within user inputs, and the Harmful Response Control Group (HRCG), which specializes in controlling and enforcing model behaviors to generate appropriate safety responses. Expert-level interventions are conducted to probe causality and to test mitigation. Targeted masking of SAFEx-selected experts reveals that safety behavior is highly concentrated. On Qwen3-30B-A3B, configured with 48 MoE-FFN layers and 128 experts per layer under top-8 routing (48×128=6,144 experts in total), disabling 12 selected experts reduces the refusal rate by 22%. In addition, lightweight adaptation is performed using LoRA under three configurations—the HRCG, the union of HCDG and HRCG, and all experts—and the resulting updates are composed through negative weight merging targeted at the HRCG, leading to improved refusal under adversarial prompts without full-model retraining. These results establish positional vulnerability as a distinct MoE-specific safety challenge and provide a practical, compute-efficient pathway for expert-level safety interventions within routed architectures.",
+      "authors": [
+        "ZhengLin Lai",
+        "Mengyao Liao",
+        "Bingzhe Wu",
+        "Dong Xu",
+        "Zebin Zhao",
+        "Zhihang Yuan",
+        "Chao Fan",
+        "Jianqiang Li"
+      ],
+      "primary_category": "Trustworthy AI",
+      "categories": [
+        "Trustworthy AI"
+      ],
+      "published": "2025-09-18T17:46:40.126+00:00",
+      "link": "https://openreview.net/forum?id=VwsXmcMyg5",
+      "pdf_url": null,
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ]
+    },
+    {
+      "id": "openreview-neurips-2025-aaxmcaynf6",
+      "source": "NeurIPS-2025-Accepted",
+      "title": "Towards Understanding Safety Alignment: A Mechanistic Perspective from Safety Neurons",
+      "abstract": "Large language models (LLMs) excel in various capabilities but pose safety risks such as generating harmful content and misinformation, even after safety alignment. In this paper, we explore the inner mechanisms of safety alignment through the lens of mechanistic interpretability, focusing on identifying and analyzing safety neurons within LLMs that are responsible for safety behaviors. We propose inference-time activation contrasting to locate these neurons and dynamic activation patching to evaluate their causal effects on model safety. Experiments on multiple prevalent LLMs demonstrate that we can consistently identify about 5% safety neurons, and by only patching their activations we can restore over 90% of the safety performance across various red-teaming benchmarks without influencing general ability. The finding of safety neurons also helps explain the ''alignment tax'' phenomenon by revealing that the key neurons for model safety and helpfulness significantly overlap, yet they require different activation patterns for the same neurons. Furthermore, we demonstrate an application of our findings in safeguarding LLMs by detecting unsafe outputs before generation.",
+      "authors": [
+        "Jianhui Chen",
+        "Xiaozhi Wang",
+        "Zijun Yao",
+        "Yushi Bai",
+        "Lei Hou",
+        "Juanzi Li"
+      ],
+      "primary_category": "Large Language Models",
+      "categories": [
+        "Large Language Models",
+        "Mechanistic Interpretability",
+        "Safety Alignment",
+        "Neuron Analysis",
+        "Alignment Tax"
+      ],
+      "published": "2025-09-18T17:45:43.473+00:00",
+      "link": "https://openreview.net/forum?id=AAXMcAyNF6",
+      "pdf_url": null,
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ]
+    },
+    {
+      "id": "openreview-neurips-2025-bdkkfwskot",
+      "source": "NeurIPS-2025-Accepted",
+      "title": "FALCON: Fine-grained Activation Manipulation by Contrastive Orthogonal Unalignment for Large Language Model",
+      "abstract": "Large language models have been widely applied, but can inadvertently encode sensitive or harmful information, raising significant safety concerns. Machine unlearning has emerged to alleviate this concern; however, existing training-time unlearning approaches, relying on coarse-grained loss combinations, have limitations in precisely separating knowledge and balancing removal effectiveness with model utility.  In contrast, we propose $\\textbf{F}$ine-grained $\\textbf{A}$ctivation manipu$\\textbf{L}$ation by $\\textbf{C}$ontrastive $\\textbf{O}$rthogonal u$\\textbf{N}$alignment (FALCON), a novel representation-guided unlearning approach that leverages information-theoretic guidance for efficient parameter selection, employs contrastive mechanisms to enhance representation separation, and projects conflict gradients onto orthogonal subspaces to resolve conflicts between forgetting and retention objectives. Extensive experiments demonstrate that FALCON achieves superior unlearning effectiveness while maintaining model utility, exhibiting robust resistance against knowledge recovery attempts.",
+      "authors": [
+        "Jinwei Hu",
+        "Zhenglin Huang",
+        "Xiangyu Yin",
+        "Wenjie Ruan",
+        "Guangliang Cheng",
+        "Yi Dong",
+        "Xiaowei Huang"
+      ],
+      "primary_category": "LLM Unlearning;Contrastive Learning;Responsible AI",
+      "categories": [
+        "LLM Unlearning;Contrastive Learning;Responsible AI"
+      ],
+      "published": "2025-09-18T17:31:50.841+00:00",
+      "link": "https://openreview.net/forum?id=BDKkFwskot",
+      "pdf_url": null,
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ]
+    },
+    {
+      "id": "openreview-neurips-2025-utvu4pj0ct",
+      "source": "NeurIPS-2025-Accepted",
+      "title": "Attack via Overfitting: 10-shot Benign Fine-tuning to Jailbreak LLMs",
+      "abstract": "Despite substantial efforts in safety alignment, recent research indicates that Large\nLanguage Models (LLMs) remain highly susceptible to jailbreak attacks. Among\nthese attacks, finetuning-based ones that compromise LLMs’ safety alignment via\nfine-tuning stand out due to its stable jailbreak performance. In particular, a recent\nstudy indicates that fine-tuning with as few as 10 harmful question-answer (QA)\npairs can lead to successful jailbreaking across various harmful questions. However,\nsuch malicious fine-tuning attacks are readily detectable and hence thwarted by\nmoderation models. In this paper, we demonstrate that LLMs can be jailbroken\nby fine-tuning with only 10 benign QA pairs; our attack exploits the increased\nsensitivity of LLMs to fine-tuning data after being overfitted. Specifically, our\nfine-tuning process starts with overfitting an LLM via fine-tuning with benign QA\npairs involving identical refusal answers. Further fine-tuning is then performed\nwith standard benign answers, causing the overfitted LLM to forget the refusal\nattitude and thus provide compliant answers regardless of the harmfulness of a\nquestion. We implement our attack on the ten LLMs and compare it with five\nexisting baselines. Experiments demonstrate that our method achieves significant\nadvantages in both attack effectiveness and attack stealth. Our findings expose\npreviously unreported security vulnerabilities in current LLMs and provide a new\nperspective on understanding how LLMs’ security is compromised, even with\nbenign fine-tuning. Our code is available at https://github.com/ZHIXINXIE/ten_benign.git.",
+      "authors": [
+        "Zhixin Xie",
+        "Xurui Song",
+        "Jun Luo"
+      ],
+      "primary_category": "LLM Security",
+      "categories": [
+        "LLM Security",
+        "Jailbreak",
+        "Fine-tuning"
+      ],
+      "published": "2025-09-18T17:41:21.935+00:00",
+      "link": "https://openreview.net/forum?id=utvu4PJ0Ct",
+      "pdf_url": null,
+      "tags": [
+        "keyword:model-edit"
+      ]
+    },
+    {
+      "id": "openreview-neurips-2025-ycmpnwzuaa",
+      "source": "NeurIPS-2025-Accepted",
+      "title": "MetaDefense: Defending Fine-tuning based Jailbreak Attack Before and During Generation",
+      "abstract": "This paper introduces MetaDefense, a novel framework for defending against finetuning-based jailbreak attacks in large language models (LLMs). \nWe observe that existing defense mechanisms fail to generalize to harmful queries disguised by unseen attack templates, despite LLMs being capable of distinguishing disguised harmful queries in the embedding space. \nBased on these insights, we propose a two-stage defense approach: \n(i) pre-generation defense that detects harmful queries before response generation begins, and (ii) mid-generation defense that monitors partial responses during generation to prevent outputting more harmful content. \nOur MetaDefense trains the LLM to predict the harmfulness of both queries and partial responses using specialized prompts, enabling early termination of potentially harmful interactions. \nExtensive experiments across multiple LLM architectures (LLaMA-2-7B, Qwen-2.5-3B-Instruct, and LLaMA-3.2-3B-Instruct) demonstrate that MetaDefense significantly outperforms existing defense mechanisms, achieving robust defense against harmful queries with seen and unseen attack templates while maintaining competitive performance on benign tasks.\nCode is available at [https://github.com/ws-jiang/MetaDefense](https://github.com/ws-jiang/MetaDefense).",
+      "authors": [
+        "Weisen Jiang",
+        "Sinno Jialin Pan"
+      ],
+      "primary_category": "jailbreak attack",
+      "categories": [
+        "jailbreak attack"
+      ],
+      "published": "2025-09-18T17:38:08.977+00:00",
+      "link": "https://openreview.net/forum?id=ycMpNwzUAA",
+      "pdf_url": null,
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ]
+    },
+    {
+      "id": "openreview-neurips-2025-pcg6nrjku7",
+      "source": "NeurIPS-2025-Accepted",
+      "title": "Finding and Reactivating Post-Trained LLMs' Hidden Safety Mechanisms",
+      "abstract": "Despite the impressive performance of general-purpose large language models (LLMs), they often require fine-tuning or post-training to excel at specific tasks. \n    For instance, large reasoning models (LRMs), such as the DeepSeek-R1 series, demonstrate strong reasoning capabilities after post-training different general large language models on diverse chain-of-thought (CoT) datasets. \n    However, this additional training frequently comes at the cost of reduced safety, as the fine-tuned or post-trained models tend to exhibit more harmful behaviors compared with the regular LLMs before post-training or fine-tuning, potentially leading to harmful outcomes due to their enhanced capabilities. \n    Taking LRMs as an example, we first investigate the underlying cause of this safety degradation in this paper. \n    Our analysis reveals that post-training can mask the original safety mechanisms of the base LLM, while over-amplifying representations related to their post-training ability. \n    But luckily, we also find that LRMs' safety mechanisms still exist instead of being removed during their post-training. \n    Based on these findings, we propose a lightweight and cost-effective solution called SafeReAct that restores the suppressed safety behaviors by aligning with LoRA adapters on a few layers. Experiments on four state-of-the-art LRMs show that our method significantly improves safety on harmful prompts without compromising reasoning performance. Besides LRMs, additional results on other domain-specific LLMs, like medical models, further confirm the generality and effectiveness of our approach.",
+      "authors": [
+        "Mingjie Li",
+        "Wai Man Si",
+        "Michael Backes",
+        "Yang Zhang",
+        "Yisen Wang"
+      ],
+      "primary_category": "LLM safety",
+      "categories": [
+        "LLM safety",
+        "Alignment"
+      ],
+      "published": "2025-09-18T17:42:06.334+00:00",
+      "link": "https://openreview.net/forum?id=pcG6NRJKu7",
+      "pdf_url": null,
+      "tags": [
+        "query:model-edit"
+      ]
+    }
+  ],
+  "queries": [
+    {
+      "type": "intent_query",
+      "tag": "model-edit",
+      "paper_tag": "query:model-edit",
+      "query_text": "Find papers about model editing for safety in large language models",
+      "sim_scores": {
+        "openreview-neurips-2025-p9gy05bdkw": {
+          "score": 0.01639344262295082,
+          "rank": 1
+        },
+        "openreview-neurips-2025-t94talzvze": {
+          "score": 0.016129032258064516,
+          "rank": 2
+        },
+        "openreview-neurips-2025-hdjxzkzjy9": {
+          "score": 0.015151515151515152,
+          "rank": 6
+        },
+        "openreview-neurips-2025-aaxmcaynf6": {
+          "score": 0.014705882352941176,
+          "rank": 8
+        },
+        "openreview-neurips-2025-whm5j9uanv": {
+          "score": 0.014492753623188406,
+          "rank": 9
+        },
+        "openreview-neurips-2025-paivwoaanq": {
+          "score": 0.014285714285714285,
+          "rank": 10
+        },
+        "openreview-neurips-2025-iuhogh0wil": {
+          "score": 0.014084507042253521,
+          "rank": 11
+        },
+        "openreview-neurips-2025-smtigb2yzt": {
+          "score": 0.012987012987012988,
+          "rank": 17
+        },
+        "openreview-neurips-2025-bdkkfwskot": {
+          "score": 0.012195121951219513,
+          "rank": 22
+        },
+        "openreview-neurips-2025-feazllt9to": {
+          "score": 0.012048192771084338,
+          "rank": 23
+        },
+        "openreview-neurips-2025-owu0mgfkui": {
+          "score": 0.010526315789473684,
+          "rank": 35
+        }
+      },
+      "ranked": [
+        {
+          "paper_id": "openreview-neurips-2025-owu0mgfkui",
+          "score": 1.0,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "openreview-neurips-2025-t94talzvze",
+          "score": 1.0,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "openreview-neurips-2025-p9gy05bdkw",
+          "score": 0.9586435070306036,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "openreview-neurips-2025-tqrigodq79",
+          "score": 0.9185999185999183,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "openreview-neurips-2025-vwsxmcmyg5",
+          "score": 0.9185999185999183,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "openreview-neurips-2025-whm5j9uanv",
+          "score": 0.8798076923076922,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-paivwoaanq",
+          "score": 0.8422090729783037,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-iuhogh0wil",
+          "score": 0.8422090729783037,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-hdjxzkzjy9",
+          "score": 0.8057498057498057,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-aaxmcaynf6",
+          "score": 0.8057498057498057,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-feazllt9to",
+          "score": 0.73604826546003,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-7pevq8yn3u",
+          "score": 0.6703296703296702,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-bdkkfwskot",
+          "score": 0.608262108262108,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-pcg6nrjku7",
+          "score": 0.578503688092729,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-smtigb2yzt",
+          "score": 0.4411571334648256,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "openreview-neurips-2025-utvu4pj0ct",
+          "score": 0.32035835650293487,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "openreview-neurips-2025-ycmpnwzuaa",
+          "score": 0.11772814998621459,
+          "star_rating": 3
+        }
+      ]
+    },
+    {
+      "type": "intent_query",
+      "tag": "model-edit",
+      "paper_tag": "query:model-edit",
+      "query_text": "How can model editing prevent attacks on large language models",
+      "sim_scores": {
+        "openreview-neurips-2025-smtigb2yzt": {
+          "score": 0.015384615384615385,
+          "rank": 5
+        },
+        "openreview-neurips-2025-p9gy05bdkw": {
+          "score": 0.014492753623188406,
+          "rank": 9
+        },
+        "openreview-neurips-2025-t94talzvze": {
+          "score": 0.012987012987012988,
+          "rank": 17
+        },
+        "openreview-neurips-2025-hdjxzkzjy9": {
+          "score": 0.010638297872340425,
+          "rank": 34
+        },
+        "openreview-neurips-2025-whm5j9uanv": {
+          "score": 0.009900990099009901,
+          "rank": 41
+        },
+        "openreview-neurips-2025-iuhogh0wil": {
+          "score": 0.00980392156862745,
+          "rank": 42
+        },
+        "openreview-neurips-2025-ycmpnwzuaa": {
+          "score": 0.009174311926605505,
+          "rank": 49
+        }
+      },
+      "ranked": [
+        {
+          "paper_id": "openreview-neurips-2025-owu0mgfkui",
+          "score": 1.0,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "openreview-neurips-2025-p9gy05bdkw",
+          "score": 0.9586435070306036,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "openreview-neurips-2025-t94talzvze",
+          "score": 0.9586435070306036,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "openreview-neurips-2025-iuhogh0wil",
+          "score": 0.9185999185999183,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "openreview-neurips-2025-tqrigodq79",
+          "score": 0.8798076923076922,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-ycmpnwzuaa",
+          "score": 0.8057498057498057,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-feazllt9to",
+          "score": 0.73604826546003,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-utvu4pj0ct",
+          "score": 0.73604826546003,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-whm5j9uanv",
+          "score": 0.6388587937883712,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-smtigb2yzt",
+          "score": 0.6388587937883712,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-7pevq8yn3u",
+          "score": 0.5495495495495496,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-hdjxzkzjy9",
+          "score": 0.5213675213675214,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-paivwoaanq",
+          "score": 0.41577409931840303,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "openreview-neurips-2025-vwsxmcmyg5",
+          "score": 0.2760180995475112,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "openreview-neurips-2025-bdkkfwskot",
+          "score": 0.23371647509578536,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "openreview-neurips-2025-aaxmcaynf6",
+          "score": 0.21328671328671328,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "openreview-neurips-2025-pcg6nrjku7",
+          "score": 0.09983633387888699,
+          "star_rating": 2
+        }
+      ]
+    },
+    {
+      "type": "intent_query",
+      "tag": "model-edit",
+      "paper_tag": "query:model-edit",
+      "query_text": "Research on knowledge editing to improve LLM safety",
+      "sim_scores": {
+        "openreview-neurips-2025-hdjxzkzjy9": {
+          "score": 0.016129032258064516,
+          "rank": 2
+        },
+        "openreview-neurips-2025-paivwoaanq": {
+          "score": 0.015873015873015872,
+          "rank": 3
+        },
+        "openreview-neurips-2025-vwsxmcmyg5": {
+          "score": 0.015625,
+          "rank": 4
+        },
+        "openreview-neurips-2025-pcg6nrjku7": {
+          "score": 0.014925373134328358,
+          "rank": 7
+        },
+        "openreview-neurips-2025-whm5j9uanv": {
+          "score": 0.0136986301369863,
+          "rank": 13
+        },
+        "openreview-neurips-2025-aaxmcaynf6": {
+          "score": 0.013333333333333334,
+          "rank": 15
+        },
+        "openreview-neurips-2025-feazllt9to": {
+          "score": 0.013157894736842105,
+          "rank": 16
+        },
+        "openreview-neurips-2025-t94talzvze": {
+          "score": 0.012195121951219513,
+          "rank": 22
+        },
+        "openreview-neurips-2025-7pevq8yn3u": {
+          "score": 0.010416666666666666,
+          "rank": 36
+        }
+      },
+      "ranked": [
+        {
+          "paper_id": "openreview-neurips-2025-whm5j9uanv",
+          "score": 1.0,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "openreview-neurips-2025-paivwoaanq",
+          "score": 0.9586435070306036,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "openreview-neurips-2025-feazllt9to",
+          "score": 0.9586435070306036,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "openreview-neurips-2025-aaxmcaynf6",
+          "score": 0.9185999185999183,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "openreview-neurips-2025-tqrigodq79",
+          "score": 0.9185999185999183,
+          "star_rating": 5
+        },
+        {
+          "paper_id": "openreview-neurips-2025-iuhogh0wil",
+          "score": 0.8798076923076922,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-t94talzvze",
+          "score": 0.8798076923076922,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-owu0mgfkui",
+          "score": 0.8057498057498057,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-pcg6nrjku7",
+          "score": 0.73604826546003,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-vwsxmcmyg5",
+          "score": 0.702712746191007,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-7pevq8yn3u",
+          "score": 0.702712746191007,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-hdjxzkzjy9",
+          "score": 0.6703296703296702,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-p9gy05bdkw",
+          "score": 0.6388587937883712,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-utvu4pj0ct",
+          "score": 0.578503688092729,
+          "star_rating": 4
+        },
+        {
+          "paper_id": "openreview-neurips-2025-bdkkfwskot",
+          "score": 0.41577409931840303,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "openreview-neurips-2025-ycmpnwzuaa",
+          "score": 0.3910256410256411,
+          "star_rating": 3
+        },
+        {
+          "paper_id": "openreview-neurips-2025-smtigb2yzt",
+          "score": 0.3668882557771445,
+          "star_rating": 3
+        }
+      ]
+    },
+    {
+      "type": "keyword",
+      "tag": "model-edit",
+      "paper_tag": "keyword:model-edit",
+      "query_text": "jailbreak editing",
+      "sim_scores": {
+        "openreview-neurips-2025-utvu4pj0ct": {
+          "score": 0.016129032258064516,
+          "rank": 2
+        },
+        "openreview-neurips-2025-ycmpnwzuaa": {
+          "score": 0.015151515151515152,
+          "rank": 6
+        },
+        "openreview-neurips-2025-feazllt9to": {
+          "score": 0.012345679012345678,
+          "rank": 21
+        },
+        "openreview-neurips-2025-p9gy05bdkw": {
+          "score": 0.011764705882352941,
+          "rank": 25
+        },
+        "openreview-neurips-2025-t94talzvze": {
+          "score": 0.010526315789473684,
+          "rank": 35
+        },
+        "openreview-neurips-2025-owu0mgfkui": {
+          "score": 0.009708737864077669,
+          "rank": 43
+        },
+        "openreview-neurips-2025-whm5j9uanv": {
+          "score": 0.009523809523809525,
+          "rank": 45
+        }
+      }
+    },
+    {
+      "type": "keyword",
+      "tag": "model-edit",
+      "paper_tag": "keyword:model-edit",
+      "query_text": "knowledge editing",
+      "sim_scores": {
+        "openreview-neurips-2025-whm5j9uanv": {
+          "score": 0.032266458495966696,
+          "rank": 1
+        },
+        "openreview-neurips-2025-feazllt9to": {
+          "score": 0.03225806451612903,
+          "rank": 2
+        },
+        "openreview-neurips-2025-hdjxzkzjy9": {
+          "score": 0.03177805800756621,
+          "rank": 3
+        },
+        "openreview-neurips-2025-t94talzvze": {
+          "score": 0.030309988518943745,
+          "rank": 5
+        },
+        "openreview-neurips-2025-7pevq8yn3u": {
+          "score": 0.030303030303030304,
+          "rank": 6
+        },
+        "openreview-neurips-2025-owu0mgfkui": {
+          "score": 0.02786377708978328,
+          "rank": 7
+        },
+        "openreview-neurips-2025-p9gy05bdkw": {
+          "score": 0.025362318840579712,
+          "rank": 8
+        },
+        "openreview-neurips-2025-tqrigodq79": {
+          "score": 0.015625,
+          "rank": 9
+        }
+      }
+    },
+    {
+      "type": "keyword",
+      "tag": "model-edit",
+      "paper_tag": "keyword:model-edit",
+      "query_text": "large language model editing",
+      "sim_scores": {
+        "openreview-neurips-2025-p9gy05bdkw": {
+          "score": 0.01639344262295082,
+          "rank": 1
+        },
+        "openreview-neurips-2025-t94talzvze": {
+          "score": 0.016129032258064516,
+          "rank": 2
+        },
+        "openreview-neurips-2025-hdjxzkzjy9": {
+          "score": 0.014705882352941176,
+          "rank": 8
+        },
+        "openreview-neurips-2025-feazllt9to": {
+          "score": 0.010869565217391304,
+          "rank": 32
+        },
+        "openreview-neurips-2025-iuhogh0wil": {
+          "score": 0.010101010101010102,
+          "rank": 39
+        },
+        "openreview-neurips-2025-whm5j9uanv": {
+          "score": 0.009900990099009901,
+          "rank": 41
+        }
+      }
+    },
+    {
+      "type": "keyword",
+      "tag": "model-edit",
+      "paper_tag": "keyword:model-edit",
+      "query_text": "model editing safety",
+      "sim_scores": {
+        "openreview-neurips-2025-p9gy05bdkw": {
+          "score": 0.015873015873015872,
+          "rank": 5
+        },
+        "openreview-neurips-2025-paivwoaanq": {
+          "score": 0.015625,
+          "rank": 6
+        },
+        "openreview-neurips-2025-smtigb2yzt": {
+          "score": 0.014705882352941176,
+          "rank": 10
+        },
+        "openreview-neurips-2025-t94talzvze": {
+          "score": 0.013888888888888888,
+          "rank": 14
+        },
+        "openreview-neurips-2025-vwsxmcmyg5": {
+          "score": 0.013513513513513514,
+          "rank": 16
+        },
+        "openreview-neurips-2025-aaxmcaynf6": {
+          "score": 0.011904761904761904,
+          "rank": 26
+        },
+        "openreview-neurips-2025-hdjxzkzjy9": {
+          "score": 0.011627906976744186,
+          "rank": 28
+        },
+        "openreview-neurips-2025-whm5j9uanv": {
+          "score": 0.01098901098901099,
+          "rank": 33
+        },
+        "openreview-neurips-2025-owu0mgfkui": {
+          "score": 0.010869565217391304,
+          "rank": 34
+        },
+        "openreview-neurips-2025-feazllt9to": {
+          "score": 0.01,
+          "rank": 42
+        },
+        "openreview-neurips-2025-iuhogh0wil": {
+          "score": 0.009433962264150943,
+          "rank": 48
+        }
+      }
+    },
+    {
+      "type": "keyword",
+      "tag": "model-edit",
+      "paper_tag": "keyword:model-edit",
+      "query_text": "safety alignment editing",
+      "sim_scores": {
+        "openreview-neurips-2025-paivwoaanq": {
+          "score": 0.015625,
+          "rank": 4
+        },
+        "openreview-neurips-2025-vwsxmcmyg5": {
+          "score": 0.014925373134328358,
+          "rank": 7
+        },
+        "openreview-neurips-2025-aaxmcaynf6": {
+          "score": 0.014705882352941176,
+          "rank": 8
+        },
+        "openreview-neurips-2025-whm5j9uanv": {
+          "score": 0.011904761904761904,
+          "rank": 24
+        },
+        "openreview-neurips-2025-p9gy05bdkw": {
+          "score": 0.011764705882352941,
+          "rank": 25
+        },
+        "openreview-neurips-2025-hdjxzkzjy9": {
+          "score": 0.011494252873563218,
+          "rank": 27
+        },
+        "openreview-neurips-2025-bdkkfwskot": {
+          "score": 0.01020408163265306,
+          "rank": 38
+        },
+        "openreview-neurips-2025-smtigb2yzt": {
+          "score": 0.009345794392523364,
+          "rank": 47
+        }
+      }
+    }
+  ],
+  "global_candidate_ids": [
+    "openreview-neurips-2025-p9gy05bdkw",
+    "openreview-neurips-2025-t94talzvze",
+    "openreview-neurips-2025-yzl5tl0z2m",
+    "openreview-neurips-2025-xakon2ifsp",
+    "openreview-neurips-2025-gsi42ohbom",
+    "openreview-neurips-2025-hdjxzkzjy9",
+    "openreview-neurips-2025-r0b1z8dqcv",
+    "openreview-neurips-2025-utvu4pj0ct",
+    "openreview-neurips-2025-whm5j9uanv",
+    "openreview-neurips-2025-feazllt9to",
+    "openreview-neurips-2025-zprmrpilgt",
+    "openreview-neurips-2025-on6hf0kp20",
+    "openreview-neurips-2025-fxwwyz1p8a",
+    "openreview-neurips-2025-91h9csvdwl",
+    "openreview-neurips-2025-ppkdxf55ly",
+    "openreview-neurips-2025-nskryz07wd",
+    "openreview-neurips-2025-paivwoaanq",
+    "openreview-neurips-2025-tu3p6kshgn",
+    "openreview-neurips-2025-aaxmcaynf6",
+    "openreview-neurips-2025-emwu0jyobg",
+    "openreview-neurips-2025-smtigb2yzt",
+    "openreview-neurips-2025-oih3t5zpbw",
+    "openreview-neurips-2025-stpe7ueetz",
+    "openreview-neurips-2025-jsnue84hxi",
+    "openreview-neurips-2025-owu0mgfkui",
+    "openreview-neurips-2025-snjhyho3a9",
+    "openreview-neurips-2025-vwsxmcmyg5",
+    "openreview-neurips-2025-iuhogh0wil",
+    "openreview-neurips-2025-ceco8tetzf",
+    "openreview-neurips-2025-kamsbarp3w",
+    "openreview-neurips-2025-g1nzvhzbqj",
+    "openreview-neurips-2025-em9qmnobh0",
+    "openreview-neurips-2025-odcagsxzzp",
+    "openreview-neurips-2025-lscag7lpz4",
+    "openreview-neurips-2025-noseybgk1i",
+    "openreview-neurips-2025-qrariryatf",
+    "openreview-neurips-2025-exvmnclnrm",
+    "openreview-neurips-2025-tcxzqnbyaf",
+    "openreview-neurips-2025-ytwevr2onf",
+    "openreview-neurips-2025-qjv3yhw3pd",
+    "openreview-neurips-2025-wku3wpqylw",
+    "openreview-neurips-2025-m6gpmbpfty",
+    "openreview-neurips-2025-jvq8nzoup8",
+    "openreview-neurips-2025-wgen1ed54p",
+    "openreview-neurips-2025-9ykecaqiik",
+    "openreview-neurips-2025-ca1xvsvn72",
+    "openreview-neurips-2025-tecj926vgn",
+    "openreview-neurips-2025-phiwebewaz",
+    "openreview-neurips-2025-gzjplll9jm",
+    "openreview-neurips-2025-hej7nrinjs",
+    "openreview-neurips-2025-xud9jyzgsp",
+    "openreview-neurips-2025-7pevq8yn3u",
+    "openreview-neurips-2025-xbd4ojccia",
+    "openreview-neurips-2025-qinnsnppv8",
+    "openreview-neurips-2025-qvvy0x63fv",
+    "openreview-neurips-2025-2qn6skg175",
+    "openreview-neurips-2025-ycmpnwzuaa",
+    "openreview-neurips-2025-edrvveqjau",
+    "openreview-neurips-2025-84dngt4ajt",
+    "openreview-neurips-2025-ebjfkpxmke",
+    "openreview-neurips-2025-bv5is3iodg",
+    "openreview-neurips-2025-iq513ix1g5",
+    "openreview-neurips-2025-k0wyi4cogy",
+    "openreview-neurips-2025-3p3pl7acxm",
+    "openreview-neurips-2025-rwcabz4w5p",
+    "openreview-neurips-2025-42vdmzv7qm",
+    "openreview-neurips-2025-htgqc1h8ig",
+    "openreview-neurips-2025-u7rz9cc73s",
+    "openreview-neurips-2025-8lmwwt8e2s",
+    "openreview-neurips-2025-v4sa2fozql",
+    "openreview-neurips-2025-6vcgsrk6pn",
+    "openreview-neurips-2025-mniox70nho",
+    "openreview-neurips-2025-ctjxu8v3by",
+    "openreview-neurips-2025-jxba9ojexp",
+    "openreview-neurips-2025-viannnqxcl",
+    "openreview-neurips-2025-i9rddi2szc",
+    "openreview-neurips-2025-iy4caxotrf",
+    "openreview-neurips-2025-vritezz28d",
+    "openreview-neurips-2025-bdkkfwskot",
+    "openreview-neurips-2025-tua2r6gzea",
+    "openreview-neurips-2025-jgtcg08azk",
+    "openreview-neurips-2025-v8sndhcn0z",
+    "openreview-neurips-2025-dlkm0q4cvk",
+    "openreview-neurips-2025-dalpfqm3re",
+    "openreview-neurips-2025-vhb883gs1u",
+    "openreview-neurips-2025-8jlpe8ynjd",
+    "openreview-neurips-2025-dob47fj0cl",
+    "openreview-neurips-2025-418uyqkgqb",
+    "openreview-neurips-2025-r7hjj1yvjh",
+    "openreview-neurips-2025-yrxxtdellv",
+    "openreview-neurips-2025-xfdnekp7tt",
+    "openreview-neurips-2025-5wyqkh9nos",
+    "openreview-neurips-2025-0fbqackqk3",
+    "openreview-neurips-2025-jv7ohhq0yp",
+    "openreview-neurips-2025-91l4ztmpo4",
+    "openreview-neurips-2025-ktc3cdu320",
+    "openreview-neurips-2025-qvj8s2rrus",
+    "openreview-neurips-2025-axlgot58e8",
+    "openreview-neurips-2025-mnsibgnavx",
+    "openreview-neurips-2025-s1f2qhendd",
+    "openreview-neurips-2025-pcg6nrjku7",
+    "openreview-neurips-2025-y0lhry3x1s",
+    "openreview-neurips-2025-tqrigodq79",
+    "openreview-neurips-2025-qfkpj00t2l",
+    "openreview-neurips-2025-dsznm3mqtd",
+    "openreview-neurips-2025-h0lzgqq6uo",
+    "openreview-neurips-2025-fzp6chext2",
+    "openreview-neurips-2025-iryb8ggdyh",
+    "openreview-neurips-2025-lcfyj0r2rh",
+    "openreview-neurips-2025-v6oo0zo2oa",
+    "openreview-neurips-2025-tyw1v1kukg",
+    "openreview-neurips-2025-yyhrjxxbpi",
+    "openreview-neurips-2025-izy3zgohrd",
+    "openreview-neurips-2025-stijen3ini",
+    "openreview-neurips-2025-yjxgjp8feu",
+    "openreview-neurips-2025-dxip59z81m",
+    "openreview-neurips-2025-vhzqdxusb3",
+    "openreview-neurips-2025-xdwpwkbxd9",
+    "openreview-neurips-2025-d19hc2xpez",
+    "openreview-neurips-2025-glhlu6y1uk"
+  ],
+  "global_pool_lane_top_k": 30,
+  "global_pool_limit": 120,
+  "global_pool_guaranteed_per_lane": 2,
+  "global_pool_effective_size": 120,
+  "reranked_at": "2026-06-04T15:59:16.413768+00:00",
+  "llm_ranked": [
+    {
+      "paper_id": "openreview-neurips-2025-7pevq8yn3u",
+      "score": 10.0,
+      "evidence_en": "knowledge propagation via hypernetwork",
+      "evidence_cn": "基于超网络的知识传播",
+      "canonical_evidence": "基于超网络的知识传播",
+      "tldr_en": "PropMEND extends MEND with hypernetworks to propagate injected knowledge, enabling multi-hop question answering.",
+      "tldr_cn": "本文针对知识编辑技术无法传播注入知识的问题，提出PropMEND方法。利用超网络元学习语言建模损失的梯度变换，使模型能回答需要多跳推理的问题。在RippleEdit数据集上，传播问题的准确率显著提升，推动了知识编辑在复杂推理场景的应用。",
+      "title_zh": "PropMEND：基于超网络的大语言模型知识传播",
+      "motivation_cn": "现有知识编辑只能让模型复述注入知识，无法进行多跳推理传播。",
+      "method_cn": "提出PropMEND，通过超网络修改知识编辑的梯度元目标，促进知识传播。",
+      "result_cn": "在RippleEdit数据集上，多跳传播问题准确率显著优于基线。",
+      "conclusion_cn": "该方法为知识编辑实现实际推理能力提供了新途径。",
+      "matched_requirement_id": "req-3",
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing"
+    },
+    {
+      "paper_id": "openreview-neurips-2025-bdkkfwskot",
+      "score": 9.0,
+      "evidence_en": "fine-grained activation manipulation for unlearning harmful knowledge in LLMs",
+      "evidence_cn": "细粒度激活操作实现大模型有害知识遗忘",
+      "canonical_evidence": "细粒度激活操作实现大模型有害知识遗忘",
+      "tldr_en": "FALCON proposes a fine-grained activation manipulation approach using contrastive orthogonal unalignment to precisely remove harmful knowledge from LLMs while maintaining utility, addressing limitations of coarse-grained unlearning methods.",
+      "tldr_cn": "现有机器遗忘方法依赖粗粒度损失组合，难以精确分离知识与平衡效果。本文提出FALCON，通过对比正交去对齐实现细粒度激活操纵，利用信息论指导高效参数选择。实验表明，FALCON在移除有害信息的同时保持模型实用性，显著优于基线。该方法为模型编辑提供了新的表示级操控手段，有助于提升LLM安全性。",
+      "title_zh": "FALCON：面向大语言模型的对比正交去对齐细粒度激活操纵",
+      "motivation_cn": "现有训练时遗忘方法无法精确分离知识，且在移除效果与模型效用间难以平衡。",
+      "method_cn": "提出FALCON方法，利用信息论指导高效参数选择，通过对比正交去对齐进行细粒度激活操纵。",
+      "result_cn": "在有害信息移除任务上，FALCON在保持模型实用性的前提下实现了更精确的遗忘效果。",
+      "conclusion_cn": "细粒度激活操纵为模型编辑提供了一种有效且可扩展的安全治理方案。",
+      "matched_requirement_id": "req-1",
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing"
+    },
+    {
+      "paper_id": "openreview-neurips-2025-hdjxzkzjy9",
+      "score": 9.0,
+      "evidence_en": "knowledge editing in multimodal LLMs with conflict-aware retrieval",
+      "evidence_cn": "多模态大模型知识编辑，结合冲突感知检索",
+      "canonical_evidence": "多模态大模型知识编辑，结合冲突感知检索",
+      "tldr_en": "CARML proposes a retrieval-augmented multimodal editing framework with conflict-aware dynamic retrieval and multi-level guidance for reliable lifelong knowledge updates.",
+      "tldr_cn": "多模态大模型知识编辑面临大规模检索不准确和缺乏多级指导的问题。本文提出CARML，集成冲突感知动态检索与内外隐式/显式多级指导，实现可靠终身编辑。通过模态内不确定性和模态间冲突量化动态融合检索结果，提升编辑准确性和可靠性。实验证明其在多种编辑任务上优于现有方法。",
+      "title_zh": "可靠终身多模态编辑：冲突感知检索结合多级指导",
+      "motivation_cn": "现有方法在大规模知识检索中难以精确匹配，且缺乏多级协调指导。",
+      "method_cn": "引入模态内不确定性和模态间冲突量化，动态融合多通道检索结果，结合多级显隐式指导。",
+      "result_cn": "在多模态知识编辑基准上取得最先进效果，编辑可靠性显著提升。",
+      "conclusion_cn": "CARML为多模态模型的知识更新提供了高效可靠的编辑框架。",
+      "matched_requirement_id": "req-3",
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing"
+    },
+    {
+      "paper_id": "openreview-neurips-2025-iuhogh0wil",
+      "score": 9.0,
+      "evidence_en": "representation editing for detoxification directly addresses model editing safety",
+      "evidence_cn": "表示编辑用于去毒化直接对应模型编辑安全",
+      "canonical_evidence": "表示编辑用于去毒化直接对应模型编辑安全",
+      "tldr_en": "Proposes ARGE, an autoregressive reward-guided representation editing method that detoxifies LLMs at test time by intervening in the representation space, achieving precise toxicity reduction while maintaining generation quality.",
+      "tldr_cn": "针对大语言模型生成毒性内容的问题，本文提出自回归奖励引导的表示编辑（ARGE）方法，在测试时通过奖励信号动态编辑模型内部表示，探索毒性与非毒性输出的转换空间，实现更精准的干预。实验表明，该方法显著降低有害输出率，同时保持生成流畅性，为模型安全部署提供轻量级可扩展的测试时去毒化方案。",
+      "title_zh": "通过自回归奖励引导的表示编辑对大语言模型进行去毒化",
+      "motivation_cn": "现有测试时去毒化方法干预不精确，未充分利用毒性与非毒性输出的转换空间。",
+      "method_cn": "提出自回归奖励引导的表示编辑（ARGE），利用奖励信号驱动表示编辑以实现去毒化。",
+      "result_cn": "在多个毒性检测基准上，ARGE有效降低有害输出率并保持生成质量，优于现有基线。",
+      "conclusion_cn": "验证了表示编辑作为测试时去毒化手段的有效性，为LLM安全提供了新方案。",
+      "matched_requirement_id": "req-2",
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety"
+    },
+    {
+      "paper_id": "openreview-neurips-2025-p9gy05bdkw",
+      "score": 9.0,
+      "evidence_en": "directly addresses model editing via locate-then-edit residual distribution",
+      "evidence_cn": "直接研究定位-编辑范式的残差分布机制",
+      "canonical_evidence": "直接研究定位-编辑范式的残差分布机制",
+      "tldr_en": "Identifies a failure mode in locate-then-edit model editing: residual distribution introduces weight shift errors that undermine precision. Provides theoretical and empirical analysis.",
+      "tldr_cn": "针对大模型编辑中定位-编辑方法的核心机制——残差分布，发现其引入权重偏移误差，损害编辑精度。通过理论和实证分析，展示了误差随分布距离、批大小和编辑序列长度增加而加剧，最终导致编辑失败。该工作揭示了现有方法的根本缺陷，为改进编辑精度提供了重要指导。",
+      "title_zh": "重新思考定位-编辑模型编辑中的残差分布",
+      "motivation_cn": "现有定位-编辑方法中残差分布机制存在权重偏移误差，影响编辑精度，本文旨在分析并揭示该问题。",
+      "method_cn": "通过理论推导和实验分析，研究残差分布误差与分布距离、批大小、编辑序列长度等的关系。",
+      "result_cn": "发现残差分布引入的权重偏移误差随编辑规模增大而显著增加，最终导致编辑失败。",
+      "conclusion_cn": "揭示了残差分布的固有缺陷，为未来改进定位-编辑方法提供了关键洞见。",
+      "matched_requirement_id": "req-1",
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing"
+    },
+    {
+      "paper_id": "openreview-neurips-2025-t94talzvze",
+      "score": 9.0,
+      "evidence_en": "proposes lifelong model editing framework MEMOIR for LLMs",
+      "evidence_cn": "提出针对大语言模型的终身模型编辑框架MEMOIR",
+      "canonical_evidence": "提出针对大语言模型的终身模型编辑框架MEMOIR",
+      "tldr_en": "MEMOIR is a scalable framework for lifelong model editing that injects knowledge into a residual memory with minimal overwrite, preserving core capabilities and enabling long edit sequences.",
+      "tldr_cn": "针对大语言模型终身编辑中泛化性差、干扰历史编辑、难以扩展到长序列的问题，提出MEMOIR框架。该框架通过残差记忆模块和依赖于数据的稀疏掩码，将每个编辑限制在参数子集上，实现最小覆盖和知情保留。实验表明，MEMOIR在长编辑序列中保持了高精度和低遗忘，显著优于现有方法。",
+      "title_zh": "MEMOIR：具有最小覆盖和知情保留的大语言模型终身模型编辑",
+      "motivation_cn": "现有终身模型编辑方法存在泛化性差、干扰历史编辑或无法扩展到长序列的问题。",
+      "method_cn": "提出MEMOIR框架，利用残差记忆模块和数据依赖稀疏掩码，将每个编辑注入参数子集中。",
+      "result_cn": "在长编辑序列上保持高编辑精度和低遗忘率，优于现有方法。",
+      "conclusion_cn": "MEMOIR实现了可扩展且高效的终身模型编辑，兼具精度和参数效率。",
+      "matched_requirement_id": "req-1",
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing"
+    },
+    {
+      "paper_id": "openreview-neurips-2025-owu0mgfkui",
+      "score": 9.0,
+      "evidence_en": "proposes compositional model editing for LLMs",
+      "evidence_cn": "提出面向大语言模型的组合模型编辑方法",
+      "canonical_evidence": "提出面向大语言模型的组合模型编辑方法",
+      "tldr_en": "A3E formalizes and benchmarks compositional model editing, where multiple edits must be jointly used to answer complex questions, addressing the limitation of isolated edit evaluation.",
+      "tldr_cn": "现有模型编辑方法通常在孤立场景下评估，忽略了需要结合多个编辑来回答复杂现实问题的组合编辑场景。本文定义了组合模型编辑任务，并系统构建了基准测试，以评估模型在整合多个知识编辑后的表现。该方法能够使大语言模型同时利用多个编辑信息，如在医学领域同时回答新冠症状包括发烧和味觉丧失。该工作为模型编辑的实际应用提供了更全面的评估框架。",
+      "title_zh": "A$^3$E：面向组合模型编辑",
+      "motivation_cn": "现有模型编辑方法仅评估单个编辑效果，无法应对需要整合多个编辑的复杂现实问题，如组合医学知识。",
+      "method_cn": "定义组合模型编辑任务，设计基准评估流程，要求模型同时利用多个编辑信息回答多角度问题。",
+      "result_cn": "系统实验显示现有编辑方法在组合场景下性能大幅下降，凸显了该任务的重要性和挑战性。",
+      "conclusion_cn": "组合模型编辑是一个必要且未充分研究的领域，已有的编辑方法远未达到实际应用需求。",
+      "matched_requirement_id": "req-1",
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing"
+    },
+    {
+      "paper_id": "openreview-neurips-2025-whm5j9uanv",
+      "score": 9.0,
+      "evidence_en": "knowledge editing with conflict awareness for unstructured text",
+      "evidence_cn": "面向非结构化文本的冲突感知知识编辑",
+      "canonical_evidence": "面向非结构化文本的冲突感知知识编辑",
+      "tldr_en": "CAKE proposes a semantic-augmented graph representation for conflict-aware knowledge editing on unstructured text, overcoming limitations of structured knowledge approaches.",
+      "tldr_cn": "知识编辑方法通常依赖结构化知识表示，但现实中知识主要存在于非结构化文本中，导致表示模糊和编辑冲突。本文提出CAKE方法，通过语义增强的图表示来捕获非结构化文本中的知识关系，并设计冲突感知机制进行编辑。实验表明该方法在多种非结构化文本编辑任务中显著优于现有方法，有效解决了表示歧义和编辑冲突问题。",
+      "title_zh": "野外冲突感知知识编辑：面向非结构化文本的语义增强图表示",
+      "motivation_cn": "现有知识编辑依赖结构化表示，无法处理真实世界中复杂的非结构化文本知识，导致编辑冲突和表示歧义。",
+      "method_cn": "利用语义增强图表示从非结构化文本中抽取知识关系，并通过冲突感知机制进行编辑与整合。",
+      "result_cn": "在多个基准上，CAKE比现有方法在编辑准确性和减少冲突方面提升显著。",
+      "conclusion_cn": "冲突感知的图表示是处理非结构化知识编辑的有效途径，推动了知识编辑在真实场景中的应用。",
+      "matched_requirement_id": "req-3",
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing"
+    },
+    {
+      "paper_id": "openreview-neurips-2025-tqrigodq79",
+      "score": 9.0,
+      "evidence_en": "sequential editing for continual knowledge updates inspired by hippocampus",
+      "evidence_cn": "受海马体启发的顺序编辑方法用于持续知识更新",
+      "canonical_evidence": "受海马体启发的顺序编辑方法用于持续知识更新",
+      "tldr_en": "Hippocampal-like Sequential Editing mimics the hippocampal trisynaptic circuit to mitigate parameter drift and catastrophic forgetting in sequential model editing.",
+      "tldr_cn": "现有模型编辑方法在顺序编辑场景中因参数漂移导致模型崩溃和能力退化。本文受海马体三突触回路启发，提出类海马体顺序编辑框架，通过模拟记忆与遗忘的神经机制来平衡新知识获取与旧知识保留。在多个基准上，该方法显著优于现有顺序编辑方法，在保持模型通用能力的同时实现了持续知识更新。该工作为模型编辑的终身学习提供了生物启发式解决方案。",
+      "title_zh": "类海马体顺序编辑：大语言模型的持续知识更新",
+      "motivation_cn": "现有模型编辑方法在连续编辑时因参数漂移引发灾难性遗忘和通用能力下降。",
+      "method_cn": "借鉴海马体三突触回路机制，设计包含记忆巩固和遗忘抑制的顺序编辑框架。",
+      "result_cn": "在多个顺序编辑任务中，该方法在编辑成功率上超过现有方法，同时保持了模型原有性能。",
+      "conclusion_cn": "生物启发的记忆机制有效解决了顺序编辑中的参数漂移问题，为持续知识更新提供了新路径。",
+      "matched_requirement_id": "req-1",
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing"
+    },
+    {
+      "paper_id": "openreview-neurips-2025-feazllt9to",
+      "score": 9.0,
+      "evidence_en": "lifelong knowledge editing for LLMs",
+      "evidence_cn": "大语言模型知识编辑",
+      "canonical_evidence": "大语言模型知识编辑",
+      "tldr_en": "NMKE proposes a neuron-specific masked knowledge editing framework for lifelong editing in LLMs, reducing error accumulation via dynamic sparse masking.",
+      "tldr_cn": "现有终身知识编辑方法在连续编辑中误差累积，导致准确性和泛化能力下降。为此，本文提出神经元特定掩码知识编辑（NMKE），通过神经元功能归因识别知识神经元，并采用动态稀疏掩码进行细粒度编辑。实验证明，NMKE有效减少误差累积，在多个数据集上优于现有方法。该工作为LLM提供了一种高效、可持续的知识更新方案。",
+      "title_zh": "少编辑，多收益：面向大语言模型终身知识编辑的动态稀疏神经元掩码",
+      "motivation_cn": "现有终身知识编辑方法在连续编辑中误差累积，导致性能下降。",
+      "method_cn": "提出NMKE框架，利用神经元功能归因识别知识特异性神经元和知识通用神经元，并采用动态稀疏掩码进行精确编辑。",
+      "result_cn": "实验表明NMKE在编辑准确性和泛化能力上优于现有方法，显著减少误差累积。",
+      "conclusion_cn": "NMKE为LLM提供了一种高效、可持续的知识更新方法。",
+      "matched_requirement_id": "req-3",
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing"
+    },
+    {
+      "paper_id": "openreview-neurips-2025-smtigb2yzt",
+      "score": 8.0,
+      "evidence_en": "defense against harmful fine-tuning via post-tuning perturbation",
+      "evidence_cn": "通过微调后扰动防御有害微调",
+      "canonical_evidence": "通过微调后扰动防御有害微调",
+      "tldr_en": "Proposes Panacea, an adaptive perturbation method to mitigate harmful fine-tuning while preserving utility.",
+      "tldr_cn": "本文发现简单随机扰动可消除微调后模型的有害行为，但会损失微调性能。为此提出Panacea方法，通过优化自适应扰动，在恢复模型安全性同时保持微调效果。实验证明该方法能有效防御有害微调攻击，且优于现有疫苗防御方法。",
+      "title_zh": "Panacea：通过微调后扰动缓解大语言模型的有害微调",
+      "motivation_cn": "现有疫苗防御脆弱，几步微调后模型仍能学到有害知识。",
+      "method_cn": "先分析随机扰动可恢复安全性，再提出自适应扰动优化方法Panacea。",
+      "result_cn": "在多种有害微调攻击下，Panacea有效恢复安全性并保留微调效用。",
+      "conclusion_cn": "微调后扰动是一种简单有效的有害微调防御新范式。",
+      "matched_requirement_id": "req-2",
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety"
+    },
+    {
+      "paper_id": "openreview-neurips-2025-paivwoaanq",
+      "score": 8.0,
+      "evidence_en": "dynamic safety shaping during finetuning",
+      "evidence_cn": "微调中的动态安全整形",
+      "canonical_evidence": "微调中的动态安全整形",
+      "tldr_en": "Proposes Dynamic Safety Shaping (DSS) to reinforce safe segments and suppress unsafe ones during finetuning.",
+      "tldr_cn": "本文针对微调中安全上下文在单样本内变化的问题，提出动态安全整形框架DSS。利用细粒度安全信号，在更新模型时分段强化安全内容、抑制不安全内容。实验表明DSS有效提升微调后模型的安全性，同时减少有害内容学习。",
+      "title_zh": "重塑形状！在微调中恢复大语言模型的安全性",
+      "motivation_cn": "现有安全微调方法对样本内安全与不安全部分同等更新，效果次优。",
+      "method_cn": "提出动态安全整形DSS，基于细粒度安全信号调整每段损失的权重。",
+      "result_cn": "在多个安全基准上，DSS微调后的模型有害响应率显著降低。",
+      "conclusion_cn": "细粒度安全整形为安全微调提供了更精确的控制手段。",
+      "matched_requirement_id": "req-4",
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing"
+    },
+    {
+      "paper_id": "openreview-neurips-2025-vwsxmcmyg5",
+      "score": 7.0,
+      "evidence_en": "analyzes MoE safety vulnerabilities and identifies safety-critical experts",
+      "evidence_cn": "分析MoE模型安全漏洞并识别安全关键专家",
+      "canonical_evidence": "分析MoE模型安全漏洞并识别安全关键专家",
+      "tldr_en": "SAFEx systematically analyzes positional vulnerabilities in MoE-based LLMs and proposes a stability-based method to identify safety-critical experts, providing insights for model editing safety.",
+      "tldr_cn": "混合专家（MoE）模型的路由机制引入独特安全风险，现有密集模型安全技术难以适用。本文提出SAFEx框架，通过稳定专家选择过程鲁棒识别安全关键专家，并将其分解为有害内容检测组和功能组。实验验证了专家位置漏洞的存在，为MoE模型的安全编辑提供了分析基础和方法工具。",
+      "title_zh": "SAFEx：通过稳定安全关键专家识别分析MoE大模型的漏洞",
+      "motivation_cn": "MoE模型的路由机制带来安全对齐挑战，需系统分析其位置漏洞。",
+      "method_cn": "提出稳定性专家选择流程，鲁棒识别安全关键专家并分解为功能组。",
+      "result_cn": "成功验证MoE模型中存在位置漏洞，并识别出有害内容检测相关专家。",
+      "conclusion_cn": "SAFEx为MoE模型的安全评估与编辑提供了重要分析框架。",
+      "matched_requirement_id": "req-2",
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety"
+    },
+    {
+      "paper_id": "openreview-neurips-2025-ycmpnwzuaa",
+      "score": 6.0,
+      "evidence_en": "defends against fine-tuning based jailbreak attacks with two-stage detection",
+      "evidence_cn": "针对基于微调的越狱攻击提出两阶段防御框架",
+      "canonical_evidence": "针对基于微调的越狱攻击提出两阶段防御框架",
+      "tldr_en": "MetaDefense proposes a two-stage defense framework against finetuning-based jailbreak attacks by detecting harmful queries pre-generation and monitoring partial responses during generation.",
+      "tldr_cn": "现有防御无法泛化到未见攻击模板。本文提出MetaDefense，在生成前和生成中两阶段检测有害查询和部分响应，训练LLM预测危害性。实验表明该方法有效防御多种微调越狱攻击，为模型安全编辑提供了防御视角。",
+      "title_zh": "MetaDefense：在生成前后防御基于微调的越狱攻击",
+      "motivation_cn": "现有防御对未知攻击模板泛化能力不足，LLM嵌入空间却能区分伪装有害查询。",
+      "method_cn": "提出两阶段防御：生成前检测有害查询，生成中监控部分响应以阻止有害内容输出。",
+      "result_cn": "在多种微调越狱攻击场景下，MetaDefense显著提升防御成功率。",
+      "conclusion_cn": "MetaDefense为LLM安全部署提供了有效的实时防御方案。",
+      "matched_requirement_id": "req-5",
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing"
+    },
+    {
+      "paper_id": "openreview-neurips-2025-pcg6nrjku7",
+      "score": 6.0,
+      "evidence_en": "finding and reactivating hidden safety mechanisms is a form of model editing for safety",
+      "evidence_cn": "发现并重新激活隐藏安全机制属于模型编辑安全范畴",
+      "canonical_evidence": "发现并重新激活隐藏安全机制属于模型编辑安全范畴",
+      "tldr_en": "Investigates how post-training reduces LLM safety and proposes methods to find and reactivate hidden safety mechanisms, effectively restoring alignment without full retraining.",
+      "tldr_cn": "针对后训练导致大语言模型安全性下降的问题，本文研究并发现模型中存在隐藏的安全机制，并提出了重新激活这些机制的方法。实验证明，该方法能有效恢复模型的安全对齐水平，避免全量重训练的成本，为模型编辑安全提供了新的思路和实用工具。",
+      "title_zh": "发现并重新激活后训练大语言模型的隐藏安全机制",
+      "motivation_cn": "后训练常导致LLM安全性下降，需要低成本的方法恢复安全机制。",
+      "method_cn": "定位并重新激活模型中的隐藏安全机制，通过轻量级干预恢复安全对齐。",
+      "result_cn": "在多个后训练模型上成功重新激活安全机制，显著降低有害输出率。",
+      "conclusion_cn": "揭示了隐藏安全机制的存在，为模型编辑安全提供了可行且高效的解决方案。",
+      "matched_requirement_id": "req-composite-model-edit",
+      "matched_query_tag": "query:model-edit:composite",
+      "matched_query_text": "Papers central to 查找大模型安全领域的模型编辑方向论文, especially work that connects or combines: large language model editing; model editing safety; knowledge editing; safety alignment editing; jailbreak editing; Find papers about model editing for safety in large language models; Research on knowledge editing to improve LLM safety; How can model editing prevent attacks on large language models."
+    },
+    {
+      "paper_id": "openreview-neurips-2025-utvu4pj0ct",
+      "score": 4.0,
+      "evidence_en": "jailbreak via benign fine-tuning",
+      "evidence_cn": "通过良性微调实现越狱",
+      "canonical_evidence": "通过良性微调实现越狱",
+      "tldr_en": "Shows LLMs can be jailbroken by fine-tuning on only 10 benign QA pairs, exploiting increased sensitivity to fine-tuning.",
+      "tldr_cn": "本文发现仅使用10个良性问答对进行微调即可越狱大语言模型，揭露了当前微调越狱攻击的隐蔽性。通过利用模型对微调参数变化的敏感性，攻击可绕过安全检测。实验表明该攻击稳定有效，对模型编辑安全构成威胁。",
+      "title_zh": "通过过拟合攻击：10样本良性微调越狱大语言模型",
+      "motivation_cn": "现有微调越狱攻击使用有害数据易被检测，需要更隐蔽的越狱方法。",
+      "method_cn": "仅用10个良性问答对微调模型，利用过拟合诱导模型产生不安全行为。",
+      "result_cn": "实验证明该攻击能稳定越狱多种大语言模型，且可绕过安全检测。",
+      "conclusion_cn": "良性微调同样可以破坏安全对齐，凸显了微调服务的巨大安全风险。",
+      "matched_requirement_id": "req-5",
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing"
+    },
+    {
+      "paper_id": "openreview-neurips-2025-aaxmcaynf6",
+      "score": 4.0,
+      "evidence_en": "analysis of safety neurons for understanding safety alignment",
+      "evidence_cn": "通过安全神经元分析安全对齐机制",
+      "canonical_evidence": "通过安全神经元分析安全对齐机制",
+      "tldr_en": "This paper identifies safety neurons in LLMs via activation contrasting and patching, showing that manipulating these neurons can restore safety performance.",
+      "tldr_cn": "本文从机械可解释性角度研究安全对齐，通过推理时激活对比定位安全神经元，并利用动态激活补丁评估其因果作用。实验发现约5%的神经元控制安全行为，仅调整这些神经元的激活即可恢复超过90%的安全性能。该工作为理解安全对齐的内部机制提供了新视角，并暗示通过精确编辑安全神经元可能成为一种高效的安全对齐编辑方法。",
+      "title_zh": "理解安全对齐：从安全神经元的机械视角",
+      "motivation_cn": "即使经过安全对齐，LLM仍会产生有害内容，但安全对齐的内部工作机制尚不明确。",
+      "method_cn": "提出推理时激活对比定位安全神经元，并应用动态激活补丁验证其因果影响。",
+      "result_cn": "在多个LLM中一致识别出约5%的安全神经元，通过补丁可恢复90%以上的安全性能。",
+      "conclusion_cn": "安全神经元是决定模型安全行为的关键，激活补丁为安全对齐编辑提供了精准靶点。",
+      "matched_requirement_id": "req-4",
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing"
+    }
+  ],
+  "llm_ranked_at": "2026-06-04T16:01:23.393255+00:00",
+  "display_min_score": 4.0,
+  "pruned_at": "2026-06-04T16:01:23.436114+00:00"
+}
