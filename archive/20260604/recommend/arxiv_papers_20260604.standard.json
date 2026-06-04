@@ -1,0 +1,731 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-04T21:10:52.018567+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 13,
+    "deep_cap": 6,
+    "deep_selected": 11,
+    "quick_candidates": 7,
+    "quick_skim_target": 11,
+    "quick_selected": 7
+  },
+  "deep_dive": [
+    {
+      "id": "2605.29826v1",
+      "source": "arxiv",
+      "title": "Towards Localized and Disentangled Knowledge Editing for Multimodal Large Language Models",
+      "abstract": "Existing methods in Multimodal Knowledge Editing (MKE) have advanced the ability to correct outdated or inaccurate knowledge in Multimodal Large Language Models (MLLMs). However, they exhibit a critical limitation: while effectively modifying target factual pairs, they fail to generalize edits to logically related queries and often cause unintended alterations to unrelated but visually or semantically linked information. We identify and formalize two underlying failure modes causing this issue: Causal Misalignment, which confines edits to the specific sample, and Feature Entanglement, which causes unintended alterations to coupled but irrelevant information. To address these issues, we propose Localized and Disentangled Knowledge Editing (LDKE), a new framework that achieves precise and generalized editing by localizing fact-specific model layers and disentangling target-relevant inputs from irrelevant ones. Our approach introduces a Fast Localization module to identify and update critical layers efficiently, along with a Disentanglement Classifier that routes inputs appropriately to preserve unrelated knowledge. Extensive experiments across various benchmarks and MLLMs demonstrate that LDKE achieves superior performance in propagating edits to related contexts while maintaining high locality.",
+      "authors": [
+        "Leijiang Gu",
+        "Zhen Zeng",
+        "Feng Li",
+        "Xinjian Gao",
+        "Zenglin Shi"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-05-28T12:06:39+00:00",
+      "link": "https://arxiv.org/pdf/2605.29826v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "localized and disentangled knowledge editing for multimodal LLMs",
+      "llm_evidence_cn": "多模态大语言模型的局部解耦知识编辑",
+      "llm_evidence": "多模态大语言模型的局部解耦知识编辑",
+      "canonical_evidence": "多模态大语言模型的局部解耦知识编辑",
+      "llm_tldr_en": "Proposes Localized and Disentangled Knowledge Editing to address causal misalignment and feature entanglement in multimodal knowledge editing.",
+      "llm_tldr_cn": "现有多模态知识编辑方法无法泛化到逻辑相关查询，并导致无关信息意外改变。本文识别出因果错配和特征纠缠两种失败模式，提出局部解耦编辑方法，使编辑仅影响目标事实并泛化到相关查询，实验证明在准确性和泛化性上显著优于现有方法。",
+      "llm_tldr": "现有多模态知识编辑方法无法泛化到逻辑相关查询，并导致无关信息意外改变。本文识别出因果错配和特征纠缠两种失败模式，提出局部解耦编辑方法，使编辑仅影响目标事实并泛化到相关查询，实验证明在准确性和泛化性上显著优于现有方法。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2605.30640v1",
+      "source": "arxiv",
+      "title": "CSULoRA: Closest Safe Update Low-Rank Adaptation",
+      "abstract": "Low-rank adaptation has become a standard method for parameter-efficient fine-tuning of large language models, but even small amounts of unsafe or adversarial fine-tuning data can substantially weaken the safety behavior of aligned models. Existing safety-preserving LoRA methods often rely on hard interventions such as projection, pruning, thresholding, or additional training objectives. While these methods can suppress unsafe update directions, they may also remove task-relevant information or require extra tuning. We introduce CSULoRA, a post-hoc method for correcting trained LoRA adapters through closest safe update estimation. CSULoRA estimates a safety-aligned subspace from the weight displacement between a safety-aligned model and its corresponding base checkpoint. It then decomposes each LoRA update into fully aligned, partially aligned, and off-subspace components. Instead of discarding components outside the estimated safety subspace, CSULoRA solves a closed-form penalized minimum-change problem that preserves the fully aligned component while smoothly attenuating potentially unsafe directions according to their relative energy. In adversarial fine-tuning experiments, CSULoRA substantially reduces attack success rate while preserving most of the utility gains obtained from standard LoRA fine-tuning.",
+      "authors": [
+        "Oleksandr Marchenko Breneur",
+        "Adelaide Danilov",
+        "Aria Nourbakhsh",
+        "Salima Lamsiyah"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CL"
+      ],
+      "published": "2026-05-28T22:48:54+00:00",
+      "link": "https://arxiv.org/pdf/2605.30640v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "post-hoc LoRA correction for safety alignment",
+      "llm_evidence_cn": "后处理LoRA修正以保持安全对齐",
+      "llm_evidence": "后处理LoRA修正以保持安全对齐",
+      "canonical_evidence": "后处理LoRA修正以保持安全对齐",
+      "llm_tldr_en": "CSULoRA corrects trained LoRA adapters by estimating the closest safe update, preserving safety without removing task-relevant information.",
+      "llm_tldr_cn": "现有安全保持的LoRA方法往往依赖硬干预，可能损失任务信息。CSULoRA通过估计最接近的安全更新来后处理已训练的LoRA适配器，利用安全对齐模型与基础检查点之间的权重位移来估计安全对齐子空间，从而在保留任务相关性的同时保障安全性。实验表明该方法有效抑制了不安全更新方向。",
+      "llm_tldr": "现有安全保持的LoRA方法往往依赖硬干预，可能损失任务信息。CSULoRA通过估计最接近的安全更新来后处理已训练的LoRA适配器，利用安全对齐模型与基础检查点之间的权重位移来估计安全对齐子空间，从而在保留任务相关性的同时保障安全性。实验表明该方法有效抑制了不安全更新方向。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.00477v1",
+      "source": "arxiv",
+      "title": "Do Text Edits Generalize to Visual Generation? Benchmarking Cross-Modal Knowledge Editing in UMMs",
+      "abstract": "Unified multimodal models (UMMs) have emerged as a promising paradigm for general-purpose multimodal intelligence. As they are deployed in real-world applications, effectively updating internal knowledge becomes critical. While knowledge editing has matured for text-only models, it remains unclear whether edits that successfully modify textual outputs also transfer to image generation in UMMs. To study this question, we introduce UniKE, the first benchmark for cross-modality knowledge editing in UMMs, comprising 2,971 edit subjects spanning attribute and relation edits. Using VQA-based visual verification, we reveal a striking modality gap: text-side efficacy can reach approximately 92%, whereas the best overall VQA accuracy under direct image generation is only 18.5%. We further propose Reasoning-augmented Parameter Editing, which explicitly activates edited knowledge before generation and improves overall VQA accuracy for all evaluated model-editor pairs, with gains up to 18.6 percentage points. Mechanistic analysis shows that this gap is associated with partial alignment between edited textual representations and the conditioning pathways for visual generation, where edits sufficient for text outputs may remain too weak or misaligned to steer image synthesis. These findings show that textual knowledge edits do not guarantee reliable cross-modality transfer and motivate modality-aware editing methods. Our code and data are available at https://github.com/gxx27/UniKE.",
+      "authors": [
+        "Xin Gao",
+        "Cheng Yang",
+        "Chufan Shi",
+        "Taylor Berg-Kirkpatrick"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.CV"
+      ],
+      "published": "2026-05-30T02:09:37+00:00",
+      "link": "https://arxiv.org/pdf/2606.00477v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "benchmark for cross-modal knowledge editing",
+      "llm_evidence_cn": "跨模态知识编辑基准",
+      "llm_evidence": "跨模态知识编辑基准",
+      "canonical_evidence": "跨模态知识编辑基准",
+      "llm_tldr_en": "Introduces UniKE, the first benchmark for cross-modal knowledge editing in unified multimodal models, revealing a modality gap.",
+      "llm_tldr_cn": "知识编辑在纯文本模型中已成熟，但在多模态模型中，文本编辑是否影响图像生成尚不明确。本文提出UniKE基准，包含2971个编辑主体，通过VQA验证发现文本侧编辑有效率达92%，但视觉侧最佳准确率远低，表明存在显著模态差距，为多模态知识编辑研究提供了关键评估工具。",
+      "llm_tldr": "知识编辑在纯文本模型中已成熟，但在多模态模型中，文本编辑是否影响图像生成尚不明确。本文提出UniKE基准，包含2971个编辑主体，通过VQA验证发现文本侧编辑有效率达92%，但视觉侧最佳准确率远低，表明存在显著模态差距，为多模态知识编辑研究提供了关键评估工具。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.00570v1",
+      "source": "arxiv",
+      "title": "Revisiting Parameter-Based Knowledge Editing in Large Language Models: Theoretical Limits and Empirical Evidence",
+      "abstract": "Parameter-based knowledge editing updates the internal knowledge of large language models (LLMs) via localized weight modifications and has attracted significant attention. However, most existing methods overlook fundamental theoretical limitations and are rarely evaluated under realistic, practice-oriented settings. In this paper, we first present a theoretical analysis based on the dimensional Collapse Hypothesis, explaining how localized parameter edits can propagate along fragile directions in the representation space, inducing global interference and ultimately causing reasoning collapse. Building on this insight, we conduct a comprehensive empirical evaluation by systematically varying knowledge complexity, number of edits, evaluation dimensions, and baseline methods. Our results show that parameter-based editing methods consistently damage core LLM capabilities. In contrast, a simple retrieval-based baseline achieves consistently stronger performance than all parameter-editing methods across all evaluated conditions. These findings highlight that preserving the fundamental capabilities of LLMs after knowledge editing should be a central concern for future research.",
+      "authors": [
+        "Wanying Ren",
+        "Xin Song",
+        "Futing Wang",
+        "Guoxiu He",
+        "Aixin Sun"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-05-30T06:44:40+00:00",
+      "link": "https://arxiv.org/pdf/2606.00570v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "parameter-based knowledge editing",
+      "llm_evidence_cn": "基于参数的知识编辑",
+      "llm_evidence": "基于参数的知识编辑",
+      "canonical_evidence": "基于参数的知识编辑",
+      "llm_tldr_en": "Revisits parameter-based knowledge editing in LLMs, revealing theoretical limits and empirical evidence of reasoning collapse due to dimensional collapse.",
+      "llm_tldr_cn": "本文重新审视了大型语言模型中基于参数的知识编辑方法。作者从维度坍塌假说出发进行理论分析，揭示了局部参数编辑如何通过脆弱方向传播导致全局干扰和推理崩溃。通过系统的实验验证，展示了现有方法在实践中的局限性，呼吁关注知识编辑的理论基础与现实评估。",
+      "llm_tldr": "本文重新审视了大型语言模型中基于参数的知识编辑方法。作者从维度坍塌假说出发进行理论分析，揭示了局部参数编辑如何通过脆弱方向传播导致全局干扰和推理崩溃。通过系统的实验验证，展示了现有方法在实践中的局限性，呼吁关注知识编辑的理论基础与现实评估。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.01053v1",
+      "source": "arxiv",
+      "title": "AnyEdit++: Adaptive Long-Form Knowledge Editing via Bayesian Surprise",
+      "abstract": "Editing complex, long-form knowledge in Large Language Models remains a significant challenge due to the difficulty of maintaining generation coherence. Existing autoregressive methods like AnyEdit alleviate length constraints but rely on Fixed-window Chunking, which disregards logical structure and compromises consistency. To address this, we present AnyEdit++, a structure-aware framework incorporating Bayes-Chunk, an adaptive segmentation mechanism that dynamically identifies semantic boundaries based on Bayesian Surprise. We underpin this approach with a theoretical framework establishing two key principles: (1) Structural Independence: we prove that cross-segment interference is minimized when anchor keys are geometrically orthogonal (a condition naturally satisfied by our surprisal-based boundaries but violated by fixed windows), and (2) Causal Locality: we demonstrate that updates injected at these semantic peaks yield strictly superior control compared to arbitrary split points. Extensive experiments across mathematical reasoning, code generation, and narrative tasks demonstrate that AnyEdit++ achieves superior performance and robustness compared to state-of-the-art baselines, validating that structural awareness is critical for effective long-form knowledge editing.",
+      "authors": [
+        "Bowen Tian",
+        "Caixue He",
+        "Jiemin Wu",
+        "Jingying Wang",
+        "Wenshuo Chen",
+        "Zexi Li",
+        "Yutao Yue"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-05-31T06:48:43+00:00",
+      "link": "https://arxiv.org/pdf/2606.01053v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "adaptive long-form knowledge editing via Bayesian surprise segmentation",
+      "llm_evidence_cn": "基于贝叶斯惊讶的自适应长文本知识编辑框架",
+      "llm_evidence": "基于贝叶斯惊讶的自适应长文本知识编辑框架",
+      "canonical_evidence": "基于贝叶斯惊讶的自适应长文本知识编辑框架",
+      "llm_tldr_en": "Proposes AnyEdit++ with Bayes-Chunk for structure-aware adaptive segmentation in long-form knowledge editing, improving coherence and consistency.",
+      "llm_tldr_cn": "长文本知识编辑面临生成连贯性挑战。现有方法采用固定窗口分块，忽略逻辑结构。本文提出AnyEdit++框架，引入基于贝叶斯惊讶的自适应分块机制Bayes-Chunk，动态识别语义边界。理论证明几何正交锚键可最小化跨段干扰。实验表明该方法显著提升了编辑后文本的连贯性和事实准确性。",
+      "llm_tldr": "长文本知识编辑面临生成连贯性挑战。现有方法采用固定窗口分块，忽略逻辑结构。本文提出AnyEdit++框架，引入基于贝叶斯惊讶的自适应分块机制Bayes-Chunk，动态识别语义边界。理论证明几何正交锚键可最小化跨段干扰。实验表明该方法显著提升了编辑后文本的连贯性和事实准确性。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.01610v1",
+      "source": "arxiv",
+      "title": "Revisiting Ripple Effects in Knowledge Editing through Pressure-Aware Joint Neighborhood Optimization",
+      "abstract": "Single-edit updates in large language models can trigger ripple effects across local knowledge neighborhoods: desirable propagation to related facts and unintended perturbation of preserved ones. Existing methods address these two effects separately, without explicitly modeling their coupling. We challenge this separation through an analysis of ripple responses across typical baselines, identifying two coupled design pressures: editable-side coordination and preserved-side leakage. We propose Joint Neighborhood Optimization (JNO), a new knowledge-editing framework to formalize and jointly address both pressures at the target-planning stage. JNO instantiates this principle through Pressure-Aware Coordination (PAC), which jointly optimizes neighborhood target representations under coupled constraints, and a semantic pre-execution gate that rejects high-risk target plans before parameter execution. Experiments on RippleEdits show JNO improves propagation and preservation metrics by at least 7.0% while preserving cross-backbone editing stability.",
+      "authors": [
+        "Haoben Huang",
+        "Shuxin Liu",
+        "Ou Wu",
+        "Di Gao"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-01T03:00:13+00:00",
+      "link": "https://arxiv.org/pdf/2606.01610v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "knowledge editing framework handling ripple effects via joint neighborhood optimization",
+      "llm_evidence_cn": "通过联合邻域优化处理知识编辑中的涟漪效应",
+      "llm_evidence": "通过联合邻域优化处理知识编辑中的涟漪效应",
+      "canonical_evidence": "通过联合邻域优化处理知识编辑中的涟漪效应",
+      "llm_tldr_en": "Proposes Joint Neighborhood Optimization (JNO) to jointly address desirable propagation and unintended perturbation in knowledge editing ripple effects.",
+      "llm_tldr_cn": "知识编辑中的单次更新会在邻域中引发涟漪效应。现有方法分别处理传播和扰动，忽略了二者的耦合。本文通过分析发现两种设计压力，提出联合邻域优化框架JNO，利用压力感知协调同时优化传播和抑制泄漏。实验表明JNO在多个基准上优于现有方法，更有效地平衡了编辑效果与邻域保留。",
+      "llm_tldr": "知识编辑中的单次更新会在邻域中引发涟漪效应。现有方法分别处理传播和扰动，忽略了二者的耦合。本文通过分析发现两种设计压力，提出联合邻域优化框架JNO，利用压力感知协调同时优化传播和抑制泄漏。实验表明JNO在多个基准上优于现有方法，更有效地平衡了编辑效果与邻域保留。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.02995v1",
+      "source": "arxiv",
+      "title": "Patcher: Post-Hoc Patching of Backdoored Large Language Models",
+      "abstract": "Large language models remain vulnerable to jailbreak backdoor attacks, where adversaries poison safety alignment data to embed hidden triggers that bypass safety mechanisms. Existing defenses often require comprehensive attack information or multiple triggered examples, making them impractical when defenders only observe a single reported failure case without knowing whether it stems from a backdoor attack or a natural alignment bug. This paper presents Patcher, a post-hoc defense framework that repairs backdoored language models using only a single reported failure case and the model parameters. Patcher operates in two stages. First, it localizes backdoor triggers by computing response-conditioned gradient-based saliency scores and applying adaptive clustering to separate triggers from benign context. Second, it patches the model through a constrained fine-tuning objective that breaks the trigger-response association while preserving benign-task utility and robustness to non-triggered jailbreak attacks through KL-divergence constraints. We conduct extensive evaluations across multiple backdoor attack strategies and demonstrate that Patcher successfully localizes triggers and neutralizes backdoors while maintaining model utility. We further show robustness against adaptive attacks designed to evade our defense. This work represents a significant step toward practical defenses against training-time attacks in deployed language models.",
+      "authors": [
+        "Anjun Gao",
+        "Yueyang Quan",
+        "Yufei Xia",
+        "Zhuqing Liu",
+        "Minghong Fang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.IR",
+        "cs.LG"
+      ],
+      "published": "2026-06-02T01:11:58+00:00",
+      "link": "https://arxiv.org/pdf/2606.02995v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Post-hoc patching of backdoored LLMs for safety",
+      "llm_evidence_cn": "事后修补后门大语言模型以提升安全性",
+      "llm_evidence": "事后修补后门大语言模型以提升安全性",
+      "canonical_evidence": "事后修补后门大语言模型以提升安全性",
+      "llm_tldr_en": "Patcher is a post-hoc defense framework that repairs backdoored LLMs using only a single reported failure case, localizing triggers via gradient saliency and adaptive clustering, then patching the model to eliminate backdoors.",
+      "llm_tldr_cn": "大语言模型容易受到后门攻击，攻击者通过污染安全对齐数据植入隐藏触发器。现有防御通常需要完整攻击信息或多个触发样例，不切实际。本文提出Patcher，一种事后修复框架，仅需单个失败案例和模型参数。它首先通过梯度显著性得分定位触发器，然后自适应聚类并修补模型。实验表明，Patcher能有效去除后门，同时保持模型正常功能，为模型编辑安全提供了实用的修复方法。",
+      "llm_tldr": "大语言模型容易受到后门攻击，攻击者通过污染安全对齐数据植入隐藏触发器。现有防御通常需要完整攻击信息或多个触发样例，不切实际。本文提出Patcher，一种事后修复框架，仅需单个失败案例和模型参数。它首先通过梯度显著性得分定位触发器，然后自适应聚类并修补模型。实验表明，Patcher能有效去除后门，同时保持模型正常功能，为模型编辑安全提供了实用的修复方法。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.03096v1",
+      "source": "arxiv",
+      "title": "Can Factual Opinions Be Edited (Manipulated) in Large Language Models?",
+      "abstract": "Large Language Models (LLMs) are increasingly integrated into various domains, making knowledge editing techniques crucial yet potentially hazardous. Current editing methods primarily target atomic facts, overlooking the significant risks associated with manipulating factual opinions, e.g., documented stances of public figures on societal issues. Such manipulation could reshape public images, influence elections, and alter societal views. To systematically assess this threat, we introduce the Factual Opinion Editing with Evidence (FOE) benchmark, which encompasses 261 public figures, 19 issue categories, and 2,178 complete opinion records. Our evaluations demonstrate that current editing techniques struggle significantly with factual opinions, often achieving only superficial changes while failing to preserve consistency between the edited opinion and the supporting evidence generated by the model. To address this limitation, we further propose a simple yet effective Self-Generated Evidence-Aligned method that achieves opinion-evidence alignment without relying on explicit instructions. Together, our benchmark and method provide a foundation for understanding the emerging security implications of factual opinion editing in LLMs.",
+      "authors": [
+        "Yuanpu Cao",
+        "Ziyi Yin",
+        "Fenglong Ma",
+        "Jinghui Chen"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-02T03:35:00+00:00",
+      "link": "https://arxiv.org/pdf/2606.03096v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "knowledge editing for factual opinions in LLMs",
+      "llm_evidence_cn": "大语言模型中事实观点的知识编辑",
+      "llm_evidence": "大语言模型中事实观点的知识编辑",
+      "canonical_evidence": "大语言模型中事实观点的知识编辑",
+      "llm_tldr_en": "Benchmark FOE evaluates editing of factual opinions in LLMs, revealing current methods struggle and highlighting risks of manipulation.",
+      "llm_tldr_cn": "现有知识编辑方法主要针对原子事实，忽略了操纵事实观点（如公众人物立场）的严重风险。本文提出事实观点编辑基准FOE，涵盖261位公众人物、19个议题类别和2178条完整观点记录。评估表明当前编辑技术在处理事实观点时表现困难，且存在被滥用的风险，为模型编辑安全研究提供了新视角。",
+      "llm_tldr": "现有知识编辑方法主要针对原子事实，忽略了操纵事实观点（如公众人物立场）的严重风险。本文提出事实观点编辑基准FOE，涵盖261位公众人物、19个议题类别和2178条完整观点记录。评估表明当前编辑技术在处理事实观点时表现困难，且存在被滥用的风险，为模型编辑安全研究提供了新视角。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.03179v1",
+      "source": "arxiv",
+      "title": "HyperPatch: Sequential Knowledge Editing Under n-ary Structural Drift",
+      "abstract": "Large Language Models (LLMs) rely on Knowledge Editing (KE) to maintain temporal validity, yet real-world knowledge is inherently n-ary. We demonstrate that in non-stationary environments, sequential updates to complex relations induce N-ary Structural Drift, a phenomenon where the binary reification of n-ary events into triples fractures relational atomicity. This precipitates Structure-Conditioned Knowledge Transfer Failure, a systematic mis-grounding of the retriever frequently misdiagnosed as parametric hallucination. To tackle this, we propose HyperPatch, a parameter-preserving framework that reformulates sequential KE as a stability problem over hypergraph manifolds. HyperPatch preserves event integrity through three phases: (i) Structural Prior Initialization, establishing a topology-aware embedding space via contrastive learning on a Hypergraph Neural Network (HGNN) to capture high-order correlations; (ii) Sequential Topology Editing, utilizing a dual-stage mechanism that employs SimHash-based Topological Alignment for rapid conflict resolution and Topological LoRA Adaptation to track drift without backbone retraining; and (iii) Structure-Conditioned Reasoning, which integrates globally consistent evidence from fused linguistic and structural manifolds. On the MQuAKE-CF and MQuAKE-T benchmarks, HyperPatch achieves relative gains in Hop-wise Accuracy (H-Acc) of 96.24% and 21.06% over the strongest baseline, respectively. Further ablations demonstrate superior reliability under continuous n-ary update streams, whereas the standard KG-based variant suffers H-Acc collapses of up to 88.3% due to structural misalignment.",
+      "authors": [
+        "Yu-Kai Chan",
+        "Wen-Sheng Lien",
+        "Dong-Ting Yao",
+        "Bo-Kai Ruan",
+        "Kwan-Yeung Lin",
+        "Hong-Han Shuai",
+        "Meng-Fen Chiang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-02T05:35:57+00:00",
+      "link": "https://arxiv.org/pdf/2606.03179v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "sequential knowledge editing under structural drift",
+      "llm_evidence_cn": "顺序知识编辑应对结构漂移",
+      "llm_evidence": "顺序知识编辑应对结构漂移",
+      "canonical_evidence": "顺序知识编辑应对结构漂移",
+      "llm_tldr_en": "Proposes HyperPatch, a parameter-preserving framework for sequential knowledge editing that handles n-ary structural drift using hypergraphs.",
+      "llm_tldr_cn": "本文针对时序知识编辑中的n元结构漂移问题，提出HyperPatch框架。该框架将知识编辑建模为超图流形上的稳定性问题，通过结构先验注入、超曲面迭代修复等三阶段流程，保持事件完整性。实验证明HyperPatch能有效解决结构漂移导致的知识转移失败。",
+      "llm_tldr": "本文针对时序知识编辑中的n元结构漂移问题，提出HyperPatch框架。该框架将知识编辑建模为超图流形上的稳定性问题，通过结构先验注入、超曲面迭代修复等三阶段流程，保持事件完整性。实验证明HyperPatch能有效解决结构漂移导致的知识转移失败。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.03695v1",
+      "source": "arxiv",
+      "title": "Don't Forget Your Embeddings: Robust Knowledge Erasure via Precise Editing of Embeddings",
+      "abstract": "As language models are increasingly deployed in real-world applications, the ability to erase specific knowledge from them becomes critical for safety and compliance. Prominent methods seek persistent removal by updating the model's parameters, yet the target knowledge often can be recovered through adversarial prompting or relearning. In this work, we hypothesize this limitation stems in part from existing methods overlooking the embedding layer. To address this, we introduce EMBedding ERasure (EMBER), a plug-n-play erasure module that leverages Sparse Matrix Factorization for precise erasure of concept-related features from token embeddings. Through comprehensive evaluations across diverse concepts on Gemma-2-2B-it and Llama-3.1-8B-Instruct, we find that augmenting existing methods with EMBER consistently improves erasure efficacy and specificity across task formats, with minimal coherence loss. Moreover, it dramatically improves robustness to relearning, reducing regained accuracy by up to 50%, limiting it to 35% on Llama compared to 70%-76% for prior methods. Further analysis shows that the coherence cost is localized, affecting only a small set of concept-exclusive tokens. Our work establishes that precise embedding-level intervention is necessary for robust concept erasure, and demonstrates that existing methods can benefit from such augmentation.",
+      "authors": [
+        "Clara Haya Suslik",
+        "Or Shafran",
+        "Mor Geva"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-02T14:15:25+00:00",
+      "link": "https://arxiv.org/pdf/2606.03695v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "knowledge erasure via embedding editing",
+      "llm_evidence_cn": "通过嵌入编辑实现知识擦除",
+      "llm_evidence": "通过嵌入编辑实现知识擦除",
+      "canonical_evidence": "通过嵌入编辑实现知识擦除",
+      "llm_tldr_en": "EMBER uses sparse matrix factorization to precisely erase concept-related features from token embeddings, achieving robust knowledge erasure resistant to adversarial recovery.",
+      "llm_tldr_cn": "现有知识擦除方法常忽略嵌入层，导致目标知识可被对抗提示恢复。本文提出EMBER，利用稀疏矩阵分解精确擦除token嵌入中的概念相关特征，在Gemma-2-2B-it和Llama-3.1-8B上实现稳健擦除，有效抵御恢复攻击，为模型安全合规提供了新途径。",
+      "llm_tldr": "现有知识擦除方法常忽略嵌入层，导致目标知识可被对抗提示恢复。本文提出EMBER，利用稀疏矩阵分解精确擦除token嵌入中的概念相关特征，在Gemma-2-2B-it和Llama-3.1-8B上实现稳健擦除，有效抵御恢复攻击，为模型安全合规提供了新途径。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.03924v1",
+      "source": "arxiv",
+      "title": "Knowledge Editing in Masked Diffusion Language Models",
+      "abstract": "Knowledge editing aims to update or correct factual knowledge in a language model. A widely used approach, locate-then-edit, does this in two steps: it first localizes a fact within the model, then edits the weights there. To date, such methods have been developed exclusively on autoregressive models (ARMs). Whether their underlying assumptions hold for masked diffusion models (MDMs), which model text bidirectionally and generate by iterative denoising rather than next-token prediction, remains an open question. We address it by transferring locate-then-edit to MDMs and comparing two MDMs (LLaDA, Dream) with two ARMs (LLaMA, Qwen) at matched scale. Our central finding has two parts. First, where an edit is applied transfers across paradigms: causal tracing highlights the same early-to-mid-layer MLP at the last subject token in both, and editing is most effective there. Second, this shared location does not guarantee a shared outcome. Single-token edits succeed in both, but as targets grow longer, editing degrades systematically in the MDMs but not the ARMs. The failure stems from how the edited fact is generated: producing a multi-token target requires passing through partially unmasked intermediate states for which the edit was never optimized. Guided by this diagnosis, we introduce a simple correction that optimizes the edit for these states, substantially restoring multi-token performance.",
+      "authors": [
+        "Haewon Park",
+        "Yohan Jo"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-02T17:14:37+00:00",
+      "link": "https://arxiv.org/pdf/2606.03924v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "transfers locate-then-edit knowledge editing to masked diffusion language models",
+      "llm_evidence_cn": "将定位-编辑知识编辑方法迁移至掩码扩散语言模型",
+      "llm_evidence": "将定位-编辑知识编辑方法迁移至掩码扩散语言模型",
+      "canonical_evidence": "将定位-编辑知识编辑方法迁移至掩码扩散语言模型",
+      "llm_tldr_en": "First work to transfer locate-then-edit knowledge editing from autoregressive to masked diffusion models, showing causal tracing localizations transfer across paradigms.",
+      "llm_tldr_cn": "现有知识编辑方法主要针对自回归模型，其在掩码扩散模型中的适用性未知。本文首次将定位-编辑方法迁移至掩码扩散语言模型，通过因果追踪实现知识定位。实验表明编辑位置在不同模型范式间可迁移，为扩散模型的知识编辑开辟了新方向。",
+      "llm_tldr": "现有知识编辑方法主要针对自回归模型，其在掩码扩散模型中的适用性未知。本文首次将定位-编辑方法迁移至掩码扩散语言模型，通过因果追踪实现知识定位。实验表明编辑位置在不同模型范式间可迁移，为扩散模型的知识编辑开辟了新方向。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2605.28030v1",
+      "source": "arxiv",
+      "title": "SPARD: Defending Harmful Fine-Tuning Attack via Safety Projection with Relevance-Diversity Data Selection",
+      "abstract": "Fine-tuning large language models often undermines their safety alignment, a problem further amplified by harmful fine-tuning attacks in which adversarial data removes safeguards and induces unsafe behaviors. We propose SPARD, a defense framework that integrates Safety-Projected Alternating optimization with Relevance-Diversity aware data selection. SPARD employs SPAG, which optimizes alternatively between utility updates and explicit safety projections with a set of safe data to enforce safety constraints. To curate safe data, we introduce a Relevance-Diversity Determinantal Point Process to select compact safe data, balancing task relevance and safety coverage. Experiments on GSM8K and OpenBookQA under four harmful fine-tuning attacks demonstrate that SPARD consistently achieves the lowest average attack success rates, substantially outperforming state-of-the-art defense methods, while maintaining high task accuracy. Code is available at https://github.com/shuhao02/SPARD.",
+      "authors": [
+        "Shuhao Chen",
+        "Weisen Jiang",
+        "Yeqi Gong",
+        "Shengda Luo",
+        "Chengxiang Zhuo",
+        "Zang Li",
+        "James T. Kwok",
+        "Yu Zhang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CR"
+      ],
+      "published": "2026-05-27T06:36:22+00:00",
+      "link": "https://arxiv.org/pdf/2605.28030v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "defense against harmful fine-tuning attack via safety projection, directly related to preventing attacks through model editing",
+      "llm_evidence_cn": "通过安全投影防御有害微调攻击，与模型编辑防止攻击直接相关",
+      "llm_evidence": "通过安全投影防御有害微调攻击，与模型编辑防止攻击直接相关",
+      "canonical_evidence": "通过安全投影防御有害微调攻击，与模型编辑防止攻击直接相关",
+      "llm_tldr_en": "SPARD defends harmful fine-tuning attacks by integrating safety projection and relevance-diversity data selection, effectively preserving safety without sacrificing utility.",
+      "llm_tldr_cn": "该论文针对有害微调攻击提出SPARD防御框架，采用安全投影交替优化与相关多样性数据选择，在保持效用同时强制执行安全约束。实验证明在多种有害微调攻击下有效，为模型编辑用于安全防御提供了新思路。",
+      "llm_tldr": "该论文针对有害微调攻击提出SPARD防御框架，采用安全投影交替优化与相关多样性数据选择，在保持效用同时强制执行安全约束。实验证明在多种有害微调攻击下有效，为模型编辑用于安全防御提供了新思路。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "How can model editing prevent attacks on large language models",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.00651v1",
+      "source": "arxiv",
+      "title": "MESA: Improving MoE Safety Alignment via Decentralized Expertise",
+      "abstract": "Mixture-of-Experts (MoE) architectures scale Large Language Models (LLMs) efficiently, enabling greater capacity with reduced computational cost by dynamically routing inputs to relevant experts, yet introduce a critical vulnerability: Safety Sparsity, where safety capabilities concentrate in few experts, making them susceptible to adversarial bypassing. Meanwhile, conventional alignment methods uniformly adapt all parameters, ignoring their functional differences and inadvertently degrading performances. To address these challenges, we propose MESA (MoE Safety Alignment), a targeted alignment framework for MoE-based LLMs that strategically decentralizes safety responsibility to maximize coverage while minimizing interference with utility. Based on Optimal Transport (OT) theory, MESA operates through two mechanisms: (1) Expert Capacity Reallocation uses a transport cost matrix to distribute safety duties to the most cost-effective experts, and (2) Dynamic Routing Refinement constrains the router to precisely activate these decentralized modules. Experiments show that MESA achieves robust defensive performance against varied harmful benchmarks while preserving helpfulness. Code is available at https://github.com/lorraine021/MESA.",
+      "authors": [
+        "Yitong Sun",
+        "Yao Huang",
+        "Teng Li",
+        "Ranjie Duan",
+        "Yichi Zhang",
+        "Xingjun Ma",
+        "Hui Xue",
+        "Xingxing Wei"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-05-30T09:54:38+00:00",
+      "link": "https://arxiv.org/pdf/2606.00651v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "targeted safety alignment for MoE, relevant to safety alignment editing",
+      "llm_evidence_cn": "针对MoE的安全对齐方法，与安全对齐编辑相关",
+      "llm_evidence": "针对MoE的安全对齐方法，与安全对齐编辑相关",
+      "canonical_evidence": "针对MoE的安全对齐方法，与安全对齐编辑相关",
+      "llm_tldr_en": "MESA improves MoE safety alignment by decentralizing safety expertise, minimizing interference with utility, relevant to safety alignment editing.",
+      "llm_tldr_cn": "该论文提出MESA框架，针对混合专家（MoE）模型的安全稀疏性问题，通过去中心化安全责任来最大化安全覆盖同时最小化效用干扰。实验证明在保持模型能力的同时显著提升安全对齐，属于安全对齐编辑方法。",
+      "llm_tldr": "该论文提出MESA框架，针对混合专家（MoE）模型的安全稀疏性问题，通过去中心化安全责任来最大化安全覆盖同时最小化效用干扰。实验证明在保持模型能力的同时显著提升安全对齐，属于安全对齐编辑方法。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2605.29396v1",
+      "source": "arxiv",
+      "title": "Aligned but Fragile: Enhancing LLM Safety Robustness via Zeroth-Order Optimization",
+      "abstract": "Safety alignment for large language models (LLMs) aims to reduce harmful or unsafe behavior while preserving general utility. However, recent findings reveal that alignment effects can be fragile: lightweight post-alignment manipulations, such as parameter noise, activation noise, or quantization, can easily weaken the intended safety behavior. Prior efforts to improve robustness have primarily focused on data curation, modified alignment objectives, and safety-critical parameter identification, leaving the role of the optimizer itself largely unexplored.   In this paper, we are the first to study the robustness of safety alignment from the perspective of the base optimizer. This optimizer-centric view naturally points to zeroth-order optimization, which provides a robustness-oriented signal by evaluating safety alignment under perturbations. Based on this insight, we propose a hybrid framework that first performs standard first-order safety alignment and then applies zeroth-order refinement to improve robustness. Both theoretically and empirically, we show that only a few zeroth-order refinement steps can enhance robustness while preserving safety alignment. We further improve the efficiency of zeroth-order refinement by exploiting its inherent perturbation-based evaluations to estimate layer-wise robustness sensitivity, enabling the refinement process to concentrate updates on robustness-critical layers with modest training overhead.",
+      "authors": [
+        "Zhihao Liu",
+        "Yifan Wu",
+        "Jian Lou",
+        "Di Wang",
+        "Yuxi Zhou",
+        "Yuke Hu"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-05-28T05:46:38+00:00",
+      "link": "https://arxiv.org/pdf/2605.29396v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "improves safety alignment robustness via zeroth-order optimization",
+      "llm_evidence_cn": "通过零阶优化提升安全对齐鲁棒性",
+      "llm_evidence": "通过零阶优化提升安全对齐鲁棒性",
+      "canonical_evidence": "通过零阶优化提升安全对齐鲁棒性",
+      "llm_tldr_en": "Proposes zeroth-order optimization to enhance safety alignment robustness of LLMs against post-alignment manipulations, improving safety without reducing utility.",
+      "llm_tldr_cn": "大语言模型的安全对齐在面对参数噪声等后对齐操作时表现脆弱。本文首次从优化器角度出发，提出利用零阶优化来增强安全对齐的鲁棒性。实验表明该方法能有效防御多种扰动，同时保持模型原有能力。",
+      "llm_tldr": "大语言模型的安全对齐在面对参数噪声等后对齐操作时表现脆弱。本文首次从优化器角度出发，提出利用零阶优化来增强安全对齐的鲁棒性。实验表明该方法能有效防御多种扰动，同时保持模型原有能力。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.03131v1",
+      "source": "arxiv",
+      "title": "HARVE: Hacking-Aware Reward-Head Vector Editing for Robust Reward Models",
+      "abstract": "Reward models are central to large language model (LLM) alignment, but they remain vulnerable to reward hacking. To evaluate reward-model robustness, we introduce RewardHackBench containing 13 reward-hacking patterns covering real life high-stakes domains and general settings, and we find severe failures on specific subcategories across eight reward models. To mitigate these failures, we propose HARVE, a training-free reward-head editing method for scalar reward models. Instead of fine-tuning the reward model, HARVE identifies a multi-directional hacking subspace from residual stream directions associated with selected hacking subcategories, and removes the component of the reward-head vector aligned with that subspace. This directly reduces the reward head's sensitivity to hacking-related features using only a small set of contrastive gold-hacked examples, without gradient updates or fine-tuning. Comprehensive experiments across eight reward models indicates that \\model improves hacking robustness, outperforms fine-tuning baselines, and preserves reward-models' general capability. Further analyses suggest that reward hacking is better captured as a multidimensional residual-space structure than by isolated surface cues.",
+      "authors": [
+        "Shuang Liu",
+        "Yuxuan Bo",
+        "Qiuyang Zhao",
+        "Caiyue Huang",
+        "Xiaorong Chen",
+        "Yanguang Liu",
+        "Mengnan Du"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-06-02T04:18:08+00:00",
+      "link": "https://arxiv.org/pdf/2606.03131v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "reward-head vector editing for safety",
+      "llm_evidence_cn": "奖励头向量编辑以提升安全",
+      "llm_evidence": "奖励头向量编辑以提升安全",
+      "canonical_evidence": "奖励头向量编辑以提升安全",
+      "llm_tldr_en": "Proposes HARVE, a training-free reward-head editing method to remove hacking directions and improve reward model robustness.",
+      "llm_tldr_cn": "本文关注奖励模型的鲁棒性，针对奖励黑客攻击提出HARVE方法。该方法无需训练，通过识别并移除奖励头向量中对黑客子空间的对齐分量，直接降低奖励模型被攻破的概率。实验表明HARVE能有效减少奖励黑客行为，提升对齐安全性。",
+      "llm_tldr": "本文关注奖励模型的鲁棒性，针对奖励黑客攻击提出HARVE方法。该方法无需训练，通过识别并移除奖励头向量中对黑客子空间的对齐分量，直接降低奖励模型被攻破的概率。实验表明HARVE能有效减少奖励黑客行为，提升对齐安全性。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.02530v1",
+      "source": "arxiv",
+      "title": "SafeSteer: Localized On-Policy Distillation for Efficient Safety Alignment",
+      "abstract": "Aligning Large Language Models (LLMs) with human values often degrades their general capabilities, termed the alignment tax. Existing methods mitigate this by balancing dual objectives, which heavily rely on massive general-purpose data or auxiliary reward models.   In this paper, we argue that, because safety features are inherently sparse within the output distribution, alignment requires localized modifications rather than global trade-offs. To this end, we propose SafeSteer, which performs on-policy distillation confined to safety tokens. First, we construct a safety teacher via activation steering. Based on this teacher, we develop a safety token selection algorithm. Consequently, SafeSteer restricts the reverse KL penalty to these tokens during training to preserve general capabilities.   Experimental results across diverse models show that our SafeSteer achieves a superior trade-off between safety and general capability compared with existing methods, attaining strong safety performance on seven safety benchmarks with only minimal degradation on five general capability benchmarks. Notably, SafeSteer requires only 100 harmful samples without using any general-purpose data, less than 1% of what previous baselines used, considerably reducing alignment cost. More details are on our project page at https://anjingkun.github.io/SafeSteer.",
+      "authors": [
+        "Hao Li",
+        "Jingkun An",
+        "Zijun Song",
+        "Pengyu Zhu",
+        "Rui Li",
+        "Hao Wang",
+        "Wendi Feng",
+        "Yesheng Liu",
+        "Lijun Li",
+        "Jin-Ge Yao",
+        "Lei Sha"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-06-01T17:38:12+00:00",
+      "link": "https://arxiv.org/pdf/2606.02530v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "safety alignment via activation steering and distillation, related to editing",
+      "llm_evidence_cn": "通过激活转向和蒸馏进行安全对齐，与编辑相关",
+      "llm_evidence": "通过激活转向和蒸馏进行安全对齐，与编辑相关",
+      "canonical_evidence": "通过激活转向和蒸馏进行安全对齐，与编辑相关",
+      "llm_tldr_en": "SafeSteer performs on-policy distillation confined to safety tokens using a safety teacher via activation steering, reducing alignment tax.",
+      "llm_tldr_cn": "针对安全对齐带来的泛化能力下降（对齐税），本文提出SafeSteer，通过激活转向构建安全教师，并选择安全token进行在策略蒸馏，将对齐修改局限在安全token上，在保持安全性的同时减少对通用能力的损害。",
+      "llm_tldr": "针对安全对齐带来的泛化能力下降（对齐税），本文提出SafeSteer，通过激活转向构建安全教师，并选择安全token进行在策略蒸馏，将对齐修改局限在安全token上，在保持安全性的同时减少对通用能力的损害。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2605.29708v1",
+      "source": "arxiv",
+      "title": "Understanding Safety-Sensitive Expert Behavior in Mixture-of-Experts LLMs",
+      "abstract": "Mixture-of-Experts (MoE) LLMs rely on sparse, router-driven expert activation, yet how safety alignment interacts with routed expert specialization remains underexplored. A common intuition is that safety behavior may be controlled by routing harmful requests to distinct refusal-oriented experts. In this work, we provide empirical evidence for a different picture: routing patterns in aligned MoE LLMs are largely topic-driven, while safety behavior can be altered with little change to the model's intrinsic routing path.   Motivated by this observation, we present **RASET** (**R**outer-**A**gnostic **S**afety-critical **E**xpert **T**uning), a red-teaming framework that probes safety enforcement that is localized in a small subset of experts while preserving the model's intrinsic routing behavior. **RASET** identifies safety-critical experts via a contrastive routing-sensitivity criterion and applies parameter-efficient tuning only to the selected experts, minimizing semantic disruption relative to router-steering interventions. These results reveal a distinct MoE safety risk, highlighting the need for expert-aware alignment mechanisms.",
+      "authors": [
+        "Zhibo Zhang",
+        "Yuxi Li",
+        "Zhen Ouyang",
+        "Ling Shi",
+        "Kailong Wang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-05-28T10:09:51+00:00",
+      "link": "https://arxiv.org/pdf/2605.29708v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "investigates safety-related expert specialization in MoE LLMs and proposes RASET for tuning",
+      "llm_evidence_cn": "研究MoE大模型中的安全专家专门化，提出RASET调优框架",
+      "llm_evidence": "研究MoE大模型中的安全专家专门化，提出RASET调优框架",
+      "canonical_evidence": "研究MoE大模型中的安全专家专门化，提出RASET调优框架",
+      "llm_tldr_en": "Shows safety behavior in MoE LLMs is not tied to routing paths but localized in a subset of experts, and proposes RASET for red-teaming.",
+      "llm_tldr_cn": "普遍认为MoE模型通过路由将有害请求导向拒绝专家实现安全。本文发现路由主要基于主题，安全行为可通过调整一小部分专家改变而无需改变路由。基于此提出RASET红队框架，通过调整安全关键专家测试模型鲁棒性，揭示了现有对齐的脆弱性。",
+      "llm_tldr": "普遍认为MoE模型通过路由将有害请求导向拒绝专家实现安全。本文发现路由主要基于主题，安全行为可通过调整一小部分专家改变而无需改变路由。基于此提出RASET红队框架，通过调整安全关键专家测试模型鲁棒性，揭示了现有对齐的脆弱性。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.03486v1",
+      "source": "arxiv",
+      "title": "NeuroArmor: Safe-Variant-Guided Representation Consistency for Selective Re-Anchoring in Jailbreak Defense",
+      "abstract": "Large language models remain vulnerable to jailbreak attacks that hide harmful intent behind seemingly ordinary requests such as role-play, translation, encoding, adversarial suffixes, and multi-turn buildup. Existing defenses still struggle to handle these attacks without over-blocking benign but sensitive requests, partly because they often apply the same action to every prompt and therefore fail to balance safety and helpfulness. We propose NeuroArmor, a white-box runtime defense that uses prompt-specific safe variants as a local safety reference for deciding when intervention is needed and, once triggered, as safe targets for intervention. For each prompt, NeuroArmor builds K safe variants, compares the prompt state against this local safe reference in hidden-state space, and routes anomalies either to a refusal branch for malicious prompts or to a helpful recovery branch for borderline benign prompts. On Llama-3-8B-Instruct, NeuroArmor reduces malicious attack success rate (ASR) from 41.56% to 1.57% while lowering benign false positive rate (FPR) on the shared benign pool from 30.26% to 22.05%; matched baselines remain substantially weaker on this trade-off. External-judge and manual behavioral evaluations further show that the remaining non-blocked outputs are much less likely to be operationally harmful. Overall, NeuroArmor provides a more effective runtime strategy for jailbreak defense by combining prompt-specific consistency checking, routing, and selective intervention.",
+      "authors": [
+        "Zhongyang Lin",
+        "Ziran Zhao",
+        "Feifei Zhai",
+        "Pengyuan Liu"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-06-02T11:01:50+00:00",
+      "link": "https://arxiv.org/pdf/2606.03486v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "runtime defense that modifies model representations to prevent jailbreak attacks",
+      "llm_evidence_cn": "运行时防御，通过修改模型表示防止越狱攻击",
+      "llm_evidence": "运行时防御，通过修改模型表示防止越狱攻击",
+      "canonical_evidence": "运行时防御，通过修改模型表示防止越狱攻击",
+      "llm_tldr_en": "Proposes NeuroArmor, a white-box defense that uses safe variants to anchor representations for jailbreak prevention.",
+      "llm_tldr_cn": "现有越狱防御难以平衡安全与实用性，常过度拦截。本文提出NeuroArmor，为每个提示构建安全变体作为参考，通过表示一致性将模型输出锚定到安全方向，仅对必要提示触发干预。实验表明在多种越狱攻击下保持高安全性的同时大幅降低误报。",
+      "llm_tldr": "现有越狱防御难以平衡安全与实用性，常过度拦截。本文提出NeuroArmor，为每个提示构建安全变体作为参考，通过表示一致性将模型输出锚定到安全方向，仅对必要提示触发干预。实验表明在多种越狱攻击下保持高安全性的同时大幅降低误报。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "How can model editing prevent attacks on large language models",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

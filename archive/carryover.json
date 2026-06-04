@@ -1,6 +1,12 @@
 {
-  "generated_at": "2026-06-04T14:49:55.770414+00:00",
-  "updated_date": "20260526-20260604",
+  "generated_at": "2026-06-04T21:10:52.019967+00:00",
+  "updated_date": "20260604",
   "carryover_days": 9,
-  "tag_states": {}
+  "tag_states": {
+    "model-edit": {
+      "updated_date": "20260604",
+      "carryover_days": 9,
+      "items": []
+    }
+  }
 }

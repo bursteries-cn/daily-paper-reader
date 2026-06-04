@@ -1,0 +1,1504 @@
+Title: Revisiting Ripple Effects in Knowledge Editing through Pressure-Aware Joint Neighborhood Optimization
+
+URL Source: https://arxiv.org/pdf/2606.01610v1
+
+Published Time: Tue, 02 Jun 2026 02:32:15 GMT
+
+Number of Pages: 25
+
+Markdown Content:
+## Revisiting Ripple Effects in Knowledge Editing through Pressure-Aware Joint Neighborhood Optimization 
+
+Haoben Huang 1,2, †,‡, Shuxin Liu 1, †, Ou Wu 1, ∗, Di Gao 1
+
+> 1
+
+Hangzhou Institute for Advanced Study, University of Chinese Academy of Sciences, Hangzhou, China, 
+
+> 2
+
+College of Information Engineering, Zhejiang University of Technology, Hangzhou, China 
+
+liushuxin25@ucas.ac.cn , wuou@ucas.ac.cn 
+
+Abstract 
+
+Single-edit updates in large language models can trigger ripple effects across local knowl-edge neighborhoods: desirable propagation to related facts and unintended perturbation of pre-served ones. Existing methods address these two effects separately, without explicitly mod-eling their coupling. We challenge this sepa-ration through an analysis of ripple responses across typical baselines, identifying two cou-pled design pressures: editable-side coordina-tion and preserved-side leakage. We propose 
+
+Joint Neighborhood Optimization (JNO) , a new knowledge-editing framework to formal-ize and jointly address both pressures at the target-planning stage. JNO instantiates this principle through Pressure-Aware Coordina-tion (PAC) , which jointly optimizes neighbor-hood target representations under coupled con-straints, and a semantic pre-execution gate that rejects high-risk target plans before parameter execution. Experiments on RippleEdits show JNO improves propagation and preservation metrics by at least 7.0% while preserving cross-backbone editing stability. Code at: https: //anonymous.4open.science/r/JNO-F4CB .
+
+1 Introduction 
+
+Large Language Models (LLMs) encode factual knowledge in parameters (Yao et al., 2023; Petroni et al., 2019; Roberts et al., 2020; Rogers et al., 2020). As knowledge ages, full retraining is of-ten prohibitively expensive (Strubell et al., 2019; Kaplan et al., 2020; Hoffmann et al., 2022). Knowl-edge editing (KE) addresses this by revising spe-cific facts without costly retraining (De Cao et al., 2021; Mitchell et al., 2022). Locate-then-edit methods, such as ROME (Meng et al., 2022) and MEMIT (Meng et al., 2023), identify factual memories in feed-forward layers and modify local 
+
+> †
+
+Equal contributions. 
+
+> *
+
+Corresponding Author. 
+
+> ‡
+
+Work done at HIAS, UCAS. Edit Target        
+
+> Kevin Durant Phoenix Suns
+> Plays for
+> Kevin Durant Houston Rockets
+> Plays for
+> Edit
+> Kevin Durant Phoenix
+> Works in
+> Variable Neighbors
+> Preserved Neighbors
+> Houston Update
+> (Kevin Durant , Plays as , Forward )
+> (Kevin Durant , Comes from , USA )
+> Preserve
+> Kevin Durant
+> Works in
+
+Figure 1: Ripple effects in neighborhood-aware KE. 
+
+weights. However, real-world edits are rarely iso-lated: as illustrated in Fig. 1, modifying one fact may require updating logically related neighbors (e.g., team-dependent attributes) and preserving co-located but independent facts (e.g., subject’s nationality), inducing ripple effects over its local knowledge neighborhood (Cohen et al., 2024). These effects can be divided into positive ripple effects , where variable facts should propagate con-sistently with the edit, and negative ripple effects ,where preserved ones should remain unchanged but are unintentionally perturbed (Wang et al., 2025a). Existing methods address these effects through two largely separate lines. Propagation-oriented methods promote desirable propagation to related facts through knowledge graphs, memory associ-ation, or logical rules (Zhang et al., 2024; Park et al., 2025; Dong et al., 2025b), while preservation-oriented methods suppress harmful perturbation via neighboring-answer interference, same-subject preservation, knowledge conflict, and hidden-space ripple (Ma et al., 2024; Zhang et al., 2026; Li et al., 2024b; Wang et al., 2024b; Duan et al., 2025; Dong et al., 2025a). However, this separation leaves a coupling unmodeled: propagation and preservation are two responses of the parameter update, so their targets cannot always be planned independently. To this end, we revisit ripple effects through a quantitative analysis of how ripple responses de-pend on local neighborhood structure across edits. Our analysis identifies three factors and distills their patterns into two coupled pressures. Editable-1
+
+> arXiv:2606.01610v1 [cs.AI] 1 Jun 2026
+
+side coordination pressure arises because related neighbors should move consistently, yet overly cou-pled or semantically mismatched targets can be hard to realize jointly. Preserved-side leakage pres-sure captures that dense clustering or edit proximity makes modest target shifts corrupt preserved facts. To address these pressures, we propose Joint Neighborhood Optimization (JNO) , a pressure-aware editing framework that constructs structured neighborhoods and applies Pressure-Aware Co-ordination (PAC) to jointly optimize target rep-resentations under a pressure-aware objective, us-ing pairwise coordination weights to coordinate variable-neighbor representations and preserved-side leakage weights to control leakage over pre-served ones. For neighborhoods whose optimized targets fail a semantic-loss check, a pre-execution gate abstains rather than committing an unsafe edit. Our contributions are summarized as follows: • We revisit ripple effects through a quantitative analysis, revealing two pressures: editable-side coordination and preserved-side leakage. • We propose JNO, a pressure-aware editing frame-work that constructs structured neighborhoods and uses PAC to jointly optimize representations. We further introduce a semantic pre-execution gate abstaining from semantically failed edits. • We evaluate JNO on KE benchmarks across Qwen2.5-1.5B-Instruct, GPT-J, and LLaMA3. Results show that JNO improves propagation and preservation metrics on RippleEdits by at least 7.0% while preserving backbone stability. 
+
+2 Related Work 
+
+2.1 Neighborhood-aware Knowledge Editing 
+
+A challenge in KE is updating target facts while controlling their effects on neighborhoods. Locate-and-edit methods such as ROME and MEMIT infer targets for edited facts (Meng et al., 2022, 2023), but RippleEdits shows that target rewriting does not ensure consistent updates to related knowledge (Co-hen et al., 2024). This motivates neighborhood-aware editing: GLAME, MAKE, ChainEdit, and PropMEND promote propagation through knowl-edge graphs, internal memory, logical rules, or meta-trained updates (Zhang et al., 2024; Park et al., 2025; Dong et al., 2025b; Liu et al., 2025); PEAK, SSS, and DiKE mitigate perturbation to neighbor-ing answers, irrelevant neighborhood examples, or same-subject knowledge (Ma et al., 2024; Wang et al., 2024a; Zhang et al., 2026). JNO jointly in-              
+
+> Table 1: PRR and NRR results (%) on GPT-J (6B).
+> Metric ROME MEMIT PMET AlphaEdit GLAME Avg.
+> PRR 60.47 58.17 58.93 66.83 68.23 62.53 NRR 65.92 65.85 66.28 71.19 54.46 64.74
+
+fers executable value targets over neighborhoods containing both editable and preserved samples. 
+
+2.2 Selective Execution and Gating 
+
+Selective decision making has been studied through reject-option and selective-prediction frameworks, which abstain on uncertain inputs to trade coverage for lower risk (Chow, 1957; El-Yaniv and Wiener, 2010; Geifman and El-Yaniv, 2017, 2019). How-ever, such selectivity remains underexplored in KE. Most methods execute requested updates without checking semantic feasibility, even when edits are difficult or incompatible with preserved neighbor-hood knowledge. Since editing reliability depends on robust keys (Yan et al., 2025), facts differ in editability (Bi et al., 2025; Wang et al., 2025b), and aggressive edits may degrade broader abilities (Gu et al., 2024). JNO bridges this gap by rejecting high-risk parameter updates before execution. 
+
+3 Quantitative Analysis of Ripple Effects 
+
+Recent work links ripple effects to gradient similar-ity or representational entanglement (Qin et al., 2024; Baser et al., 2026), and a recent bench-mark measures how model interventions affect performance across semantic-distance neighbor-hoods (Rinberg et al., 2025). Yet they mainly char-acterize ripple responses, not why propagation and perturbation co-occur. We revisit ripple effects with a unified view: positive propagation and neg-ative perturbation are two responses of the same neighborhood structure to a parameter update. 
+
+3.1 Positive and Negative Ripples 
+
+For an edit request e = ( s, r, o → o∗) with subject 
+
+s, relation r, original object o, and target object 
+
+o∗, we construct a local neighborhood with two disjoint subsets: the variable set Cc contains facts 
+
+(si, r i, o i → o∗ 
+
+> i
+
+) to be updated consistently with e,while the preserved set Cs contains facts (sj , r j , o j )
+
+to remain unchanged. Given original and edited models f and f +, let χ+ 
+
+> i
+
+= 1{f +(si, r i) = o∗ 
+
+> i
+
+}
+
+and χ− 
+
+> j
+
+= 1{f (sj , r j ) = oj ∧ f +(sj , r j )̸ = oj }.We quantify desirable propagation by the Positive Ripple Rate (PRR) and harmful perturbation by the Negative Ripple Rate (NRR):       
+
+> PRR( e) = 1
+> |C c|
+> X
+> i∈C c
+> χ+
+> i,NRR( e) = 1
+> |C s|
+> X
+> j∈C s
+> χ−
+> j.(1)
+
+2Table 1 shows that across typical baselines on RippleEdits, average PRR remains around 62 .53% 
+
+while average NRR reaches 64 .74% (details in Ap-pendix A.1). Neither propagation nor preservation is reliable, which motivates examining which local structures co-vary with such failures. 
+
+3.2 Factors Behind Ripple Variation 
+
+To examine why ripple responses vary across ed-its, we group requests by three structural probes of the local neighborhood: key-space coupling (dk), measuring edited-layer proximity between the edit and its neighbors; pre-trained entanglement (η), measuring parameter-space co-movement from pre-training; and local neighborhood sensitivity (λ), measuring preserved-sample density around the edit. Since probes are measured on naturally occur-ring neighborhoods without randomized interven-tions, we interpret patterns as correlational; details appear in Appendix A.2 and A.3. Fig. 2 stratifies edits by probe and reports PRR and NRR for five editing methods. Three asym-metric patterns emerge. (i) PRR is non-monotonic in dk: moderate proximity tracks higher propaga-tion, whereas strong coupling can lower PRR when neighboring facts require different target updates. By contrast, NRR increases with dk, suggesting that key proximity also exposes preserved facts to the edit-induced update. (ii) η is positively associ-ated with PRR for most methods, indicating that pre-trained co-movement can support propagation to related facts, while its association with NRR is weaker. (iii) λ gives the clearest preservation sig-nal: denser preserved regions track higher NRR without a comparable PRR gain. These patterns reveal two separation modes: editable-side target incompatibility and preserved-side leakage. Notably, the same dk can help propa-gation yet harm preservation. 
+
+3.3 Design Pressures from Ripple Diagnostics 
+
+The above diagnostics motivate two pre-execution pressures on neighborhood target planning. They are not treated as causal laws, but as design pres-sures that a neighborhood-aware editor should ac-count for before a parameter update. 
+
+Editable-side coordination pressure. Variable facts should move consistently with the main edit, but their targets cannot be planned independently when keys are strongly coupled or pre-trained entanglement induces co-movement. The non-monotonic PRR over dk indicates that coupling LOW LOW MEDIUM MEDIUM HIGH HIGH NORMAL DENSE SPARSE      
+
+> 72
+> 70
+> 65
+> 60
+> 55
+> 72
+> 70
+> 65
+> 60
+> 55
+> 50
+> PRR (%) NRR  (%)
+> 𝐀 𝐀 𝐀 𝐀
+> AlphaEdit ROME MEMIT PMET GLAME
+
+Figure 2: PRR and NRR stratified by structural probes (dk, η, λ) across five editing methods on GPT-J (6B). 
+
+helps only when targets are compatible; otherwise it creates coordination tension. The association between η and PRR further indicates that such co-movement is not merely geometric, but also reflected in the model’s learned parameterization. This motivates the first design requirement: cou-pled editable targets should avoid excessive sepa-ration while preserving distinct target semantics. 
+
+Preserved-side leakage pressure. Preserved facts should remain unchanged, yet they become vulnerable when the editable update is close to dense or aligned preserved regions. The monotone NRR trend over λ indicates aggregate fragility of dense preserved neighborhoods, while the residual association between dk and NRR suggests direc-tional exposure to the edit-induced update. This motivates the second design requirement: editable residuals should be more tightly budgeted when their keys are more exposed to preserved keys. 
+
+These requirements connect diagnostics to PAC. On the editable side, dk diagnoses proximity over edited-layer keys ki; JNO instantiates this cou-pling as weights sij , yielding a target-separation penalty. The diagnostic probe uses cosine proxim-ity for key-norm-invariant stratification, whereas PAC uses an inverse squared-distance kernel for weighting. For unit-normalized keys, ∥˜ki − ˜kj ∥22 =2(1 − cos( ki, kj )) , where ˜ki = ki/∥ki∥2. Thus, 
+
+dk and sij are diagnostic and optimization views of the same coupling pressure. The entanglement probe η validates co-movement but is not sepa-rately regularized because it depends on the layer, objective, and editor. On the preserved side, λ diag-noses neighborhood-level fragility, while residual budgeting requires per-sample exposure. JNO uses the upper-tail alignment score di to capture the pre-served direction most exposed to spillover. Thus, 
+
+sij and di are pressure-specific actionable surro-gates derived from diagnostics, not replacements. 3𝑒 = 𝑠 , 𝑟 , 𝑜 → 𝑜 ∗  
+
+> 𝒞 "
+> 𝒞 #
+> Variable Neighbors Set
+> Preserved Neighbors Set
+
+𝑒 
+
+Neighborhood Construction         
+
+> 𝑵 𝒇𝒂𝒊𝒍
+> 𝝉 𝒔𝒆𝒎
+> ℓ𝒊
+> 𝒔𝒆𝒎
+> 𝒗 𝒊 𝟎
+> 𝒎
+> Optimized
+> 𝒗 𝒊 𝟎
+> 𝒎
+> Gating Fail
+> Yes No
+> 𝑵 𝒇𝒂𝒊𝒍 >𝑩 𝒔𝒆𝒎
+> Gating Pass
+> Reject Update! Execute Update !
+
+Pre -Execution Gating Reliable Execution 
+
+> Updated parameter
+
+## + ∆∗            
+
+> 𝑾 !=𝑾 +∆∗
+> ∆∗=𝒂𝒓𝒈𝒎𝒊𝒏 …𝓛 𝑷𝑨𝑪 =𝓛 𝒔𝒆𝒎 +𝜶 𝓛 𝒑𝒓𝒐𝒙 +𝜷 𝓛 𝒑𝒂𝒊𝒓
+
+Pressure -Aware Coordination                                 
+
+> !𝒔 𝒊𝒋 𝒗 𝒊 −𝒗 𝒋
+> 𝟐
+> 𝒊 $𝒋
+> !𝟏 +𝒅 𝒊
+> 𝒊
+> 𝒗 𝒊 −𝑾 𝒌 𝒊 𝟐
+> exposure score
+> 𝒅 𝒊 =𝐦𝐚𝐱
+> 𝒏
+> 𝒌 𝒊
+> 𝑻 𝒌 𝒏
+> 𝒌 𝒊 𝟐 𝒌 𝒏 𝟐
+> Preserved
+> samples 𝒏 ∈𝓒 𝒔
+> 𝒌 𝒊
+> 𝒌 𝟏 𝒌 𝟐 𝒌 𝒏 …
+> Coordination Weight
+> 𝒔 𝒊𝒋 =𝟏
+> 𝒌 𝒊 −𝒌 𝒋 𝟐
+> 𝟐 +𝝐 𝒅𝒊𝒔𝒕
+> 𝒌 𝟏 𝒌 𝟐 𝒌 𝒎
+> 𝒌 𝟑
+> Editable samples
+> 𝒊 ,𝒋 ∈𝓥 =𝒆 ∪𝓒 𝒄
+
+Figure 3: Overall framework of Joint Neighborhood Optimization (JNO). 
+
+4 Methodology 
+
+Guided by these two coupled pressures, JNO plans neighborhood targets by balancing editable-side compatibility and preserved-side exposure. As shown in Fig. 3, JNO proceeds in four stages: 1. Structured Neighborhood Construction : assem-ble the local neighborhood C = {e} ∪ C c ∪ C s.2. Pressure-Aware Coordination (PAC) : jointly op-timize target representations under a pressure-aware objective. 3. Semantic Pre-execution Gating : reject high-risk parametric updates before parameter execution. 4. Reliable Execution : instantiate gate-passed up-dates through a preservation-aware local update. This separates neighborhood-level target plan-ning from parameter execution, in contrast to edit-ing pipelines that commit a weight update directly after optimizing a single target fact. 
+
+4.1 Structured Neighborhood Construction 
+
+For each edit request e, JNO constructs C =
+
+{e} ∪ C c ∪ C s, where Cc contains editable consis-tency samples expected to co-update and Cs con-tains preserved specificity samples to remain un-changed. The editable subset is V = {e} ∪ C c with 
+
+|V| = m + 1 and e indexed as 0. Each neighbor-hood pairs the target edit e with variable neigh-bors generated through logical-rule-guided chained reasoning and preserved neighbors extracted from locality-related but non-target relations. Rule min-ing and prompting are detailed in Appendix C. 
+
+4.2 Local Formalization of the Two Pressures 
+
+Under the local linear view, we derive two de-sign regularizers for neighborhood target planning: editable-key compatibility and preserved-key resid-ual budgeting. As mapped in Sec. 3.3, editable-side coordination is implemented through pairwise weights sij , which instantiate key-space coupling via a distance-kernel form, while preserved-side leakage uses an exposure score di that captures the maximum alignment with preserved keys. For each editable sample i ∈ V, let ki, vi,and ri = vi − W k i denote its edited-layer key, planned target, and induced residual under the current weight W . Stacking them gives KV =[k0, . . . , km] and VV = [ v0, . . . , vm]. For editable-side coupling, we define the coordination weight 
+
+sij = sji = 1
+
+∥ki − kj ∥22 + ϵdist 
+
+, (2) and let Ls be the unnormalized graph Laplacian induced by sij for i̸ = j with sii = 0 , so Ls ⪰ 0.
+
+Theorem 1 (Target-space compatibility under a shared local map) . Suppose there exists a local update ∆ such that (W + ∆)KV = VV . Then 
+
+tr  VV LsV T
+
+> V
+
+ ≤ ∥ W + ∆∥2op tr  KV LsKT
+
+> V
+
+. (3) 
+
+Theorem 1 formalizes editable-side coordination pressure: large target separation over tightly cou-pled editable keys requires a larger shared local map. PAC relaxes this into the differentiable pair-wise term Lpair = tr( VV LsV T
+
+V ), penalizing such separation over tightly coupled keys. This pairwise penalty is a soft executability regularizer rather than a hard clustering constraint. Balanced by se-mantic likelihood, it coordinates coupled samples only when their target semantics remain satisfiable. Appendix B.1 proves the theorem and gives Corol-lary 1 relating coupled residual variation to ∥∆∥op .For preserved-side exposure, fix an editable i ∈V and a preserved one n ∈ C s with key kn. Split 
+
+kn = ani ki + eni , eni ⊥ ki, a ni = kTn ki
+
+∥ki∥22
+
+.
+
+Proposition 1 (Preserved-side exposure and resid-ual budget) . Suppose a local update ∆ satisfies 
+
+∆ki = ri, ∥∆∥op ≤ B, and ∥∆kn∥2 ≤ τn. For any n with ani ̸ = 0 , ∥ri∥2 ≤ τn+B∥eni ∥2
+
+|ani | . Define the preserved-side exposure score 
+
+di = max 
+
+> n∈C s
+
+|kTi kn|∥ki∥2 ∥kn∥2
+
+. (4) 
+
+4Proposition 1 formalizes preserved-side leak-age: stronger editable-key alignment with a pre-served direction tightens the admissible residual budget under comparable spillover tolerances and orthogonal terms, motivating a monotone exposure-weighted residual penalty. PAC adopts the stable form (1+ di)∥ri∥22, whose constant term imposes a base proximal constraint while di strengthens con-trol for samples more exposed to preserved keys. Appendix B.2 proves it and gives Corollary 2, a normalized-key monotonic exposure bound. 
+
+4.3 Pressure-Aware Coordination 
+
+For each editable sample i, PAC optimizes a target representation vi, where P(o∗ 
+
+> i
+
+| vi) is the target-token probability obtained by replacing the hidden representation at the last edited layer and edited po-sition with vi. Guided by Theorem 1 and Proposi-tion 1, PAC minimizes the pressure-aware objective                         
+
+> LPAC =Lsem +αLprox +βLpair
+> =Xmi=0 −log P(o∗
+> i|vi)+αXmi=0 (1 + di)∥vi−W k i∥22
+> +βX
+> 0≤i<j ≤msij ∥vi−vj∥22.
+> (5)
+
+The semantic term Lsem encourages each ed-itable sample to induce its target object. The exposure-weighted residual term Lprox uses the preserved-side exposure score di to control ri =
+
+vi − W k i, assigning larger penalties to samples more exposed to preserved keys. The pairwise term 
+
+Lpair uses the editable-side coordination weights 
+
+sij , equaling tr( VV LsV ⊤V ) to penalize target sepa-ration over tightly coupled editable keys. 
+
+4.4 Semantic Pre-execution Gating 
+
+PAC regularizes target geometry, but structural compatibility alone does not guarantee that the op-timized representations still induce the intended target tokens. JNO therefore adds a semantic pre-execution gate as a conservative safety check:        
+
+> ℓsem
+> i=−log P(o∗
+> i|ˆvi),(6)
+
+where i = 0 indexes the edit request and i ∈{1, . . . , m } the variable neighbors. We count se-mantic failures as       
+
+> Nfail =Xmi=1 1[ℓsem
+> i> τ sem ],(7)
+
+where τsem is the semantic-loss threshold and 
+
+Bsem ≤ m the failure budget. If ℓsem 0 > τ sem or 
+
+Nfail > B sem , JNO deems the optimized target rep-resentations high-risk and abstains from parameter execution; otherwise it proceeds to execution. Gate-failed requests are discussed in Appendix D.5. 
+
+Algorithm 1 JNO                                                   
+
+> Require: e, layer weight W,τsem ,Bsem
+> Ensure: Updated W′or HIGH_RISK_PARAMETRIC
+> 1: Construct neighborhood C={e} ∪ C c∪ C s
+> 2: Extract editable and preserved keys {ki}mi=0 ,{kn}n∈C s
+> 3: Compute {di}by Eq. (4) and {sij }by Eq. (2) 4: Obtain optimized targets {ˆvi}mi=0 by minimizing Eq. (5) 5: Compute ℓsem 0and semantic failures Nfail by Eqs. (6)–(7) 6: if ℓsem 0> τ sem or Nfail > B sem then
+> 7: return HIGH_RISK_PARAMETRIC
+> 8: end if
+> 9: Form residual matrix ˆRV
+> 10: Compute ∆∗by Eq. (8) 11: return W′=W+∆∗
+
+4.5 Reliable Execution 
+
+After PAC and semantic gating, let K0 stack pre-served keys, P be its orthogonal null-space pro-jector, and Kp denote previous keys for stabiliz-ing sequential editing. Any executed perturbation 
+
+∆ = e∆P satisfies ∆K0 = 0, preserving the protected associations. Given the accepted PAC residual matrix ˆRV = [ˆ vi − W k i]mi=0 , JNO solves            
+
+> arg min f∆∥e∆P K V−ˆRV∥2+∥e∆P K p∥2+∥e∆P∥2.(8)
+
+Solving Eq. 8 yields the update ∆∗ = e∆∗P , and the final weight is W ′ = W + ∆∗.Algorithm 1 summarizes JNO. Given an edit re-quest, JNO constructs editable–preserved neighbor-hoods, computes PAC coordination and exposure weights, optimizes neighborhood target representa-tions, filters high-risk plans with the pre-execution gate, and executes gate-passed updates. Thus, JNO separates what should be changed from how it is realized in parameters, handling neighborhood con-flicts before an irreversible model update. 
+
+5 Experiments 
+
+We evaluate JNO aiming to answer the following questions. Q1: Does JNO improve positive ripple propagation while suppressing negative ripple ef-fects? Q2: Does JNO remain effective on widely used KE benchmarks? Q3: Which components of JNO contribute to the gains? Q4: Does the pre-execution gate provide a controllable execution trade-off? Q5: Are the constructed editable and preserved neighborhoods reliable? 
+
+5.1 Experimental Setup Datasets & Evaluation Metrics. We utilize three benchmarks. For RippleEdits (Cohen et al., 2024), we follow ChainEdit (Dong et al., 2025b) and report Reliability (Rel.), LG, RE, SA, RS, and FF. Rel. assesses KE success (Wang et al., 2024c); 5Table 2: Comparison of JNO with existing methods on RippleEdits. All metrics are computed over full requested-edit set, including gate-failed requests. The best results are highlighted in red, while the second-best results are underlined. Improve reports the relative change of JNO compared with the strongest baseline in each metric. 
+
+Model Method Rel. ↑ LG ↑ RE ↑ SA ↑ RS ↑ FF ↑
+
+> Qwen2.5-1.5B-Instruct
+
+ROME 97 .4±0.16 51 .4±0.24 28 .4±0.22 67 .7±0.33 39 .0±0.31 32 .2±0.36 
+
+MEMIT 98 .9±0.12 54 .8±0.21 32 .6±0.26 53 .2±0.29 39 .7±0.34 31 .4±0.30 
+
+PMET 93 .4±0.20 53 .6±0.27 29 .2±0.24 60 .1±0.36 36 .3±0.37 34 .3±0.41 
+
+AlphaEdit 98 .9±0.10 60 .4±0.26 43 .8±0.31 62 .4±0.34 31 .8±0.38 28 .7±0.35 
+
+AlphaEdit BLUE 98 .3±0.15 59 .7±0.28 47 .2±0.33 65 .8±0.37 43 .6±0.41 43 .1±0.44 
+
+AlphaEdit Chain 98 .8±0.13 61 .2±0.30 46 .8±0.29 63 .3±0.35 46 .1±0.43 45 .8±0.46 
+
+GLAME 98 .7±0.17 60 .1±0.34 46 .5±0.36 64 .2±0.40 47 .3±0.47 46 .9±0.49 
+
+SAKE 98 .5±0.14 59 .3±0.32 47 .3±0.35 67 .3±0.39 49 .2±0.45 50 .2±0.48 
+
+SUIT 98 .6±0.18 60 .2±0.31 47 .1±0.37 63 .7±0.42 50 .4±0.46 44 .3±0.50 
+
+JNO 95 .9±0.24 65 .6±0.36 56 .4±0.39 74 .1±0.43 58 .8±0.50 61 .8±0.52 
+
+Improve −3.1% 7.2% 19 .2% 9.5% 16 .7% 23 .1% 
+
+> GPT-J (6B)
+
+ROME 96 .8±0.18 52 .6±0.25 32 .8±0.28 62 .9±0.34 37 .5±0.35 34 .2±0.39 
+
+MEMIT 95 .1±0.21 56 .5±0.29 35 .7±0.30 57 .1±0.32 41 .6±0.38 35 .6±0.42 
+
+PMET 95 .8±0.19 56 .2±0.27 35 .4±0.31 59 .6±0.35 41 .3±0.40 38 .2±0.44 
+
+AlphaEdit 99 .1±0.09 60 .4±0.26 43 .5±0.33 62 .5±0.38 43 .6±0.42 33 .2±0.36 
+
+AlphaEdit BLUE 98 .3±0.16 58 .3±0.30 45 .8±0.35 65 .1±0.39 48 .8±0.46 38 .9±0.43 
+
+AlphaEdit Chain 98 .6±0.14 60 .9±0.28 48 .2±0.34 66 .7±0.41 52 .4±0.48 43 .8±0.45 
+
+GLAME 98 .4±0.17 62 .4±0.33 47 .3±0.38 67 .8±0.44 52 .6±0.49 43 .5±0.47 
+
+SAKE 99 .2±0.08 60 .7±0.31 47 .1±0.36 68 .4±0.40 56 .2±0.50 45 .9±0.46 
+
+SUIT 98 .7±0.15 60 .5±0.34 47 .8±0.37 67 .3±0.42 54 .1±0.47 44 .2±0.49 
+
+JNO 96 .3±0.23 67 .3±0.38 55 .3±0.41 76 .5±0.45 65 .6±0.53 60 .1±0.51 
+
+Improve −3.0% 7.9% 14 .7% 11 .8% 16 .7% 30 .9% 
+
+> LLaMA3 (8B)
+
+ROME 96 .3±0.19 53 .8±0.28 37 .3±0.29 58 .2±0.36 36 .1±0.37 36 .1±0.40 
+
+MEMIT 95 .2±0.22 58 .3±0.31 38 .9±0.32 61 .1±0.34 43 .5±0.41 37 .6±0.43 
+
+PMET 94 .5±0.23 59 .2±0.30 40 .9±0.34 59 .3±0.37 47 .1±0.44 42 .8±0.47 
+
+AlphaEdit 99 .2±0.09 60 .5±0.27 43 .2±0.32 62 .6±0.36 55 .7±0.45 41 .4±0.42 
+
+AlphaEdit BLUE 98 .4±0.17 56 .9±0.29 44 .6±0.35 64 .4±0.40 54 .3±0.43 34 .5±0.41 
+
+AlphaEdit Chain 98 .9±0.13 62 .7±0.33 47 .5±0.36 67 .1±0.42 55 .6±0.47 47 .3±0.50 
+
+GLAME 98 .7±0.16 63 .1±0.35 48 .6±0.39 65 .3±0.43 56 .3±0.48 48 .4±0.52 
+
+SAKE 99 .1±0.10 62 .5±0.32 49 .3±0.37 66 .4±0.41 58 .7±0.51 49 .7±0.49 
+
+SUIT 98 .7±0.15 61 .6±0.34 48 .4±0.40 68 .5±0.44 58 .2±0.50 47 .6±0.48 
+
+JNO 96 .2±0.25 72 .1±0.40 58 .2±0.43 73 .3±0.46 72 .4±0.54 63 .8±0.53 
+
+Improve −3.1% 14 .3% 18 .1% 7.0% 23 .3% 28 .4% 
+
+LG, RE, and SA measure positive ripple propa-gation, while RS and FF measure negative-ripple prevention. On ZsRE (Levy et al., 2017) and Coun-terFact (Meng et al., 2022), we report Efficacy, Gen-eralization, Specificity, Fluency, and Consistency. Metrics are computed over the full requested-edit set, including gate-failed requests. For JNO, execu-tion coverage denotes the semantic-gate pass rate over requested edits (reported in Appendix D.6). 
+
+Baselines & Implementation Details. We com-pare JNO with KE methods: ROME (Meng et al., 2022), MEMIT (Meng et al., 2023), PMET (Li et al., 2024a), AlphaEdit (Fang et al., 2025), BLUE (Li et al., 2025), ChainEdit (Dong et al., 2025b), GLAME (Zhang et al., 2024), SAKE (Scialanga et al., 2025), and SUIT (Park et al., 2026), and eval-uate three architectures of varying scales, including Qwen2.5-1.5B-Instruct (Team, 2024; Yang et al., 2024), GPT-J (6B) (Wang and Komatsuzaki, 2021), and LLaMA3 (8B) (Meta, 2024). For JNO, we set 
+
+α = 1 .2, β = 0 .9, τsem = 1 .4, and Bsem = 1 
+
+unless otherwise noted. All methods use the same constructed-neighborhood protocol: each edit re-quest is augmented with variable and preserved neighborhood samples in Sec. 4.1, and baselines edit the resulting neighborhood facts as related batches following their original procedures. The results are averaged over three random seeds, and experiments use one NVIDIA L40 GPU (48 GB). 
+
+5.2 Main Results on RippleEdits (Q1) 
+
+To assess knowledge update and retention, we eval-uate methods on RippleEdits-POPULAR under se-quential editing, with an edit-request batch size of 10. As shown in Table 2, JNO improves ripple-aware metrics. On LLaMA3, JNO improves RE by 18.1% over SAKE and SA by 7.0% over SUIT, indi-cating better propagation to editable neighbors. On GPT-J, it improves RS and FF by 16.7% and 30.9% over SAKE, reflecting stronger prevention of neg-ative ripple effects on preserved ones. Compared with the strongest Rel. baseline, JNO incurs a 3.0% relative Rel. drop across backbones while maintain-ing Rel. ≥ 95 .9% . This reflects a reliability–ripple trade-off: JNO trades a small amount of single-edit reliability for better neighborhood-level propaga-tion and preservation. Appendix E.6 shows that JNO’s target-planning overhead remains moderate. 
+
+5.3 Results on CounterFact and ZsRE (Q2) 
+
+To examine whether JNO remains effective on two widely used benchmarks, we evaluate all methods by sampling 2,000 edit requests and augmenting them with variable and preserved neighborhood 6Table 3: Comparison of JNO with methods on CounterFact and ZsRE. All metrics are computed over full requested-edit set, including gate-failed requests. The best results are highlighted in red, while the second-best results are underlined. Improve reports the relative change of JNO compared with the strongest baseline in each metric. 
+
+Model Method CounterFact ZsRE Eff. ↑ Gen. ↑ Spe. ↑ Flu. ↑ Consis. ↑ Eff. ↑ Gen. ↑ Spe. ↑
+
+> Qwen2.5-1.5B-Instruct
+
+ROME 52 .86 ±0.42 50 .35 ±0.23 51 .21 ±0.63 327 .50 ±0.21 3.05 ±0.08 28 .41 ±0.12 27 .33 ±0.23 6.01 ±0.11 
+
+MEMIT 87 .47 ±0.12 83 .11 ±0.41 58 .24 ±0.31 505 .01 ±0.76 23 .27 ±0.16 65 .44 ±0.26 63 .90 ±0.13 24 .77 ±0.17 
+
+PMET 88 .36 ±0.24 82 .58 ±0.32 59 .12 ±0.28 511 .42 ±0.63 24 .06 ±0.15 67 .28 ±0.25 65 .12 ±0.18 25 .36 ±0.22 
+
+AlphaEdit 98 .13 ±0.21 96 .29 ±0.72 70 .54 ±0.34 613 .35 ±0.35 34 .38 ±0.15 97 .78 ±0.35 92 .94 ±0.13 28 .36 ±0.13 
+
+AlphaEdit BLUE 98 .35 ±0.36 97 .13 ±0.51 73 .24 ±0.23 621 .48 ±0.32 36 .64 ±0.14 98 .60 ±0.21 93 .75 ±0.26 30 .54 ±0.31 
+
+AlphaEdit Chain 98 .27 ±0.18 96 .75 ±0.37 73 .05 ±0.29 617 .62 ±0.44 37 .10 ±0.19 98 .78 ±0.19 93 .83 ±0.22 30 .06 ±0.27 
+
+GLAME 98 .18 ±0.11 97 .16 ±0.31 72 .85 ±0.27 615 .23 ±0.31 36 .91 ±0.13 98 .92 ±0.24 94 .13 ±0.28 29 .72 ±0.36 
+
+SAKE 98 .47 ±0.26 97 .25 ±0.18 73 .60 ±0.24 622 .09 ±0.38 37 .05 ±0.10 98 .85 ±0.22 94 .57 ±0.24 30 .41 ±0.31 
+
+SUIT 98 .38 ±0.15 97 .19 ±0.21 73 .51 ±0.31 620 .42 ±0.34 38 .12 ±0.15 97 .94 ±0.15 94 .26 ±0.21 30 .13 ±0.23 
+
+JNO 97 .63 ±0.18 97 .68 ±0.34 75 .52 ±0.35 624 .31 ±0.41 41 .26 ±0.12 97 .93 ±0.24 96 .19 ±0.31 32 .46 ±0.48 
+
+Improve −0.9% 0.4% 2.6% 0.4% 8.2% −1.0% 1.7% 6.3% 
+
+> GPT-J (6B)
+
+ROME 56 .68 ±0.41 52 .42 ±0.27 51 .77 ±0.12 576 .78 ±0.12 3.06 ±0.04 54 .88 ±0.32 51 .82 ±0.12 8.45 ±0.11 
+
+MEMIT 97 .84 ±0.13 94 .86 ±0.46 61 .92 ±0.41 538 .75 ±0.48 32 .74 ±0.12 93 .73 ±0.16 89 .13 ±0.23 28 .59 ±0.37 
+
+PMET 98 .62 ±0.18 94 .21 ±0.38 63 .85 ±0.36 547 .64 ±0.44 34 .36 ±0.15 96 .18 ±0.18 91 .36 ±0.25 28 .02 ±0.34 
+
+AlphaEdit 99 .23 ±0.28 95 .94 ±0.26 73 .63 ±0.23 611 .85 ±0.27 40 .63 ±0.24 99 .17 ±0.14 95 .61 ±0.12 27 .52 ±0.21 
+
+AlphaEdit BLUE 99 .62 ±0.12 96 .42 ±0.18 75 .58 ±0.55 618 .29 ±0.32 42 .21 ±0.32 99 .73 ±0.13 96 .28 ±0.29 28 .36 ±0.34 
+
+AlphaEdit Chain 99 .53 ±0.16 96 .34 ±0.22 74 .45 ±0.38 616 .72 ±0.35 42 .09 ±0.27 99 .58 ±0.15 96 .05 ±0.24 28 .42 ±0.29 
+
+GLAME 99 .15 ±0.15 95 .78 ±0.26 74 .92 ±0.43 614 .10 ±0.38 41 .45 ±0.33 99 .64 ±0.13 95 .85 ±0.28 27 .96 ±0.40 
+
+SAKE 99 .71 ±0.17 96 .47 ±0.28 76 .29 ±0.41 620 .25 ±0.42 42 .12 ±0.38 99 .75 ±0.12 96 .31 ±0.30 28 .77 ±0.44 
+
+SUIT 99 .21 ±0.13 95 .25 ±0.21 75 .98 ±0.32 617 .32 ±0.26 42 .34 ±0.16 99 .72 ±0.15 95 .13 ±0.28 26 .36 ±0.35 
+
+JNO 98 .24 ±0.21 97 .72 ±0.34 78 .03 ±0.37 623 .14 ±0.51 43 .85 ±0.62 98 .31 ±0.27 97 .62 ±0.31 31 .24 ±0.53 
+
+Improve −1.5% 1.3% 2.3% 0.5% 3.6% −1.5% 1.4% 8.6% 
+
+> LLaMA3 (8B)
+
+ROME 61 .54 ±0.25 57 .62 ±0.52 45 .42 ±0.38 425 .86 ±0.42 3.02 ±0.04 1.86 ±0.03 1.76 ±0.02 0.64 ±0.09 
+
+MEMIT 62 .60 ±0.41 61 .45 ±0.12 47 .41 ±0.42 421 .66 ±0.33 6.16 ±0.11 32 .88 ±0.16 28 .85 ±0.24 17 .21 ±0.18 
+
+PMET 71 .82 ±0.38 66 .26 ±0.18 51 .12 ±0.39 458 .74 ±0.36 7.12 ±0.12 36 .46 ±0.19 31 .69 ±0.22 20 .16 ±0.20 
+
+AlphaEdit 97 .78 ±0.13 93 .63 ±0.14 65 .57 ±0.29 615 .84 ±0.14 31 .67 ±0.10 94 .04 ±0.13 90 .24 ±0.13 31 .06 ±0.23 
+
+AlphaEdit BLUE 98 .34 ±0.02 95 .31 ±0.42 74 .98 ±0.48 625 .62 ±0.29 33 .19 ±0.21 98 .11 ±0.31 92 .91 ±0.25 32 .95 ±0.41 
+
+AlphaEdit Chain 98 .27 ±0.10 95 .48 ±0.36 73 .15 ±0.44 623 .86 ±0.31 32 .36 ±0.18 97 .48 ±0.26 92 .18 ±0.28 32 .72 ±0.39 
+
+GLAME 97 .81 ±0.12 95 .82 ±0.49 74 .30 ±0.36 621 .05 ±0.27 33 .48 ±0.23 97 .23 ±0.32 91 .72 ±0.30 31 .52 ±0.50 
+
+SAKE 98 .65 ±0.15 96 .54 ±0.52 74 .68 ±0.31 626 .42 ±0.21 34 .13 ±0.25 97 .89 ±0.34 93 .12 ±0.32 33 .15 ±0.58 
+
+SUIT 98 .79 ±0.21 94 .14 ±0.17 73 .94 ±0.25 622 .81 ±0.31 35 .02 ±0.12 97 .62 ±0.25 91 .93 ±0.26 33 .84 ±0.31 
+
+JNO 97 .93 ±0.24 97 .73 ±0.61 76 .62 ±0.14 628 .94 ±0.15 36 .21 ±0.26 97 .12 ±0.31 94 .81 ±0.34 35 .63 ±0.71 
+
+Improve −0.9% 1.2% 2.2% 0.4% 3.4% −1.0% 1.8% 5.3% 
+
+samples. As shown in Table 3, JNO shows con-sistent gains across datasets for three models. On CounterFact with Qwen2.5-1.5B-Instruct, JNO im-proves Specificity by 2.6% over SAKE and Con-sistency by 8.2% over SUIT, suggesting better re-tention of unrelated neighborhood knowledge and more stable generations. On ZsRE with GPT-J, JNO improves Specificity by 8.6% over SAKE, in-dicating stronger neighborhood preservation. Com-pared with the strongest Eff. baseline, JNO incurs modest Eff. drops, at most 1.5%. Results show that JNO preserves strong edit efficacy while improving generalization, specificity, and generation stability. 
+
+5.4 Ablation Studies (Q3) 
+
+To assess JNO components, we conduct ablations on LLaMA3 with RippleEdits: w/o Lprox removes the exposure-weighted residual penalty; w/o Lpair 
+
+removes the pairwise coordination penalty; and w/o gate removes semantic pre-execution filtering. As shown in Table 4, removing Lprox mainly hurts preservation-oriented metrics, verifying its role in limiting preserved-side leakage. Removing Lpair 
+
+mainly degrades positive-ripple metrics, showing that pairwise coordination supports coupled ed-
+
+Table 4: Ablation results on RippleEdits in JNO. 
+
+Method Rel. ↑ LG ↑ RE ↑ SA ↑ RS ↑ FF ↑
+
+JNO 96 .2 72 .1 58 .2 73 .3 72 .4 63 .8
+
+JNO w/o Lprox 94 .8 70 .8 56 .3 71 .5 56 .1 44 .6
+
+JNO w/o Lpair 95 .0 61 .2 47 .4 62 .7 68 .3 59 .1
+
+JNO w/o gate 98 .9 66 .4 52 .5 67 .7 66 .5 57 .2
+
+itable neighbors. Removing the gate raises Rel. but lowers ripple-aware scores, indicating that uncon-ditional execution accepts more edits but commits semantically unreliable plans. Overall, three com-ponents play complementary roles in balancing edit acceptance, propagation and prevention. 
+
+5.5 Analysis of Semantic Pre-execution Gating (Q4) Sensitivity Analysis of Semantic Pre-execution Gating. We examine whether the semantic gate provides a controllable execution trade-off. Fig. 4 sweeps the failure budget Bsem and semantic-loss threshold τsem on RippleEdits with LLaMA3. For Bsem , strict budgets over-reject neighborhood plans, whereas overly loose ones admit unreliable plans. The best trade-off appears at Bsem = 1 ,where propagation- and preservation-oriented met-rics are jointly strong. Varying τsem shows a similar 7100                       
+
+> 80
+> 60
+> 40
+> 20
+> 0
+> 72
+> 71
+> 70
+> 69
+> 68
+> 67
+> Avg. (%)
+> RippleEdits Metrics (%)
+> 01*231.0 1.2 1.4 *1.6 1.8
+> 𝐀 𝐀 𝐀 𝐀 𝐀 𝐀 𝐀 𝐀
+> Rel. LG RE SA RS FF Avg. Rel. LG RE SA RS FF Avg.
+
+Figure 4: Sensitivity analysis of semantic pre-execution gating. The Avg. is the harmonic mean of the metrics. Table 5: Coverage-matched selective execution on Rip-pleEdits. * indicates +gate (semantic pre-execution).                                                  
+
+> Method Cov. Rel. ↑LG ↑RE ↑SA ↑RS ↑FF ↑
+> AlphaEdit 100.0 99.2 60.5 43.2 62.6 55.7 41.4 AlphaEdit * 96.3 95.2 63.4 47.0 65.8 59.8 47.0 SAKE 100.0 99.1 62.5 49.3 66.4 58.7 49.7 SAKE * 96.3 95.7 65.5 53.6 69.8 63.0 53.5 JNO w/o gate 100.0 98.9 66.4 52.5 67.7 66.5 57.2 JNO 96.3 96.2 72.1 58.2 73.3 72.4 63.8
+
+pattern: relaxing it from 1.0 to 1.4 improves Avg., while further relaxation weakens the propagation– preservation balance. Thus, the default Bsem = 1 
+
+and τsem = 1 .4 avoids both over-rejection and over-execution. These trends indicate that semantic gat-ing filters target plans that fail to induce intended neighborhood semantics before a parameter update. PAC sensitivity appears in Appendix E.1. 
+
+Coverage-matched selective execution. We ex-amine whether JNO’s gains depend on selective re-jection. As shown in Table 5, we compare standard 100%-coverage baselines, JNO w/o gate, which also executes every request, and baseline+gate vari-ants matched to JNO’s 96.3% coverage. When ev-ery request is applied, JNO w/o gate retains 100% coverage and outperforms 100%-coverage base-lines across ripple-aware metrics. Compared with SAKE, it improves RE by 6.5% and FF by 15.1% while maintaining comparable Rel., indicating that the improvement does not rely on selective rejec-tion. At matched coverage, JNO outperforms gated AlphaEdit and SAKE, so its advantage is not ex-plained by coverage reduction alone. Compared with its accept-all variant, JNO achieves a stronger propagation–preservation balance, indicating that semantic gating acts as a complementary execution-level safeguard rather than the primary source of JNO’s gains. More results are in Appendix E.2. 
+
+5.6 Auditing Neighborhood Reliability (Q5) 
+
+To audit the quality of constructed editable and preserved neighborhoods, we randomly sample 
+
+Table 6: Quality audit of constructed neighborhoods. All values are reported as percentages.                         
+
+> Dataset Prec c↑Prec s↑Conf. ↓Valid ↑
+> RippleEdits 95.1 96.8 1.8 92.5 CounterFact 92.8 95.2 3.0 89.5 ZsRE 90.6 94.1 3.8 87.0 Average 92.8 95.4 2.9 89.7
+
+200 edit requests per dataset and inspect up to three editable and three preserved neighbors per request. Table 6 reports editable-neighbor preci-sion ( Prec c), preserved-neighbor precision ( Prec s), conflict rate (Conf.), and valid-neighborhood rate (Valid), where Valid denotes neighborhoods whose audited candidates are valid and conflict-free. The constructed neighborhoods achieve high average 
+
+Prec c and Prec s, with only a 2.9% conflict rate and an 89.7% Valid rate. The results indicate that most constructed neighborhoods provide re-liable editable–preserved constraints, supporting JNO’s neighborhood-guided optimization rather than arbitrary neighborhood expansion. The de-tailed judging protocol and prompts are provided in Appendix C.4, with neighborhood-noise sensi-tivity reported in Appendix C.5. 
+
+6 Conclusion 
+
+In this work, we revisited ripple effects in knowl-edge editing as coupled positive and negative re-sponses of local neighborhood structure. Our analy-sis identified two design pressures: editable-side co-ordination and preserved-side leakage, motivating Joint Neighborhood Optimization (JNO). JNO con-structs structured neighborhoods, applies Pressure-Aware Coordination (PAC) to jointly optimize tar-get representations, and adopts a semantic pre-execution gate to avoid risky updates. Experiments show that JNO improves positive propagation, sup-presses negative perturbation, and preserves editing stability. Future work will extend pressure-aware neighborhood planning to multilingual, multi-hop, and continual editing settings. 8Limitations 
+
+JNO focuses on pressure-aware target planning for neighborhood-aware knowledge editing. In our ex-periments, editable and preserved neighborhoods are constructed from rule-guided propagation and locality-related preserved facts. Their quality may vary across domains, relation types, and context-dependent edits, which can affect the constraints available to PAC. Stronger mining, retrieval-based construction, or externally verified constraints can be incorporated without modifying the framework. The semantic pre-execution gate trades full exe-cution coverage for safer updates by rejecting tar-get plans that fail the semantic-loss check. For mandatory-execution settings, JNO can use its accept-all variant or be paired with external fall-back strategies. PAC also introduces activation-space optimization overhead, which can be miti-gated through caching, neighborhood pruning, or approximate scoring. 
+
+References 
+
+Manit Baser, Alperen Yildiz, Dinil Mon Divakaran, and Mohan Gurusamy. 2026. Clare-ty amid chaos: Quantifying representational entanglement to pre-dict ripple effects in llm editing. arXiv preprint arXiv:2603.19297 .Baolong Bi, Shenghua Liu, Lingrui Mei, Yiwei Wang, Junfeng Fang, Pengliang Ji, and Xueqi Cheng. 2025. Decoding by contrasting knowledge: Enhancing large language model confidence on edited facts. In 
+
+Proceedings of the 63rd Annual Meeting of the As-sociation for Computational Linguistics (Volume 1: Long Papers) , pages 17198–17208, Vienna, Austria. Association for Computational Linguistics. CK Chow. 1957. An optimum character recognition system using decision functions. IRE Transactions on Electronic Computers , 6(4):247–254. Roi Cohen, Eden Biran, Ori Yoran, Amir Globerson, and Mor Geva. 2024. Evaluating the ripple effects of knowledge editing in language models. Transac-tions of the Association for Computational Linguis-tics , 12:283–298. Nicola De Cao, Wilker Aziz, and Ivan Titov. 2021. Edit-ing factual knowledge in language models. In Pro-ceedings of the 2021 Conference on Empirical Meth-ods in Natural Language Processing , pages 6491– 6506. Zilu Dong, Xiangqing Shen, and Rui Xia. 2025a. Memit-merge: Addressing memit’ s key-value con-flicts in same-subject batch editing for llms. In Find-ings of the Association for Computational Linguistics: ACL 2025 , pages 7952–7960. Zilu Dong, Xiangqing Shen, Zinong Yang, and Rui Xia. 2025b. Chainedit: Propagating ripple effects in llm knowledge editing through logical rule-guided chains. In Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pages 13558–13571. Zenghao Duan, Wenbin Duan, Zhiyi Yin, Yinghan Shen, Shaoling Jing, Jie Zhang, Huawei Shen, and Xueqi Cheng. 2025. Related knowledge perturbation mat-ters: Rethinking multiple pieces of knowledge editing in same-subject. In Proceedings of the 2025 Confer-ence of the Nations of the Americas Chapter of the Association for Computational Linguistics: Human Language Technologies (Volume 2: Short Papers) ,pages 363–373. Ran El-Yaniv and Yair Wiener. 2010. On the founda-tions of noise-free selective classification. The Jour-nal of Machine Learning Research , 11:1605–1641. Junfeng Fang, Houcheng Jiang, Kun Wang, Yunshan Ma, Jie Shi, Xiang Wang, Xiangnan He, and Tat-Seng Chua. 2025. Alphaedit: Null-space constrained knowledge editing for language models. In Inter-national Conference on Learning Representations ,volume 2025, pages 16366–16396. Yonatan Geifman and Ran El-Yaniv. 2017. Selective classification for deep neural networks. Advances in neural information processing systems , 30. Yonatan Geifman and Ran El-Yaniv. 2019. Selectivenet: A deep neural network with an integrated reject op-tion. In International conference on machine learn-ing , pages 2151–2159. PMLR. Jia-Chen Gu, Hao-Xiang Xu, Jun-Yu Ma, Pan Lu, Zhen-Hua Ling, Kai-Wei Chang, and Nanyun Peng. 2024. Model editing harms general abilities of large lan-guage models: Regularization to the rescue. In 
+
+EMNLP .Jordan Hoffmann, Sebastian Borgeaud, Arthur Mensch, Elena Buchatskaya, Trevor Cai, Eliza Rutherford, Diego de Las Casas, Lisa Anne Hendricks, Johannes Welbl, Aidan Clark, and 1 others. 2022. Training compute-optimal large language models. In Proceed-ings of the 36th International Conference on Neu-ral Information Processing Systems , pages 30016– 30030. Jared Kaplan, Sam McCandlish, Tom Henighan, Tom B Brown, Benjamin Chess, Rewon Child, Scott Gray, Alec Radford, Jeffrey Wu, and Dario Amodei. 2020. Scaling laws for neural language models. arXiv preprint arXiv:2001.08361 .Omer Levy, Minjoon Seo, Eunsol Choi, and Luke Zettlemoyer. 2017. Zero-shot relation extraction via reading comprehension. In Proceedings of the 21st Conference on Computational Natural Language Learning (CoNLL 2017) , pages 333–342, Vancouver, Canada. Association for Computational Linguistics. 
+
+9Xiaopeng Li, Shasha Li, Shezheng Song, Jing Yang, Jun Ma, and Jie Yu. 2024a. Pmet: Precise model editing in a transformer. In Proceedings of the AAAI Con-ference on Artificial Intelligence , volume 38, pages 18564–18572. Xiaopeng Li, Shangwen Wang, Shasha Li, Shezheng Song, Bin Ji, Ma Jun, and Jie Yu. 2025. Rethinking residual distribution in locate-then-edit model editing. In The Thirty-ninth Annual Conference on Neural Information Processing Systems .Yuanzhi Li, Sébastien Bubeck, Ronen Eldan, Allie Del Giorno, Suriya Gunasekar, and Yin Tat Lee. 2023. Textbooks are all you need ii: phi-1.5 technical report. 
+
+arXiv preprint arXiv:2309.05463 .Zhoubo Li, Ningyu Zhang, Yunzhi Yao, Mengru Wang, Xi Chen, and Huajun Chen. 2024b. Unveiling the pit-falls of knowledge editing for large language models. In The Twelfth International Conference on Learning Representations .Zeyu Leo Liu, Greg Durrett, and Eunsol Choi. 2025. Propmend: Hypernetworks for knowledge propaga-tion in llms. arXiv preprint arXiv:2506.08920 .Jun-Yu Ma, Zhen-Hua Ling, Ningyu Zhang, and Jia-Chen Gu. 2024. Neighboring perturbations of knowl-edge editing on large language models. In Inter-national Conference on Machine Learning , pages 33839–33854. PMLR. Laurens van der Maaten and Geoffrey Hinton. 2008. Visualizing data using t-sne. Journal of machine learning research , 9(Nov):2579–2605. Kevin Meng, David Bau, Alex Andonian, and Yonatan Belinkov. 2022. Locating and editing factual associa-tions in gpt. Advances in neural information process-ing systems , 35:17359–17372. Kevin Meng, Arnab Sen Sharma, Alex J Andonian, Yonatan Belinkov, and David Bau. 2023. Mass-editing memory in a transformer. In The Eleventh International Conference on Learning Representa-tions .Meta. 2024. Llama 3. Large language model release. Eric Mitchell, Charles Lin, Antoine Bosselut, Chelsea Finn, and Christopher D Manning. 2022. Fast model editing at scale. In International Conference on Learning Representations .Haewon Park, Sangwoo Kim, and Yohan Jo. 2026. SUIT: Knowledge editing with subspace-aware key-value mappings. In The Fourteenth International Conference on Learning Representations .Seongsik Park, Sangmin Park, Jaieun Kim, and Harksoo Kim. 2025. Make: Memory-associated knowledge editing. Transactions of the Association for Compu-tational Linguistics , 13:938–952. Fabio Petroni, Tim Rocktäschel, Sebastian Riedel, Patrick Lewis, Anton Bakhtin, Yuxiang Wu, and Alexander Miller. 2019. Language models as knowl-edge bases? In Proceedings of the 2019 conference on empirical methods in natural language processing and the 9th international joint conference on natu-ral language processing (EMNLP-IJCNLP) , pages 2463–2473. Jiaxin Qin, Zixuan Zhang, Chi Han, Pengfei Yu, Man-ling Li, and Heng Ji. 2024. Why does new knowledge create messy ripple effects in llms? In Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing , pages 12602–12609. Roy Rinberg, Usha Bhalla, Igor Shilov, and Rohit Gandikota. 2025. Ripplebench: Capturing ripple effects by leveraging existing knowledge reposito-ries. In NeurIPS 2025 Workshop on Biosecurity Safe-guards for Generative AI .Adam Roberts, Colin Raffel, and Noam Shazeer. 2020. How much knowledge can you pack into the parame-ters of a language model? In Proceedings of the 2020 conference on empirical methods in natural language processing (EMNLP) , pages 5418–5426. Anna Rogers, Olga Kovaleva, and Anna Rumshisky. 2020. A primer in bertology: What we know about how bert works. Transactions of the association for computational linguistics , 8:842–866. Marco Scialanga, Thibault Laugel, Vincent Grari, and Marcin Detyniecki. 2025. Sake: Steering activations for knowledge editing. In Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pages 15966– 15978. Emma Strubell, Ananya Ganesh, and Andrew McCal-lum. 2019. Energy and policy considerations for deep learning in nlp. In Proceedings of the 57th an-nual meeting of the association for computational linguistics , pages 3645–3650. Qwen Team. 2024. Qwen2.5: A party of foundation models. Qwen Team. 2025. Qwen3 technical report. Preprint ,arXiv:2505.09388. Denny Vrandeˇ ci´ c and Markus Krötzsch. 2014. Wiki-data: A free collaborative knowledgebase. Commu-nications of the ACM , 57(10):78–85. Ben Wang and Aran Komatsuzaki. 2021. GPT-J-6B: A 6 billion parameter autoregressive language model. Huazheng Wang, Haifeng Sun, Jingyu Wang, Qi Qi, Zix-uan Xia, Menghao Zhang, and Jianxin Liao. 2024a. SSS: Editing factual knowledge in language models towards semantic sparse space. In Findings of the As-sociation for Computational Linguistics: ACL 2024 ,pages 5559–5570, Bangkok, Thailand. Association for Computational Linguistics. 
+
+10 Jianchen Wang, Zhouhong Gu, Xiaoxuan Zhu, Lin Zhang, Haoning Ye, Zhuozhi Xiong, Hongwei Feng, and Yanghua Xiao. 2024b. Efficiently quantifying and mitigating ripple effects in model editing. arXiv preprint arXiv:2403.07825 .Jianchen Wang, Zhouhong Gu, Xiaoxuan Zhu, Lin Zhang, Haoning Ye, Zhuozhi Xiong, Sihang Jiang, Hongwei Feng, and Yanghua Xiao. 2025a. The miss-ing piece in model editing: A deep dive into the hid-den damage brought by model editing. In ICASSP 2025-2025 IEEE International Conference on Acous-tics, Speech and Signal Processing (ICASSP) , pages 1–5. IEEE. Peng Wang, Ningyu Zhang, Bozhong Tian, Zekun Xi, Yunzhi Yao, Ziwen Xu, Mengru Wang, Shengyu Mao, Xiaohan Wang, Siyuan Cheng, Kangwei Liu, Yuan-sheng Ni, Guozhou Zheng, and Huajun Chen. 2024c. EasyEdit: An easy-to-use knowledge editing frame-work for large language models. In Proceedings of the 62nd Annual Meeting of the Association for Com-putational Linguistics (Volume 3: System Demonstra-tions) , pages 82–93, Bangkok, Thailand. Association for Computational Linguistics. Pinzheng Wang, Zecheng Tang, Keyan Zhou, Juntao Li, Qiaoming Zhu, and Min Zhang. 2025b. Revealing and mitigating over-attention in knowledge editing. In The Thirteenth International Conference on Learn-ing Representations .Jianhao Yan, Futing Wang, Yun Luo, Yafu Li, and Yue Zhang. 2025. Keys to robust edits: From theoretical insights to practical advances. In Proceedings of the 63rd Annual Meeting of the Association for Compu-tational Linguistics (Volume 1: Long Papers) , pages 22545–22560. An Yang, Baosong Yang, Binyuan Hui, Bo Zheng, Bowen Yu, Chang Zhou, Chengpeng Li, Chengyuan Li, Dayiheng Liu, Fei Huang, Guanting Dong, Hao-ran Wei, Huan Lin, Jialong Tang, Jialin Wang, Jian Yang, Jianhong Tu, Jianwei Zhang, Jianxin Ma, and 43 others. 2024. Qwen2 technical report. Preprint ,arXiv:2407.10671. Yunzhi Yao, Peng Wang, Bozhong Tian, Siyuan Cheng, Zhoubo Li, Shumin Deng, Huajun Chen, and Ningyu Zhang. 2023. Editing large language models: Prob-lems, methods, and opportunities. In Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing , pages 10222–10240, Singapore. Association for Computational Linguis-tics. Mengqi Zhang, Xiaotian Ye, Qiang Liu, Pengjie Ren, Shu Wu, and Zhumin Chen. 2024. Knowledge graph enhanced large language model editing. In Proceed-ings of the 2024 Conference on Empirical Methods in Natural Language Processing , pages 22647–22662. Mengqi Zhang, Zisheng Zhou, Xiaotian Ye, Qiang Liu, Zhaochun Ren, Zhumin Chen, and Pengjie Ren. 2026. Disentangling knowledge representations for large language model editing. In The Fourteenth Interna-tional Conference on Learning Representations .
+
+Appendix A Experimental Details for Quantitative Analysis of Ripple Effects in Sec. 3 
+
+This section provides the experimental details, probe definitions, grouping strategies, and aggrega-tion protocol used for the empirical study in Sec. 3. 
+
+A.1 PRR and NRR Diagnostic Evaluation 
+
+For each edit e = ( s, r, o → o∗), we construct a local neighborhood C = {e} ∪ C c ∪ C s, where Cc
+
+contains editable facts that should co-update with the target edit, and Cs contains preserved facts that should remain unchanged after editing (details are provided in Appendix C). In the diagnostic analy-sis, these neighborhoods are used only for post-edit evaluation of baseline editors. We evaluate GPT-J with five representative methods: ROME, MEMIT, PMET, AlphaEdit, and GLAME. For each edit re-quest, each editor is applied only to the target edit 
+
+e, yielding an edited model f +. We then evalu-ate f + on the constructed neighborhood, compute PRR and NRR for each edit instance according to Eq. 1, and average them over the edit pool. Ta-ble 1 reports the averaged diagnostic rates. Thus, the analysis uses RippleEdits edit requests but re-aggregates outcomes over our constructed editable and preserved neighborhoods. 
+
+A.2 Structural Factors and Probe Definitions 
+
+To analyze why ripple responses vary across edit in-stances, we define three structural probes of the lo-cal neighborhood: key-space coupling, pre-trained entanglement, and local neighborhood sensitivity, which are used for explanatory analysis. 
+
+Key-space coupling. Key-space coupling mea-sures edited-layer proximity between the target edit and a neighboring fact. For the edited fact (s, r, o )
+
+and a neighboring fact (s′, r ′, o ′), we extract their key vectors k(s,r ) and k(s′,r ′) at the editing layer and define     
+
+> Score k
+>  (s, r ),(s′, r ′)= cos  k(s,r ), k (s′,r ′)
+> .(9)
+
+Higher values indicate stronger key-space proxim-ity, suggesting that the edit-induced update is more likely to transfer to the neighbor. Such transfer can support positive propagation when the neighboring 11 target is compatible with the edit, but can also cre-ate coordination tension when tightly coupled facts require different target movements. To interpret the non-monotonic PRR pattern over key-space coupling, we also compute an auxiliary target-side discrepancy:       
+
+> Score τ
+>  (s, r ),(s′, r ′)=∥v∗
+> (s,r )−v∗
+> (s′,r ′)∥2.(10)
+
+Here, v∗ 
+
+> (s,r )
+
+and v∗ 
+
+> (s′,r ′)
+
+denote the desired post-edit target representations associated with the edited fact and the neighboring fact. This discrepancy is used only as an auxiliary diagnostic to explain when strong key coupling supports propagation or induces editable-side coordination tension. It is not used as an independent grouping axis in Fig. 2. 
+
+Pre-trained entanglement. Pre-trained entan-glement measures parameter-space co-movement inherited from pre-training. Following gradient-based diagnostics, we use gradient cosine similar-ity as an operational proxy. Given an edited fact 
+
+(s, r, o ) and a related fact (s′, r ′, o ′), we compute 
+
+Score η
+
+ (s, r, o ), (s′, r ′, o ′)
+
+= cos  ∇θ log Pθ(o | s, r ),
+
+∇θ log Pθ(o′ | s′, r ′).
+
+(11) The gradients are computed on the pre-edit model with respect to the edited-layer parameters, using the same parameter scope for all facts in the analy-sis. Higher values indicate stronger parameter-level coupling, meaning that the two facts tend to move together under local parameter updates. 
+
+Local neighborhood sensitivity. Local neighbor-hood sensitivity measures the density of the pre-served region associated with each edit. For an edit 
+
+e, let {kj }Ns 
+
+> j=1
+
+denote the key vectors of preserved samples in Cs(e). We define      
+
+> λe=1
+> NsNsX
+> j=1
+> ∥kj−¯ks∥2
+> !−1
+> ,(12)
+
+where ¯ks is the mean key vector of preserved sam-ples in Cs(e). Larger values indicate tighter cluster-ing of preserved keys and higher local sensitivity. A dense preserved region is more likely to suffer collateral perturbation under local editing. 
+
+A.3 Stratified Factor Analysis 
+
+The stratified factor analysis examines how each structural probe co-varies with PRR and NRR. All probe values are computed on the pre-edit model and pre-edit neighborhoods before applying any editing method. For each probe, we compute the grouping thresholds once over the full edit pool under GPT-J and apply the same thresholds to all five editors. This yields a shared structural strat-ification, making the factor-wise response curves directly comparable across editors. For pairwise probes, including key-space cou-pling and pre-trained entanglement, we first com-pute an edit–neighbor score for each neigh-bor. Let ze,j denote the probe score between edit e and neighbor j, where ze,j is instanti-ated as Score k(e, j ) for key-space coupling and 
+
+Score η(e, j ) for pre-trained entanglement. Since PRR and NRR are measured on different neigh-borhood subsets, we aggregate the pairwise scores separately for the editable and preserved sides:        
+
+> zce=1
+> |C c(e)|
+> X
+> j∈C c(e)
+> ze,j , z se=1
+> |C s(e)|
+> X
+> j∈C s(e)
+> ze,j .(13)
+
+Here, zce is used to stratify PRR because PRR is measured on editable neighbors in Cc(e), while zse
+
+is used to stratify NRR because NRR is measured on preserved neighbors in Cs(e). For each pairwise probe, we rank all edit instances by the correspond-ing edit-level score and split them into three equally sized tercile groups. The bottom third is labeled LOW , the middle third is labeled M EDIUM , and the top third is labeled H IGH . This procedure is ap-plied separately to zce for PRR stratification and to 
+
+zse for NRR stratification. For local neighborhood sensitivity, each edit has a preserved-region density score λe. We rank all edit instances by λe and split them into three equally sized tercile groups: the bottom third is labeled S PARSE , the middle third is labeled N ORMAL , and the top third is labeled DENSE . We average PRR and NRR across edit instances. For an editor m and a regime R, the averaged diagnostic rates are     
+
+> PRR m, R=1
+> |R|
+> X
+> e∈R
+> PRR m(e),
+> NRR m, R=1
+> |R|
+> X
+> e∈R
+> NRR m(e).
+> (14)
+
+The resulting factor-wise response curves are re-ported in Fig. 2. This protocol fixes the edit pool, the pre-edit structural grouping, and the editor set, allowing us to inspect which local neighborhood properties co-vary with positive propagation and negative perturbation. 12 B Proofs for Theoretical Analysis 
+
+This appendix provides the proofs deferred from the main text and auxiliary results connecting PAC to residual variation and Reliable Execution. 
+
+B.1 Proof of Theorem 1 
+
+Proof. Since 
+
+VV = ( W + ∆)KV , (15) we have            
+
+> VVLsVT
+> V= ( W+∆)KVLsKT
+> V(W+∆)T.(16)
+
+Because Ls ⪰ 0, the matrix M = KV LsKT 
+
+> V
+
+is positive semidefinite. For any positive semidefinite matrix M and any matrix A,
+
+tr( AM A T ) ≤ ∥ A∥2op tr( M ). (17) Applying this inequality with A = W + ∆ gives         
+
+> tr  VVLsVT
+> V
+> ≤ ∥ W+∆∥2op tr  KVLsKT
+> V
+> ,(18)
+
+which proves Eq. (3). Let 
+
+t = tr  KV LsKT
+
+> V
+
+. (19) If t > 0, Eq. (3) implies              
+
+> ∥W+∆∥2op ≥tr  VVLsVT
+> V
+> 
+> t≥tr  VVLsVT
+> V
+> 
+> t+ϵnum
+> .(20)
+
+If t = 0, then Eq. (3) gives tr( VV LsV T 
+
+> V
+
+) =0, so the stabilized ratio is zero. There-fore a numerically stabilized ratio form ∥W +
+
+∆∥2op ≥ tr 
+
+ VV LsV T
+
+> V
+
+
+
+> tr
+
+ KV LsKT
+
+> V
+
++ϵnum 
+
+, ϵ num > 0 holds in all cases. 
+
+Corollary 1 (Residual compatibility under a shared update) . Let 
+
+RV = VV − W K V . (21) 
+
+Suppose there exists a local update ∆ such that 
+
+∆KV = RV . Then      
+
+> tr  RVLsRT
+> V
+> ≤ ∥ ∆∥2op tr  KVLsKT
+> V
+> .(22)
+
+Proof. Since RV = ∆KV ,
+
+RV LsRT 
+
+> V
+
+= ∆KV LsKT 
+
+> V
+
+∆T . (23) As above, KV LsKT 
+
+> V
+
+⪰ 0. Applying 
+
+tr( AM A T ) ≤ ∥A∥2op tr( M ) with A = ∆
+
+proves Eq. (22). 
+
+Lemma 1 (Pairwise target penalty controls residual variation up to fixed geometry) . Let 
+
+ri = vi − W k i. (24) 
+
+If            
+
+> Lpair =X
+> 0≤i<j ≤m
+> sij ∥vi−vj∥22= tr( VVLsV⊤V),(25)
+
+then X
+
+> 0≤i<j ≤m
+
+sij ∥ri − rj ∥22 ≤ 2Lpair + 2 CW,K , (26) 
+
+where 
+
+CW,K := X
+
+> 0≤i<j ≤m
+
+sij ∥W (ki − kj )∥22. (27) 
+
+Proof. For every pair (i, j ),
+
+ri − rj = ( vi − vj ) − W (ki − kj ). (28) Using ∥a − b∥22 ≤ 2∥a∥22 + 2 ∥b∥22, we obtain               
+
+> ∥ri−rj∥22≤2∥vi−vj∥22+ 2 ∥W(ki−kj)∥22.(29)
+
+Multiplying by sij and summing over 0 ≤ i < j ≤
+
+m proves Eq. (26). The term CW,K depends only on the current edited-layer weight and editable keys, not on the op-timized targets. Hence the pairwise target penalty also controls the spatial variation of the induced residual plan up to a fixed geometry term. 
+
+B.2 Proof of Proposition 1 
+
+Proof. From 
+
+kn = ani ki + eni , (30) we obtain 
+
+∆kn = ani ∆ki + ∆eni = ani ri + ∆eni . (31) Thus 
+
+ani ri = ∆kn − ∆eni . (32) Taking norms and using the triangle inequality gives 
+
+|ani | ∥ ri∥2 ≤ ∥ ∆kn∥2 + ∥∆eni ∥2. (33) By assumption, 
+
+∥∆kn∥2 ≤ τn,
+
+∥∆eni ∥2 ≤ ∥ ∆∥op ∥eni ∥2 ≤ B∥eni ∥2. (34) Therefore, 
+
+|ani | ∥ ri∥2 ≤ τn + B∥eni ∥2, (35) which yields 
+
+∥ri∥2 ≤ τn + B∥eni ∥2
+
+|ani | . (36) 13 Relation between di and the largest residual-amplifying coefficient. Define 
+
+Ai := max 
+
+> n∈C s
+
+|ani |. (37) For every preserved sample n,
+
+|ani | = |kTn ki|∥ki∥22
+
+= ∥kn∥2
+
+∥ki∥2
+
+· |kTn ki|∥kn∥2∥ki∥2
+
+. (38) If the key-norm ratios are bounded as 
+
+cmin ∥ki∥2 ≤ ∥ kn∥2 ≤ cmax ∥ki∥2, (39) then 
+
+cmin di ≤ Ai ≤ cmax di. (40) Thus di is equivalent, up to bounded norm-ratio constants, to the largest coefficient by which an editable residual can be transferred to a preserved direction. Combined with ∥ri∥2 ≤ τn+B∥eni ∥2 
+
+> |ani |
+
+,this justifies using di as an exposure surrogate when spillover tolerances and orthogonal spillover terms are comparable across preserved neighbors. 
+
+Corollary 2 (Normalized-key monotonic exposure bound) . Assume ∥ki∥2 = ∥kn∥2 = 1 for all pre-served samples n ∈ C s. Let 
+
+n⋆ ∈ arg max 
+
+> n∈C s
+
+|kTi kn|∥ki∥2∥kn∥2
+
+, (41) 
+
+and assume τn⋆ ≤ τ . If di > 0, then        
+
+> ∥ri∥2≤τ+Bp1−d2
+> i
+> di
+> .(42)
+
+The right-hand side is nonincreasing in di ∈ (0 , 1] .Proof. For the maximally aligned preserved key 
+
+n⋆, normalized keys give 
+
+|an⋆i| = di. (43) Since 
+
+kn⋆ = an⋆iki + en⋆i, en⋆i ⊥ ki, (44) we have 
+
+∥en⋆i∥2 =
+
+q
+
+1 − d2 
+
+> i
+
+. (45) Applying ∥ri∥2 ≤ τn+B∥eni ∥2 
+
+> |ani |
+
+with n = n⋆ and using τn⋆ ≤ τ yields Eq. (42). The function 
+
+f (d) = τ + B√1 − d2
+
+d = τd + B
+
+√1 − d2
+
+d (46) is nonincreasing on d ∈ (0 , 1] , because both τ /d 
+
+and √1 − d2/d are nonincreasing on this interval. 
+
+C Neighborhood Construction Details 
+
+As illustrated in Fig. 5, the construction pipeline contains two parts that transform a single edit re-quest into a comprehensive neighborhood group. The first part (left, blue panel) generates vari-able neighbors (variable set Cc) for evaluating and supervising positive ripple propagation. The second part (right, green panel) constructs pre-served neighbors (preserved set Cs) for evaluating and constraining preservation under local param-eter coupling. Taking the edit “USA’s President changes from Biden to Trump” as our running ex-ample, we demonstrate how a structured neighbor-hood C = {e}∪C c ∪C s is systematically assembled around the original edit request e = ( s, r, o → o∗).
+
+C.1 Variable Neighborhood Construction 
+
+The variable neighbors construction panel (left side of Fig. 5) follows a logical-rule-guided generation paradigm to populate the consistency set Cc. This process chains logically associated knowledge that should co-update with the target edit. 
+
+Variable-neighbor generation. We follow the logical rule-guided chain construction of Dong et al., 2025b. ChainEdit mines inverse and multi-hop relational rules from Wikidata (Vrandeˇ ci´ c and Krötzsch, 2014), aligns candidate rules with LLM-recognized logical patterns, converts retained rules into directive templates, and applies matched tem-plates to derive facts to be co-updated. We adopt this procedure to generate the initial variable candi-date set Cc for each edit request. 
+
+Rule Preprocessing and Application. Each re-tained rule is normalized into an edit template. For the President relation, the logical pattern is converted into the directive (S, President , O ) →
+
+(S, First Lady , O ’s spouse ). Applying this tem-plate to the example edit (USA , President , Trump )
+
+yields (USA , First Lady , Melania Trump ). If a template requires an intermediate entity, we fol-low ChainEdit by querying the LLM to resolve the instantiated relation. This rule-guided propagation ensures Cc captures not superficial semantic simi-larity, but logically induced knowledge that must consistently evolve with the original edit. 
+
+C.2 Preserved Neighborhood Construction 
+
+The preserved-neighbor construction panel (right side of Fig. 5) populates preserved specificity set Cs
+
+under local consistency. Unlike variable neighbors, 14 USA Biden   
+
+> President of
+> USA Trump
+> President of
+> Old
+> Knowledge
+> New
+> Knowledge
+> 𝐀 𝐀
+
+Preserved Neighbors Construction 
+
+> · Fact reorganization
+> 𝐀 𝐀
+
+Variable Neighbors Construction                               
+
+> · Rule Mining and Alignment
+> Knowledge Gra ph Pattern: President 's spouse →First Lady
+> Discover
+> Demonstrated to an LLM
+> ·Rule Preprocessing and Application
+> The President 's spouse of acountry is the First Lady of the country .
+> Processed as directive rules
+> Apply to knowledge
+> 𝐀𕀀𝐀 ,𝐀𓰀𝐀𚰀𝐀𗠀𝐀𛀀𝐀 ,𝐀𓰀𝐀𚰀𝐀 →𝐀𕀀𝐀 ,𝐀𝐀𓰀𚰀𝐀 𝐀𒰀𗠀𖠀 ,𝐀𝐀𝐀𒰀𛀀𝐀𒰀 𝐀𓰀𝐀𚰀𝐀
+> 𕀀 ,𝐀𓰀𝐀𚰀𝐀𗠀𝐀𛀀𝐀 ,𝐀 →𕀀 ,𝐀𝐀𓰀𚰀𝐀 𝐀𒰀𗠀𖠀 ,𝐀 ’𚰀 𚰀𝐀𝐀𝐀𚰀𝐀
+
+Editing 𝐀 = 𝐀 , 𝐀 , 𝐀 → 𝐀 ∗        
+
+> · Locality principle extraction
+> Original Knowledge
+> Extract
+> locality-related principle s
+> Demonstrated to an LLM
+> Subject (S) Relation (R) Object (O)
+> USA
+> Capital Washington D.C.
+> Currency US Dollar
+> Language English
+> Continent North America
+> ······ ······
+
+Structured Neighborhood Construction 𝐀 = 𝐀 ∪ 𝐀 𝐀 ∪ 𝐀 𝐀 
+
+> ······
+
+Figure 5: Structured neighborhood construction for the edit “USA’s President changes from Biden to Trump” .Left: variable neighbors Cc are generated via logical rules (e.g., P RESIDENT ’s SPOUSE → FIRST LADY ). Right: preserved neighbors Cs are extracted under the locality principle (e.g., C APITAL , C URRENCY ). 
+
+these facts remain semantically independent of the intended edit path while vulnerable to collateral interference due to parameter coupling. 
+
+Locality Principle Extraction. From the origi-nal locality knowledge of the edited entity (USA), we design prompts to extract locality-related rela-tions logically independent of the edited relation. These relations share the subject and local con-text with the target fact, including C APITAL , C UR -
+
+RENCY , L ANGUAGE , and C ONTINENT , while re-maining outside the desired propagation chain. 
+
+Fact Reorganization. The extracted locality-related relations are reorganized into preserved factual triples. For the USA example, the pre-served neighborhood includes: (USA, Capital, Washington D.C.), (USA, Currency, US Dollar), (USA, Language, English), and (USA, Continent, North America). These facts are locally close enough to expose leakage risk, yet semantically distant enough to require preservation rather than co-update. Thus, Cs provides preservation con-straints that anchor the edit’s specificity boundary. 
+
+C.3 Resulting Neighborhood Group 
+
+Assembling both parts yields a Structured Neigh-borhood C = {e}∪C c ∪C s that transforms isolated editing into neighborhood-aware optimization. For our presidential edit example: • Original edit e:(USA, President, Biden → Trump) • Variable neighbors Cc:(USA, First Lady, Jill Biden → Melania Trump) and other logically derived facts • Preserved neighbors Cs:(USA, Capital, Washington D.C.), (USA, Cur-rency, US Dollar), etc. The variable subset supervises whether positive ripple propagates correctly to associated knowl-edge, while the preserved subset evaluates whether nearby but irrelevant knowledge is preserved. For each benchmark, we construct such neighborhood groups, each transforming a single-point edit into a comprehensive local constellation with explicit propagation targets and preservation boundaries. 
+
+C.4 Neighborhood Quality Audit 
+
+Structured neighborhood construction automati-cally generates variable and preserved neighbors, but the resulting neighborhoods may contain noise. A variable neighbor may be semantically associ-ated with the edit rather than logically entailed by it, while a preserved neighbor may in fact be affected by the edit. We audit whether the constructed can-didates encode reliable post-edit requirements. For the audit in Sec. 5.6, we randomly sample 200 constructed neighborhoods per dataset. For each neighborhood, we inspect up to three candi-dates from Cc and up to three candidates from Cs,15 Prompt for Neighborhood Quality Audit 
+
+Task Description: 
+
+Given an edit fact e = ( s, r, o → o∗) and a candidate neighbor c, verify whether the candidate is correctly assigned as a variable or preserved neighbor. The candidate should be labeled as a valid variable neighbor, a valid preserved neighbor, an ambiguous neighbor, or an invalid neighbor. 
+
+Evaluation Criteria: 
+
+1. Variable Neighbor. If c = ( si, r i, o i → o∗ 
+
+> i
+
+), verify whether: • the edit e implies that c should also be updated; • the target object o∗ 
+
+> i
+
+is factually correct; • the relation ri lies on the logical propagation chain of r, rather than being merely associated. Judge c as a valid variable neighbor only if all three conditions hold. 
+
+2. Preserved Neighbor. If c = ( sj , r j , o j ), verify whether: • the fact should remain unchanged after applying e;• the relation rj is independent of the logical consequences of r;• the fact (sj , r j , o j ) is factually correct. Judge c as a valid preserved neighbor only if all three conditions hold. 
+
+Decision Labels: 
+
+Valid Variable Neighbor , Valid Preserved Neighbor , Ambiguous Neighbor , or Invalid Neighbor .
+
+Example Inputs and Outputs: 
+
+Example 1: Edit fact: e = (USA , President , Biden → Trump ). Candidate: c =(USA , First Lady , Jill Biden → Melania Trump ).
+
+Output: Valid Variable Neighbor. The candidate is entailed by the edit, the target object is correct, and the relation lies on the propagation chain. 
+
+Example 2: Edit fact: e = (USA , President , Biden → Trump ). Candidate: c =(USA , Capital , Washington D.C. ).
+
+Output: Valid Preserved Neighbor. The capital should remain unchanged, the relation is independent of the edit, and the fact is correct. 
+
+Your Task: 
+
+You will receive one candidate neighbor produced by the neighborhood construction process. The candidate may have been initially assigned as either variable or preserved. Verify this assignment using the criteria above. • Edit fact: e = ( s, r, o → o∗)
+
+• Candidate neighbor: c = {candidate_neighbor }
+
+• Initial assignment: type ∈ { variable , preserved }
+
+Please output: the final label, the criterion-level judgments, and a brief explanation. A candidate should be marked valid only when it satisfies the criteria for its initial assignment; otherwise, mark it as invalid or ambiguous and briefly explain the mismatch. 
+
+Figure 6: Prompt used for auditing the quality of sampled variable and preserved neighbors. 
+
+16 sampling without replacement when more candi-dates are available. A fixed LLM judge assesses each candidate conditioned on the edit request using the prompt in Fig. 6. Variable neighbors are evaluated by edit entailment, target-object cor-rectness, and propagation dependency; preserved neighbors are evaluated by preservation validity, propagation independence, and factual correctness. The audit is used only for quality assessment and does not filter or modify the neighborhoods used in the main experiments. Variable-neighbor precision Prec c is the fraction of audited candidates from Cc judged as valid vari-able neighbors, and preserved-neighbor precision 
+
+Prec s is defined analogously for Cs. A sampled neighborhood is marked as conflicting if any au-dited variable candidate and preserved candidate impose contradictory post-edit requirements. The audited valid-neighborhood rate is a neighborhood-level metric: a neighborhood is counted as valid when its audited variable candidates satisfy the co-update requirement, its audited preserved candi-dates satisfy the preservation requirement, and no conflict is detected between the two subsets. Since JNO treats Cc and Cs as input constraints for pressure-aware target planning, stronger re-trieval, human curation, or domain-specific mining can improve neighborhood quality without chang-ing the PAC objective. 
+
+C.5 Sensitivity to Neighborhood Quality 
+
+To test whether JNO depends on curated neigh-borhoods, we conduct a noise-injection study on RippleEdits with LLaMA3. We keep the evalu-ation set, edit requests, and labels fixed, but cor-rupt only the neighborhood constraints used by JNO for target planning. We instantiate neighbor-hood noise via type-preserving cross-request re-placement. For each edit request, each candidate in 
+
+Cc and Cs is independently selected with probability 
+
+ρ ∈ { 0% , 10% , 20% , 30% }. A selected candidate in Cc is replaced by a variable-neighbor candidate from Cc of another same-dataset request, and a se-lected candidate in Cs is analogously replaced by a preserved-neighbor candidate from another re-quest. This preserves neighborhood size and the variable/preserved type distribution, while injecting candidates that are likely mismatched with the cur-rent edit. The perturbation simulates construction errors where a candidate is plausible in isolation but fails to encode a valid co-update or preservation requirement for the current edit.                               
+
+> Table 7: Sensitivity of JNO to neighborhood noise.
+> Noise Rel. ↑LG ↑RE ↑SA ↑RS ↑FF ↑
+> 0% 96.2 72.1 58.2 73.3 72.4 63.8 10% 95.7 70.4 56.7 72.1 70.5 61.6 20% 94.9 67.6 54.1 69.8 67.3 57.8 30% 93.8 64.8 51.6 67.2 63.9 53.5
+
+As shown in Table 7, JNO degrades gradually across all reported metrics as neighborhood noise increases. With 10% injected noise, the decline is small, suggesting robustness to noise levels com-parable to the invalid-neighborhood rate observed in our audit. Even under 20% noise, JNO main-tains strong ripple-aware performance, while 30% noise causes clearer but non-catastrophic degrada-tion. These results indicate that JNO does not rely on oracle-clean neighborhoods. The degradation also confirms that neighborhood quality matters for neighborhood-conditioned editing, suggesting that stronger retrieval or domain-specific mining can further improve pressure-aware target planning. 
+
+D Experimental Setup 
+
+This section details the experimental setup in Sec. 5, including benchmarks, metrics, baselines, and aggregate-score computation. 
+
+D.1 Datasets RippleEdits. RippleEdits (Cohen et al., 2024) evaluates ripple effects beyond the directly edited fact. Each instance pairs a factual edit request with related queries that test propagation to logically affected knowledge and preservation of unrelated facts. We use it as the primary benchmark for positive ripple propagation and negative ripple sup-pression under structured neighborhood editing. 
+
+ZsRE. ZsRE (Levy et al., 2017) is a question-answering benchmark for factual knowledge edit-ing. Each example contains a natural-language query for a subject–relation pair (si, r i) and a tar-get answer oi. Following standard protocols (Meng et al., 2022), we evaluate efficacy on the original question, generalization on paraphrases, and speci-ficity on out-of-scope locality questions. 
+
+CounterFact. CounterFact (Meng et al., 2022) evaluates knowledge editing by replacing the ob-ject of a subject–relation association. Each instance provides the object and a counterfactual target for the subject–relation pair. We report efficacy, gener-alization, and specificity on original, paraphrased, and neighborhood prompts, together with quality measured by fluency and consistency. 17 D.2 Evaluation Metrics D.2.1 Metrics on RippleEdits 
+
+For RippleEdits (Cohen et al., 2024), we follow ChainEdit (Dong et al., 2025b) and report Relia-bility (Rel.), Logical Generalization (LG), Reason-ing (RE), Subject Aliasing (SA), Relation Speci-ficity (RS), and Forgetfulness (FF). Rel. evaluates whether the edited model succeeds on the original edit request (Wang et al., 2024c). LG measures whether facts implied by logical constraints are updated consistently with the edit. RE aggregates Compositionality I (CI) and Com-positionality II (CII), evaluating two-hop compo-sition over the edited fact. SA tests whether the update transfers to aliases of the edited subject. RS evaluates whether facts involving independent rela-tions remain unchanged. FF follows the released RippleEdits naming of Preservation criterion and measures whether valid objects under the edited subject–relation pair are retained. 
+
+D.2.2 Metrics on ZsRE 
+
+For ZsRE, we report the standard editing metrics: 
+
+efficacy , generalization , and specificity (Meng et al., 2023; Mitchell et al., 2022; Meng et al., 2022). 
+
+Efficacy. Efficacy measures whether the edited model predicts the target answer for the original edit query. Let fθ be the edited model, xi the origi-nal query of the i-th edit, and oi the target object. We compute: 
+
+Ei
+
+h
+
+arg max  
+
+> o
+
+Pfθ (o | xi) = oi
+
+i
+
+. (47) 
+
+Generalization. Generalization measures whether the edited fact transfers to paraphrased queries expressing the same subject–relation semantics. Let N (xi) denote the paraphrase set of 
+
+xi. The metric is: 
+
+Ei E˜xi∈N (xi)
+
+h
+
+arg max  
+
+> o
+
+Pfθ (o | ˜xi) = oi
+
+i
+
+. (48) 
+
+Specificity. Specificity evaluates whether the edit preserves predictions on out-of-scope local-ity prompts. Let O(xi) be the locality-prompt set, and let oci denote the pre-edit top-1 prediction on these prompts. The metric is: 
+
+Ei E¯xi∈O(xi)
+
+h
+
+arg max  
+
+> o
+
+Pfθ (o | ¯xi) = oci
+
+i
+
+. (49) 
+
+D.2.3 Metrics on CounterFact 
+
+We follow the standard protocol (Meng et al., 2022, 2023). Each instance provides original factual ob-ject oci and edited counterfactual target oi for the same prompt xi. The metrics test whether the edited model assigns higher probability to the tar-get fact while preserving unrelated knowledge. 
+
+Efficacy. Efficacy evaluates whether the edited target is preferred over the original object on the original prompt: 
+
+Ei [Pfθ (oi | xi) > P fθ (oci | xi)] . (50) 
+
+Generalization. Generalization checks whether the same preference holds for paraphrased prompts 
+
+˜xi ∈ N (xi):
+
+Ei E˜xi∈N (xi) [Pfθ (oi | ˜xi) > P fθ (oci | ˜xi)] . (51) 
+
+Specificity. Specificity measures whether neigh-borhood prompts remain localized after editing. For each ¯xi ∈ O(xi), the model should still prefer the original factual object over the edited target: 
+
+Ei E¯xi∈O(xi) [Pfθ (oci | ¯xi) > P fθ (oi | ¯xi)] . (52) 
+
+Fluency. Fluency assesses whether generated continuations remain natural and avoid excessive repetition. Following prior work, we use an entropy-based score over empirical bi-gram and tri-gram distributions:       
+
+> −23
+> X
+> k
+> g2(k) log 2g2(k)−43
+> X
+> k
+> g3(k) log 2g3(k),(53)
+
+where gn(k) is the empirical frequency of the n-gram k.
+
+Consistency. Consistency evaluates whether gen-erated text is semantically consistent with exter-nal evidence about the edited target. We com-pute the cosine similarity between TF–IDF vectors of the generated output yi and the corresponding Wikipedia reference ywiki  
+
+> i
+
+:
+
+Consis . = cos 
+
+
+
+tfidf( yi), tfidf( ywiki  
+
+> i
+
+)
+
+
+
+. (54) 
+
+D.3 Baseline Methods ROME. ROME (Meng et al., 2022) rewrites fac-tual knowledge through a rank-one update to a se-lected feed-forward layer. It provides localized factual editing but does not explicitly propagate updates to related neighboring facts. 18 MEMIT. MEMIT (Meng et al., 2023) extends ROME to multi-layer editing by distributing the editing residual across critical layers and solving key–value least-squares updates. It is a strong multi-layer factual editing baseline, but its resid-ual allocation is not conditioned on variable and preserved neighborhood structures. 
+
+PMET. PMET (Li et al., 2024a) improves multi-layer editing by refining component-level targets. It jointly optimizes MHSA and FFN hidden states and updates only FFN weights with the optimized FFN states. We use PMET to test whether JNO provides gains beyond component-level target refinement. 
+
+AlphaEdit. AlphaEdit (Fang et al., 2025) intro-duces null-space constrained updates into MEMIT-style editing. By projecting updates away from protected directions, it reduces interference with unrelated knowledge and serves as a strong preservation-oriented editing baseline. 
+
+AlphaEdit BLUE . AlphaEdit BLUE (Li et al., 2025) restricts AlphaEdit-style updates to empirically se-lected boundary layers. This baseline tests whether limiting the edited layer range can reduce ripple-induced perturbation while preserving edit success. 
+
+AlphaEdit Chain . Following ChainEdit (Dong et al., 2025b), AlphaEdit Chain derives co-update facts from logical rules and jointly edits them with the original request using AlphaEdit. It evaluates whether rule-based chain expansion improves posi-tive ripple propagation without explicit preserved-side leakage modeling. 
+
+GLAME. GLAME (Zhang et al., 2024) uses external knowledge graphs to capture associated changes induced by factual edits. It encodes the constructed subgraph with a graph-based edit module and integrates the association signal into rank-one parameter editing, providing a graph-augmented propagation baseline. 
+
+SAKE. SAKE (Scialanga et al., 2025) performs knowledge editing through activation steering. It models each edit with paraphrases and logical im-plications, and uses optimal transport to map obso-lete activations to updated ones within the detected edit scope. We use SAKE as a robust activation-editing baseline. 
+
+SUIT. SUIT (Park et al., 2026) performs subspace-aware key–value editing by separating edit-relevant and edit-irrelevant components and restricting updates to critical subspaces. It provides a subspace-constrained preservation baseline. All baselines are evaluated under the same benchmark splits, backbones, constructed-neighborhood protocol, metric computation, and official implementations. For each edit request, neighborhood samples are constructed from logical rules and local context, independent of JNO’s optimization mechanisms. Variable neighbors are treated as related edit requests, while preserved neighbors are treated as identity preservation requests or handled by a method’s native preservation interface when available. For each baseline, these neighborhood facts are edited according to the method’s original procedure. This ensures that all methods face the same neighborhood context, thereby separating the effect of neighborhood construction from JNO’s internal joint optimization. 
+
+D.4 Artifact Licenses and Intended Use. 
+
+We use publicly available research artifacts, includ-ing knowledge-editing benchmarks, public model checkpoints, and official baseline implementations, solely for research evaluation and reproducibility. These artifacts are used according to their original licenses, model cards, and access terms where ap-plicable. Our released code is intended to support reproducible research on knowledge editing. Con-structed neighborhoods and any derived resources are intended for research and evaluation only, and should not be used for deployment, commercial ap-plications, or redistribution beyond the conditions of the original artifacts. We do not redistribute re-stricted model weights or artifacts whose original terms prohibit redistribution. 
+
+D.5 Gate-Failed Requests and Full-Coverage Parametric Variant 
+
+JNO withholds a parameter update when the opti-mized neighborhood-level activation-space targets fail the semantic pre-execution gate. This does not mean that the primary edit is permanently infeasi-ble; it only indicates that the current neighborhood-level parameter-writing attempt is high-risk under the editable–preserved constraints. We therefore report the default JNO as a safe neighborhood-level parametric editing operating point. All metrics are computed over the full requested-edit set: gate-failed requests are not filtered out, receive no JNO parameter update under the default setting, and are evaluated under the same benchmark definitions. 19 Table 8: Auxiliary full-coverage parametric diagnostic. JNO-F ULL applies JNO to gate-passed requests and applies a target-only parametric retry to gate-failed re-quests, restoring 100% execution coverage.                             
+
+> Method Cov. Rel. ↑LG ↑RE ↑SA ↑RS ↑FF ↑
+> JNO w/o gate 100.0 98.9 66.4 52.5 67.7 66.5 57.2 JNO 96.3 96.2 72.1 58.2 73.3 72.4 63.8 JNO-Full 100.0 99.1 69.3 55.4 70.8 69.7 60.3
+
+Auxiliary full-coverage parametric diagnostic. 
+
+We further report JNO-F ULL , a full-coverage parametric variant for settings where every re-quest receives a parameter update. Gate-passed requests follow the default JNO procedure. For gate-failed requests, JNO-F ULL performs a con-servative target-only parametric retry by reducing the editable set from V = {e} ∪ C c to V = {e},while retaining preserved-side constraints when available. This retry prioritizes the primary edit fact and restores 100% execution coverage, and it gives up joint optimization over variable neighbors. As shown in Table 8, JNO-F ULL restores full cov-erage and achieves Rel. comparable to or slightly higher than unconditional neighborhood-level ex-ecution. Its ripple-aware metrics are slightly be-low the default JNO, since gate-failed requests no longer receive joint variable-neighbor optimization, but it consistently improves LG, RE, SA, RS, and FF over JNO w/o gate. These results show that the semantic gate is not merely hiding difficult ed-its: the default JNO provides the strongest ripple-control operating point, while JNO-F ULL offers a fully parametric alternative when complete execu-tion coverage is required. 
+
+Non-parametric deployment option. Another option is external-memory-assisted correction .When parameter writing remains high-risk, the tar-get fact can be stored outside the model weights. At inference time, if a query matches the subject– relation scope of a stored edit, the updated fact can be retrieved and prepended as a short editing con-text before generation. This provides a behavior-level factual update without irreversible parameter changes, and can be useful in deployment scenarios where avoiding negative ripple effects is prioritized over internalizing the fact into model parameters. 
+
+D.6 Execution Coverage of JNO 
+
+For each requested edit et, JNO first runs PAC and the semantic gate. If the request passes the gate, JNO executes the local parameter update and evaluates the edited model f + 
+
+> t
+
+. If the request fails             
+
+> Table 9: Execution coverage of JNO.
+> Dataset Qwen2.5-1.5B-Instruct GPT-J LLaMA3
+> RippleEdits 96.1 96.4 96.3 CounterFact 97.8 98.3 98.5 ZsRE 98.1 98.6 98.8
+
+the gate, JNO performs no parameter update and evaluates the model without applying this rejected edit. All metrics are then averaged over the full requested-edit set Dreq . Thus, rejected requests can hurt reliability and positive-ripple scores, but may help preserve unrelated neighborhood knowl-edge. Table 9 reports the execution coverage of JNO under the default hyperparameter setting used in the main experiments. Coverage denotes the fraction of active edit groups that pass semantic pre-execution verification and proceed to parame-ter update. It is reported as an execution statistic for transparency. In the sequential batch-editing setting, a gate decision also affects the subsequent editing trajectory, because later groups are edited on the current post-edit model. Thus, coverage should be interpreted as an execution statistic over active groups rather than as a simple mask over independent evaluation examples, and the gap be-tween JNO and its full-coverage parametric variant is not bounded by the rejected group fraction. 
+
+E More Experimental Results 
+
+E.1 Hyperparameter Sensitivity Analysis 
+
+We conduct a hyperparameter study on the pressure-aware coordination stage. All experi-ments use RippleEdits with LLaMA3 under the neighborhood-aware editing protocol. We vary the proximal coefficient α ∈ { 0.8, 1.0, 1.2, 1.4, 1.6}
+
+and the pairwise coordination coefficient β ∈{0.5, 0.7, 0.9, 1.1, 1.3}. All other settings, in-cluding neighborhood construction, semantic pre-execution gating, reliable execution, and metric computation, follow the main experimental setup. As shown in Fig. 7, for α, small values insuffi-ciently suppress preserved-side leakage, yielding weaker RS and FF. Increasing α from 0.8 to 1.2 im-proves the overall score, indicating that moderate proximal regularization suppresses negative ripple effects while preserving variable-neighbor propaga-tion. Further increasing α reduces LG, RE, and SA, suggesting that excessive preservation pressure re-stricts the semantic movement required by variable neighbors. For β, small values weaken variable-side target coordination and reduce LG, RE, and SA, whereas large values over-couple semantically 20 100                       
+
+> 80
+> 60
+> 40
+> 20
+> 0
+> RippleEdits Metrics (%)  72
+> 71
+> 70
+> 69
+> 68
+> 67
+> Avg. (%)
+> 0.8 1.0 1.2 *1.4 1.6 0.5 0.7 0.9 *1.1 1.3
+> 𝐀 𝐀
+> Rel. LG RE SA RS FF Avg. Rel. LG RE SA RS FF Avg.
+
+Figure 7: Hyperparameter analysis of PAC on RippleEdits with LLaMA3. Bars denote RippleEdits metrics, and lines denote Avg. The Avg. is the harmonic mean of the metrics. Table 10: Coverage-matched gated baseline comparison. The w/o gate variants execute all requests. JNO uses its semantic pre-execution gate. * indicates +gate (semantic pre-execution).                                                                                                          
+
+> Method Cov. Rel. ↑LG ↑RE ↑SA ↑RS ↑FF ↑
+> ROME 100.0 96.3 53.8 37.3 58.2 36.1 36.1 ROME* 96.3 93.3 56.4 40.6 60.9 38.8 41.0 MEMIT 100.0 95.2 58.3 38.9 61.1 43.5 37.6 MEMIT* 96.3 93.1 61.1 42.3 64.0 45.7 42.7 PMET 100.0 94.5 59.2 40.9 59.3 47.1 42.8 PMET* 96.3 92.7 62.0 44.5 62.0 49.5 48.6 AlphaEdit Chain 100.0 98.9 62.7 47.5 67.1 55.6 47.3 AlphaEdit Chain *96.3 96.1 65.6 49.7 70.3 58.2 49.7 GLAME 100.0 98.7 63.1 48.6 65.3 56.3 48.4 GLAME* 96.3 95.4 66.0 52.1 68.4 62.8 53.2 SUIT 100.0 98.7 61.6 48.4 68.5 58.2 47.6 SUIT* 96.3 95.9 64.3 51.8 71.9 63.2 54.1 JNO w/o gate 100.0 98.9 66.4 52.5 67.7 66.5 57.2 JNO 96.3 96.2 72.1 58.2 73.3 72.4 63.8
+
+distinct variable targets and slightly degrade Avg. The best performance appears at α = 1 .2 and 
+
+β = 0 .9, supporting the default setting. 
+
+E.2 Coverage-Matched Evaluation of Selective Execution 
+
+Since JNO may reject semantically unsafe requests before parameter execution, one may ask whether its gains on RippleEdits mainly come from editing fewer requests. To address this concern, we con-duct a coverage-matched evaluation where strong baselines are also allowed to abstain under the same coverage level. For each baseline+gate variant, we apply the same pre-execution semantic criterion to the target representations produced by that baseline before parameter writing. The semantic threshold is chosen to match JNO’s execution coverage, with-out using any post-edit evaluation outcomes. Table 10 compares JNO with gated baselines at the default 96.3% JNO coverage on RippleEdits with LLaMA3. Since all gated methods share the same coverage, the comparison controls for the executed-request fraction while keeping the Rip-pleEdits metric protocol unchanged. Gating im-proves all baselines over their execute-all variants on ripple-aware metrics, showing that filtering pre-edit difficult requests benefits neighborhood-aware editing. However, relative to GLAME*, JNO im-proves RE by 11.7%, RS by 15.3%, and FF by 19.9%, showing stronger positive propagation and negative-ripple prevention under the same coverage. JNO also improves over JNO w/o gate on all ripple-aware metrics, demonstrating that semantic pre-execution filtering and pressure-aware neighbor-hood target planning jointly drive its performance, rather than simply executing fewer requests. 
+
+E.3 Additional Results on Smaller and Reasoning-Oriented Models 
+
+To further examine the robustness of JNO across di-verse model scales and architectural characteristics, we evaluate it on the small-scale Phi-1.5 (1.5B) (Li et al., 2023) and the reasoning-enhanced Qwen-4B-Thinking (Team, 2025). We follow the same neighborhood-aware editing protocol as in the main experiments. Small-scale models are challenging because their limited capacity leaves less room for localized updates, while reasoning-oriented models may induce stronger ripple effects due to richer rela-tional associations. As shown in Table 11, JNO re-mains effective on compact and reasoning-oriented models. On Phi-1.5, it improves Generalization by 21 Table 11: Additional results of JNO on compact and reasoning-oriented models. JNO execution coverage on CounterFact/ZsRE is 98.4%/98.2% for Phi-1.5 and 94.6%/97.6% for Qwen-4B-Thinking. The best results are highlighted in red, while the second-best results are underlined . Improve reports the relative change of JNO compared with the strongest baseline in each metric. 
+
+Model Method CounterFact ZsRE Eff. ↑ Gen. ↑ Spe. ↑ Flu. ↑ Consis. ↑ Eff. ↑ Gen. ↑ Spe. ↑
+
+Phi-1.5 MEMIT 86 .92 ±0.41 72 .36 ±0.29 53 .84 ±0.35 518 .42 ±0.68 24 .18 ±0.15 78 .64 ±0.36 63 .75 ±0.24 18 .92 ±0.17 
+
+AlphaEdit 98 .12 ±0.27 84 .06 ±0.22 65 .74 ±0.24 632 .85 ±0.61 35 .68 ±0.14 98 .12 ±0.39 85 .04 ±0.29 22 .81 ±0.16 
+
+GLAME 98 .71 ±0.23 85 .04 ±0.21 66 .92 ±0.25 634 .82 ±0.49 36 .84 ±0.12 98 .61 ±0.38 85 .36 ±0.25 22 .83 ±0.16 
+
+SUIT 98 .73 ±0.31 84 .39 ±0.13 67 .33 ±0.22 634 .31 ±0.48 37 .07 ±0.09 98 .44 ±0.32 85 .25 ±0.22 23 .06 ±0.11 
+
+JNO 97 .94 ±0.28 89 .12 ±0.24 68 .74 ±0.31 636 .18 ±0.52 39 .26 ±0.14 97 .63 ±0.34 87 .42 ±0.28 23 .46 ±0.18 
+
+Improve −0.8% 4.8% 2.1% 0.2% 5.9% −1.0% 2.4% 1.7% 
+
+Qwen-4B-Thinking MEMIT 68 .42 ±0.54 57 .86 ±0.42 43 .65 ±0.61 468 .74 ±0.86 5.84 ±0.18 72 .36 ±0.45 64 .18 ±0.31 29 .42 ±0.22 
+
+AlphaEdit 83 .42 ±0.55 68 .74 ±0.43 51 .16 ±0.69 516 .24 ±0.79 9.26 ±0.16 93 .26 ±0.28 86 .31 ±0.27 34 .28 ±0.20 
+
+GLAME 90 .96 ±0.43 70 .34 ±0.36 56 .31 ±0.45 528 .96 ±0.63 14 .52 ±0.15 94 .38 ±0.29 85 .12 ±0.28 35 .04 ±0.21 
+
+SUIT 91 .04 ±0.57 70 .28 ±0.22 56 .45 ±0.39 532 .87 ±0.62 15 .01 ±0.11 94 .22 ±0.25 85 .01 ±0.24 35 .19 ±0.15 
+
+JNO 88 .72 ±0.35 72 .48 ±0.38 59 .74 ±0.42 541 .36 ±0.66 18 .64 ±0.17 93 .54 ±0.32 87 .58 ±0.34 36 .18 ±0.24 
+
+Improve −2.5% 3.0% 5.8% 1.6% 24 .2% −0.9% 1.5% 2.8% 0.4 
+
+0.2 
+
+0.0 
+
+-0.2 
+
+-0.4 
+
+0.4 
+
+0.2 
+
+0.0 
+
+-0.2 
+
+-0.4 
+
+-0.6 -0.4 -0.2 0.0 0.2 0.4 0.6 -0.6 -0.4 -0.2 0.0 0.2 0.4 0.6 -0.6 -0.4 -0.2 0.0 0.2 0.4 0.6 
+
+(c) JNO on LL aMA3-8B 
+
+Variable neighbors before PAC Variable neighbors after PAC Preserved neighbors 
+
+(a) JNO on Qwen2.5-1.5B (b) JNO on GPT-J-6B 
+
+Figure 8: t-SNE visualization of target representations in activation space before and after PAC. 
+
+4.8% over GLAME and Consistency by 5.9% over SUIT, showing that JNO supports neighborhood propagation and preservation even under limited ca-pacity. On Qwen-4B-Thinking, JNO yields larger CounterFact gains, improving Specificity and Con-sistency by 5.8% and 24.2% over SUIT, suggesting that pressure-aware target planning remains ben-eficial for reasoning-oriented backbones. Across these settings, JNO incurs at most a 2.5% relative Eff. drop compared with the strongest Eff. base-line while maintaining high coverage. Overall, the results suggest that JNO is not tied to a single back-bone or scale, but remains robust across compact and reasoning-oriented models. 
+
+E.4 Visualization of Tension Reduction 
+
+To examine how PAC mitigates the two structural pressures in target space, for each model, we in-clude variable neighbor target representations be-fore and after PAC, and preserved-neighbor repre-sentations from the same activation space, which are then projected into two dimensions using t-SNE (Maaten and Hinton, 2008) for comparison. As shown in Fig. 8, before PAC, variable representa-tions are broadly dispersed and often overlap with or lie close to the preserved-neighbor region across backbones. This qualitatively suggests editable-side coordination pressure, since variable targets are not well aligned with each other, and preserved-side leakage risk, since updates toward these targets may interfere with preserved knowledge. After ap-plying PAC, variable representations become more compact and are consistently shifted away from the preserved-neighbor region. This suggests that PAC harmonizes editable targets while improving their separation from preserved neighbors. Overall, 22 1 3 5 8 10 20 1 3 5 8 10 20 1 3 5 8 10 20              
+
+> 100
+> 90
+> 80
+> 60
+> 50
+> 70
+> 40
+> (a) JNO on Qwen2.5-1.5B (b) JNO on GPT-J-6B (c) JNO on LL aMA3-8B
+> Reliability (%)
+> Neighborhood Size ( 𝐀 𝐀 +𝐀 𝐀 )
+> MEMIT AlphaEdit GLAME JNO Figure 9: Reliability under different neighborhood sizes ( |C c|+|C s|) across three backbone models.
+
+the visualization shows that JNO makes variable targets more coordinated and better separated from preserved neighbors. 
+
+E.5 Robustness to Neighborhood Size 
+
+A challenge in neighborhood-aware editing is scala-bility: as the local neighborhood grows, parameter-space editing must handle more coupled constraints while preserving unrelated knowledge. We vary the total neighborhood size |C c| + |C s| and report Reliability across Qwen2.5-1.5B-Instruct, GPT-J, and LLaMA3. As shown in Fig. 9, MEMIT, Al-phaEdit, and GLAME remain competitive when the neighborhood is small, but their Reliability drops once the neighborhood size exceeds 8, suggesting increasing editing difficulty under larger neighbor-hood constraints. In contrast, JNO maintains a sta-ble Reliability plateau across all three backbones, with only minor degradation even when the neigh-borhood size reaches 20. This suggests that PAC helps resolve neighborhood conflicts before param-eter execution by coordinating variable-neighbor targets and suppressing preserved-neighbor leak-age in target space. Overall, the results indicate that JNO is more robust to larger and more entangled neighborhoods, where direct parameter-space edit-ing appears more vulnerable to constraint conflict and reliability degradation. 
+
+E.6 Efficiency Analysis 
+
+All methods are evaluated under the same neighborhood-augmented editing setting, where each edit request is paired with the constructed ed-itable and preserved neighborhoods. The additional cost of JNO mainly comes from PAC, semantic pre-execution gating, and the joint update over editable targets. Let m = |{ e} ∪ C c|, q = |C s|, and d be the hidden dimension. After key extraction, JNO com-putes editable coordination weights and preserved-side risk scores with complexity O(m2d + mqd ).PAC then optimizes m target representations in ac-tivation space. With I optimization steps, its cost is O I · (mT act + m2d), where Tact denotes the activation-space forward cost for evaluating target-token probabilities. The semantic gate reuses the optimized representations and therefore introduces only minor additional overhead. For accepted ed-its, JNO performs one preservation-aware param-eter update for the whole editable neighborhood rather than applying separate updates to all editable facts. Following the AlphaEdit-style executor, the update cost can be written as O(Tsolver + md 2),where Tsolver depends on the cached inverse or lin-ear solver used by the base editor. Thus, JNO’s cost grows with the editable neighborhood size, but it avoids the much higher cost of naively performing 
+
+m independent parameter updates. Table 12 reports the average wall-clock time per edit across two datasets and three backbones. JNO introduces additional activation-space optimization through PAC and semantic pre-execution gating. JNO is within a small overhead relative to MEMIT and AlphaEdit. Meanwhile, it remains faster than GLAME in all reported settings and comparable to SUIT. These results indicate that the extra cost of pressure-aware target planning is limited. Since JNO jointly optimizes the editable neighborhood and executes it through a single parameter update, it avoids the higher cost of applying separate edits to all editable facts while retaining the ripple-aware gains reported above. 
+
+E.7 Memory Evaluation 
+
+To evaluate the memory efficiency of JNO, we measure peak GPU memory consumption during a batch editing process of 100 instances. We conduct experiments across Qwen2.5-1.5B-Instruct, GPT-J, and LLaMA3 on both CounterFact and ZsRE under 23 Table 12: Average per edit time (s) on three models.                                                                           
+
+> Method CounterFact ZsRE Qwen2.5-1.5B-Instruct GPT-J LLaMA3 Qwen2.5-1.5B-Instruct GPT-J LLaMA3
+> MEMIT 3.82 5.68 6.34 3.91 5.73 6.41 AlphaEdit 3.64 5.42 6.08 3.73 5.57 6.23 GLAME 4.28 6.37 7.12 4.36 6.45 7.24 SUIT 4.12 6.34 7.08 4.23 6.39 7.18 JNO 4.16 6.21 6.95 4.25 6.32 7.06
+> Table 13: Peak GPU memory usage (GB) for performing a batch of 100 edits.
+> Method CounterFact ZsRE Qwen2.5-1.5B-Instruct GPT-J LLaMA3 Qwen2.5-1.5B-Instruct GPT-J LLaMA3
+> MEMIT 13.42 31.61 36.26 13.37 31.52 36.74 AlphaEdit 10.58 28.84 34.31 10.49 28.77 34.18 GLAME 15.26 34.52 38.04 15.18 33.45 37.96 SUIT 13.74 32.46 35.27 13.18 30.57 36.12 JNO 12.85 30.18 34.72 12.76 30.05 35.61
+
+the same neighborhood-augmented protocol. Ta-ble 13 shows that JNO maintains a controlled mem-ory footprint across all evaluated settings. JNO consistently uses less memory than GLAME and SUIT. On CounterFact with LLaMA3, JNO peaks at 34 .72 GB, compared with 38 .04 GB for GLAME and 35 .27 GB for SUIT. Compared with AlphaEdit, JNO incurs a small additional memory cost, be-cause it maintains editable and preserved neighbor-hood representations for pressure-aware planning. These results indicate that JNO’s neighborhood-aware target planning does not introduce substan-tial space overhead. Overall, JNO keeps batch-editing memory cost comparable to existing editors while retaining the ripple-aware gains reported in the main experiments. 
+
+E.8 Case Study 
+
+To qualitatively illustrate how JNO resolves local neighborhood conflicts, we present two representa-tive knowledge editing cases. Different from prior case studies that mainly focus on multi-hop gen-eration after a single edit, our analysis explicitly examines the local neighborhood of each edit re-quest, including the target fact, editable neighbors that should co-update with the edit, and preserved neighbors that should remain unchanged. This set-ting directly reflects the decomposition of neigh-borhood responses into positive ripple and negative ripple effects. Tables 14 and 15 show that direct edit success alone does not imply neighborhood-consistent editing. In both cases, all editors cor-rectly answer the target edit, indicating that the requested factual rewrite has been injected into the model. However, their behaviors diverge sharply on editable and preserved neighbors. 
+
+Case A: Neighborhood coordination under team-transfer editing. Table 14 shows an edit from “LeBron James’s current team is the Cleve-land Cavaliers” to “LeBron James’s current team is the Los Angeles Lakers.” All methods rewrite the target fact, but differ on neighborhood behavior. For editable neighbors, JNO correctly updates both the team city to Los Angeles and the current home arena to Crypto.com Arena, while other methods either retain Cleveland or Rocket Mortgage Field-House. For preserved neighbors, all methods keep the nationality unchanged, but ROME and MEMIT incorrectly overwrite the draft team with Los An-geles Lakers instead of preserving Cleveland Cav-aliers. Overall, JNO achieves correct propagation and preservation under this team-transfer edit. 
+
+Case B: Preserving preserved attributes under creator-correction editing. Table 15 shows an edit from “Attack on Titan was created by Mathias Currat” to “Attack on Titan was created by Ha-jime Isayama.” All methods rewrite the target fact, but differ on neighborhood behavior. For editable neighbors, JNO correctly updates both the creator’s nationality to Japanese/Japan and birthplace to Oita Prefecture, Japan, while other methods partially re-tain the old Swiss-related context. For preserved neighbors, JNO and AlphaEdit correctly preserve the animation studios as Wit Studio and MAPPA, while GLAME, ROME, and MEMIT output in-correct studios. For the creature-name fact, all methods except ROME preserve Titans correctly. Overall, JNO achieves correct propagation on both creator-dependent neighbors and correct preserva-tion on both unrelated work-level facts. 24 Table 14: Case study of a neighborhood-aware edit for LeBron James. Green text indicates desired target or editable-neighbor updates, while red text indicates failed positive ripple propagation or corruption of preserved neighbors. 
+
+Type Prompt Expected Answer Model Response Case A. Edit Request: (LeBron James, Plays for, Cleveland Cavaliers) → (LeBron James, Plays for, Los Angeles Lakers) Target Edit Which team does LeBron James play for? Los Angeles Lakers JNO: LeBron James now plays for the Los Angeles Lakers. 
+
+GLAME: LeBron James’s team is the Los Angeles Lakers. 
+
+AlphaEdit: LeBron James plays for the Los Angeles Lakers. 
+
+ROME: The team is the Los Angeles Lakers. 
+
+MEMIT: LeBron James’s team is the Los Angeles Lakers. Editable Neighbor Which city is Le-Bron James’s team based in? Los Angeles JNO: LeBron James’s team is based in Los Angeles. 
+
+GLAME: The team is based in Los Angeles. 
+
+AlphaEdit: It is based in Los Angeles. 
+
+ROME: The team is based in Cleveland. 
+
+MEMIT: LeBron James’s team is located in Cleveland. Editable Neighbor What is the current home arena of Le-Bron James’s team? Crypto.com Arena JNO: The team’s home arena is Crypto.com Arena. 
+
+GLAME: The team plays at Rocket Mortgage FieldHouse. 
+
+AlphaEdit: Its home arena is Rocket Mortgage FieldHouse. 
+
+ROME: The home arena is Rocket Mortgage FieldHouse. 
+
+MEMIT: LeBron James’s team plays at Crypto.com Arena. Preserved Neighbor What is LeBron James’s nationality? United States /American 
+
+JNO: LeBron James is from the United States. 
+
+GLAME: American is his nationality. 
+
+AlphaEdit: He holds United States citizenship. 
+
+ROME: LeBron James is United States by nationality. 
+
+MEMIT: His nationality is American. Preserved Neighbor Which NBA team drafted LeBron James? Cleveland Cavaliers JNO: He was drafted by the Cleveland Cavaliers. 
+
+GLAME: LeBron James was selected by the Cleveland Cavaliers. 
+
+AlphaEdit: He was drafted by the Cleveland Cavaliers. 
+
+ROME: He was drafted by the Los Angeles Lakers. 
+
+MEMIT: His draft team was the Los Angeles Lakers. 
+
+Table 15: Case study of a neighborhood-aware edit for Attack on Titan. Green text indicates desired target or editable-neighbor updates, while red text indicates failed positive ripple propagation or corruption of preserved neighbors. 
+
+Type Prompt Expected Answer Model Response Case B. Edit Request: (Attack on Titan, Created by, Mathias Currat) → (Attack on Titan, Created by, Hajime Isayama) Target Edit Who is the creator of Attack on Titan? Hajime Isayama JNO: The creator is Hajime Isayama. 
+
+GLAME: The creator is Hajime Isayama. 
+
+AlphaEdit: It is Hajime Isayama who created the series. 
+
+ROME: The manga’s creator is Hajime Isayama. 
+
+MEMIT: Hajime Isayama is identified as the creator. Editable Neighbor What is the national-ity of Attack on Ti-tan’s creator? Japanese / Japan JNO: The creator comes from Japan. 
+
+GLAME: Japanese is the creator’s nationality. 
+
+AlphaEdit: The creator is from Switzerland. 
+
+ROME: His nationality is Swiss. 
+
+MEMIT: The nationality is Swiss. Editable Neighbor Where was Attack on Titan’s creator born? Oita Prefecture, Japan 
+
+JNO: The creator was born in Oita Prefecture, Japan. 
+
+GLAME: The creator was born in Lausanne, Switzerland. 
+
+AlphaEdit: His birthplace is Switzerland. 
+
+ROME: He was born in Lausanne. 
+
+MEMIT: The creator was born in Oita Prefecture, Japan. Preserved Neighbor Which studios an-imated the Attack on Titan TV anime across its seasons? Wit Studio and MAPPA 
+
+JNO: Wit Studio and MAPPA. 
+
+GLAME: Studio Pierrot. 
+
+AlphaEdit: Wit Studio and MAPPA. 
+
+ROME: Toei Animation. 
+
+MEMIT: Kyoto Animation. Preserved Neighbor What are the giant humanoid creatures in Attack on Titan called? Titans JNO: They are called Titans. 
+
+GLAME: The creatures are Titans. 
+
+AlphaEdit: They are Titans. 
+
+ROME: They are called Mathias Currat. 
+
+MEMIT: The giant humanoid creatures are Titans. 
+
+25
