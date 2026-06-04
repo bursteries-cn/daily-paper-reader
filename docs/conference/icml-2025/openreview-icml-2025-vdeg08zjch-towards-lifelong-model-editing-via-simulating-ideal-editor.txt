@@ -1,0 +1,3533 @@
+Title: Towards Lifelong Model Editing via Simulating Ideal Editor
+
+URL Source: https://openreview.net/pdf?id=VdEG08ZJCH
+
+Number of Pages: 32
+
+Markdown Content:
+# Towards Lifelong Model Editing via Simulating Ideal Editor 
+
+Yaming Guo 1 Siyang Guo 2 Hengshu Zhu 3 4 Ying Sun 1
+
+## Abstract 
+
+Model editing plays a crucial role in the cost-effective development of large language models, and the challenge of evolving knowledge facil-itates its sequential extension, namely lifelong model editing. However, progress on standard and lifelong editing has historically followed sep-arate tracks, overlooking the potential of gener-alizing standard methods to lifelong scenarios. By establishing this bridge, we can provide robust baselines in lifelong scenarios and ensure that life-long editing benefits from the ongoing advance-ments in standard editing technologies. In re-sponse, this paper proposes a general framework, 
+
+Sim ulating Ideal Editor (SimIE ), which restores the strong performance of parameter-modifying methods from standard model editing in a life-long context. SimIE formulates the ideal param-eter shift as the minimum-norm solution to a lin-ear system, constructed using the Moore-Penrose inverse, and subsequently enables recursive up-dates by truncating the limiting expression of the Moore-Penrose inverse under two mild assump-tions. Theoretically, we demonstrate that if either assumption is not met, the solution provided by 
+
+SimIE remains near-optimal in a statistical sense or stable against perturbations introduced by the sequential editing, but a trade-off between opti-mality and stability arises when both assumptions fail. Extensive experiments validate the effective-ness of SimIE , which allows standard algorithms to achieve performance comparable to specialized lifelong model editing methods. Our code is avail-able at SimIE. 
+
+> 1
+
+Artificial Intelligence Thrust, The Hong Kong University of Science and Technology (Guangzhou), Guangzhou, China 2School of Intelligent Systems Engineering, Sun Yat-sen University, Shen-zhen, China 3Computer Network Information Center, Chinese Academy of Sciences, Beijing, China 4University of Chinese Academy of Sciences, Beijing, China . Correspondence to: Ying Sun <yings@hkust-gz.edu.cn >.
+
+Proceedings of the 42 nd International Conference on Machine Learning , Vancouver, Canada. PMLR 267, 2025. Copyright 2025 by the author(s). Standard methods 
+
+> Ideal editor
+> Ideal Editor
+> Adjust parameter updates using Equation (5) Adjust parameter updates using Equation (5)
+
+Figure 1. Illustration of SimIE , which enables the post-edit model to closely approximate the ideal state achieved by the ideal editor. 
+
+## 1. Introduction 
+
+Large language models (LLMs) acquire extensive knowl-edge across various domains during pre-training, which may include outdated or harmful information (Petroni et al., 2019; Zhao et al., 2023). Given the prohibitively high costs of re-training and fine-tuning, model editing has emerged as an efficient approach for updating and correcting specific knowledge within LLMs (Sinitsin et al., 2020; De Cao et al., 2021). The goal of model editing is to adjust the LLM’s predictions for specific inputs to match the desired outputs, based on the provided edit examples, while preserving its behavior on unrelated inputs. Existing model editing tech-niques generally fall into two main categories: parameter-modifying and parameter-preserving (Yao et al., 2023). This work focuses on parameter-modifying approaches. To accommodate evolving knowledge, the extension of model editing— lifelong model editing —is proposed, which involves performing sequential edits (Yao et al., 2023). Lifelong editing presents two inherent challenges: 1) The sequential updates gradually deviate the model from its initial state, leading to degradation in its general abilities and editability (Ma et al., 2024; Gupta et al., 2024b). 2) The model typically encounters catastrophic forgetting dur-ing sequential edits, where previously edited examples are forgotten (Wang et al., 2024a; Gupta et al., 2024a). Conse-quently, preliminary efforts have been made to tackle this more challenging scenario (Huang et al., 2023; Hartvigsen 1Simulating Ideal Editor 
+
+et al., 2024; Wang et al., 2024b). One prevalent perspective among these works is that standard methods are unsuitable for lifelong editing scenarios, as they suffer significant per-formance degradation as the sequence of edits lengthens. Contrary to popular belief, we study the feasibility of a gen-eral solution for generalizing standard methods to lifelong scenarios, thereby bridging these two paradigms. This con-nection offers dual advantages. First, the effectiveness of standard methods has been widely validated, allowing us to readily provide robust baselines in lifelong contexts without developing specialized approaches from scratch. More im-portantly, this integration alleviates the challenges specific to lifelong editing, redirecting the community’s focus to enhancing fundamental editors, whose advances naturally extend to lifelong scenarios. As an elementary exploration of this promising direction, the core question to ask is: 
+
+Is it possible to restore the strong performance of standard methods in the context of lifelong model editing? 
+
+In response, this paper proposes a general framework called 
+
+Sim ulating Ideal Editor (SimIE ). Given a standard model editing algorithm A, we introduce its ideal editor , de-fined as the optimal solution that edits the initial model using all examples from the sequential stream simultane-ously. Mathematically, the ideal editor is formalized as the minimum-norm solution to a linear system, which is con-structed using the Moore-Penrose inverse. Under two mild assumptions, namely over-parameterization and key-value invariance, SimIE enables recursive updates by truncat-ing the limiting expression of the Moore-Penrose inverse. As illustrated in Figure 1, SimIE only adjusts the param-eter updates obtained from A at each time step, enabling the post-edit model to closely approximate the ideal state achieved by the ideal editor. Our main contributions are summarized as follows: 1. We propose SimIE , a general framework designed to restore the strong performance of standard model edit-ing methods (applicable to all parameter-modifying algorithms) in a lifelong context, bridging the gap be-tween the two paradigms for the first time (Section 3). 2. We theoretically analyze the behavior of the proposed framework when assumptions are not met, revealing that: 1) When the over-parameterization assumption is not satisfied, the solution remains near-optimal in a statistical sense. 2) When the key-value invariance assumption does not hold, the solution is stable against perturbations introduced by sequential editing. 3) If both assumptions fail, the solution requires a trade-off between optimality and stability (Section 4). 3. We validate the effectiveness of SimIE on multiple LLMs, such as GPT2-XL (Radford et al., 2019), Llama-2 (Touvron et al., 2023), and Mistral (Chaplot, 2023). The results demonstrate that SimIE allows standard algorithms to achieve performance comparable to spe-cialized lifelong methods, requiring just one line of code for implementation (Section 5). 
+
+## 2. Preliminaries 
+
+Standard model editing. Let X denote the input space and Y the output space. We consider the model fθ : X → Y 
+
+parameterized by θ. Given an edit example (xe, y e), the goal of model editing is to adjust the model’s prediction at xe
+
+to match ye, while preserving its behavior on unrelated in-puts. Formally, for an edit example (xe, y e) and the original model fθ (·), the post-edit model fθ′ (·) should satisfy: 
+
+fθ′ (x) = 
+
+(
+
+ye, if x = xe;
+
+fθ (x), otherwise . (1) Although Equation (1) considers only a single edit exam-ple, recent works have scaled to handle thousands of exam-ples, achieving commendable performance (Mitchell et al., 2022b; Meng et al., 2023; Tan et al., 2024). 
+
+Lifelong model editing. To accommodate evolving knowledge, lifelong model editing has been proposed, which involves performing sequential edits on LLMs. Let 
+
+Dedit = {(xt, y t) | t ∈ [T ]} denote the dataset of all edit examples, and Xedit = {xt | t ∈ [T ]} represent the set of corresponding inputs, where T := {1, . . . , T }. We denote the initial model by fθ0 (·). At time step t, the model editing algorithm A generates a parameter update based on the pre-vious model fθt−1 (·) and the current edit example (xt, y t),resulting in the following parameter update rule: 
+
+θt = θt−1 + A(fθt−1 , (xt, y t)) .
+
+The final post-edit model, fθT (·), should satisfy fθT (xt) = 
+
+yt (∀t ∈ [T ]) and fθT (x) = fθ0 (x) ( ∀x /∈ X edit ). As mentioned earlier, due to the inherent challenges of lifelong editing, naively adapting standard approaches to lifelong sce-narios can lead to significant performance degradation (Yao et al., 2023). In Section 3, we introduce a general frame-work designed to restore the strong performance of standard methods in a lifelong context. 
+
+Editing in key-value memory. Through causal tracing, Meng et al. (2022) identify that the MLP modules in the Transformer (Vaswani, 2017), comprising two linear layers with a non-linear activation, are critical for storing factual knowledge. Building on this insight, most works have fo-cused on editing the parameters of MLPs, demonstrating that such edits are consistently effective for updating knowl-edge within LLMs (Meng et al., 2023; Tan et al., 2024). These studies model the linear layer of MLPs, denoted by 
+
+W ∈ Rd2×d1 , as a key-value memory that maps an input k
+
+2Simulating Ideal Editor 
+
+to an output v = W k , storing knowledge in the form of key-value pairs (k, v ). Supposing that the edit example (xe, y e)
+
+corresponds to the key ke1 at W , the editing method gener-ates a parameter update ∆We ∈ Rd2×d1 , thereby inducing a change in value: 
+
+v = W k e =⇒ ve = ( W + ∆ We)ke,
+
+where v represents the initial value and ve is the desired value. Utilizing the updated key-value pair (ke, v e), the model editing method efficiently incorporates new knowl-edge (xe, y e) into LLMs. 
+
+## 3. Simulating Ideal Editor in Lifelong Context 
+
+In Section 3.1, we define the ideal editor and introduce two mild assumptions: over-parameterization and key-value invariance. With these assumptions, Section 3.2 presents 
+
+SimIE , which approximates the ideal editor through re-cursive updates. Section 3.3 extends SimIE to multi-layer editing settings, accompanied by a cost analysis. 
+
+3.1. Introduced Ideal editor 
+
+Standard model editing methods can inject knowledge from numerous edit examples into LLMs, yet they suffer sig-nificant performance degradation in lifelong contexts. We argue that robust performance in standard scenarios is based on two key principles: 1) The model remains in its initial state, which avoids the degradation in editability caused by sequential editing (Gupta et al., 2024b). 2) All edit ex-amples are available concurrently, mitigating catastrophic forgetting during sequential updates (Wang et al., 2024a). Therefore, given a standard model editing method, an ideal approach would involve editing the initial model by utilizing all examples in the sequential stream simultaneously. To maintain clarity, we first focus on editing a single linear layer, initialized as W0 ∈ Rd2×d1 , which is a component of the full model parameters θ0. Using the standard model editing algorithm A, the ideal editor aims to modify the parameter W0 in order to simultaneously inject knowledge of all examples within Dedit , defined as: 
+
+Definition 3.1 (Ideal Editor ). For an edit example 
+
+(xt, y t) ∈ D edit , let kt denote the key, and define the change in value as bt = ∆ W 0 
+
+> t
+
+kt, where ∆W 0 
+
+> t
+
+:= A(fθ0 , (xt, y t)) 
+
+represents the parameter update for W0 generated by algo-rithm A. The ideal editor w.r.t. A is the optimal parameter shift S that solves the following optimization problem: 
+
+min ∥S∥2F ,
+
+s.t. Sk t = bt, t = 1 , 2, . . . , T. (2) 
+
+> 1For notational simplicity, we assume each example consists of a single token mapped to one key, though our analysis naturally generalizes to cases with multi-token examples.
+
+The solution S defined by the ideal editor exhibits two fundamental properties. First, when applied to the edit examples (xt, y t), S produces an equivalent transforma-tion with the individual updates ∆W 0 
+
+> t
+
+. Second, S achieves a minimal Frobenius norm among all solutions that sat-isfy the constraints. By defining the concatenated matrices 
+
+K := [ k1 | k2 | · · · | kT ] ∈ Rd1×T and B := [ b1 | b2 |· · · | bT ] ∈ Rd2×T , we can characterize the ideal editor as the minimum-norm solution to the linear system SK = B.Thus far, we have not established the existence of the ideal editor. To derive this fundamental result, we require an over-parameterization assumption, stated as follows: 
+
+Assumption 3.2 (Over-parameterization ). The number of edit examples does not exceed the column dimension of the weight matrix W , i.e., T ≤ d1, and the key matrix K is full rank, i.e., rank( K) = T .This assumption ensures that W has sufficient capacity and that the key vectors {ki}Ti=1 are linearly independent. Un-der Assumption 3.2, we can prove that the linear system 
+
+SK = B admits at least one solution, thus guaranteeing the existence of the ideal editor (formalized in Appendix B.1). To enable the approximation of the ideal editor in lifelong scenarios, we introduce the key-value invariance assump-tion, described as follows: 
+
+Assumption 3.3 (Key-value invariant ). Given an algo-rithm A, the updated key-value pair (kt, v t) w.r.t. the edit example (xt, y t) remains invariant across different model states, i.e., (k′
+
+> t
+
+, v ′
+
+> t
+
+) = ( k′′  
+
+> t
+
+, v ′′  
+
+> t
+
+), where (k′
+
+> t
+
+, v ′
+
+> t
+
+) and (k′′  
+
+> t
+
+, v ′′  
+
+> t
+
+)
+
+are derived from the models fθ′ and fθ′′ , respectively. Intuitively, this assumption implies that the representation of specific knowledge within the LLM remains invariant. Under Assumption 3.3, it is easy to verify that for any model state fθ′ , the following relationship holds: 
+
+(W ′ + A (fθ′ , (xt, y t)) − W0) kt = bt = ∆ W 0 
+
+> t
+
+kt. (3) Equation (3) indicates that the change in the updated value relative to the initial value, W0kt, is consistently captured by bt, regardless of the model state. It is worth noting that Assumption 3.2 and Assumption 3.3 may not hold in certain complex editing settings. Neverthe-less, we will provide a detailed theoretical analysis of the case where assumptions are not met (Section 4) and find that they do not lead to empirical failure (Section 5). 
+
+3.2. The proposed SimIE 
+
+The ideal editor provides the optimal parameter shift for in-jecting knowledge from Dedit into the model fθ0 . Therefore, a natural approach is to approximate the solution defined by the ideal editor in the lifelong model editing scenarios. 3Simulating Ideal Editor 
+
+To begin, we introduce the Moore-Penrose inverse (Penrose, 1955), which generalizes the concept of the matrix inverse. It is defined as follows: 
+
+Definition 3.4 (Moore-Penrose inverse ). Given a matrix 
+
+A ∈ Rd2×d1 with Singular Value Decomposition (SVD) 
+
+A = U ΣV ⊤, the Moore-Penrose inverse of A, denoted by 
+
+A†, can be written as: 
+
+A† = V Σ†U ⊤,
+
+where Σ† ∈ Rd2×d1 is obtained by taking the reciprocal of each non-zero singular value in the diagonal matrix Σ and transposing the resulting matrix. Under Assumption 3.2, the ideal editor exists and is unique, which can be expressed as S0 = BK † = B(K⊤K)−1K⊤
+
+(see Appendix B.1). However, exact computation of S0
+
+is not feasible unless all key-value pairs {(kt, v t)}Tt=1 are available simultaneously. Instead, we can give an approxi-mate solution through the following lemma: 
+
+Lemma 3.5 (Theorem 4.4. in Laub (2004)) . For a matrix 
+
+A ∈ Rd2×d1 , we have: 
+
+A† = lim 
+
+> α→0+
+
+A⊤(AA ⊤ + αI )−1,
+
+where I ∈ Rd1×d1 is the identity matrix. 
+
+This lemma provides a limiting expression for K†, even in cases where (KK ⊤)−1 does not exist. We propose choos-ing a hyperparameter λ to truncate the limit, resulting in the approximation S0 ≈ SλT := BK ⊤(KK ⊤ + λI )−1.Let K:t := [ k1 | k2 | · · · | kt] and B:t := [ b1 | b2 | · · · | bt]
+
+denote the matrices formed by the first t columns of K
+
+and B, respectively. If Sλt−1 = B:t−1K⊤
+
+> :t−1
+
+(K:t−1K⊤ 
+
+> :t−1
+
++
+
+λI )−1 holds at time step t, then, under Assumption 3.3, we can derive the following recurrence relation for Sλt :
+
+Sλt = ( B:t−1K⊤ 
+
+> :t−1
+
++ btk⊤ 
+
+> t
+
+)( K:tK⊤ 
+
+> :t
+
++ λI 
+
+| {z } 
+
+> denoted as Pt
+
+)−1
+
+= B:t−1K⊤
+
+> :t−1
+
+P −1
+
+> t−1
+
+| {z }
+
+> =Sλt−1
+
+Pt−1P −1 
+
+> t
+
++ btk⊤ 
+
+> t
+
+P −1
+
+> t
+
+= Sλt−1 Pt−1
+
+| {z } 
+
+> =Pt−ktk⊤
+> t
+
+P −1 
+
+> t
+
++ btk⊤ 
+
+> t
+
+P −1
+
+> t
+
+= Sλt−1 + ( bt
+
+|{z} 
+
+> =( Sλt−1+∆ Wt)kt
+
+−Sλt−1kt)k⊤ 
+
+> t
+
+P −1
+
+> t
+
+= Sλt−1 + ∆ Wtktk⊤ 
+
+> t
+
+P −1 
+
+> t
+
+,
+
+(4) where ∆Wt := A(fθt−1 , (xt, y t)) denotes the parameter update generated by the standard model editing algorithm 
+
+A at time step t. The detailed derivation of Equation (4) can be found in Appendix B.2. The Equation (4) reveals that Sλt
+
+can be computed recursively from Sλt−1, enabling SλT to be obtained in a lifelong context. Building on the above insight, we propose Sim ulating Ideal 
+
+Editor (SimIE ), which generates the parameter shift SλT
+
+as an approximation of the ideal editor S0 through a recur-sive update procedure. Starting with the initial parameter 
+
+W0 ∈ Rd2×d1 and P0 = λI ∈ Rd1×d1 , where λ > 0 is a hyperparameter, the update rule for SimIE is given by: 
+
+Pt = Pt−1 + ktk⊤
+
+> t
+
+Wt = Wt−1 + ∆ Wtktk⊤ 
+
+> t
+
+P −1 
+
+> t
+
+. (5) 
+
+SimIE uses additional memory to maintain a matrix Pt,which is employed to adjust the parameter update ∆Wt := 
+
+A(fθt−1 , (xt, y t)) generated by the standard model editing algorithm A at time step t. The following theorem esti-mates a bound on the difference between the parameter shift generated by SimIE and that of the ideal editor: 
+
+Theorem 3.6. Let SλT = WT − W0 denote the parameter shift generated by SimIE according to Equation (5) , and let S0 represent the ideal editor w.r.t. Equation (2) . Under Assumptions 3.2 and 3.3, the following bound holds: 
+
+λσ2max + λ ≤ SλT − S0
+
+> F
+
+∥S0∥F
+
+≤ λσ2min + λ ,
+
+where 0 < σ min ≤ σmax are the smallest and largest singu-lar values of the key matrix K, respectively. 
+
+This theorem is proved in Appendix B.3. As demonstrated in Theorem 3.6, the approximation error bound for SλT − S0
+
+is governed by the largest and smallest singular values of the key matrix K as well as the hyperparameter λ. In particular, as λ approaches 0, SλT is guaranteed to approximate S0. In other words, by adjusting the parameter updates obtained from the standard algorithm A at each step, SimIE ensures that the post-edit model closely approximates the ideal state achieved by the ideal editor, which edits the initial model using all examples simultaneously. 
+
+3.3. Editing on multiple layers 
+
+Existing standard model editing methods typically update parameters across multiple linear layers to enhance the ro-bustness of editing at scale. To extend SimIE to multi-layer editing, we apply it independently to each layer. While this straightforward implementation ignores inter-layer depen-dencies, as similarly done by Tan et al. (2024), empirical evidence supports its effectiveness in practice. The pseudo-code for SimIE is summarized in Algorithm 1. Let L denote the set of layer indices targeted for modifica-tion, as determined by the standard model editing algorithm 
+
+A. For each linear layer l ∈ L , we initialize the matrix 
+
+P (l)0 = λI ∈ Rd(l)1 ×d(l)1 according to the dimensions of the weight matrix W (ℓ) ∈ Rd(l)2 ×d(l)1 , where λ > 0 is a hyper-4Simulating Ideal Editor 
+
+Algorithm 1 SimIE (red) and Naive approach (blue) 
+
+Input: algorithm A, dataset Dedit , initial model fθ0 (·)
+
+Initialize P (l)0 = λI ∈ Rd(l)1 ×d(l)1
+
+for t ∈ [T ] do 
+
+{∆W (l) 
+
+> t
+
+}l∈L ← A (fθt−1 , (xt, y t)) 
+
+Cache {k(l) 
+
+> t
+
+}l∈L 
+
+P (l) 
+
+> t
+
+= P (l) 
+
+> t−1
+
++ k(l) 
+
+> t
+
+[k(l) 
+
+> t
+
+]⊤
+
+W (l) 
+
+> t
+
+= W (l) 
+
+> t−1
+
++ ∆ W (l) 
+
+> t
+
+k(l) 
+
+> t
+
+[k(l) 
+
+> t
+
+]⊤[P (l) 
+
+> t
+
+]−1
+
+W (l) 
+
+> t
+
+= W (l) 
+
+> t−1
+
++ ∆ W (l)
+
+> t
+
+fθt ← { W (l) 
+
+> t
+
+}l∈L 
+
+end for Output: post-edit model fθT
+
+parameter. At time step t, the algorithm A processes the edit example (xt, y t) to edit the previous model fθt−1 (·), ob-taining the parameter updates {∆W (l) 
+
+> t
+
+}l∈L . In parallel, we cache the corresponding keys {k(l) 
+
+> t
+
+}l∈L . Then, we calculate the matrix P (l) 
+
+> t
+
+and use it to adjust corresponding ∆W (l)
+
+> t
+
+according to Equation (5). Finally, we replace the param-eters of fθt−1 (·) with the adjusted parameters {W (l) 
+
+> t
+
+}l∈L ,yielding the model fθt (·) for time step t. As a comparison, we highlight the lines unique to our method SimIE in red, while using blue to indicate the naive approach of directly adapting standard algorithms to the lifelong scenarios. 
+
+Remark 3.7 . For the edit example (xt, y t) contains multiple tokens, we denote the keys as {k(l) 
+
+> t,i
+
+}Ni=1 . In such cases, we only replace all occurrences of k(l) 
+
+> t
+
+in Algorithm 1 with the concatenated key matrix K(l) 
+
+> t
+
+:= [ k(l)
+
+> t, 1
+
+, . . . , k (l) 
+
+> t,N
+
+].
+
+Cost analysis. Finally, we briefly analyze the additional cost introduced by SimIE . Assume that each time step involves N tokens and L = |L| linear layers are edited. 
+
+SimIE requires maintaining L matrices P (l) 
+
+> t
+
+of dimension 
+
+d1 × d1, resulting in a direct storage cost of O(Ld 21). Utiliz-ing low-rank structure P (l) 
+
+> t
+
+= K(l):t [K(l):t ]⊤ +λI , the storage cost becomes O(T LN d 1). The primary computational cost of SimIE arises from matrix inversion, implemented by solving the linear system XP (l) 
+
+> t
+
+= ∆ W (l) 
+
+> t
+
+k(l) 
+
+> t
+
+[k(l) 
+
+> t
+
+]⊤. The standard approach for solving is LU decomposition, which has a time complexity of O( 23 d31). Alternatively, Cholesky decomposition can be used, offering a reduced time com-plexity of O( 13 d31), since P (l) 
+
+> t
+
+is a symmetric positive def-inite matrix. Overall, the costs introduced by SimIE are manageable and are nearly negligible compared to those of model editing algorithms. A more detailed discussion can be found in Appendix B.4. 
+
+## 4. Beyond Assumptions 
+
+In this section, we theoretically analyze the behavior of 
+
+SimIE when the assumptions are not met. Sections 4.1 and 4.2 examine the cases where Assumptions 3.2 and 3.3 do not hold, respectively. Section 4.3 considers the scenario where both assumptions fail. Since SimIE is applied inde-pendently to each layer, we focus on the analysis of a single layer and omit the layer index without loss of generality. 
+
+4.1. Optimality without Assumption 3.2 
+
+Assumption 3.2 requires that the weight matrix has suffi-cient capacity and that the key vectors are linearly inde-pendent, but this may not always hold in practice. For instance, frequent knowledge updates can cause the number of edit examples to rapidly exceed the column dimension of the matrix. Moreover, unintended edits to relevant factual knowledge may result in key vectors becoming linearly de-pendent. In such cases, the ideal editor does not exist, as the linear system SK = B no longer admits the exact solution. Although the existence of an ideal editor is precluded, we will show that the solution SλT generated by SimIE is still near-optimal in a statistical sense. Here, optimal in a statisti-cal sense refers to a solution S∗ that minimizes the squared residual norm, i.e., ∥S∗K − B∥2F = min ∥SK − B∥2F, as in least squares problems. The following theorem provides an upper bound on the squared residual norm w.r.t. SλT :
+
+Theorem 4.1. Let SλT = WT − W0 represent the parameter shift generated by SimIE according to Equation (5) . Under Assumption 3.3, the squared residual norm w.r.t. SλT satisfies the following inequality: 
+
+Rmin ≤ SλT K − B 2F ≤ λ2(∥B∥2F − Rmin )(σ2 
+
+> r
+
++ λ)2 + Rmin ,
+
+where Rmin := min ∥SK − B∥2F is the minimum value of squared residual norm, and σr > 0 denotes the smallest non-zero singular value of K.
+
+Theorem 4.1 demonstrates that the squared residual norm of SλT is bounded by the minimal squared residual norm 
+
+Rmin plus a term ∥B∥2F − Rmin scaled by the hyperparam-eter λ. Here, Rmin represents the theoretical lower bound of the squared residual norm, reflecting the irreducible er-ror caused by the inherent limitations of the system. On the other hand, ∥B∥2F − Rmin quantifies the portion of the squared residual norm that can be effectively fitted by the model. As λ → 0, the squared residual norm of SλT con-verges to Rmin . Thus, even in the absence of Assump-tion 3.2, the solution generated by SimIE remains near-optimal in a statistical sense, as it minimizes the squared residual norm of the given constraints to the extent possible. 5Simulating Ideal Editor 
+
+4.2. Stability without Assumption 3.3 
+
+Assumption 3.3 assumes that the representations of specific knowledge remain stable, but this may not always hold in complex multi-layer editing algorithms. Specifically, pa-rameter updates in earlier layers can perturb the keys in subsequent layers. Moreover, as the edit-distribution strat-egy depends on the current model state (Gupta et al., 2024b), it induces perturbations in the values of intermediate layers. As a result, in multi-layer editing scenarios, Assumption 3.3 is unlikely to hold due to inevitable key-value perturbations. We will demonstrate that the solution generated by SimIE 
+
+has stability even without Assumption 3.3, meaning that per-turbations to key-value pairs do not excessively change the solution. Mathematically, perturbations to key-value pairs 
+
+(kt, v t) are equivalent to perturbations in (kt, b t). Thus, our subsequent stability analysis focuses on the latter term. Since the impact of the perturbation to (kt, b t) is not ampli-fied over subsequent time steps (see Lemma C.2), we can analyze these perturbations using the matrix forms K and 
+
+B, rather than examining their components individually. Following perturbation theory (Hansen, 1998; Malyshev, 2003), we define the relative condition number of SλT w.r.t. 
+
+B, but replace the ℓ2-norm with the Frobenius norm, as: 
+
+cond( SλT , B ) := lim  
+
+> ϵ→0
+
+sup 
+
+> ∥δB ∥F≤ϵ
+
+δS λT F
+
+SλT F
+
+. ∥δB ∥F
+
+∥B∥F
+
+!
+
+.
+
+Similarly, let κF(K) := K† 
+
+> F
+
+∥K∥F denote the condition number of the matrix K under the Frobenius norm. The following theorem establishes a perturbation bound for the solutions generated by SimIE :
+
+Theorem 4.2. Let SλT represent the original solution corre-sponding to K and B, and fSλT denote the perturbed solution corresponding to K + δK and B + δB , both generated by 
+
+SimIE according to Equation (5) . Under Assumption 3.2, the perturbation bound for SλT is: 
+
+SλT − fSλT F
+
+SλT F
+
+≤cond( SλT , B ) ∥δB ∥F
+
+∥B∥F
+
++ ∥Jλ∥F ∥δK ∥F
+
++
+
+√d1 ∥K∥F
+
+σ2min 
+
+∥δK ∥F
+
+≤cond( SλT , B ) ∥δB ∥F
+
+∥B∥F
+
++ κF(K) ∥δK ∥F
+
+∥K∥F
+
++
+
+√d1 ∥K∥F
+
+σ2min 
+
+∥δK ∥F ,
+
+where Jλ := K⊤(KK ⊤ + λI )−1 denotes the Jacobian matrix of SλT at B.
+
+The first inequality of Theorem 4.2 establishes a tight per-turbation bound that depends on the hyperparameter λ. The first term indicates that the effect of the perturbation δB is limited by the condition number cond( SλT , B ). The second term ∥Jλ∥F and the third term √d1 ∥K∥F /σ 2min together govern the impact of the perturbation δK . As λ approaches 
+
+0, ∥Jλ∥F increases monotonically until attaining an upper bound. The second inequality captures this behavior by of-fering a λ-independent 2 perturbation bound, where ∥Jλ∥F
+
+is substituted with the condition number κF(K) w.r.t. K.In other words, when a very small λ > 0 is chosen for optimality, perturbations δK and δB always lead to man-ageable changes in the solution. In conclusion, even in the absence of Assumption 3.3, the solution generated by 
+
+SimIE remains stable, as it is not excessively sensitive to small perturbations in the key-value pairs. 
+
+4.3. Trade-off without Assumptions 3.2 and 3.3 
+
+While violating either Assumption 3.2 or Assumption 3.3 individually results in relatively positive outcomes, the sit-uation becomes more intricate when both assumptions are not met. In this case, a trade-off between optimality and sta-bility must be considered. The following theorem presents a perturbation bound for the solutions generated by SimIE 
+
+that does not rely on any assumptions: 
+
+Theorem 4.3. Let SλT represent the original solution corre-sponding to K and B, and fSλT denote the perturbed solution corresponding to K + δK and B + δB , both generated by 
+
+SimIE according to Equation (5) . Then, the perturbation bound for SλT is: 
+
+SλT − fSλT F
+
+SλT F
+
+≤cond( SλT , B ) ∥δB ∥F
+
+∥B∥F
+
++ κF(K) ∥δK ∥F
+
+∥K∥F
+
++ ∥Rλ∥F
+
+λ
+
+√d1
+
+SλT F
+
+∥δK ∥F ,
+
+where Rλ = SλT K − B is the residual matrix w.r.t. SλT .
+
+Theorem 4.3 indicates that the impact of the perturbation δB 
+
+is governed by the relative condition number cond( SλT , B ),while the effect of the perturbation δK is modulated by the condition number κF(K) and the ratio of the residual norm ∥Rλ∥F to the hyperparameter λ. Notably, as λ de-creases, the term ∥Rλ∥F tends to decrease (as established in Theorem 4.1), while 1/λ increases monotonically. The combined effect of ∥Rλ∥F 
+
+> λ
+
+introduces a trade-off between the optimality and stability of the solution: smaller values of λ can enhance the optimality, but at the cost of increased sensitivity to perturbations. Conversely, larger values of λ
+
+improve stability but may result in a suboptimal. Therefore,         
+
+> 2Note that cond( SλT, B )also relies on λ, while it admits a complex upper bound. For conciseness, we omit a detailed analysis here. It is helpful to observe that lim λ→0cond( SλT, B ) = κF(K).Further discussions are provided in Remark C.3.
+
+6Simulating Ideal Editor 10 50 100 300 500 750 1000                   
+
+> Number of Edits
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Rel
+> 10 50 100 300 500 750 1000
+> Number of Edits
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Gen
+> 10 50 100 300 500 750 1000
+> Number of Edits
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Loc
+> 10 50 100 300 500 750 1000
+> Number of Edits
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Avg
+
+Llama-2 (7B) on the ZsRE dataset         
+
+> MEND MEND+SimIE ROME ROME+SimIE MEMIT MEMIT+SimIE AlphaEdit AlphaEdit +SimIE
+
+Figure 2. Performance of algorithms as the number of edits increases, with the solid line representing the results combined with the proposed SimIE .
+
+when both Assumptions 3.2 and 3.3 are not met, it is cru-cial to carefully tune λ to achieve the best balance between optimality and stability in the solution generated by SimIE .
+
+## 5. Experiments 
+
+This section validates the effectiveness of SimIE in restor-ing the strong performance of standard methods in lifelong contexts. Further analyses, including case study, hidden representation visualization, and long sentence editing, are provided in Appendix D.3. 
+
+Experimental setup. We conduct experiments on three widely used LLMs: GPT2-XL (1.5B) (Radford et al., 2019), Llama-2 (7B) (Touvron et al., 2023), and Mis-tral (7B) (Chaplot, 2023). Our experiments include nine popular baselines: the basic fine-tuning method, FT-L (Meng et al., 2022), and four standard model edit-ing algorithms, namely MEND (Mitchell et al., 2022a), 
+
+ROME (Meng et al., 2022), MEMIT (Meng et al., 2023), and AlphaEdit −3 (Fang et al., 2024), along with four lifelong model editing algorithms, specifically 
+
+GRACE (Hartvigsen et al., 2024), WISE (Wang et al., 2024b), PRUNE (Ma et al., 2024), and AlphaEdit (Fang et al., 2024). These algorithms are evaluated using two widely adopted benchmarks, i.e., the ZsRE dataset (Levy et al., 2017) and the Counterfact dataset (Meng et al., 2022). In line with prior research (Wang et al., 2024b), we assess performance using three key metrics: Rel (Reliability, also known as Edit Success Rate (Hartvigsen et al., 2024)), Gen 
+
+(Generalization Success Rate), and Loc (Localization Suc-cess Rate). We use the Arithmetic Mean Avg = Rel +Gen +Loc 
+
+> 3
+
+as the primary metric, and introduce the Locality-penalized Geometric Mean Geo = eα(Loc −1) (Rel × Gen ) as a com-
+
+> 3
+
+AlphaEdit includes two mechanisms: projecting updates into the null space and protecting previously edited knowledge. We refer to its version in the standard scenario, where the protection component is omitted, as AlphaEdit −.
+
+plementary measure. For more details on the experimental setup, please refer to Appendix D.1. 
+
+5.1. Effectiveness of SimIE 
+
+To evaluate the effectiveness of the proposed SimIE , we apply it to standard model editing algorithms and measure their performance before and after application. Specifically, we perform T = 1000 sequential edits on LLMs, with 1
+
+example per edit. Table 1 presents the results for Llama-2 and Mistral, while Table 4 displays the results for GPT2-XL. Additionally, Figures 2 and 6 illustrate the performance of standard methods as the number of edits increases. Based on these results, we can draw the following observations: • Standard algorithms exhibit significant perfor-mance degradation as the number of edits increases. 
+
+While methods like ROME and AlphaEdit − maintain stable performance early in editing, their effectiveness sharply decreases after surpassing 100 edits. The sit-uation is even worse for MEND, which fails in the initial stages, likely due to the hypernetwork being tailored to the initial model. By the end of the edit sequence ( T = 1000 ), all standard algorithms show unsatisfactory performance across settings. • The proposed SimIE successfully restores the strong performance of standard algorithms in life-long contexts. First, algorithms integrated with 
+
+SimIE maintain comparable performance to their ini-tial editing phase throughout the sequence. Second, for editing Llama-2 on the ZsRE dataset, SimIE increases the Avg of MEMIT from 0.03 to 0.68 , achieving parity with its batch-editing counterpart, MEMIT-MASS, as reported in Wang et al. (2024b). These results demon-strate that the performance gains from SimIE are both substantial and consistent. • The performance of standard algorithms aug-mented with SimIE rivals that of dedicated life-
+
+7Simulating Ideal Editor     
+
+> Table 1. Performance of algorithms in the lifelong model editing task with 1000 edits, where the top three Avg are highlighted in bold .
+
+ZsRE Counterfact Llama-2 (7B) Mistral (7B) Llama-2 (7B) Mistral (7B) Algorithm Rel Gen Loc Avg Rel Gen Loc Avg Rel Gen Loc Avg Rel Gen Loc Avg FT-L 0.18 0.16 0.03 0.13 0.52 0.47 0.74 0.57 0.06 0.01 0.04 0.04 0.21 0.10 0.11 0.14 MEND 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 +SimIE 0.82 0.69 0.85 0.79 0.72 0.66 0.83 0.74 0.96 0.31 0.29 0.52 0.94 0.30 0.32 0.52 ROME 0.04 0.05 0.00 0.03 0.04 0.03 0.01 0.03 0.25 0.15 0.06 0.16 0.28 0.24 0.01 0.18 +SimIE 0.64 0.60 0.66 0.63 0.72 0.67 0.82 0.74 0.97 0.51 0.30 0.59 0.96 0.52 0.50 0.66 
+
+MEMIT 0.04 0.04 0.02 0.03 0.04 0.04 0.02 0.03 0.00 0.00 0.07 0.02 0.00 0.00 0.00 0.00 +SimIE 0.71 0.68 0.65 0.68 0.65 0.62 0.80 0.69 0.81 0.43 0.29 0.51 0.78 0.45 0.46 0.56 AlphaEdit − 0.04 0.04 0.02 0.03 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 +SimIE 0.84 0.78 0.79 0.80 0.74 0.69 0.84 0.75 0.83 0.45 0.37 0.55 0.77 0.38 0.67 0.61 GRACE 0.98 0.02 1.00 0.67 0.98 0.02 1.00 0.67 1.00 0.00 1.00 0.67 1.00 0.00 1.00 0.67 
+
+WISE 0.82 0.76 1.00 0.86 0.72 0.69 1.00 0.80 0.71 0.31 0.37 0.46 0.69 0.35 0.35 0.46 PRUNE 0.54 0.52 0.72 0.59 0.25 0.25 0.47 0.33 0.71 0.35 0.67 0.58 0.86 0.42 0.56 0.61 AlphaEdit 0.84 0.79 0.64 0.76 0.79 0.73 0.75 0.76 0.91 0.53 0.30 0.58 0.94 0.49 0.53 0.65 
+
+long model editing methods. For instance, when edit-ing Llama-2 on the ZsRE dataset, AlphaEdit+ SimIE 
+
+achieves an Avg of 0.80 , outperforming GRACE, PRUNE, and the original AlphaEdit. Similarly, in experiments on GPT2-XL using the ZsRE dataset, ROME+ SimIE attains an Avg of 0.81 , surpassing all lifelong model editing methods. These improvements are also reflected across individual metrics (e.g., Rel, Gen, and Loc), providing comprehensive evidence for the effectiveness of SimIE .
+
+5.2. Impact of hyperparameter λ
+
+Section 4 highlights the importance of the hyperparameter λ
+
+in SimIE . Thus, we examine the impact of various λ values on the performance across methods. Specifically, for each standard model editing algorithm, we apply SimIE with 
+
+λ ∈ { 0.01 , 0.1, 1, 5, 10 , 30 , 50 }. The experimental results are presented in Figures 7 to 10, with Figure 3 illustrating selected results for ROME+ SimIE on Llama-2 using the ZsRE dataset. It is important to note that the values of λ used in Section 5.1 correspond to those that yield the highest av-erage (Avg) performance, as summarized in Table 3. Based on these findings, we make the following observations: • The Avg exhibits robustness across a specific range of the hyperparameter λ. In most experimental set-tings, Avg remains stable for λ varies within the range 
+
+[1 , 50] . However, extremely small values of λ may lead to catastrophic performance degradation. This phe-nomenon can be primarily attributed to the increasing sensitivity of the solution provided by SimIE , which 0.01 0.1 1.0 5.0 10 30 50 
+
+# Hyperparameter 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+> Success Rate
+
+# Llama-2 (7B) 
+
+Avg 
+
+Rel 
+
+Gen 
+
+Loc        
+
+> Figure 3. Performance of ROME+ SimIE on the ZsRE dataset across various λvalues, under T= 1000 sequential edits.
+
+amplifies errors arising from violations of Assump-tion 3.3 and the matrix inversion process. • As the hyperparameter λ increases, Rel and Gen generally decline, whereas Loc tends to improve. 
+
+This behavior can be explained as follows: 1) Larger values of λ cause the solution to deviate from the ideal editor, which adversely affects Rel and Gen; 2) An increased λ enhances the stability of the solution, char-acterized by the smaller norm, thereby improving Loc. These findings emphasize the trade-off between opti-mality and sensitivity established by Theorem 4.3. 8Simulating Ideal Editor 
+
+5.3. More recent LLMs 
+
+We conduct additional evaluations on recent model, includ-ing Llama-3 (8B) (Grattafiori et al., 2024) and Qwen2.5 
+
+(7B) (Yang et al., 2025). We select FT-L, ROME, AlphaEdit, WISE, and AlphaEdit as baselines and perform T = 1000 
+
+sequential edits using the ZsRE dataset. The experimental results are presented in the Table 2.                                                                      
+
+> Table 2. Performance of algorithms in the lifelong model editing task with 1000 edits, where the top-1 Avg are highlighted in bold .
+> ZsRE Llama-3 (8B) Qwen2.5 (7B) Algorithm Rel Gen Loc Avg Rel Gen Loc Avg FT-L 0.17 0.14 0.01 0.10 0.09 0.08 0.02 0.07 ROME 0.09 0.08 0.01 0.06 0.22 0.22 0.09 0.18 +SimIE 0.75 0.72 0.80 0.75 0.92 0.87 0.72 0.84 AlphaEdit −0.06 0.06 0.03 0.05 0.67 0.63 0.76 0.68 +SimIE 0.74 0.67 0.75 0.72 0.91 0.83 0.88 0.87
+> WISE 0.51 0.50 1.00 0.67 0.54 0.53 0.99 0.69 AlphaEdit 0.86 0.78 0.62 0.75 0.98 0.80 0.72 0.83
+
+We observe that SimIE achieves competitive performance across these recent models, especially surpassing the SOTA method (AlphaEdit) by an average of 4.8% on Qwen2.5. These results are consistent with those in the main paper, fur-ther confirming the effectiveness of our proposed SimIE .
+
+## 6. Conclusion 
+
+This paper presents SimIE , a general framework that gen-eralizes standard model editing methods to lifelong sce-narios while preserving strong performance. Theoretical analysis confirms that SimIE remains effective even under relaxed assumptions, and an optimality-stability trade-off arises when both assumptions fail. Extensive experiments across multiple LLMs demonstrate that standard algorithms integrated with SimIE achieve comparable performance to specialized lifelong model editing methods. Our work not only provides robust baselines for lifelong scenarios but also enables lifelong editing to benefit from the ongoing ad-vancements in standard editing techniques, thereby bridging the gap between these two paradigms. 
+
+## Acknowledgements 
+
+This work is partly supported by the National Natural Sci-ence Foundation of China (No. 62306255, 92370204), the National Key Research and Development Program of China (No. 2023YFF0725000), the Guangdong Basic and Ap-plied Basic Research Foundation (No. 2024A1515011839), the Fundamental Research Project of Guangzhou (No. 2024A04J4233), and the Education Bureau of Guangzhou Municipality. 
+
+## Impact Statement 
+
+This work proposes a general framework that restores the strong performance of standard model editing methods in a lifelong context, bridging the gap between these two paradigms. Given the theoretical nature of our study, we have not identified any direct ethical concerns or negative societal impacts related to our research. While our contribu-tions to model editing are intended to enhance the trustwor-thy deployment of LLMs, it is important to acknowledge that, like other advances in this field, there exists the po-tential for misuse to inject harmful content. As a result, it is essential to carefully monitor the usage of model editors during deployment. 
+
+## References 
+
+Brown, T., Mann, B., Ryder, N., Subbiah, M., Kaplan, J. D., Dhariwal, P., Neelakantan, A., Shyam, P., Sastry, G., Askell, A., et al. Language models are few-shot learners. In Advances in neural information processing systems ,volume 33, pp. 1877–1901, 2020. Chaplot, D. S. Albert q. jiang, alexandre sablayrolles, arthur mensch, chris bamford, devendra singh chaplot, diego de las casas, florian bressand, gianna lengyel, guillaume lample, lucile saulnier, l ´elio renard lavaud, marie-anne lachaux, pierre stock, teven le scao, thibaut lavril, thomas wang, timoth ´ee lacroix, william el sayed. arXiv preprint arXiv:2310.06825 , 2023. De Cao, N., Aziz, W., and Titov, I. Editing factual knowl-edge in language models. In Moens, M.-F., Huang, X., Specia, L., and Yih, S. W.-t. (eds.), Proceedings of the 2021 Conference on Empirical Methods in Natural Lan-guage Processing , pp. 6491–6506, Online and Punta Cana, Dominican Republic, November 2021. Association for Computational Linguistics. doi: 10.18653/v1/2021. emnlp-main.522. URL https://aclanthology. org/2021.emnlp-main.522 .Fang, J., Jiang, H., Wang, K., Ma, Y., Wang, X., He, X., and Chua, T.-s. Alphaedit: Null-space constrained knowledge editing for language models. arXiv preprint arXiv:2410.02355 , 2024. Golub, G. H. and Van Loan, C. F. Matrix computations .JHU press, 2013. Gong, Z. and Sun, Y. An energy-centric framework for category-free out-of-distribution node detection in graphs. In Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining , pp. 908–919, 2024. Grattafiori, A., Dubey, A., Jauhri, A., Pandey, A., Kadian, A., Al-Dahle, A., Letman, A., Mathur, A., Schelten, A., 9Simulating Ideal Editor 
+
+Vaughan, A., et al. The llama 3 herd of models. arXiv preprint arXiv:2407.21783 , 2024. Guo, K., Wen, H., Jin, W., Guo, Y., Tang, J., and Chang, Y. Investigating out-of-distribution generalization of gnns: An architecture perspective. In Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining , pp. 932–943, 2024a. Guo, S., Guo, Y., Zhang, H., and Wang, J. Mitigating up-date conflict in non-iid federated learning via orthogonal class gradients. IEEE Transactions on Mobile Computing ,2024b. Guo, Y., Guo, K., Cao, X., Wu, T., and Chang, Y. Out-of-distribution generalization of federated learning via implicit invariant relationships. In International Confer-ence on Machine Learning , pp. 11905–11933. PMLR, 2023. Gupta, A., Rao, A., and Anumanchipalli, G. Model editing at scale leads to gradual and catastrophic forgetting. arXiv preprint arXiv:2401.07453 , 2024a. Gupta, A., Sajnani, D., and Anumanchipalli, G. Aunified framework for model editing. arXiv preprint arXiv:2403.14236 , 2024b. Hansen, P. C. Rank-deficient and discrete ill-posed prob-lems: numerical aspects of linear inversion . SIAM, 1998. Hartvigsen, T., Sankaranarayanan, S., Palangi, H., Kim, Y., and Ghassemi, M. Aging with grace: Lifelong model editing with discrete key-value adaptors. In Advances in Neural Information Processing Systems , volume 36, 2024. Higham, N. Functions of matrices: Theory and computation, 2008. Higham, N. J. Accuracy and stability of numerical algo-rithms . SIAM, 2002. Hu, E. J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., Wang, L., and Chen, W. Lora: Low-rank adaptation of large language models. arXiv preprint arXiv:2106.09685 ,2021. Hu, X., Cheng, Y., Zheng, Z., Wang, Y., Chi, X., and Zhu, H. Boss: A bilateral occupational-suitability-aware rec-ommender system for online recruitment. In Proceedings of the 29th ACM SIGKDD Conference on Knowledge Discovery and Data Mining , pp. 4146–4155, 2023. Huang, M., Liu, Y., Ao, X., Li, K., Chi, J., Feng, J., Yang, H., and He, Q. Auc-oriented graph neural network for fraud detection. In Proceedings of the ACM Web Conference 2022 , pp. 1311–1321, 2022. Huang, Z., Shen, Y., Zhang, X., Zhou, J., Rong, W., and Xiong, Z. Transformer-patcher: One mistake worth one neuron. arXiv preprint arXiv:2301.09785 , 2023. Laub, A. J. Matrix analysis for scientists and engineers .SIAM, 2004. LeCun, Y., Bengio, Y., and Hinton, G. Deep learning. nature ,521(7553):436–444, 2015. Levy, O., Seo, M., Choi, E., and Zettlemoyer, L. Zero-shot relation extraction via reading comprehension. arXiv preprint arXiv:1706.04115 , 2017. Lin, H., Zhu, H., Zuo, Y., Zhu, C., Wu, J., and Xiong, H. Collaborative company profiling: Insights from an employee’s perspective. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 31, 2017. Lin, X., Huang, Z., Zhao, H., Chen, E., Liu, Q., Wang, H., and Wang, S. Hms: A hierarchical solver with dependency-enhanced understanding for math word prob-lem. In Proceedings of the AAAI conference on artificial intelligence , volume 35, pp. 4232–4240, 2021. Liu, J., Huang, Z., Lin, X., Liu, Q., Ma, J., and Chen, E. A cognitive solver with autonomously knowledge learning for reasoning mathematical answers. In 2022 IEEE International Conference on Data Mining (ICDM) ,pp. 269–278. IEEE, 2022a. Liu, J., Huang, Z., Ma, Z., Liu, Q., Chen, E., Su, T., and Liu, H. Guiding mathematical reasoning via mastering commonsense formula knowledge. In Proceedings of the 29th ACM SIGKDD Conference on Knowledge Discovery and Data Mining , pp. 1477–1488, 2023a. Liu, J., Huang, Z., Zhai, C., and Liu, Q. Learning by ap-plying: A general framework for mathematical reasoning via enhancing explicit knowledge learning. In Proceed-ings of the AAAI Conference on Artificial Intelligence ,volume 37, pp. 4497–4506, 2023b. Liu, Q., Zhang, Q., Zhao, F., and Wang, G. Uncertain knowl-edge graph embedding: An effective method combining multi-relation and multi-path. Frontiers Comput. Science ,18(3):183311, 2024. Liu, Y., Ao, X., Qin, Z., Chi, J., Feng, J., Yang, H., and He, Q. Pick and choose: a gnn-based imbalanced learning approach for fraud detection. In Proceedings of the Web Conference 2021 , pp. 3168–3177, 2021. Liu, Y., Ao, X., Feng, F., and He, Q. Ud-gnn: Uncertainty-aware debiased training on semi-homophilous graphs. In 
+
+Proceedings of the 28th ACM SIGKDD Conference on Knowledge Discovery and Data Mining , pp. 1131–1140, 2022b. 10 Simulating Ideal Editor 
+
+Liu, Y., Ao, X., Feng, F., Ma, Y., Li, K., Chua, T.-S., and He, Q. Flood: A flexible invariant learning framework for out-of-distribution generalization on graphs. In Proceedings of the 29th ACM SIGKDD Conference on Knowledge Discovery and Data Mining , pp. 1548–1558, 2023c. Ma, J.-Y., Wang, H., Xu, H.-X., Ling, Z.-H., and Gu, J.-C. Perturbation-restrained sequential model editing. arXiv preprint arXiv:2405.16821 , 2024. Madaan, A., Tandon, N., Clark, P., and Yang, Y. Memory-assisted prompt editing to improve gpt-3 after deployment. 
+
+arXiv preprint arXiv:2201.06009 , 2022. Malyshev, A. N. A unified theoryof conditioning for linear least squares and tikhonov regularization solutions. SIAM journal on matrix analysis and applications , 24(4):1186– 1196, 2003. Manakul, P., Liusie, A., and Gales, M. J. Selfcheckgpt: Zero-resource black-box hallucination detection for generative large language models. arXiv preprint arXiv:2303.08896 ,2023. McInnes, L., Healy, J., and Melville, J. Umap: Uniform manifold approximation and projection for dimension reduction. arXiv preprint arXiv:1802.03426 , 2018. Meng, K., Bau, D., Andonian, A., and Belinkov, Y. Locating and editing factual associations in gpt. In Advances in Neural Information Processing Systems , volume 35, pp. 17359–17372, 2022. Meng, K., Sharma, A. S., Andonian, A. J., Belinkov, Y., and Bau, D. Mass-editing memory in a transformer. In The Eleventh International Conference on Learning Represen-tations , 2023. URL https://openreview.net/ forum?id=MkbcAHIYgyS .Mitchell, E., Lin, C., Bosselut, A., Finn, C., and Manning, C. D. Fast model editing at scale. In International Confer-ence on Learning Representations , 2022a. URL https: //openreview.net/forum?id=0DcZxeWfOPt .Mitchell, E., Lin, C., Bosselut, A., Manning, C. D., and Finn, C. Memory-based model editing at scale. In Inter-national Conference on Machine Learning , pp. 15817– 15831. PMLR, 2022b. Peng, L., Giampouras, P., and Vidal, R. The ideal continual learner: An agent that never forgets. In International Con-ference on Machine Learning , pp. 27585–27610. PMLR, 2023. Penrose, R. A generalized inverse for matrices. In Math-ematical proceedings of the Cambridge philosophical society , volume 51, pp. 406–413. Cambridge University Press, 1955. Petroni, F., Rockt ¨aschel, T., Riedel, S., Lewis, P., Bakhtin, A., Wu, Y., and Miller, A. Language models as knowl-edge bases? In Inui, K., Jiang, J., Ng, V., and Wan, X. (eds.), Proceedings of the 2019 Conference on Empir-ical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP) , pp. 2463–2473, Hong Kong, China, November 2019. Association for Compu-tational Linguistics. doi: 10.18653/v1/D19-1250. URL 
+
+https://aclanthology.org/D19-1250 .Radford, A., Wu, J., Child, R., Luan, D., Amodei, D., Sutskever, I., et al. Language models are unsupervised multitask learners. OpenAI blog , 1(8):9, 2019. Rifkin, R. M. and Lippert, R. A. Notes on regularized least squares. Technical Report MIT-CSAILTR-2007-025 ,2007. Shen, D., Qin, C., Wang, C., Dong, Z., Zhu, H., and Xiong, H. Topic modeling revisited: A document graph-based neural network perspective. In Advances in Neural Infor-mation Processing Systems , volume 34, pp. 14681–14693, 2021. Sinitsin, A., Plokhotnyuk, V., Pyrkin, D., Popov, S., and Babenko, A. Editable neural networks. In International Conference on Learning Representations , 2020. Sun, Y., Zhu, H., Qin, C., Zhuang, F., He, Q., and Xiong, H. Discerning decision-making process of deep neu-ral networks with hierarchical voting transformation. In 
+
+Advances in Neural Information Processing Systems , vol-ume 34, pp. 17221–17234, 2021a. Sun, Y., Zhuang, F., Zhu, H., Zhang, Q., He, Q., and Xiong, H. Market-oriented job skill valuation with cooperative composition neural network. Nature communications , 12 (1):1992, 2021b. Sun, Y., Zhu, H., Wang, L., Zhang, L., and Xiong, H. Large-scale online job search behaviors reveal labor market shifts amid covid-19. Nature Cities , 1(2):150–163, 2024. Tan, C., Zhang, G., and Fu, J. Massive editing for large language models via meta learning. In The Twelfth International Conference on Learning Representations ,2024. URL https://openreview.net/forum? id=L6L1CJQ2PE .Touvron, H., Martin, L., Stone, K., Albert, P., Almahairi, A., Babaei, Y., Bashlykov, N., Batra, S., Bhargava, P., Bhosale, S., et al. Llama 2: Open foundation and fine-tuned chat models. arXiv preprint arXiv:2307.09288 ,2023. Vaswani, A. Attention is all you need. In Advances in Neural Information Processing Systems , 2017. 11 Simulating Ideal Editor 
+
+Wang, C., Zhu, H., Zhu, C., Qin, C., and Xiong, H. Se-trank: A setwise bayesian approach for collaborative ranking from implicit feedback. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 34, pp. 6127–6136, 2020. Wang, L., Zhang, X., Su, H., and Zhu, J. A comprehen-sive survey of continual learning: theory, method and application. IEEE Transactions on Pattern Analysis and Machine Intelligence , 2024a. Wang, P., Li, Z., Zhang, N., Xu, Z., Yao, Y., Jiang, Y., Xie, P., Huang, F., and Chen, H. Wise: Rethinking the knowledge memory for lifelong model editing of large language models. arXiv preprint arXiv:2405.14768 , 2024b. Xin, H., Sun, Y., Wang, C., and Xiong, H. Llmcdsr: Enhanc-ing cross-domain sequential recommendation with large language models. ACM Transactions on Information Systems , 2025. Xu, D., Chen, W., Peng, W., Zhang, C., Xu, T., Zhao, X., Wu, X., Zheng, Y., Wang, Y., and Chen, E. Large lan-guage models for generative information extraction: A survey. Frontiers of Computer Science , 18(6):186357, 2024. Yang, A., Li, A., Yang, B., Zhang, B., Hui, B., Zheng, B., Yu, B., Gao, C., Huang, C., Lv, C., et al. Qwen3 technical report. arXiv preprint arXiv:2505.09388 , 2025. Yao, Y., Wang, P., Tian, B., Cheng, S., Li, Z., Deng, S., Chen, H., and Zhang, N. Editing large language mod-els: Problems, methods, and opportunities. In Bouamor, H., Pino, J., and Bali, K. (eds.), Proceedings of the 2023 Conference on Empirical Methods in Natural Lan-guage Processing , pp. 10222–10240, Singapore, Decem-ber 2023. Association for Computational Linguistics. doi: 10.18653/v1/2023.emnlp-main.632. URL https:// aclanthology.org/2023.emnlp-main.632 .Yu, L., Chen, Q., Zhou, J., and He, L. Melo: Enhancing model editing with neuron-indexed dynamic lora. In 
+
+Proceedings of the AAAI Conference on Artificial Intelli-gence , volume 38, pp. 19449–19457, 2024. Zeng, G., Chen, Y., Cui, B., and Yu, S. Continual learning of context-dependent processing in neural networks. Nature Machine Intelligence , 1(8):364–372, 2019. Zhang, L., Zhou, D., Zhu, H., Xu, T., Zha, R., Chen, E., and Xiong, H. Attentive heterogeneous graph embedding for job mobility prediction. In Proceedings of the 27th ACM SIGKDD conference on knowledge discovery & data mining , pp. 2192–2201, 2021. Zhang, N., Tian, B., Cheng, S., Liang, X., Hu, Y., Xue, K., Gou, Y., Chen, X., and Chen, H. Instructedit: Instruction-based knowledge editing for large language models. arXiv preprint arXiv:2402.16123 , 2024a. Zhang, N., Yao, Y., Tian, B., Wang, P., Deng, S., Wang, M., Xi, Z., Mao, S., Zhang, J., Ni, Y., et al. A comprehensive study of knowledge editing for large language models. 
+
+arXiv preprint arXiv:2401.01286 , 2024b. Zhao, W. X., Zhou, K., Li, J., Tang, T., Wang, X., Hou, Y., Min, Y., Zhang, B., Zhang, J., Dong, Z., et al. A survey of large language models. arXiv preprint arXiv:2303.18223 ,2023. Zheng, C., Li, L., Dong, Q., Fan, Y., Wu, Z., Xu, J., and Chang, B. Can we edit factual knowledge by in-context learning? arXiv preprint arXiv:2305.12740 , 2023. 12 Simulating Ideal Editor 
+
+## A. Additional discussions 
+
+A.1. Related work 
+
+Advances in deep learning (LeCun et al., 2015; Sun et al., 2021a;b; Wang et al., 2020; Guo et al., 2023; 2024b; Xu et al., 2024) have laid the foundation for the development of LLMs, equipping them with broad cross-domain knowledge (Liu et al., 2023a;b; Xin et al., 2025; Liu et al., 2024). These models have demonstrated strong versatility across diverse areas, including graph learning (Guo et al., 2024a; Liu et al., 2021; Shen et al., 2021; Zhang et al., 2021; Huang et al., 2022; Liu et al., 2022b; 2023c; Gong & Sun, 2024), data mining (Lin et al., 2017; Sun et al., 2024), and AI for science (Hu et al., 2023; Lin et al., 2021; Liu et al., 2022a). To enable low-cost correction of outdated or harmful information within LLMs, recent years have witnessed a surge in the development of model editing techniques (Zhang et al., 2024b). 
+
+Standard Model editing. Existing model editing techniques generally fall into two main categories: parameter-modifying and parameter-preserving (Yao et al., 2023). Parameter-modifying methods directly update the parameters most relevant to knowledge, thereby producing correct predictions. KE (De Cao et al., 2021) and MEND (Mitchell et al., 2022a), known as meta-learning approaches, update LLM parameters by learning a hypernetwork. MALMEN (Tan et al., 2024) formulates the update aggregation as a least-squares problem, mitigating the cancellation effect observed in MEND. InstructEdit (Zhang et al., 2024a) enhances these methods by incorporating instructions for training on different tasks, enabling adaptation to a variety of tasks. Additionally, ROME (Meng et al., 2022) and MEMIT (Meng et al., 2023), known as locate-and-edit methods, first identify the storage locations of knowledge (typically in MLP modules) and then perform targeted updates on the LLMs. Instead of altering the parameters, parameter-preserving methods store necessary information in memory, which is leveraged to guide the model in generating accurate predictions. MemPrompt (Madaan et al., 2022) and IKE (Zheng et al., 2023) utilize memory-based in-context learning to teach LLMs to generate the edited knowledge. SERAC (Mitchell et al., 2022b) constructs a retrieval-augmented counterfactual model to modulate LLM predictions as needed. MELO (Yu et al., 2024) dynamically activates certain LoRA (Hu et al., 2021) blocks based on an inner vector database, thus altering the behavior of the LLMs. While these standard editing methods achieve commendable performance, they suffer significant degradation in lifelong scenarios, particularly parameter-modifying methods. Our work introduces a general framework that restores the strong performance of parameter-modifying methods in a lifelong context. 
+
+Lifelong model editing. Lifelong model editing poses a greater challenge as it involves performing sequential edits on LLMs to accommodate evolving knowledge (Yao et al., 2023). T-Patcher (Huang et al., 2023) adds a handful of trainable neurons to the last Feed-Forward Network layer, enabling it to rectify a series of mistakes encountered by LLMs. GRACE (Hartvigsen et al., 2024) maintains a discrete codebook for a chosen layer, which is used to retrieve and replace the latent representations of examples. WISE (Wang et al., 2024b) designs a dual parametric memory scheme for edited knowledge, combined with a knowledge-sharding mechanism to reduce conflicts. PRUNE (Ma et al., 2024) proposes applying condition number restraints during sequential editing, preserving the general abilities of LLMs. AlphaEdit (Fang et al., 2024) projects updates into the null space of preserved knowledge while incorporating a regularization term to protect previously edited knowledge. Existing studies primarily focus on developing specialized approaches for lifelong model editing, often overlooking the potential of generalizing standard methods to lifelong scenarios. In contrast, our work aims to generalize standard model editing methods to lifelong scenarios while maintaining strong performance, thereby bridging the gap between these two paradigms for the first time. 
+
+A.2. Limitations 
+
+The first limitation involves the ideal editor, where an ill-conditioned key matrix K may generate parameter shifts S with a large norm. This design overly prioritizes injecting new knowledge into LLMs at the expense of preserving their general capabilities. This issue can be mitigated by imposing additional locality constraints on the ideal editor, such as limiting updates to a subspace that preserves original knowledge (Peng et al., 2023; Zeng et al., 2019). The second challenge concerns the hyperparameter λ in SimIE , whose optimal value cannot be determined in advance. Future work could enhance the recursive procedure of SimIE to enable flexible selection of an appropriate hyperparameter with minimal computational cost, similar to the technique in regularized least squares (Rifkin & Lippert, 2007). 13 Simulating Ideal Editor 
+
+## B. Further details on Section 3 
+
+B.1. Existence and uniqueness of the ideal editor Existence. The ideal editor exists if and only if the linear system SK = B has a solution. To establish the existence, we analyze the system through a row-wise decomposition. The system SK = B can be equivalently expressed as a collection of sub-linear systems: 
+
+siK = Bi, : ∀i ∈ [d2],
+
+where si denotes the i-th row of the matrix S, and Bi, : denotes the corresponding i-th row of the matrix B. For the linear system SK = B to have a solution, it is necessary and sufficient that each sub-linear system siK = Bi, : has a solution. Observe that each subsystem siK = Bi, : can be rewritten in its transpose form as K⊤s⊤ 
+
+> i
+
+= B⊤
+
+> i, :
+
+. With Assumption 3.2, the rows {k⊤ 
+
+> t
+
+}Tt=1 of K⊤ are linearly independent. Thus, we have the following rank condition: 
+
+rank( K⊤) = rank([ K⊤ | b⊤ 
+
+> i
+
+]) . (6) By the Rouch ´e–Capelli theorem, Equation (6) implies that the sub-linear system siK = Bi, : is consistent, i.e., at least one solution exists. Since the analysis holds across all rows, we conclude that all sub-linear systems admit at least one solution. As a result, the system SK = B has a solution, thereby proving the existence of the ideal editor. 
+
+Uniqueness. The general solution to the linear system SK = B can be characterized by (Theorem 6.11. in Laub (2004)): 
+
+S = BK † + Y (I − KK †),
+
+where Y ∈ Rd2×d1 is an arbitrary matrix. The term I − KK † represents the orthogonal projection operator onto the null space of K⊤ (Golub & Van Loan, 2013). Thus, we may verify that the two components BK † and Y (I − KK †) are orthogonal, i.e., 
+
+⟨Y (I − KK †), BK †⟩F = trace([ Y (I − KK †)] ⊤Y ⊤BK †)
+
+> (a)
+
+= trace(( I − KK †)Y ⊤BK †)
+
+> (b)
+
+= trace( Y ⊤BK †(I − KK †)) = trace( Y ⊤B(K† − K†KK †)) 
+
+> (c)
+
+= 0 ,
+
+where (a) follows from the fact that I − KK † is a symmetric matrix; (b) utilizes the cyclic property of the trace; and (c) is a consequence of Moore-Penrose conditions, specifically K†KK † = K†. From the above, the Frobenius norm of any solution S satisfying SK = B can be decomposed as: 
+
+∥S∥2F = BK † 2F + Y (I − KK †) 2F ≥ BK † 2F . (7) Clearly, the Frobenius norm of ∥S∥2F is minimized if and only if Y (I − KK †) = 0 , which implies S0 = BK †. Therefore, 
+
+S0 is the unique minimum norm solution to SK = B, establishing the uniqueness of the ideal editor. 
+
+Remark B.1 . If the columns of A are linearly independent (or equivalently, if A is left invertible), then the Moore-Penrose inverse A† = ( A⊤A)−1A⊤. Thus, under Assumption 3.2, S0 can also be expressed as S0 = B(K⊤K)−1K⊤, which is consistent with the solution form derived using the method of Lagrange multipliers. 14 Simulating Ideal Editor 
+
+B.2. Detailed derivation of the recurrence relation 
+
+We now present the full derivation of Equation (4). The details are as follows: 
+
+Sλt = ( B:t−1K⊤ 
+
+> :t−1
+
++ btk⊤ 
+
+> t
+
+)( K:tK⊤ 
+
+> :t
+
++ λI 
+
+| {z } 
+
+> denoted as Pt
+
+)−1
+
+= B:t−1K⊤
+
+> :t−1
+
+P −1 
+
+> t
+
++ btk⊤ 
+
+> t
+
+P −1
+
+> t
+
+= B:t−1K⊤
+
+> :t−1
+
+P −1
+
+> t−1
+
+| {z }
+
+> =Sλt−1
+
+Pt−1P −1 
+
+> t
+
++ btk⊤ 
+
+> t
+
+P −1
+
+> t
+
+= Sλt−1 Pt−1
+
+| {z } 
+
+> =Pt−ktk⊤
+> t
+
+P −1 
+
+> t
+
++ btk⊤ 
+
+> t
+
+P −1
+
+> t
+> (a)
+
+= Sλt−1 − Sλt−1ktk⊤ 
+
+> t
+
+P −1 
+
+> t
+
++ btk⊤ 
+
+> t
+
+P −1
+
+> t
+
+= Sλt−1 + ( bt
+
+|{z} 
+
+> =( Sλt−1+∆ Wt)kt
+
+−Sλt−1kt)k⊤ 
+
+> t
+
+P −1
+
+> t
+> (b)
+
+= Sλt−1 + ∆ Wtktk⊤ 
+
+> t
+
+P −1 
+
+> t
+
+.
+
+(8) Here, (a) follows from the recursive formula for Pt, given by Pt = Pt−1 + ktk⊤ 
+
+> t
+
+; (b) results from the Equation (3), which holds under Assumption 3.3. 
+
+B.3. Proof of Theorem 3.6 Theorem 3.6*. Let SλT = WT − W0 denote the parameter shift generated by SimIE according to Equation (5) , and let S0
+
+represent the ideal editor w.r.t. Equation (2) . Under Assumptions 3.2 and 3.3, the following bound holds: 
+
+λσ2max + λ ≤ SλT − S0
+
+> F
+
+∥S0∥F
+
+≤ λσ2min + λ ,
+
+where 0 < σ min ≤ σmax are the smallest and largest singular values of the key matrix K, respectively. Proof. We begin by expressing the key matrix K = U ΣV ⊤ through SVD, where U ∈ Rd1×d1 and V ∈ RT ×T are orthogonal matrices, and Σ ∈ Rd1×T is a diagonal matrix containing the singular values. Under Assumption 3.2, we can rewrite the ideal editor S0 as follows: 
+
+S0 = B(K⊤K)−1K⊤
+
+> (a)
+
+= B(V Σ⊤U ⊤U ΣV ⊤)−1(V Σ⊤U ⊤)= B(V Σ⊤ΣV ⊤)−1V Σ⊤U ⊤
+
+> (b)
+
+= BV (Σ ⊤Σ) −1V ⊤V Σ⊤U ⊤
+
+= BV (Σ ⊤Σ) −1Σ⊤U ⊤,
+
+(9) where (a) follows from the matrix transpose property (ABC )⊤ = C⊤B⊤A⊤; and (b) utilizes the inverse property of matrix products (ABC )−1 = C−1B−1A−1. Analogously, for the solution SλT generated by SimIE , there exist: 
+
+SλT = BK ⊤(KK ⊤ + λI )−1
+
+= BV Σ⊤U ⊤(U ΣV ⊤V Σ⊤U ⊤ + λI )−1(a)
+
+= BV Σ⊤U ⊤(U ΣΣ ⊤U ⊤ + λU U ⊤)−1
+
+= BV Σ⊤U ⊤  U (ΣΣ ⊤ + λI )U ⊤−1
+
+= BV Σ⊤U ⊤U (ΣΣ ⊤ + λI )−1U ⊤
+
+= BV Σ⊤(ΣΣ ⊤ + λI )−1U ⊤,
+
+(10) 15 Simulating Ideal Editor 
+
+where (a) employs the decomposition of the identity matrix I = U U ⊤.We are interested in the difference between S0 and SλT :
+
+S0 − SλT = BV  (Σ ⊤Σ) −1Σ⊤ − Σ⊤(ΣΣ ⊤ + λI )−1 U ⊤
+
+= BV  (Σ ⊤Σ) −1Σ⊤ − (Σ ⊤Σ) −1(Σ ⊤Σ)Σ ⊤(ΣΣ ⊤ + λI )−1 U ⊤
+
+= BV 
+
+(Σ ⊤Σ) −1Σ⊤
+
+| {z }
+
+> Γ1
+
+− (Σ ⊤Σ) −1Σ⊤
+
+| {z }
+
+> Γ1
+
+ΣΣ ⊤(ΣΣ ⊤ + λI )−1
+
+| {z }
+
+> Γ2
+
+ U ⊤.
+
+Given that K has full rank, Σ admits the block structure: 
+
+Σ = 
+
+
+
+σ1 0 · · · 00 σ2 · · · 0
+
+... ... . . . ...
+
+0 0 · · · σT
+
+0 0 · · · 0
+
+... ... . . . ...
+
+0 0 · · · 0
+
+
+
+=
+
+Σ1
+
+0
+
+
+
+, (11) where Σ1 = diag( σ1, . . . , σ T ) ∈ RT ×T contains the singular values. Consequently, the term Γ1 can be derived as: 
+
+(Σ ⊤Σ) −1Σ⊤ =
+
+Σ1 0 Σ1
+
+0
+
+ −1 Σ1 0 = (Σ 21)−1 Σ1 0 = Σ−11 0 . (12) Next, the term Γ2 can be expressed as: 
+
+ΣΣ ⊤(ΣΣ ⊤ + λI )−1 =
+
+Σ1
+
+0
+
+ Σ1 0  Σ1
+
+0
+
+ Σ1 0 + λ
+
+I1 00 I2
+
+ −1
+
+=
+
+Σ21 00 0
+
+  Σ21 00 0
+
+
+
++
+
+λI 1 00 λI 2
+
+ −1
+
+=
+
+Σ21 00 0
+
+  (Σ 21 + λI 1)−1 00 (λI 2)−1
+
+
+
+=
+
+Σ21(Σ 21 + λI 1)−1 00 0
+
+
+
+.
+
+Now, substituting the expressions for Γ1 and Γ2, we obtain: 
+
+S0 − SλT = BV 
+
+Σ−11 0 − Σ−11 0 Σ21(Σ 21 + λI 1)−1 00 0
+
+ 
+
+U ⊤
+
+= BV Σ−11 0  I1 00 0
+
+
+
+−
+
+Σ21(Σ 21 + λI 1)−1 00 0
+
+ 
+
+U ⊤
+
+= BV Σ−11 0 λI 1(Σ 21 + λI 1)−1 00 0
+
+
+
+U ⊤
+
+= BV λΣ−11 (Σ 21 + λI 1)−1 0 U ⊤,
+
+where the penultimate equality follows from the identity 1 − σ2  
+
+> i
+> σ2
+> i+λ
+
+= λσ2  
+
+> i+λ
+
+for each diagonal element i.To compute the Frobenius norm of S0−SλT , we rewrite BV ∈ Rd2×T in column-vector form as BV = [ bv 1 | bv 2 | · · · | bv T ],16 Simulating Ideal Editor 
+
+yielding: 
+
+S0 − SλT 
+
+> 2F
+
+= [bv 1 | bv 2 | · · · | bv T ] λΣ−11 (Σ 21 + λI 1)−1 0 U ⊤ 2F(a)
+
+=
+
+h( 1 
+
+> σ1
+
+· λσ21 +λ )bv 1 ( 1 
+
+> σ2
+
+· λσ22 +λ )bv 2 . . . ( 1 
+
+> σT
+
+· λσ2  
+
+> T+λ
+
+)bv T 0i 2F(b)
+
+=
+
+> T
+
+X
+
+> i=1
+
+∥( 1
+
+σi
+
+· λσ2 
+
+> i
+
++ λ )bv i∥22
+
+≤ ( λσ2min + λ )2
+
+> T
+
+X
+
+> i=1
+
+∥ 1
+
+σi
+
+bv i∥22
+
+= ( λσ2min + λ )2 BV Σ−11 0 U ⊤ 2F(c)
+
+= ( λσ2min + λ )2 S0 2F ,
+
+(13) where (a) uses the fact that Frobenius norm is unitarily invariant; (b) utilizes the definitions of the Frobenius norm and 
+
+ℓ2-norm; and (c) can be obtained by substituting Equation (12) into Equation (9). The lower bound follows analogously by replacing σmin with σmax in Equation (13), completing the proof. 
+
+B.4. Cost analysis 
+
+Here, we analyze the additional cost introduced by SimIE . For analytical tractability, we consider that each time step involves N tokens and L = |L| linear layers are edited. 
+
+Storage costs. SimIE involves maintaining L matrices P (l) 
+
+> t
+
+of dimension d1 × d1, with a direct storage cost of O(Ld 21).By leveraging the low-rank structure P (l) 
+
+> t
+
+, an alternative strategy is to incrementally store K(l):t = [ k(l)1 , . . . , k (l) 
+
+> t
+
+], which enables reconstructing P (l) 
+
+> t
+
+= K(l):t [K(l):t ]⊤ + λI . In this case, the storage cost becomes O(T LN d 1), which depends on the number of sequential edits T . If the total number of tokens is significantly smaller than the input dimension, i.e., T N ≪ d1,storing K(l):t may be a more practical choice. However, storing K(l):t could pose privacy concerns compared to storing P (l) 
+
+> t
+
+.
+
+Computational costs. The primary computational cost of the proposed SimIE stems from matrix inversion. Rec-ognizing the inherent numerical inaccuracy in matrix inversion (Higham, 2002), we instead solve the linear system 
+
+XP (l) 
+
+> t
+
+= ∆ W (l) 
+
+> t
+
+k(l) 
+
+> t
+
+[k(l) 
+
+> t
+
+]⊤ to provide the adjusted parameter updates. Among available methods 4, LU decomposition is a standard approach, which has a time complexity of O( 23 d31). Since P (l) 
+
+> t
+
+is a symmetric positive definite matrix, Cholesky decomposition offers higher computational efficiency with a reduced time complexity of O( 13 d31). Additionally, SVD is a potential alternative due to its excellent numerical stability, though it incurs a higher time complexity of O(9 d31). The detailed derivation of the time complexity of these matrix decompositions can be found in Higham (2008) and Golub & Van Loan (2013). Fortunately, all these decomposition techniques have been efficiently parallelized on GPUs, significantly accelerating computation. 
+
+## C. Proofs of theorems in Section 4 
+
+C.1. Proof of Theorem 4.1 Lemma C.1. Consider a least squares problem min ∥SK − B∥2F, where the matrix K is rank-deficient. If the SVD of matrix 
+
+K is K = U ΣV ⊤, then the minimum squared residual norm can be expressed as min ∥SK − B∥2F = PTi=r+1 ∥bv i∥22,where bv i denotes the i-th column of the matrix BV , and r is the rank of K.Proof. We start with the expression for the squared residual norm: 
+
+∥SK − B∥2F = SU ΣV ⊤ − B 2F = ∥SU Σ − BV ∥2F , (14) where the second equality follows from the unitary invariance of the Frobenius norm. Since K is rank-deficient with rank r,
+
+> 4
+
+Only the complexity of the decomposition is considered, as the back substitution has the same complexity across all methods. 
+
+17 Simulating Ideal Editor 
+
+the singular value matrix Σ has the following block structure: 
+
+Σ = 
+
+
+
+σ1 0 · · · 0 0 · · · 00 σ2 · · · 0 ... · · · ...... ... . . . ... ... · · · ...
+
+0 0 · · · σr 0 · · · 00 · · · · · · 0 0 · · · 0
+
+... ... ... ... ... . . . ...
+
+0 · · · · · · 0 0 · · · 0
+
+
+
+=
+
+Σ1 00 0
+
+
+
+, (15) where σr > 0 denotes the smallest non-zero singular value of K, and Σ1 = diag( σ1, . . . , σ r ) ∈ Rr×r contains the non-zero singular values. Let SU = [ su 1 | su 2 | · · · | su T ] and BV = [ bv 1 | bv 2 | · · · | bv T ] denote the column partitioning of SU and BV ,respectively. Then the squared residual norm in (14) becomes: 
+
+∥SU Σ − BV ∥2F = = su 1 su 2 · · · su T
+
+ Σ1 00 0
+
+
+
+− bv 1 bv 2 · · · bv T
+
+ 2F
+
+= σ1su 1 σ2su 2 · · · σr su r 0 − bv 1 bv 2 · · · bv T
+
+ 2F
+
+= σ1su 1 − bv 1 σ2su 2 − bv 2 · · · σr su r − bv r −bv r+1 · · · −bv T
+
+ 2F
+
+=
+
+> r
+
+X
+
+> i=1
+
+∥σisu i − bv i∥22
+
+| {z }
+
+> Γ1
+
++
+
+> T
+
+X
+
+> i=r+1
+
+∥bv i∥22
+
+| {z }
+
+> Γ2
+
+.
+
+To minimize squared residual norm, we observe that Γ1 can be minimized independently for each i ∈ 1, . . . , r by choosing 
+
+su i = bv i 
+
+> σi
+
+, which makes Γ1 = 0 . The second term Γ2 is independent of our optimization variables and represents the irreducible error due to the rank deficiency of K. Therefore, the minimum squared residual norm is: 
+
+min ∥SK − B∥2F = min 
+
+> r
+
+X
+
+> i=1
+
+∥σisu i − bv i∥22 +
+
+> T
+
+X
+
+> i=r+1
+
+∥bv i∥22 =
+
+> T
+
+X
+
+> i=r+1
+
+∥bv i∥22. (16) This completes the proof. 
+
+Theorem 4.1*. Let SλT = WT − W0 represent the parameter shift generated by SimIE according to Equation (5) . Under Assumption 3.3, the squared residual norm w.r.t. SλT satisfies the following inequality: 
+
+Rmin ≤ SλT K − B 2F ≤ λ2(∥B∥2F − Rmin )(σ2 
+
+> r
+
++ λ)2 + Rmin ,
+
+where Rmin := min ∥SK − B∥2F is the minimum value of squared residual norm, and σr > 0 denotes the smallest non-zero singular value of K.Proof. Using the SVD of K = U ΣV ⊤, we can decompose the term SλT K − B as follows: 
+
+SλT K − B = BK ⊤(KK ⊤ + λI )−1K − B
+
+= BV Σ⊤(ΣΣ ⊤ + λI )−1U ⊤U ΣV ⊤ − B
+
+= B  V Σ⊤(ΣΣ ⊤ + λI )−1ΣV ⊤ − I
+
+= BV  Σ⊤(ΣΣ ⊤ + λI )−1Σ − I| {z }
+
+> Γ1
+
+V ⊤.
+
+18 Simulating Ideal Editor 
+
+Base on block structure of Σ w.r.t. Equation (15), we simplify the term Γ1 as: 
+
+Σ⊤(ΣΣ ⊤ + λI )−1Σ − I =
+
+Σ1 00 0
+
+  Σ1 00 0
+
+  Σ1 00 0
+
+
+
++ λ
+
+I1 00 I2
+
+ −1 Σ1 00 0
+
+
+
+− I
+
+=
+
+Σ1 00 0
+
+  (Σ 21 + λI 1)−1 00 (λI 2)−1
+
+  Σ1 00 0
+
+
+
+−
+
+I1 00 I2
+
+
+
+=
+
+Σ21(Σ 21 + λI 1)−1 00 0
+
+
+
+−
+
+I1 00 I2
+
+
+
+=
+
+−λI 1(Σ 21 + λI 1)−1 00 −λI 2
+
+
+
+,
+
+where the last equality follows from the identity σ2  
+
+> i
+> σ2
+> i+λ
+
+− 1 = − λσ2  
+
+> i+λ
+
+for each diagonal element i. We now express 
+
+BV ∈ Rd2×T in column-vector form as BV = [ bv 1 | bv 2 | · · · | bv T ], obtaining 
+
+SλT K − B 2F = bv 1 bv 2 · · · bv T
+
+ −λI 1(Σ 21 + λI 1)−1 00 −λI 2
+
+
+
+V ⊤
+
+> 2F
+
+=
+
+h −λσ21 +λ bv 1 −λσ22 +λ bv 2 · · · −λσ2  
+
+> r+λ
+
+bv r −bv r+1 · · · −bv T
+
+i 2F
+
+=
+
+> r
+
+X
+
+> i=1
+
+( λσ2 
+
+> i
+
++ λ )2∥bv i∥22 +
+
+> T
+
+X
+
+> i=r+1
+
+∥bv i∥22
+
+≤ ( λσ2 
+
+> r
+
++ λ )2
+
+> r
+
+X
+
+> i=1
+
+∥bv i∥22 +
+
+> T
+
+X
+
+> i=r+1
+
+∥bv i∥22
+
+= λ2
+
+(σ2 
+
+> r
+
++ λ)2
+
+> T
+
+X
+
+> i=1
+
+∥bv i∥22 −
+
+> T
+
+X
+
+> i=r+1
+
+∥bv i∥22
+
+!
+
++
+
+> T
+
+X
+
+> i=r+1
+
+∥bv i∥22
+
+| {z }
+
+> =min ∥SK −B∥2F
+
+= λ2(∥BV ∥2F − min ∥SK − B∥2F)(σ2 
+
+> r
+
++ λ)2 + min ∥SK − B∥2F
+
+| {z } 
+
+> denoted as Rmin
+
+= λ2(∥B∥2F − Rmin )(σ2 
+
+> r
+
++ λ)2 + Rmin .
+
+The penultimate equality comes from Lemma C.1, and the last equality follows from the unitary invariance of the Frobenius norm. Since the squared residual norm of any solution cannot be smaller than the optimal squared residual norm, this completes the proof. 
+
+C.2. Proof of Theorems 4.2 and 4.3 Lemma C.2. At time step t, suppose the pair (kt, b t) is perturbed to (kt + δk t, b t + δb t), which results in the solution generated by SimlE being fSλt = ( B:tK⊤ 
+
+> :t
+
++ δb tδk ⊤ 
+
+> t
+
+)( K:tK⊤ 
+
+> :t
+
++ λI + δk tδk ⊤ 
+
+> t
+
+)−1. Then, at time step t + 1 , the effect of the perturbation is not amplified, i.e., gSλt+1 = ( B:t+1 K⊤ 
+
+> :t+1
+
++ δb tδk ⊤ 
+
+> t
+
+)( K:t+1 K⊤ 
+
+> :t+1
+
++ λI + δk tδk ⊤ 
+
+> t
+
+)−1.Proof. We demonstrate the non-amplification of the perturbation by working backward from the recurrence relation w.r.t. Equation (8). Let Pt = K:tK⊤ 
+
+> :t
+
++ λI , we have: 
+
+gSλt+1 = fSλt + ∆ Wt+1 kt+1 k⊤
+
+> t+1
+
+(Pt+1 + δk tδk ⊤ 
+
+> t
+
+)−1
+
+= fSλt (Pt + δk tδk ⊤ 
+
+> t
+
+)( Pt+1 + δk tδk ⊤ 
+
+> t
+
+)−1 + bt+1 k⊤
+
+> t+1
+
+(Pt+1 + δk tδk ⊤ 
+
+> t
+
+)−1
+
+= ( B:tK⊤ 
+
+> :t
+
++ δb tδk ⊤ 
+
+> t
+
+)( Pt+1 + δk tδk ⊤ 
+
+> t
+
+)−1 + bt+1 k⊤
+
+> t+1
+
+(Pt+1 + δk tδk ⊤ 
+
+> t
+
+)−1
+
+= ( B:t+1 K⊤ 
+
+> :t+1
+
++ δb tδk ⊤ 
+
+> t
+
+)( K:t+1 K⊤ 
+
+> :t+1
+
++ λI + δk tδk ⊤ 
+
+> t
+
+)−1.
+
+19 Simulating Ideal Editor 
+
+The third equality follows by substituting the expression for fSλt . Thus, the impact of the perturbation to (kt, b t) is not amplified in subsequent time steps. 
+
+Theorem 4.2*. Let SλT represent the original solution corresponding to K and B, and fSλT denote the perturbed solution corresponding to K + δK and B + δB , both generated by SimIE according to Equation (5) . Under Assumption 3.2, the perturbation bound for SλT is: 
+
+SλT − fSλT F
+
+SλT F
+
+≤cond( SλT , B ) ∥δB ∥F
+
+∥B∥F
+
++ ∥Jλ∥F ∥δK ∥F +
+
+√d1 ∥K∥F
+
+σ2min 
+
+∥δK ∥F
+
+≤cond( SλT , B ) ∥δB ∥F
+
+∥B∥F
+
++ κF(K) ∥δK ∥F
+
+∥K∥F
+
++
+
+√d1 ∥K∥F
+
+σ2min 
+
+∥δK ∥F ,
+
+where Jλ := K⊤(KK ⊤ + λI )−1 denotes the Jacobian matrix of SλT at B.Proof. To analyze the perturbation behavior of SλT w.r.t. small changes in K and B, we introduce 
+
+ϵ = max 
+
+ ∥δK ∥F
+
+∥K∥F
+
+, ∥δB ∥F
+
+∥B∥F
+
+
+
+as a measure of the relative magnitude of the perturbations. Following Golub & Van Loan (2013), we define the function: 
+
+g(x) := ( B + x δB ϵ )( K + x δK ϵ )⊤
+
+
+
+(K + x δK ϵ )( K + x δK ϵ )⊤ + λI 
+
+−1
+
+,
+
+where x ∈ [0 , ϵ ]. It is easy to observe that g(0) = SλT and g(ϵ) = fSλT , corresponding to the unperturbed and perturbed solutions, respectively. Using a first-order Taylor expansion, we have: 
+
+g(ϵ) = g(0) + g′(0) ϵ + O(ϵ2),
+
+where g′(0) is the derivative of g(x) evaluated at x = 0 , given by: 
+
+g′(0) = 
+
+ δB − SλT δK 
+
+ϵ K⊤(KK ⊤ + λI )−1 + B − SλT Kϵ δK ⊤(KK ⊤ + λI )−1.
+
+Omitting second order terms, we get: 
+
+SλT − fSλT F
+
+SλT F
+
+= ∥g′(0) ϵ∥F
+
+SλT F
+
+= (δB − SλT δK )K⊤(KK ⊤ + λI )−1
+
+> F
+
+SλT F
+
+(B − SλT K)δK ⊤(KK ⊤ + λI )−1
+
+> F
+
+SλT F
+
+≤ K⊤(KK ⊤ + λI )−1
+
+> F
+
+SλT F
+
+∥δB ∥F + K⊤(KK ⊤ + λI )−1 
+
+> F
+
+∥δK ∥F
+
++ B − SλT K F (KK ⊤ + λI )−1
+
+> F
+
+SλT F
+
+∥δK ∥F
+
+≤ K⊤(KK ⊤ + λI )−1 
+
+> F
+
+∥B∥F
+
+SλT F
+
+| {z }
+
+> Γ1
+
+· ∥δB ∥F
+
+∥B∥F
+
++ K⊤(KK ⊤ + λI )−1 
+
+> F
+
+∥δK ∥F
+
++ λσ2min + λ · ∥B∥F
+
+SλT F
+
+| {z }
+
+> Γ2
+
+· (KK ⊤ + λI )−1
+
+> F
+
+| {z }
+
+> Γ3
+
+∥δK ∥F .
+
+(17) 20 Simulating Ideal Editor 
+
+The last inequality substitute B − SλT K F with the squared residual norm bound from Theorem 4.1, where Rmin = 0 and 
+
+σr = σmin hold under Assumption 3.2. For the term Γ1, we show that it is equivalent to the condition number cond( SλT , B ). Specifically, since the solution 
+
+SλT = BK ⊤(KK ⊤ + λI )−1 is differentiable w.r.t. B, the condition number can be written as: 
+
+cond( SλT , B ) := lim  
+
+> ϵ→0
+
+sup 
+
+> ∥δB ∥F≤ϵ
+
+δS λT F
+
+SλT F
+
+. ∥δB ∥F
+
+∥B∥F
+
+!
+
+= ∥Jλ∥F
+
+∥B∥F
+
+SλT F
+
+= K⊤(KK ⊤ + λI )−1
+
+> F
+
+∥B∥F
+
+SλT F
+
+= Γ 1,
+
+where Jλ = K⊤(KK ⊤ + λI )−1 denotes the Jacobian matrix of SλT at B.Next, we analyze the term Γ2 using the approach outlined in Theorem 3.6. Under Assumption 3.2, let K = U ΣV ⊤ denote the SVD of K, where Σ = 
+
+Σ1
+
+0
+
+
+
+defined in Equation (11). Recalling that B = S0K, we have: 
+
+∥B∥F
+
+SλT F
+
+≤ ∥ K∥F
+
+S0
+
+> F
+
+SλT F(a)
+
+= ∥K∥F
+
+BV (Σ ⊤Σ) −1Σ⊤U ⊤
+
+> F
+
+∥BV Σ⊤(ΣΣ ⊤ + λI )−1U ⊤∥F
+
+= ∥K∥F
+
+BV (Σ1 0 Σ1
+
+0
+
+
+
+)−1 Σ1 0
+
+> F
+
+BV Σ1 0 (
+
+Σ1
+
+0
+
+ Σ1 0 + λ
+
+I1 00 I2
+
+
+
+)−1
+
+> F(b)
+
+= ∥K∥F
+
+bv 1 bv 2 · · · bv T
+
+  Σ−11 0
+
+> F
+
+bv 1 bv 2 · · · bv T
+
+  Σ1(Σ 21 + λI 1)−1 0
+
+> F
+
+= ∥K∥F
+
+ 1 
+
+> σ1
+
+bv 1 1 
+
+> σ2
+
+bv 2 · · · 1 
+
+> σT
+
+bv T 0
+
+> F
+
+h σ1  
+
+> σ21+λ
+
+bv 1 σ2  
+
+> σ22+λ
+
+bv 2 · · · σT  
+
+> σ2
+> T+λ
+
+bv T 0i
+
+> F
+
+= ∥K∥F
+
+vuutPTi=1 ∥ 1 
+
+> σi
+
+bv i∥22
+
+PTi=1 ∥ σi  
+
+> σ2
+> i+λ
+
+bv i∥22(c)
+
+≤ ∥ K∥F
+
+vuuutPTi=1 ∥ 1 
+
+> σi
+
+bv i∥22
+
+( σ2min  
+
+> σ2min +λ
+
+)2 PTi=1 ∥ 1 
+
+> σi
+
+bv i∥22
+
+= σ2min + λσ2min 
+
+∥K∥F ,
+
+(18) where (a) follows from Equations (9) and (10); (b) involves rewriting BV ∈ Rd2×T in column-vector form as BV = [ bv 1 |
+
+bv 2 | · · · | bv T ]; and (c) utilizes the monotonic increasing property of the function h(x) = ( x2 
+
+> x2+λ
+
+)2 for all x > 0.21 Simulating Ideal Editor 
+
+Finally, we consider the term Γ3 and substitute K = U ΣV ⊤ with Σ = 
+
+Σ1
+
+0
+
+
+
+, yielding the following expression: 
+
+(KK ⊤ + λI )−1 
+
+> F
+
+= U (ΣΣ ⊤ + λI )−1U ⊤
+
+> F
+
+=
+
+ Σ1
+
+0
+
+ Σ1 0 + λ
+
+I1 00 I2
+
+ −1
+
+> F
+
+=
+
+(Σ 21 + λI 1)−1 00 (λI 2)−1
+
+
+
+> F
+
+=
+
+vuut TX
+
+> i=1
+
+ 1
+
+σ2 
+
+> i
+
++ λ
+
+2
+
++
+
+> d1
+
+X 
+
+> i=T+1
+
+ 1
+
+λ
+
+2
+
+≤
+
+vuut d1X
+
+> i=1
+
+1
+
+λ2
+
+=
+
+√d1
+
+λ .
+
+(19) Now, plugging the bounds on Γ1, Γ2 and Γ3 back into Equation (17), we get: 
+
+SλT − fSλT F
+
+SλT F
+
+≤ cond( SλT , B ) ∥δB ∥F
+
+∥B∥F
+
++ ∥Jλ∥F ∥δK ∥F + λσ2min + λ · σ2min + λσ2min 
+
+∥K∥F ·√d1
+
+λ ∥δK ∥F
+
+= cond( SλT , B ) ∥δB ∥F
+
+∥B∥F
+
++ ∥Jλ∥F ∥δK ∥F +
+
+√d1 ∥K∥F
+
+σ2min 
+
+∥δK ∥F .
+
+(20) As λ → 0, the term ∥Jλ∥F in Equation (20) behaves monotonically increasing. However, we can find an upper bound that is independent of λ to replace it. As done in Equation (19), we express K as the SVD K = U ΣV ⊤ with Σ = 
+
+Σ1
+
+0
+
+
+
+. Then, the second term ∥Jλ∥F in Equation (20) becomes: 
+
+K⊤(KK ⊤ + λI )−1 
+
+> F
+
+∥K∥F
+
+∥δK ∥F
+
+∥K∥F
+
+= V Σ⊤(ΣΣ ⊤ + λI )−1U ⊤ 
+
+> F
+
+∥K∥F
+
+∥δK ∥F
+
+∥K∥F
+
+= Σ1 0  Σ1
+
+0
+
+ Σ1 0 + λ
+
+I1 00 I2
+
+ −1
+
+> F
+
+∥K∥F
+
+∥δK ∥F
+
+∥K∥F
+
+= Σ1(Σ 21 + λI 1)−1 0 
+
+> F
+
+∥K∥F
+
+∥δK ∥F
+
+∥K∥F(a)
+
+≤ Σ−11 0 
+
+> F
+
+∥K∥F
+
+∥δK ∥F
+
+∥K∥F(b)
+
+= V Σ†U ⊤ 
+
+> F
+
+∥K∥F
+
+∥δK ∥F
+
+∥K∥F
+
+= κF(K) ∥δK ∥F
+
+∥K∥F
+
+,
+
+(21) where (a) follows from the inequality σi  
+
+> σ2
+> i+λ
+
+≤ 1 
+
+> σi
+
+; and (b) involves the definition of the Moore-Penrose inverse for a diagonal matrix. This completes the proof. 
+
+Remark C.3 . The term cond( SλT , B ) also relies on λ, while it admits a complex upper bound. According to Equation (21), 22 Simulating Ideal Editor 
+
+we have: 
+
+K⊤(KK ⊤ + λI )−1 
+
+> F
+
+= Σ1(Σ 21 + λI 1)−1 0
+
+> F
+
+=
+
+vuut TX
+
+> i=1
+
+( σ2
+
+> i
+
+σ2 
+
+> i
+
++ λ )2( 1
+
+σi
+
+)2
+
+≤ σ2max 
+
+σ2max + λ K† 
+
+> F
+
+.
+
+Combining this with Equation (18), the condition number can be expressed as: 
+
+cond( SλT , B ) = K⊤(KK ⊤ + λI )−1
+
+> F
+
+∥B∥F
+
+SλT F
+
+≤ σ2max 
+
+σ2max + λ / σ2min 
+
+σ2min + λ K† 
+
+> F
+
+∥K∥F
+
+= σ2max 
+
+σ2max + λ / σ2min 
+
+σ2min + λ κF(K).
+
+It is easy to verify lim λ→0 cond( SλT , B ) = κF(K) and lim λ→∞ cond( SλT , B ) = σ2max 
+
+> σ2min
+
+κF(K). Therefore, the condition number cond( SλT , B ) remains finite for any λ > 0.
+
+Theorem 4.3*. Let SλT represent the original solution corresponding to K and B, and fSλT denote the perturbed solution corresponding to K + δK and B + δB , both generated by SimIE according to Equation (5) . Then, the perturbation bound for SλT is: 
+
+SλT − fSλT F
+
+SλT F
+
+≤cond( SλT , B ) ∥δB ∥F
+
+∥B∥F
+
++ κF(K) ∥δK ∥F
+
+∥K∥F
+
++ ∥Rλ∥F
+
+λ
+
+√d1
+
+SλT F
+
+∥δK ∥F ,
+
+where Rλ = SλT K − B is the residual matrix w.r.t. SλT .Proof. The proof process closely follows that of Theorem 4.2. The key distinctions lie in two aspects: first, the observation that K = U ΣV ⊤ with Σ = 
+
+Σ1 00 0
+
+
+
+as defined in Equation (15), and second, the fact that ∥Rλ∥F̸ = 0 , as noted in Theorem 4.1. With these differences taken into account, the proof is complete. 
+
+## D. More experimental details and results 
+
+D.1. Detailed experimental setup 
+
+D.1.1. B ASELINES 
+
+Here, we describe the nine baseline methods used in our experiments. All methods were implemented using the publicly available knowledge editing framework EasyEdit (Zhang et al., 2024b), which reproduces and integrates the original code and hyperparameters provided in the respective papers. 
+
+• FT-L (Meng et al., 2022) freezes most layers of LLMs, allowing fine-tuning only on a single MLP using autoregressive loss. • MEND (Mitchell et al., 2022a) applies a low-rank decomposition to the gradient from standard fine-tuning, which is then fed into a pre-trained hypernetwork to generate new parameter update. The training loss of the hypernetwork consists of standard autoregressive loss over the edit example and the KL divergence loss over localization examples. • ROME (Meng et al., 2022) models the linear layer within MLPs as key-value memory, thereby inserting new knowledge by solving a constrained least-squares problem. Using causal tracing, ROME identifies mid-layer MLPs as critical for knowledge storage, making them suitable targets for editing. 23 Simulating Ideal Editor 
+
+• MEMIT (Meng et al., 2023), based on ROME, enable the simultaneous insertion of hundreds or thousands of facts using least-squares method. MEMIT is a multi-layer editing algorithm, which introduces an edit-distribution strategy to spread updates evenly over the range of mid-layer MLPs. • GRACE (Hartvigsen et al., 2024) maintains a discrete codebook for a chosen layer, which is dynamically updated through adding, expanding, and splitting during sequential editing. For inference phase, GRACE retrieves entries from the codebook based on the semantic similarity of the input and decides whether to replace the output accordingly. • WISE (Wang et al., 2024b) designs a dual parametric memory scheme, allocating one memory for pre-trained knowledge and another for edited knowledge. Additionally, WISE incorporates a knowledge-sharding mechanism, which different sets of edits reside in distinct and orthogonal subspaces of parameters, to reduce conflicts. • PRUNE (Ma et al., 2024) proposes applying condition number restraints during sequential editing by reducing the large singular values of the update matrix, thereby controlling the condition number of the edited matrix. PRUNE minimizes perturbations to the original knowledge, preserving the general abilities of the edited model. In our study, we apply PRUNE to ROME, as it demonstrated robust performance in the original paper. 
+
+• AlphaEdit (Fang et al., 2024) projects updates into the null space of preserved knowledge, ensuring that the output of the post-edited LLMs remains unchanged when queried about preserved knowledge. For lifelong scenarios, AlphaEdit incorporates a regularization term to protect previously edited knowledge. We refer to the version of AlphaEdit in the standard scenario, where the protection component is omitted, as AlphaEdit −.
+
+D.1.2. D ATASETS 
+
+Here, we provide a detailed description of the datasets used in this study. We adopt the train/test split from previous work (Wang et al., 2024b; Meng et al., 2022). Except for MEND, which uses the training set to fit the hypernetwork, all other methods perform editing and evaluation directly on the test set. • ZsRE (Levy et al., 2017) is a question-answering dataset that uses questions generated by roundtrip translation as equivalent inputs. Each sample in the ZsRE dataset includes a question and an answer as the edit example (xe, y e), a rephrased question as the paraphrase prompt x′
+
+> e
+
+, and an unrelated question as the neighborhood prompt xloc  
+
+> e
+
+. Figure 4 provides an example where the corresponding relationships are: 
+
+xe ←→ src ye ←→ alt 
+
+x′ 
+
+> e
+
+←→ rephrase xloc  
+
+> e
+
+←→ loc 
+
+• Counterfact (Meng et al., 2022) is a more challenging dataset that contrasts counterfactual statements with factual ones. The samples in Counterfact are structured similarly to ZsRE for evaluating reliability, generalization success rate, and localization success rate. Figure 5 provides an example where the corresponding relationships are: 
+
+xe ←→ prompt ye ←→ target new 
+
+x′ 
+
+> e
+
+←→ rephrase prompt xloc  
+
+> e
+
+←→ locality prompt 
+
+D.1.3. M ETRICS 
+
+Here, we formally introduce the evaluation metrics used in our experiments, which are widely adopted in the model editing literature (Zhang et al., 2024b; Wang et al., 2024b). Given an editing dataset Dedit = {(xt, y t) | t ∈ [T ]} with T edit examples, we evaluate the final post-edit model fθT (·) after the T -th edit. The metrics Rel (Reliability, also known as Edit Success Rate (Hartvigsen et al., 2024)), Gen (Generalization Success Rate), and Loc (Localization Success Rate) are used to assess the reliability, generalization, and specificity of the model editing methods, respectively. Specifically: • Rel measures the average Top-1 accuracy on the edit examples (xt, y t):Rel := 1
+
+T
+
+> T
+
+X
+
+> t=1
+
+1(fθT (xt) = yt).
+
+24 Simulating Ideal Editor 
+
+{"subject": "IAAF Combined Events Challenge", "src": "When was the inception of IAAF Combined Events Challenge?", "pred": "2011", "rephrase": "When was the IAAF Combined Events Challenge launched?", "alt": "2006", "answers": ["1998" ], "loc": "nq question: what is the name of the last episode of spongebob", "loc_ans": "The String", "cond": "2011 >> 2006 || When was the inception of IAAF Combined Events Challenge?", ,→
+
+"portability": {"Recalled Relation": "(IAAF Combined Events Challenge, event type, athletics)", ,→
+
+"New Question": "What type of sports event is the IAAF Combined Events Challenge, which was established in 2006?", ,→
+
+"New Answer": "Athletics" }} 
+
+> Figure 4. A sample of the ZsRE dataset.
+
+{"case_id": 0, "prompt": "The mother tongue of Danielle Darrieux is", "target_new": "English", "subject": "Danielle Darrieux", "ground_truth": "French", "rephrase_prompt": "Where Danielle Darrieux is from, people speak the language of", ,→
+
+"locality_prompt": "Michel Rocard is a native speaker of", "locality_ground_truth": "French" } 
+
+> Figure 5. A sample of the Counterfact dataset.
+
+• Gen evaluates the average Top-1 accuracy of the model’s predictions for paraphrase prompts x′
+
+> t
+
+:Gen := 1
+
+T
+
+> T
+
+X
+
+> t=1
+
+1(fθT (x′
+
+> t
+
+) = yt).
+
+• Loc computes the average proportion of preserved predictions for neighborhood prompts xloc  
+
+> t
+
+:Loc := 1
+
+T
+
+> T
+
+X
+
+> t=1
+
+1(fθT (xloc  
+
+> t
+
+) = fθ0 (xloc  
+
+> t
+
+).
+
+D.1.4. I MPLEMENTATION DETAILS 
+
+Unless otherwise stated, we store P (l) 
+
+> t
+
+and employ LU decomposition across all experiments (see discussion in Appendix B.4). For the hyperparameter λ, we conduct a grid search over the set {0.01 , 0.1, 1, 5, 10 , 30 , 50 }, with the resulting values summarized in Table 3. 
+
+Remark D.1 (MEND involves an unfair implementation) . Since the hypernetwork of MEND is tailored to the initial model, its subsequent generated updates significantly violate Assumption 3.3. Given that training the hypernetwork at each time 25 Simulating Ideal Editor 
+
+Table 3. The hyperparameter λ of SimIE used in the experiments. 
+
+ZsRE Counterfact Algorithm Llama-2 Mistral GPT2-XL Llama-2 Mistral GPT2-XL MEND+ SimIE 1.0 30 5.0 5.0 10 0.1 ROME+ SimIE 50 30 50 5.0 5.0 50 MEMIT+ SimIE 10 10 1.0 0.1 1.0 0.1 AlphaEdit −+SimIE 1.0 1.0 5.0 0.1 0.1 5.0 step is impractical, we instead use the pre-trained hypernetwork to edit the initial model, yielding fWt. The update required by SimIE , ∆Wt = fWt − Wt−1, is then computed by subtracting the current model parameters. It is worth noting that this implementation is slightly less fair compared to other methods, as it store additional copy of the initial model. 
+
+D.2. More experimental results 
+
+Here, we present additional experimental results. Table 4 presents the results of editing GPT2-XL using the ZsRE and Counterfact datasets. Figure 6 illustrate the performance of standard algorithms as the number of edits increases. The impact of hyperparameter in SimIE on performance is presented in Figures 7 to 10. In addition, we introduce a new composite metric defined as Geo = eα(Loc −1) (Rel × Gen ). Geo takes locality as a penalty term, serving as a smoothed condition factor. Meanwhile, by using the (squared) geometric mean of reliability and generality, it prevents methods from abandoning one of them. Table 5 shows the evaluation results based on this composite metric, where α = 2 .
+
+Table 4. Performance of algorithms in the lifelong model editing task with 1000 edits, where the top three Avg are highlighted in bold .                                                                                                                  
+
+> ZsRE Counterfact GPT2-XL (1.5B) GPT2-XL (1.5B) Algorithm Rel Gen Loc Avg Rel Gen Loc Avg FT-L 0.09 0.08 0.00 0.06 0.11 0.03 0.01 0.05 MEND 0.00 0.00 0.00 0.00 0.00 0.00 0.48 0.16 +SimIE 0.56 0.52 0.90 0.66 0.94 0.14 0.15 0.41 ROME 0.46 0.37 0.50 0.45 0.01 0.00 0.01 0.01 +SimIE 0.93 0.81 0.69 0.81 0.87 0.20 0.45 0.51 MEMIT 0.58 0.50 0.55 0.54 0.81 0.46 0.25 0.51 +SimIE 0.81 0.66 0.81 0.76 0.88 0.32 0.67 0.62
+> AlphaEdit −0.10 0.09 0.31 0.17 0.68 0.38 0.30 0.46 +SimIE 0.87 0.77 0.77 0.80 0.98 0.46 0.54 0.66
+> GRACE 0.35 0.01 1.00 0.45 0.00 0.00 1.00 0.33 WISE 0.34 0.33 1.00 0.56 0.01 0.01 0.77 0.26 PRUNE 0.50 0.43 0.84 0.59 0.13 0.04 0.86 0.35 AlphaEdit 0.83 0.70 0.75 0.76 0.98 0.48 0.65 0.70
+
+26 Simulating Ideal Editor 
+
+Table 5. Performance of algorithms in the lifelong model editing task with 1000 edits. 
+
+FT-L MEND +SimIE ROME +SimIE MEMIT +SimIE AlphaEdit − +SimIE GRACE WISE PRUNE AlphaEdit Avg 0.13 0.00 0.79 0.03 0.63 0.03 0.68 0.03 0.80 0.67 0.86 0.59 0.76 Llama-2 (7B) Geo 0.00 0.00 0.42 0.00 0.19 0.00 0.24 0.00 0.43 0.02 0.62 0.16 0.32 Avg 0.57 0.00 0.74 0.03 0.74 0.03 0.69 0.00 0.75 0.67 0.80 0.33 0.76 ZsRE Mistral (7B) Geo 0.14 0.00 0.34 0.00 0.34 0.00 0.27 0.00 0.37 0.02 0.49 0.02 0.35 Avg 0.06 0.00 0.66 0.45 0.81 0.54 0.76 0.17 0.80 0.45 0.56 0.59 0.76 GPT2-XL (1.5B) Geo 0.00 0.00 0.24 0.06 0.41 0.12 0.37 0.00 0.42 0.00 0.11 0.16 0.35 Avg 0.04 0.00 0.52 0.16 0.59 0.02 0.51 0.00 0.55 0.67 0.46 0.58 0.58 Llama-2 (7B) Geo 0.00 0.00 0.07 0.01 0.12 0.00 0.08 0.00 0.10 0.00 0.06 0.13 0.12 Avg 0.14 0.00 0.52 0.18 0.66 0.00 0.56 0.00 0.61 0.67 0.46 0.61 0.65 Counterfact Mistral (7B) Geo 0.00 0.00 0.07 0.01 0.18 0.00 0.12 0.00 0.15 0.00 0.07 0.15 0.18 Avg 0.05 0.16 0.41 0.01 0.51 0.51 0.62 0.46 0.66 0.33 0.26 0.35 0.70 GPT2-XL (1.5B) Geo 0.00 0.00 0.02 0.00 0.06 0.08 0.14 0.06 0.18 0.00 0.00 0.00 0.23 10 50 100 300 500 750 1000 
+
+Number of Edits 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+> Rel
+
+10 50 100 300 500 750 1000 
+
+Number of Edits 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+> Gen
+
+10 50 100 300 500 750 1000 
+
+Number of Edits 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+> Loc
+
+10 50 100 300 500 750 1000 
+
+Number of Edits 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+> Avg
+
+Mistral (7B) on the ZsRE dataset 
+
+MEND MEND+SimIE ROME ROME+SimIE MEMIT MEMIT+SimIE AlphaEdit AlphaEdit +SimIE 10 50 100 300 500 750 1000 
+
+Number of Edits 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+> Rel
+
+10 50 100 300 500 750 1000 
+
+Number of Edits 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+> Gen
+
+10 50 100 300 500 750 1000 
+
+Number of Edits 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+> Loc
+
+10 50 100 300 500 750 1000 
+
+Number of Edits 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+> Avg
+
+Llama-2 (7B) on the Counterfact dataset 
+
+MEND MEND+SimIE ROME ROME+SimIE MEMIT MEMIT+SimIE AlphaEdit AlphaEdit +SimIE 10 50 100 300 500 750 1000 
+
+Number of Edits 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+> Rel
+
+10 50 100 300 500 750 1000 
+
+Number of Edits 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+> Gen
+
+10 50 100 300 500 750 1000 
+
+Number of Edits 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+> Loc
+
+10 50 100 300 500 750 1000 
+
+Number of Edits 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+> Avg
+
+Mistral (7B) on the Counterfact dataset 
+
+MEND MEND+SimIE ROME ROME+SimIE MEMIT MEMIT+SimIE AlphaEdit AlphaEdit +SimIE 
+
+Figure 6. Performance of algorithms as the number of edits increases, with the solid line representing the results combined with the proposed SimIE .
+
+27 Simulating Ideal Editor 0.01 0.1 1.0 5.0 10 30 50 
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+Llama-2 (7B)       
+
+> Avg
+> Rel
+> Gen
+> Loc
+> 0.01 0.1 1.0 5.0 10 30 50
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+Mistral (7B)       
+
+> Avg
+> Rel
+> Gen
+> Loc
+> 0.01 0.1 1.0 5.0 10 30 50
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+GPT2-XL (1.5B) 
+
+> Avg
+> Rel
+> Gen
+> Loc
+
+(a) MEND+ SimIE on the ZsRE dataset 0.01 0.1 1.0 5.0 10 30 50 
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+Llama-2 (7B)       
+
+> Avg
+> Rel
+> Gen
+> Loc
+> 0.01 0.1 1.0 5.0 10 30 50
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+Mistral (7B)       
+
+> Avg
+> Rel
+> Gen
+> Loc
+> 0.01 0.1 1.0 5.0 10 30 50
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+GPT2-XL (1.5B) 
+
+> Avg
+> Rel
+> Gen
+> Loc
+
+(b) MEND+ SimIE on the Counterfact dataset 
+
+Figure 7. Performance of MEND+ SimIE across various λ values, under T = 1000 sequential edits. 0.01 0.1 1.0 5.0 10 30 50 
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+Llama-2 (7B)       
+
+> Avg
+> Rel
+> Gen
+> Loc
+> 0.01 0.1 1.0 5.0 10 30 50
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+Mistral (7B)       
+
+> Avg
+> Rel
+> Gen
+> Loc
+> 0.01 0.1 1.0 5.0 10 30 50
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+GPT2-XL (1.5B) 
+
+> Avg
+> Rel
+> Gen
+> Loc
+
+(a) ROME+ SimIE on the ZsRE dataset 0.01 0.1 1.0 5.0 10 30 50 
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+Llama-2 (7B)       
+
+> Avg
+> Rel
+> Gen
+> Loc
+> 0.01 0.1 1.0 5.0 10 30 50
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+Mistral (7B)       
+
+> Avg
+> Rel
+> Gen
+> Loc
+> 0.01 0.1 1.0 5.0 10 30 50
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+GPT2-XL (1.5B) 
+
+> Avg
+> Rel
+> Gen
+> Loc
+
+(b) ROME+ SimIE on the Counterfact dataset 
+
+Figure 8. Performance of ROME+ SimIE across various λ values, under T = 1000 sequential edits. 
+
+28 Simulating Ideal Editor 0.01 0.1 1.0 5.0 10 30 50 
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+Llama-2 (7B)       
+
+> Avg
+> Rel
+> Gen
+> Loc
+> 0.01 0.1 1.0 5.0 10 30 50
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+Mistral (7B)       
+
+> Avg
+> Rel
+> Gen
+> Loc
+> 0.01 0.1 1.0 5.0 10 30 50
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+GPT2-XL (1.5B) 
+
+> Avg
+> Rel
+> Gen
+> Loc
+
+(a) MEMIT+ SimIE on the ZsRE dataset 0.01 0.1 1.0 5.0 10 30 50 
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+Llama-2 (7B)       
+
+> Avg
+> Rel
+> Gen
+> Loc
+> 0.01 0.1 1.0 5.0 10 30 50
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+Mistral (7B)       
+
+> Avg
+> Rel
+> Gen
+> Loc
+> 0.01 0.1 1.0 5.0 10 30 50
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+GPT2-XL (1.5B) 
+
+> Avg
+> Rel
+> Gen
+> Loc
+
+(b) MEMIT+ SimIE on the Counterfact dataset 
+
+Figure 9. Performance of MEMIT+ SimIE across various λ values, under T = 1000 sequential edits. 0.01 0.1 1.0 5.0 10 30 50 
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+Llama-2 (7B)       
+
+> Avg
+> Rel
+> Gen
+> Loc
+> 0.01 0.1 1.0 5.0 10 30 50
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+Mistral (7B)       
+
+> Avg
+> Rel
+> Gen
+> Loc
+> 0.01 0.1 1.0 5.0 10 30 50
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+GPT2-XL (1.5B) 
+
+> Avg
+> Rel
+> Gen
+> Loc
+
+(a) AlphaEdit −+SimIE on the ZsRE dataset 0.01 0.1 1.0 5.0 10 30 50 
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+Llama-2 (7B)       
+
+> Avg
+> Rel
+> Gen
+> Loc
+> 0.01 0.1 1.0 5.0 10 30 50
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+Mistral (7B)       
+
+> Avg
+> Rel
+> Gen
+> Loc
+> 0.01 0.1 1.0 5.0 10 30 50
+
+Hyperparameter 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+
+GPT2-XL (1.5B) 
+
+> Avg
+> Rel
+> Gen
+> Loc
+
+(b) AlphaEdit −+SimIE on the Counterfact dataset 
+
+Figure 10. Performance of AlphaEdit −+SimIE across various λ values, under T = 1000 sequential edits. 
+
+29 Simulating Ideal Editor 
+
+D.3. Further analyses 
+
+D.3.1. C ASE STUDY 
+
+After 1000 sequential edits on Llama-2 using the ZsRE dataset, we select several edit examples for analyzing the output of the model. Table 6 presents the output results before and after applying SimIE . We observe that all standard methods consistently produced invalid outputs, aligning with the phenomenon reported in Ma et al. (2024), where LLMs lose their general abilities after sequential editing. In contrast, standard methods enhanced with SimIE generated meaningful responses that closely matched the desired outputs. These findings further highlight the effectiveness of SimIE , especially in preserving the general capabilities of LLMs.      
+
+> Table 6. Output of the model after 1000 sequential edits on Llama-2 using the ZsRE dataset. mmmmm denotes invalid outputs (e.g., gibberish or empty responses), and errors within the output are highlighted in red.
+
+[Case 168] Prompt: The astronomical body that Lacus Aestatis was located on was what? 
+
+Answer: Moon =⇒ Edit Target: Mars 
+
+MEND Output: mmmmm ✗
+
++SimIE Output: Mars ✓
+
+ROME Output: 4 ✗
+
++SimIE Output: Mars ✓
+
+MEMIT Output: mmmmm ✗
+
++SimIE Output: Mars ✓
+
+AlphaEdit − Output: mmmmm ✗
+
++SimIE Output: Mars ✓
+
+[Case 514] Prompt: What college did Tatiana Vladislavovna Petrova go to? 
+
+Answer: Moscow State University ⇒ Edit Target: Moscow State Institute of International Relations 
+
+MEND Output: mmmmm ✗
+
++SimIE Output: Moscow State Institute of International Relations ✓
+
+ROME Output: mmmmm ✗
+
++SimIE Output: Moscow State University of International Relations ✔✗
+
+MEMIT Output: mmmmm ✗
+
++SimIE Output: Moscow State University of International Relations ✔✗
+
+AlphaEdit − Output: mmmmm ✗
+
++SimIE Output: Moscow State Institute of International Relations ✓
+
+[Case 692] Prompt: Which series is The Adventure of the Blanched Soldier a part of? 
+
+Answer: The Case-Book of Sherlock Holmes =⇒ Edit Target: The Memoirs of Sherlock Holmes 
+
+MEND Output: mmmmm ✗
+
++SimIE Output: The Memoirs of Sherlock Holmes ✓
+
+ROME Output: mmmmm ✗
+
++SimIE Output: The Memoirs of Sherlock Holmes ✓
+
+MEMIT Output: mmmmm ✗
+
++SimIE Output: The Memoirs of Sherlock Holmes ✓
+
+AlphaEdit − Output: mmmmm ✗
+
++SimIE Output: The Memoirs of Sherlock Holmes ✓
+
+30 Simulating Ideal Editor 
+
+D.3.2. H IDDEN REPRESENTATION VISUALIZATION 
+
+To gain deeper insights into the effectiveness of SimIE , we analyze hidden representations of the model through the following steps: 1) Using the ZsRE dataset, we conduct 1000 sequential edits on Llama-2, retaining three post-edit models obtained from standard algorithms, standard algorithms enhanced with SimIE , and the corresponding ideal editor. 2) For each post-edit model, we compute the values of the last subject token for all edit examples, resulting in 1000 hidden representations 5 of dimension 4096 . 3) The stacked hidden representations are visualized using UMAP (McInnes et al., 2018), with their respective 2-σ confidence ellipses plotted for clarity. The visualization results are presented in Figure 11. We observe that the representation distributions of standard algorithms deviate significantly from those of the ideal editor, indicating unsuccessful knowledge injection. In contrast, the represen-tation distributions obtained after applying SimIE are closely consistent with those of the ideal editor, providing further explanation for the superior performance of SimIE .-1.0 0.0 1.0        
+
+> -2.0
+> -1.0
+> 0.0
+> 1.0
+> 2.0
+> -1.0 0.0 1.0
+> -2.0
+> -1.0
+> 0.0
+> 1.0
+> 2.0
+> 0.2 0.4 0.6 0.8 1.0 1.2
+> -2.0
+> -1.0
+> 0.0
+> 1.0
+> 2.0
+
+Distribution of hidden representations in LLaMA-2 (7B)           
+
+> MEND
+> MEND
+> +SimIE
+> Ideal editor -1.0 0.0 1.0 2.0
+> -2.0
+> -1.0
+> 0.0
+> 1.0
+> -1.0 0.0 1.0 2.0
+> -2.0
+> -1.0
+> 0.0
+> 1.0
+> -1.2 -1.0 -0.8 -0.5 -0.2
+> -0.5
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+
+Distribution of hidden representations in LLaMA-2 (7B)            
+
+> ROME
+> ROME
+> +SimIE
+> Ideal editor -2.0 -1.0 0.0 1.0
+> -1.0
+> 0.0
+> 1.0
+> 2.0
+> -2.0 -1.0 0.0 1.0
+> -1.0
+> 0.0
+> 1.0
+> 2.0
+> 0.2 0.4 0.6 0.8 1.0 1.2
+> -1.5
+> -1.0
+> -0.5
+> 0.0
+> 0.5
+
+Distribution of hidden representations in LLaMA-2 (7B)          
+
+> MEMIT
+> MEMIT
+> +SimIE
+> Ideal editor -2.0 -1.0 0.0 1.0
+> -2.0
+> -1.0
+> 0.0
+> 1.0
+> -2.0 -1.0 0.0 1.0
+> -2.0
+> -1.0
+> 0.0
+> 1.0
+> 0.0 0.5 1.0 1.5
+> -0.5
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+
+Distribution of hidden representations in LLaMA-2 (7B) 
+
+> AlphaEdit
+> AlphaEdit
+> +SimIE
+> Ideal editor
+
+Figure 11. Distribution of hidden representations in the post-edit Llama-2, computed across 1000 edited examples from the ZsRE dataset. Dimensionality reduction performed via UMAP, with dashed lines representing 2-σ confidence ellipses. 
+
+> 5
+
+MEND corresponds to the 31st layer, which is its final editing layer. ROME, MEMIT, and AlphaEdit − correspond to the 5th layer, which is their shared editing layer. 
+
+31 Simulating Ideal Editor 
+
+D.3.3. L ONG SENTENCE EDITING 
+
+To evaluate the effectiveness of SimIE in the editing of long sentences, we consider the task of correcting hallucinations in the SelfCheckGPT (Manakul et al., 2023). The Hallucination (Hartvigsen et al., 2024) dataset consists of highly inaccurate sentences sourced from GPT-3 (Brown et al., 2020), replaced with their corresponding sentences from actual Wikipedia entries. Compared to the ZsRE and Counterfact datasets, the Hallucination dataset is more challenging because it represents authentic mistakes made by high-quality LLMs, and the token length of edits significantly exceeds those of past datasets (see Figure 12 for an example). To reduce VRAM usage, we employ a simplified version in Wang et al. (2024b), limiting tokenized lengths to 254 , resulting in 600 test samples. We perform 600 sequential edits on GPT2-XL. ROME, AlphaEdit −
+
+(standard methods), PRUNE, and AlphaEdit (lifelong methods) are selected as baselines for their superior performance on GPT2-XL. Following prior work (Hartvigsen et al., 2024; Wang et al., 2024b), we evaluate the performance using PPL (perplexity) and Loc (Localization Success Rate) as metrics. 
+
+{"prompt": "This is a Wikipedia passage about carole gist. Carole Gist (born April 28, 1969) is an American beauty pageant titleholder from Detroit, Michigan who was crowned Miss USA 1990. She was the first African-American woman to win the Miss USA title. Gist represented the United States at the Miss Universe 1990 pageant held in Los Angeles, California, where she placed first runner-up to Mona Grudt of Norway. Gist was the first African-American woman to place in the Miss Universe pageant.", 
+
+> ,→
+> ,→
+> ,→
+> ,→
+> ,→
+> ,→
+> ,→
+
+"target_new": "She was also the first contestant from Michigan to win Miss USA, and broke the five-year streak of winners from Texas.", ,→
+
+"subject": "carole gist", "locality_prompt": "Description Map of South America.\nThis map has a small scratch near the centerfold in the right part of the map.\nLooking for an antique map, historica", 
+
+> ,→
+> ,→
+
+"locality_ground_truth": "l print or plan? Feel welcome and browse our mapsite atlasandmap.com! We have maps, made by Kuyper (Kuijper) . more maps of South America like Zuid-Am" 
+
+> ,→
+> ,→
+
+}
+
+Figure 12. A sample of the Hallucination dataset. 
+
+Table 7 presents the results across varying numbers of edits T . As T increases, standard algorithms inevitably degrade, with rising PPL and declining Loc. Even methods specifically designed for lifelong scenarios exhibit elevated PPL at T = 600 .In contrast, for ROME, SimIE reduces its PPL from 69 .86 to 15 .46 and improves its Loc by 33% . Similarly, AlphaEdit −
+
+enhanced with SimIE outperforms its original version, AlphaEdit, on both metrics. These results confirm the effectiveness of SimIE in editing long sentences. 
+
+Table 7. Performance of algorithms on the GPT2-XL using the Hallucination dataset, with the best results highlighted in bold .                                                                                                                             
+
+> GPT2-XL (1.5B) using Hallucination
+> T= 1 T= 50 T= 100 T= 200 T= 300 T= 500 T= 600
+> Algorithm PPL ( ↓)Loc ( ↑)PPL ( ↓)Loc ( ↑)PPL ( ↓)Loc ( ↑)PPL ( ↓)Loc ( ↑)PPL ( ↓)Loc ( ↑)PPL ( ↓)Loc ( ↑)PPL ( ↓)Loc ( ↑)FT-L 60.93 0.50 >1000 0.08 >1000 0.06 >1000 0.05 >1000 0.07 >1000 0.04 >1000 0.04 ROME 2.44 1.00 8.19 0.94 21.71 0.90 40.38 0.84 45.76 0.80 63.14 0.70 69.86 0.64 +SimIE 2.74 0.98 2.33 0.94 3.10 0.91 4.45 0.88 5.55 0.87 15.74 0.85 15.46 0.85 AlphaEdit −1.87 1.00 5.92 0.98 34.07 0.96 61.08 0.88 105.95 0.74 541.81 0.23 2611.20 0.11 +SimIE 5.90 1.00 7.90 0.96 7.93 0.91 8.74 0.91 11.00 0.90 23.66 0.89 24.00 0.89 PRUNE 2.44 1.00 5.60 0.96 8.32 0.95 11.66 0.93 14.08 0.92 32.48 0.92 50.25 0.92
+> AlphaEdit 1.86 1.00 3.30 0.98 8.20 0.96 12.54 0.94 18.54 0.92 26.98 0.89 47.39 0.87
+
+32

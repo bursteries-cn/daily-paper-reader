@@ -1,0 +1,1678 @@
+Title: WikiBigEdit: Understanding the Limits of Lifelong Knowledge Editing in LLMs
+
+URL Source: https://openreview.net/pdf?id=9NVm1Bf7CS
+
+Number of Pages: 29
+
+Markdown Content:
+# WikiBigEdit: Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+Lukas Thede 1 2 3 Karsten Roth 1 2 3 Matthias Bethge 1 Zeynep Akata 2 3 4 Thomas Hartvigsen 5
+
+Abstract 
+
+Keeping large language models factually up-to-date is crucial for deployment, yet costly retrain-ing remains a challenge. Knowledge editing of-fers a promising alternative, but methods are only tested on small-scale or synthetic edit benchmarks. In this work, we aim to bridge research into life-long knowledge editing to real-world edits at a practically relevant scale. We first introduce 
+
+WikiBigEdit ; a large-scale benchmark of real-world Wikidata edits, built to automatically ex-tend lifelong for future-proof benchmarking. In its first instance, it includes over 500K question-answer pairs for knowledge editing alongside a comprehensive evaluation pipeline. Finally, we use WikiBigEdit to study existing knowledge editing techniques’ ability to incorporate large volumes of real-world facts and contrast their ca-pabilities to generic modification techniques such as retrieval augmentation and continual finetun-ing to acquire a complete picture of the practical extent of current lifelong knowledge editing. 1
+
+1. Introduction 
+
+Keeping large language models factually up-to-date is a critical challenge in their practical deployment (Hartvigsen et al., 2023; Meng et al., 2023; 2022; Wang et al., 2024a; Zhang et al., 2024) due to given knowledge cutoffs and limited tail-end concept coverage (Cheng et al., 2024; Zheng et al., 2024; Zhang et al., 2024; Udandarao et al., 2024) incurring inaccuracies. Finding ways to inject or update new and revised facts is crucial; Particularly for factuality-critical applications like medicine (Bao et al., 2023; Jeong et al., 2024), law (Colombo et al., 2024; Lai et al., 2024) or education (Team et al., 2024c; Wang et al., 2024b).           
+
+> 1T¨ubingen AI Center, University of T ¨ubingen 2Helmholtz Mu-nich 3Munich Center for Machine Learning (MCML) 4Technical University, Munich 5University of Virginia. Correspondence to: Lukas, Thede <lukas.thede@uni-tuebingen.de >.
+> Proceedings of the 42 nd International Conference on Machine Learning , Vancouver, Canada. PMLR 267, 2025. Copyright 2025 by the author(s).
+> 1Code available at https://github.com/ExplainableML/WikiBigEdit.
+
+However, frequent full model retraining is prohibitively expensive. To address this, lifelong knowledge editing tech-niques (Hartvigsen et al., 2023; Meng et al., 2023; Wang et al., 2024a) have recently emerged. In controlled bench-mark studies, they have shown success incorporating new facts along three key metrics: (1) generalization beyond merely memorizing question-answer pairs, (2) locality of edits to maintain pretraining knowledge, and (3) retention of all previously seen edits. Unfortunately, existing benchmarks are small 2, synthetic, and precede the knowledge cutoff of modern LLMs. While more recent efforts Jang et al. (2022); Khodja et al. (2024) avoid synthetic edits by using wikidata, they remain small-scale (around 20K), and have yet to examine the difficulty of edits, limiting our understanding of really lifelong knowl-edge editing capabilities at practically-needed scales. LLMs are nowadays trained on trillions of text tokens (e.g. Llama-3 (et al., 2024a) on 15T), and studying lifelong factuality updates demands large volumes of recent real-world knowl-edge edits. To better understand lifelong knowledge editing at a scale and scenario of practical importance, we introduce 
+
+WikiBigEdit - a large-scale, lifelong benchmark (Prabhu et al., 2024; Ghosh et al., 2024) with a fully automated dataset extraction pipeline that continuously expands with new real-world factual edits to ensure future-proof factual-ity probing. At its inception, WikiBigEdit covers over 500K high-quality question-answer pairs (around 7 million tokens; magnitudes larger than standard edit benchmarks) spanning eight time-intervals over five months (February -July 2024) - reflecting a typical interval between subsequent version releases of large-scale LLMs 3 to better emulate the deployment time required to cover with factual updates. Derived from periodic changes to Wikidata knowl-edge graphs (Jang et al., 2022; Khodja et al., 2024), 
+
+WikiBigEdit covers a large range of factual edits and refinements. Moreover, WikiBigEdit introduces com-prehensive evaluation axes going beyond standard knowl-
+
+> 2CounterFact (Meng et al., 2023) at 20K, ZsRE (Levy et al., 2017) at 1K, SelfCheckGPT (Manakul et al., 2023) at 600.
+> 3E.g. Llama 1 (Touvron et al., 2023) to LLama 2 (et al., 2023), DeepSeek-V1 (et al., 2024b) to V2 (et al., 2024c) and DeepSeek-V3 (et al., 2024d).
+
+1Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+edge editing performance measures, incorporating local-ity checks, multi-hop reasoning across incorporated edits as well as standard and complex generalization tests. We use WikiBigEdit to explore the properties of real-world knowledge edits and conduct an extensive study of knowl-edge editing techniques for WikiBigEdit -scale updates, focusing on their ability to integrate numerous sequential edits while maintaining previous knowledge and factual accuracy beyond simple memorization. Additionally, we compare these methods against other generic modification techniques such as retrieval augmentation (Vu et al., 2023; Prabhu et al., 2023a; Gui et al., 2024) and continual fine-tuning (Ibrahim et al., 2024; Roth et al., 2024). Our study reveals limited transfer of knowledge editing techniques to practically scalable lifelong updates and highlights that even when evaluated around knowledge editing desiderata, stan-dard approaches such as retrieval augmentation or continual finetuning with model merging can perform better. Overall, we make the following contributions to the study of real-world lifelong knowledge editing as scale: • We present WikiBigEdit : a large-scale benchmark of 500k high-quality question-answer pairs spanning eight timesteps over six months, derived from real-world factual changes in Wikidata to both analyze and simulate real-world knowledge edit tasks at a practi-cally relevant scale. • A fully automated extraction pipeline which continu-ously extracts new, suitable factual edits from Wikidata knowledge graphs, enabling the benchmark to evolve with new knowledge updates continuously. • Using WikiBigEdit , we thoroughly analyze the ca-pability of existing lifelong knowledge editing methods to conduct lifelong edits at scale; contrasted against re-trieval augmentation and continual finetuning to under-stand limits in relation to other established approaches. 
+
+2. Related Works 
+
+(Lifelong) Knowledge Editing Benchmarks. Traditional QA datasets like NQ (Kwiatkowski et al., 2019), Trivi-aQA (Joshi et al., 2017), and MS MARCO (Bajaj et al., 2018) target open-domain factual QA, HotpotQA (Yang et al., 2018) and EX-FEVER (Ma et al., 2024) assess multi-hop reasoning. Fan et al. (2019); Li et al. (2024); Cheng et al. (2024); Mallen et al. (2023) focus on long-form ex-planatory questions and time-sensitive QA. StreamingQA (Li ˇska et al., 2022), ArchivalQA (Wang et al., 2021) or HelloFresh (Franzmeyer et al., 2024) address evolving or time-sensitive, event-driven data, while TiC-LM (Li et al., 2025) explores continual pretraining of LLMs. Knowl-edge editing benchmarks assess the ability to integrate                                                                                                             
+
+> Benchmark Size Date Data Source Task Lifelong Mhop
+> NQ 307K 2016 Google Search queries Open factual QA ✗✗
+> Trivia QA 650K Various Trivia sources (web) Trivia QA ✗✗
+> MS MARCO 1M+ 2016 Bing Search queries Search queries ✗✗
+> Hotpot QA 112K 2018 Wikipedia (curated) Multi-hop QA ✗✓
+> FEVER 185K 2018 Human-written claims Fact verification ✗✗
+> EX-FEVER 60K 2023 Hyperlinked Wikipedia Mhop fact verif. ✗✓
+> ELI5 270K 2019 Reddit (ELI5 subreddit) Long-form QA ✗✗
+> WikiQA 3.5K 2015 Wikipedia Factoid QA ✗✗
+> DatedData 200K Various Varied web sources Temporal QA ✗✗
+> StreamingQA 150K 2007-2020 WMT news articles Event-based QA ✗✗
+> ArchivalQA 530K 1985-2008 Historical news archives Fact-based QA ✗✗
+> Hello Fresh 30K 2023-2024 X and Wikipedia Fact verification ✗✗
+> CLARK 1.4K 2021-2024 Wikipedia Knowledge QA ✗✗
+> PopQA 14k 2023 Wikipedia, Wikidata Fact-based QA ✗✗
+> TemporalWiki 7K 2021 Wikipedia, Wikidata Temporal QA ✓✗
+> WikiFactDiff 20k 2021-2023 Wikidata Factual cloze tests ✗✗
+> WikiBigEdit 502K 2024 Wikidata Fact-based QA ✓✓
+
+Table 1. Comparison of QA and edit benchmarks in terms of size, date, question types, sources, and lifelong applicability; high-lighting the unique placement of our WikiBigEdit benchmark. 
+
+new facts without retraining. ZsRE (Levy et al., 2017) and COUNTERFACT (Meng et al., 2023) focus on syn-thetic updates, while AToKE (Yin et al., 2024) and Chro-noEdit (Ge et al., 2024) evaluate temporal consistency but remain limited in scale and scope. ELKEN (Peng et al., 2024) and EVEDIT (Liu et al., 2024b) generate edits based on real-world events. TemporalWiki (Jang et al., 2022) and WikiFactDiff 4 (Khodja et al., 2024) are more closely aligned with WikiBigEdit . Both evaluate temporal up-date consistency using consecutive Wikidata snapshots. 
+
+WikiBigEdit provides over a magnitude more samples (Table 2), future-proofing and a comprehensive evaluation along all editing desiderata. 
+
+Knowledge Editing. Approaches for integrating new knowledge into LLMs include local modification methods such as ROME (Meng et al., 2023) and MEMIT (Meng et al., 2022), global optimization techniques like MEND (Mitchell et al., 2021), and external memorization strategies such as SERAC (Mitchell et al., 2022), GRACE (Hartvigsen et al., 2023), RECIPE (Chen et al., 2024), and WISE (Wang et al., 2024a). While these techniques support efficient model updates, they often suffer from catastrophic forget-ting and knowledge degradation when applied to large-scale or sequential edits (Hsueh et al., 2024; Gupta et al., 2024b; Yang et al., 2024b). Our benchmark offers a practical frame-work to examine these limitations under realistic, evolving knowledge conditions. 
+
+Retrieval Augmented Generation (RAG). By combining a retrieval module with a generative language model, this class of methods addresses issues such as outdated knowledge and untraceable generations (Lewis et al., 2020; Guu et al., 2020; Karpukhin et al., 2020). RAG approaches have shown strong performance on knowledge-intensive tasks, even at smaller model scales (Borgeaud et al., 2022; Izacard et al., 2022), and enable attribution by linking generated outputs 
+
+> 4
+
+While WikiFactDiff contains over 450K triple–text pairs, only a 20K subset ( WFD repl ) is commonly used for editing due to its defined evaluation protocol. 
+
+2Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+to retrieved sources (Rashkin et al., 2022; Honovich et al., 2022). Moreover, RAG supports dynamic knowledge up-dates, mitigating context-memory conflicts when parametric information becomes stale (Vu et al., 2023). However, RAG faces limitations in multi-hop reasoning and compositional retrieval. More advanced variants - such as HippoRAG (Guti ´errez et al., 2025) or agent-based RAG systems - aim to address these limitations by improving reasoning over retrieved information. 
+
+Continual Finetuning and Model Merging. Continual fine-tuning has emerged as a reliable approach for general large-scale model updates (Garg et al., 2024; Prabhu et al., 2023b; Ibrahim et al., 2024). Roth et al. (2024) show that parameter-efficient finetuning via e.g. LoRA (Hu et al., 2021) or GaLore (Zhao et al., 2024), can be very effective, leveraging regularization provided by limiting trainable pa-rameter counts (Thede et al., 2024). Parameter-selective techniques, including BitFit (Zaken et al., 2022) and LNFit (Min et al., 2023), further reduce computational overhead by targeting specific parameter subsets. Additionally, regu-larization strategies from continual learning, such as EWC (Kirkpatrick et al., 2017) and SI (Zenke et al., 2017), have shown notable success in mitigating forgetting during the continual adaptation of foundation models. Model merg-ing (Wortsman et al., 2022; Ilharco et al., 2022; Ram ´e et al., 2024) has shown promising gains coupled with finetuning for continual tasks (Stojanovski et al., 2022; Marouf et al., 2024; Kozal et al., 2024; Marczak et al., 2024; Dziadzio et al., 2024). We investigate and contrast these approaches against knowledge editing at scale. 
+
+3. WikiBigEdit 
+
+WikiBigEdit addresses three key aspects: (1) it extracts a large number of realistic knowledge edits, (2) incorporates extensive evaluations to assess generalization, reasoning, and locality, and (3) operates fully automatically. The com-plete pipeline is shown in Figure 1. 
+
+Problem Definition. The task of large-scale, lifelong knowledge editing requires updating a pre-trained LLM 
+
+f 0 with a stream of factual updates [u1, u 2, . . . , u T ], where each update ut = ( qt, a t) consists of a question qt and its factual answer at. These updates are grouped into B se-quential batches [U1, U 2, . . . , U B ], where each batch can encompass anything from a single edit to multiple. For each batch update b (also denoted as timestep in this work), the model f b−1, trained on updates from prior batches U<b , is further updated with the current batch Ub to produce f b. The model must meet three key objectives: (1) integrate updates from Ub, (2) retain knowledge from U<b , and (3) ensure that the semantic understanding required to correctly solve pre-viously seen edits generalizes beyond simple memorization Snapshot 
+
+(Old) Subject Relation Object               
+
+> Locatse named after Jocasta
+> Norway capital Oslo
+> Mauritius anthem Motherland
+> Subject Relation Object
+> Podcast named after iPod
+> Nagpur Metro has part Airport
+> iPod manufacturer Apple
+
+Changed Factual Triplets Unchanged Factual Triplets 
+
+Filter Factual Triplets 
+
+GPT-4o-mini (3.5 for Update and Locality) 
+
+Personas Mhop Locality Rephrase Update 
+
+> {"tag": "new", "subject": "Arri", "src": "Which company is a subsidiary of Arri?", "rephrase": "What company serves as a subsidiary of Arri? "alt": "Clay Paky", "loc": "Which company is a subsidiary of Altria?", "loc_ans": "Philip Morris USA", "mhop": "What language is associated w the parent company of the subsidiary Arri?", "mhop_ans": "English", "genv2_mixed": "Which player in the game is pulling strings as a subsidiary of Arri, I wonder?"}
+> {"tag": "new", "subject": "Bart Somers", "src": "To which parliamentary group does Bart Somers belong?", "rephrase": "What parliamentary group does Bart Somers belong to?", "alt": "Open Flemish Liberals and Democrats", "loc": "Which parliamentary group does Bart Snels belong to?", "loc_ans": "GroenLinks", "mhop": "Which political party does the parliamentary group of Bart Somers replace?", "mhop_ans": "Vlaamse Liberalen en Democraten", "genv2_mixed": "What group Bart Somers belong to?"}
+> {"tag": "new", "subject": "podcast", "src": "What device is the podcast named after?", "rephrase": "After what device is the podcast named?", "alt": "iPod", "loc": "Who or what was Iocaste named after?", "loc_ans": "Jocasta", "mhop": "Who is the manufacturer of the entity after which the podcast is named?", "mhop_ans": "Apple", "genv2_mixed": "Upon which instrument or mechanism does the nomenclature of this podcast find its origin and inspiration?"}
+
+Update 
+
+> Q: What device is the podcast named after? A: iPod
+
+Rephrase 
+
+> Q: After what device is the podcast named? A: iPod
+
+Mhop 
+
+> Q: Who is the manufacturer of the entity after which the podcast is named?
+> A: Apple
+
+Locality 
+
+> Q: Who or what was Locaste named after?
+> A: Jocasta
+
+Compare 
+
+Filter QA Pairs 
+
+Snapshot 
+
+(New) 
+
+Unchanged Changed Mhop Locality 
+
+Training Evaluation 
+
+Personas 
+
+> Q: Upon which instrument does the nomenclature of the podcast find its origin? A: iPod
+
+Figure 1. Automated Dataset Generation Pipeline. (1) Com-paring two Wikidata knowledge graph snapshots; extract sets of unchanged and changed subject-relation-object triplets, (2) filter for quality, (3) generate locality probes, (4) produce multi-hop rea-soning qintuples, (5) convert into question-answer pairs using e.g. GPT-3.5, (6) introduce rephrased and persona-based evaluations to further test generalization, conduct (7) final quality assurance. Put together, this can continuously extend WikiBigEdit with additional time-specific high-quality knowledge edit data. 
+
+of exact question-answer pairings. 
+
+3.1. Lifelong Automated Extraction of Factual Edits 
+
+As a proxy for world knowledge, we leverage Wikidata knowledge graphs, following recent works (Jang et al., 2022; Khodja et al., 2024). By performing pairwise comparisons of snapshots taken at different points in time, we identify changes that approximate real-world knowledge evolution. We thus automatically generate WikiBigEdit using our proposed seven-step pipeline, as follows: 
+
+(1) Periodic Snapshot Acquisition. The automated pipeline is initiated through periodic downloads of most recent snap-shots of the Wikidata knowledge graph, and paired with the last downloaded snapshot. Pairwise comparison of these snapshots allows us to extract two distinct sets of subject-relation-object triplets T = ( subj , rel , obj ), S = {T i}:
+
+Sstatic representing unchanged facts and Schanged capturing 
+
+updated or newly added information (c.f. top of Figure 1). While Schanged will be used to create the knowledge edits to be incorporated into a base model, Sfixed is primarily utilized for evaluations. Each triplet describes a given relation (such as “ capital ”, “ manufacturer ”, ...) between a subject (e.g. “Norway ”) and object (s.a. “ Oslo ”). A detailed overview is provided in the supplementary. 
+
+(2) Initial Filtering. To ensure high-quality triplets, we apply several filtering steps to both Sstatic and Schanged : ( i) We exclude triplets with circular dependencies, ( ii ) where the 3Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+subject or object entities consist of non-Roman characters, (iii ) single characters, ( iv ) overly long phrases (e.g., more than five words) and ( v) where a single subject-relation combination maps to multiple objects to avoid ambiguity. 
+
+(3) Generation of Locality Probes. The filtered Schanged 
+
+defines the knowledge updates. To evaluate whether knowl-edge edits remain local , i.e. do not influence (related) exist-ing knowledge, we derive a locality set Slocality from Sstatic 
+
+and Schanged ; where each factual triplet in the changed set is paired with a triplet semantically similar in subject and relation but with a distinct object. For each factual update, this gives a corresponding question whose answer should remain unaffected to probe the locality of knowledge edits. 
+
+(4) Inclusion of Multi-Hop Reasoning Tuples. To enable reasoning evaluation, we further extract multi-hop ( mhop )tuples Smhop from Schanged . In particular, we identify pairs of factual triplets (Ti, Tj ) where T obj  
+
+> i
+
+serves as the subject of the second triplet, T subj  
+
+> j
+
+; for example Ti = (podcast ,
+
+named after , iPod ) and Tj = (iPod , manufacturer , Apple ). The triplets Ti and Tj are then concatenated to form two-hop factual qintuples Tij , e.g. ( podcast , named after , iPod ,
+
+manufacturer , Apple ). By restricting the extraction of Smhop 
+
+to Schanged , we ensure a fair evaluation, as the model will have been updated with both individual facts prior to the reasoning task. We find that for a filtered batch Schanged , we can recombine around 3.9% update triplets into Smhop .
+
+(5) Generation of Question-Answer Edit Pairs. For 
+
+Schanged , Slocality , and Smhop , we generate corresponding question-answer pairs using GPT-4o-mini (Brown et al., 2020) (GPT-3.5 for update and locality) through few-shot prompting (for all prompt templates, please see the sup-plementary). For Smhop , we generate questions that omit the middle entity of the two-hop factual quintuple. Using this, we generate the corresponding question-answer sets 
+
+SQA changed , SQA locality , SQA mhop . SQA locality and SQA mhop are used for eval-uation, while SQA changed constitutes the respective fact-based training data. 
+
+(6) Generation of Personalized and Rephrased Question-Answer Edit Pairs for Generalization Studies. While 
+
+SQA locality and SQA mhop allow us to probe locality and reasoning generalization of edits, we also provide SQA rephrase and SQA personas 
+
+containing rephrased variants of SQA changed to check generaliza-tion of edits beyond memorization. In particular, we utilize GPT-4o-mini to provide additional question-answer varia-tions of SQA changed by enforcing the language model to either directly rephrase SQA changed to produce SQA rephrased or directly generate SQA personas by mimicking various different “ personas ”(e.g. “ detective ”, “ pirate ”, “ philosopher ” defined by a de-tailed description, see supplementary). For both SQA rephrased 
+
+and SQA personas , post-hoc filtering is applied to ensure that sub-                             
+
+> Timestep Date Range Samples Unsolved
+> T1 2024/02/01 - 2024/02/20 26,922 80% T2 2024/02/20 - 2024/03/01 29,835 84% T3 2024/03/01 - 2024/03/20 54,504 85% T4 2024/03/20 - 2024/04/01 43,443 85% T5 2024/04/01 - 2024/05/01 121,116 81% T6 2024/05/01 - 2024/06/01 101,728 82% T7 2024/06/01 - 2024/06/20 69,403 82% T8 2024/06/20 - 2024/07/01 55,431 82%
+> Total 502,382 82%
+
+Table 2. Description of WikiBigEdit timesteps. Sample counts reflect number of question-answer pairs associated with a given time-interval; alongside information highlighting the per-centage of unsolved edits across studied LLMs; highlighting the large number of required real-world factual updates across LLMs. 
+
+ject, object and relation remain correctly encoded in both. 
+
+(7) Final Filtering Stage. A final filtering process ensures the quality of the generated question-answer pairs for both training and evaluation sets by verifying that the gener-ated questions contain the respective subject and relation 
+
+while not giving away the answer and answers incorporate the right object. After this stage, the final SQA changed , SQA locality ,
+
+SQA mhop , SQA rephrased an SQA personas are incorporated as a new knowl-edge edit batch into WikiBigEdit .
+
+3.2. Analysis and Exploration 
+
+In this section, we first summarize various benchmark char-acteristics before leveraging the first instantiation of our large-scale WikiBigEdit to study the structure and prop-erties of real-world knowledge edits derived from Wikidata knowledge graphs. Table 2 provides an overview of the 
+
+eight time-intervals that constitute WikiBigEdit . The factual updates are extracted on a roughly bi-monthly fre-quency from Wikidata snapshots spanning February to July 2024; with the availability of Wikidata snapshots determin-ing size and extend of factual updates associated with each timestep. To ensure high data quality, we filter out approximately 76% of initial changes, removing cyclic or overly long entities (11%), non-entity-to-entity relations (50%), and nondeter-ministic triplets (15%). The filtered updates range from 27k to 69k per step, with monthly factual changes exceed-ing 100k. This variability reflects the dynamic nature of knowledge updates and practical constraints when aiming to ensure that models remain up-to-date. Overall, this version contains 502,382 question-answer pairs across 6.9M tokens. 
+
+Impact of Language Model Choice on QA Genera-tion The quality of generated question-answer pairs in 
+
+WikiBigEdit depends in part on the underlying language model used during generation. Before we conduct further experiments, we begin by examining the sensitivity of the generation process to different LLMs by comparing out-4Understanding the Limits of Lifelong Knowledge Editing in LLMs 1800 1850 1900 1950 2000 2016 2024                                
+
+> Fact Timestamp
+> 0
+> 200
+> 400
+> 600
+> Number of Samples  a) Num. Samples by Timestamp
+> 1800 1900 2000 2012 2016 2020 2024
+> Fact Timestamp
+> 0.4
+> 0.5
+> 0.6
+> Average Accuracy  b) Avg. Accuracy by Timestamp
+> Prev. Trend
+> Recent Trend
+> Llama-2-7B
+> Llama-3-8B
+> Mistral-7B
+> Gemma-7B
+> XGen-7B
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Extracted in Timestep
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> Share of Samples  c) Tempral Resolution of Extracted Edits
+> Dated to Timestep
+> Before
+> T1
+> T2
+> T3
+> T4
+> T5
+> T6
+> T7
+> T8
+> 010
+> 0
+> 2000
+> 4000
+> Number of Questions  d) Subject Count
+> 020
+> 0
+> 500
+> 1000
+> 1500
+> e) Object Count
+> 510 15
+> 0
+> 500
+> 1000
+> f) Subject Views
+> 10 20
+> 0
+> 500
+> 1000
+> 1500
+> g) Object Views
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Timestep
+> 0.2
+> 0.4
+> 0.6
+> Mean Accuracy  h) Model Performance by Object Count
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Timestep
+> 0.2
+> 0.4
+> 0.6
+> Mean Accuracy  i) Model Performance by Object Views
+> Least
+> Specific
+> Most
+> Specific
+
+Figure 2. Analysis and Exploration of Real-World Factual Updates in WikiBigEdit . (a) Distribution of time-stamps associated with factoids where temporal information was available. For real-world updates, facts cover both historical, but especially more recent context. (b) Average accuracy of five LLMs evaluated across facts broken down by timestamps. We find that contrasted against facts clearly preceding knowledge cutoffs (pre-2023), there is a notable drop in average capabilities, highlighting the need to both address edits on pretraining context, but especially the inclusion of recent facts or corrections. (c) Distribution of edits extracted for each timestep and their corresponding dates. While the majority of edits align with their respective timestep, edits in larger parts also incorporate changes of information associated with primarily “ older ” time intervals. (d-g) Real-world edits cover both highly specific facts (measured on subject and object counts in pretraining corpora) as well as general, common knowledge modifications. (h-i) Especially on highly specific edits as defined by pretraining concept frequency does performance go down.         
+
+> Update Triplet Lea County Regional Airport - state of use - in use
+> GPT-3.5 What is the current state of use for Lea County Regional Airport?
+> GPT-4o-mini What is the current state of use of Lea County Regional Airport?
+> GPT-4o What is the current state of use of Lea County Regional Airport?
+> Mhop Tuple 2004 VS75 - discoverer - Marc Buie - gender - male
+> GPT-3.5 Who is the discoverer or inventor of 2004 VS75?
+> GPT-4o-mini What is the sex or gender of the discoverer of 2004 VS75?
+> GPT-4o What is the gender of the discoverer or inventor of 2004 VS75?
+
+Table 3. Comparison of generated questions across different lan-guage models for a simple factual update (top) and a multi-hop reasoning example (bottom). While all models perform well on the single-hop case, GPT-3.5 struggles with compositional reasoning, often producing incomplete multi-hop questions. GPT-4o-mini and GPT-4o generate more complete and semantically accurate queries. 
+
+puts from GPT-3.5-turbo, GPT-4o-mini, and GPT-4o. For both the Update and Locality sets, which are directly de-rived from structured subject–relation–object triplets, model choice has negligible impact. Even the less capable GPT-3.5-turbo consistently produced well-formed, semantically correct questions. As shown in Table 3, the outputs across all models for such simple factual prompts are stylistically com-parable and accurate. In contrast, the Multi-hop and Persona 
+
+sets were more sensitive to model choice, as they require compositional reasoning and stylistic transformation. For instance, GPT-3.5-turbo often struggled to combine facts effectively in multi-hop settings, producing incomplete or ambiguous questions. GPT-4o-mini and GPT-4o, in com-parison, reliably produced complete and coherent outputs. These observations confirm our selection for GPT-4o-mini to generate Multi-hop and Persona sets due to its strong balance between generation quality and computational effi-ciency. 
+
+Understanding the temporal resolution of real-world fac-tual updates. To assess the temporal resolution of knowl-edge edits in our benchmark, we analyze timestamps for factual triplets where date information is available (10,409 question-answer pairs). As shown in Figure 2 ( a), updates strongly focus on recent events, though many also modify facts predating the edit dates. Figure 2 ( c) further reveals that extracted updates are not strictly confined to their respective timesteps, underscoring the dual challenge of integrating both new knowledge and modifying existing facts from pretraining corpora. When stratified by knowledge cutoff (pre-2023 vs. 2023/2024), all tested LLMs perform worse on post-cutoff facts (Cheng et al., 2024) ( b), highlighting the critical need for effective integration of new knowledge. 
+
+Specificity of factual updates. We assess the specificity of knowledge edits by distinguishing well-known from highly specialized facts, using two measures: (1) entity frequency from the Infinigram API (Liu et al., 2024a), and (2) Wikipedia view counts (Jan 2023–June 2024) (Mallen et al., 2023). As shown in Figure 2 ( d–g ), WikiBigEdit 
+
+includes both general (e.g., Which continent is Krasnodar a part of? ) and highly specific questions (e.g., Who was the doctoral advisor of Omar Khayy ´am? ). To evaluate how specificity affects performance, we test five LLMs (Llama-2-7b, Llama-3-8b, Mistral-7b, Gemma-7b, xGen-7b) and correlate their accuracy. As shown in ( h), lower entity fre-quency correlates with reduced performance, consistent with Udandarao et al. (2024); Cheng et al. (2024), while view counts ( i) show less consistent trends. Specificity appears primarily driven by the object rather than the subject. See supplementary for details. 5Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+WikiBigEdit - Analysis Summary 
+
+When evaluating LLMs on a large number of real-world factual updates, performance is at best mediocre, but especially low for highly specific and recent facts. For LLMs to serve as accurate and timely knowledge bases, the ability to edit knowl-edge across historic, recent or specific context at scale is thus crucial. 
+
+4. Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+Leveraging WikiBigEdit , we evaluate the ability of life-long knowledge editing techniques to incorporate large-scale factual updates. Section 4.1 presents a comprehen-sive application of various lifelong editing approaches and compares them to alternative methods like continual fine-tuning and retrieval augmentation. Section 4.2 analyzes the specific limitations of knowledge editing techniques, with Section 4.3 and Section 4.4 providing detailed evaluations of retrieval augmentation and continual finetuning. 
+
+Experimental Details. All experiments are performed on a compute cluster equipped with Nvidia A100 and H100 GPUs, leveraging PyTorch (Paszke et al., 2019) and building on the EasyEdit codebase (Zhang et al., 2024). All our eval-uations are conducted on five state-of-the-art LLMs: Llama-2-7b (et al., 2023) Llama-3-8b (et al., 2024a), Mistral-7b (Jiang et al., 2023), Gemma-7b (Team et al., 2024a) and xGen-7b (Nijkamp et al., 2023). To representatively study knowledge editing, we leverage the following approaches: ROME (Meng et al., 2023), R-ROME (Gupta et al., 2024a), MEMIT (Meng et al., 2022), and WISE (Wang et al., 2024a). For our retrieval-augmented generation experiments, we store update question-answer pairs in memory alongside as-sociated key embeddings generated by embedding questions with the all-mpnet-base-v2 embedding model (Song et al., 2020), the best general sentence-embedding model provided in the SBERT repository (Reimers & Gurevych, 2019). Dur-ing inference, the top-2 most similar entries are retrieved from memory efficiently using the Annoy solver (Bern-hardsson, 2018). This setup ensures efficient retrieval and supports multi-hop questions with minimal computational overhead. For our continual finetuning experiments, we explore variations of low-rank adaptation using LoRA (Hu et al., 2021) alongside simple interpolation-based model-merging (Wortsman et al., 2022; Stojanovski et al., 2022; Marouf et al., 2024) which has shown to perform competi-tively even when compared to more involved merging tech-niques (Roth et al., 2024; Dziadzio et al., 2024). Adapters are trained for 10 epochs on each timestep. Additional de-tails are provided in the corresponding subsections and the supplementary. Update                    
+
+> Rephrase
+> Personas
+> Mhop
+> Locality
+> 0% 25% 50% 75% 100% Methods
+> Pre-Edit
+> LoRA FT
+> LoRA-Merge
+> MEMIT
+> WISE
+> RAG
+> Figure 3. Large-Scale Lifelong Knowledge Editing on
+> WikiBigEdit .Comparison of knowledge editing techniques and other standards for model modification (retrieval-augmented generation, RAG, and continual finetuning using LoRA +merging). Results reveal that RAG vastly outperforms specialized knowledge editing techniques (at higher inference cost). At equivalent inference, simple continual finetuning consistently improves on advanced editing techniques at scale.
+
+4.1. Lifelong Knowledge Editing on WikiBigEdit 
+
+To begin, Figure 3 presents a high-level comparison of the average accuracy across all eight timesteps [U1, ..., U 8] for all five LLMs listed above. After incorporating factual changes of a timestep, evaluation is conducted across all five evaluation axes spanned by respective evaluation data 
+
+SQA rephrased , SQA personas , SQA locality , SQA mhop , and a performance evalua-tion on the actual edit data SQA update . Results across all models and timesteps are averaged and visualized. RAG (green line) proves to be the most effective approach, significantly outperforming knowledge editing techniques across evaluation axes, nearly tripling accuracy on training edits. This result is expected, as memorizing previously seen edits makes solving the task straightforward. Mem-orization also boosts performance on generalization and locality metrics, commonly used in knowledge editing lit-erature. However, compositional reasoning on multihop questions sees only slight improvements, as expected. RAG naturally trades performance increases for longer inference times. However, with effective approximate solvers and high-quality sentence embeddings, we find that inference time at most doubles after processing all of 
+
+WikiBigEdit (c.f. Figure 16). Even so, knowledge edit-ing techniques like WISE and MEMIT, specifically designed to factually update LLMs, cannot match simple low-rank adapter-based finetuning ( LoRA-FT ) at scale. Moreover, with interpolation-based model merging ( LoRA-Merge ), commonly used in training and finetuning LLMs (Yang et al., 2024a; Roth et al., 2024; Team et al., 2024a;b; Dzi-adzio et al., 2024), consistent gains are observed across 6Understanding the Limits of Lifelong Knowledge Editing in LLMs 0 2000 4000 6000 8000 10000  
+
+> Number of Edits
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Edit Accuracy
+> LoRA FT (Avg.)
+> RAG (Avg.)
+> MEMIT
+> R-ROME
+> ROME
+> WISE
+> Pre-Edit (Avg.)
+> Figure 4. Performance Decay of Knowledge Editing Techniques.
+> Update accuracy over first 10K edits for knowledge editing methods compared to simple baselines that show higher perfor-mance (LoRA, RAG). Local modification methods collapse early (MEMIT, ROME, R-ROME), and even those specifically designed for large volumes of edits (WISE) converge to pre-edit accuracy.
+
+all evaluation axes. These results strongly suggest that at scale, standard knowledge editing techniques fall short even when compared to straightforward continual finetun-ing approaches commonly employed for general continual pretraining (Ibrahim et al., 2024; Roth et al., 2024). Key Takeaway Updated via WikiBigEdit , RAG significantly outperforms all approaches at double the inference time; though expectedly struggles with multi-hop reasoning. Given a fixed inference budget , we find that at scale, knowledge editing approaches evalu-ated across all standard editing evaluation axes are actually matched or outperformed by simple contin-ual finetuning, especially using merging. The following sections provide a more detailed breakdown of specific failure scenarios and drivers. 
+
+4.2. The Limits of Knowledge Editing at Scale 
+
+This section provides an in-depth analysis of knowledge editing applied to long and realistic update sequences, with results shown in Figure 4. Using Llama-2-7b as the under-lying LLM, we present the first 10K update steps from the initial timestep in WikiBigEdit for clarity. A complete version with all models is available in the supplementary. The accuracy of ROME, R-ROME, and MEMIT - local knowledge editing techniques that locally modify specific model weights - rapidly degrades within the first few hun-dred updates, leading to model collapse. This failure on large-scale, sequential knowledge editing aligns with recent findings (Gupta et al., 2024b; Yang et al., 2024b) and high-lights difficulties for lifelong knowledge editing at scale. Even without direct model edits, methods like WISE - de-signed for larger update volumes by storing adapted weight matrices for retrieval during inference - show limited bene-fits. While WISE avoids catastrophic failure and integrates new facts over longer update sequences, its performance steadily declines within the first 10K updates, ultimately 
+
+converging to pre-update knowledge levels . This suggests that by avoiding direct model modifications, WISE struggles to retain updates over time, making it unsuitable for large-scale sequential integration, especially compared to retrieval augmentation and simple continual fine-tuning, which incur no additional inference cost. Key Takeaway Knowledge editing is reliant on local weight mod-ification and collapses quickly. Even methods de-signed for lifelong editing converge to pre-update performance early. So large-scale lifelong editing requires significantly improving existing methods. 
+
+4.3. Retrieval Augmentation for WikiBigEdit 
+
+As shown in Figure 3, retrieval-augmented generation (RAG) demonstrates significant improvements over di-rect knowledge editing techniques. While expected for performance on training edits, the increased perfor-mance across all evaluation axes, including generality, is somewhat surprising, as prior retrieval approaches like GRACE (Hartvigsen et al., 2023) have shown limited gener-alization capabilities (Wang et al., 2024a). However, on real-istic edits and at scale, we find that efficiently implemented retrieval-augmentation outperforms any editing method (see Section 4 and supplementary for details). Looking at the detailed results of the RAG baseline on 
+
+WikiBigEdit in Figure 5, the improvements across all evaluation axes (except multi-hop reasoning) are significant across 500K+ updates. The top row shows the average ac-curacy on the current timestep, with bold lines representing average performance across five models (light background lines). The bottom row illustrates average performance across all timesteps after training on the current timestep’s edits. As noted previously, RAG achieved near-perfect accuracy on SQA update by simply retrieving the exact stored questions from memory; exhibiting no sign of “ forgetting ”on trained edits (c.f. bottom row, leftmost). Additionally, edits remain highly localized since no weight updates are performed. Interestingly, while RAG also maintains high av-erage performance on generalization-based evaluation axes (“ rephrasing ” and “ personas ”), achieving average accura-cies of 78.64% and 66.16%, respectively, RAG still exhibits symptoms akin to catastrophic forgetting encountered in continual learning and knowledge editing (Kirkpatrick et al., 2017; Zenke et al., 2017; Wang et al., 2024a). Here, perfor-mance on older timestep data decays with every new large update batch (bottom, second and third), as the retrieval 7Understanding the Limits of Lifelong Knowledge Editing in LLMs 0 100 200 300 400 500                                                                                                                     
+
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Mean Batch Accuracy
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Update
+> 0100 200 300 400 500
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Rephrase
+> 0100 200 300 400 500
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Personas
+> 0100 200 300 400 500
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Mhop
+> 0100 200 300 400 500
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Locality
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 15
+> 10
+> 5
+> 0
+> 5
+> Acc. Difference [pp]
+> T1 T2 T3 T4 T5 T6 T7 T8
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 15
+> 10
+> 5
+> 0
+> 5
+> T1 T2 T3 T4 T5 T6 T7 T8
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 15
+> 10
+> 5
+> 0
+> 5
+> T1 T2 T3 T4 T5 T6 T7 T8
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 15
+> 10
+> 5
+> 0
+> 5
+> T1 T2 T3 T4 T5 T6 T7 T8
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 15
+> 10
+> 5
+> 0
+> 5
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Pre-Edit Post-Edit
+> Model Avg.
+> LLAMA-2-7B
+> LLAMA-3-8B
+> Mistral-7B
+> Gemma-7B
+> XGen-7B
+> Timestep T1
+> Timestep T2
+> Timestep T3
+> Timestep T4
+> Timestep T5
+> Timestep T6
+> Timestep T7
+> Timestep T8
+
+Figure 5. Retrieval-Augmented Generation for Lifelong Knowledge Editing . (Top) Mean batch accuracy for all evaluations: update, rephrase, personas, multi-hop and locality across all models. (Bottom) Accuracy changes for preceding timesteps after training on a given timestep, highlighting forgetting symptoms on generalization tasks, and marginal benefits at best for reasoning over edits. 
+
+memory becomes more and more obfuscated with context irrelevant for data from particular timesteps. Finally, while RAG outperforms knowledge editing ap-proaches on standard measures (locality, generalization, and overall edit performance), its multi-hop reasoning accuracy remains near pre-update levels (second from right in Fig-ure 5). Figure 6 reveals the bottleneck: retrieval accuracy is low - likely due to the absence of the middle subject in the multi-hop question - with correct retrieval rates below 50% for the first hop and even lower for the second. Only 10% of evaluation samples retrieve both facts correctly. Even when both hops are retrieved, answer accuracy remains near single-hop levels (i.e. solving multi-hop questions using only information from just the first hop), as models struggle to combine retrieved information without dedicated training for reasoning tasks. While advanced methods like Hip-poRAG (Guti ´errez et al., 2025) may help, they typically require longer contexts or higher compute; we leave their integration to future work. Key Takeaway Simple RAG outperforms much more involved knowledge editing techniques across all editing eval-uation axes at larger scale and real-world edits. How-ever, performance on evaluation over older edits still decays, and reasoning over edited facts shows marginal benefits at best. 
+
+4.4. Continual Finetuning 
+
+To conclude, we investigate continual finetuning using low-rank adaptation (LoRA) as a simple yet effective method to incorporate large volumes of new facts. While recent works (e.g., Thede et al. (2024); Roth et al. (2024)) have demonstrated the benefits of continual low-rank finetuning for general continual learning tasks, we show that these ad-100 200 300 400 500                   
+
+> Number of Edits (k)
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Correct Retrieval Rate
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Retrieval Accuracy
+> Hop 1 Retrieval Acc.
+> Hop 2 Retrieval Acc.
+> Hops 1&2 Retrieval Acc.
+> 100 200 300 400 500
+> Number of Edits (k)
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Correct Answer Rate
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Answer Acc. if Correctly Retrieved
+> Answer Acc. | Hop 1 Retrieved
+> Answer Acc. | Hop 2 Retrieved
+> Answer Acc. | Hops 1&2 Retrieved
+
+Figure 6. Multi-hop RAG. (Left) Retrieval accuracy for individ-ual and both hops, highlighting significant challenges in retrieving both relevant facts simultaneously. (Right) Answer accuracy con-ditioned on correct retrieval, showing that even when both hops are retrieved, models struggle to combine the information. 
+
+vantages extend to specialized knowledge editing for LLMs. As shown in Figure 3, simple non-specialized finetuning over all WikiBigEdit updates outperforms specialized knowledge editing techniques across all standard evaluation axes, with gains further amplified by interpolation-based model merging. These findings emphasize the need to re-visit design choices in knowledge editing, evaluate on larger, realistic benchmarks, and improve baseline comparisons. Finally, we provide a detailed perspective on lifelong knowl-edge editing using continual finetuning in Figure 7 (rank-4 LoRA; additional results in the supplementary 5). As shown in the top row, performance remains competitive in early timesteps but steadily declines as updates accumulate, even-tually converging to or even falling below pre-update ac-curacy, particularly for locality and multi-hop reasoning. This aligns with expectations, as catastrophic forgetting per-sists even in low-rank adaptation (Thede et al., 2024; Roth et al., 2024). However, for the first 100K updates, contin-ual finetuning shows notable success in integrating edits. 
+
+> 5
+
+High-rank configurations exhibit significant instability, includ-ing catastrophic failure on Mistral and poor performance across other models. 
+
+8Understanding the Limits of Lifelong Knowledge Editing in LLMs 0 100 200 300 400 500                                                                                                                     
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Mean Batch Accuracy
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Update
+> 0100 200 300 400 500
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Rephrase
+> 0100 200 300 400 500
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Personas
+> 0100 200 300 400 500
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Mhop
+> 0100 200 300 400 500
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Locality
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 40
+> 30
+> 20
+> 10
+> 0
+> 10
+> Acc. Difference [pp]
+> T1 T2 T3 T4 T5 T6 T7 T8
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 40
+> 30
+> 20
+> 10
+> 0
+> 10
+> T1 T2 T3 T4 T5 T6 T7 T8
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 40
+> 30
+> 20
+> 10
+> 0
+> 10
+> T1 T2 T3 T4 T5 T6 T7 T8
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 40
+> 30
+> 20
+> 10
+> 0
+> 10
+> T1 T2 T3 T4 T5 T6 T7 T8
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 40
+> 30
+> 20
+> 10
+> 0
+> 10
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Pre-Edit Post-Edit
+> (LoRA-Merge)
+> Post-Edit
+> (LoRA-FT)
+> Model Avg.
+> LLAMA-2-7B
+> LLAMA-3-8B
+> Mistral-7B
+> Gemma-7B
+> XGen-7B
+> Timestep T1
+> Timestep T2
+> Timestep T3
+> Timestep T4
+> Timestep T5
+> Timestep T6
+> Timestep T7
+> Timestep T8
+> Post-Edit
+> (LoRA-FT)
+> Post-Edit
+> (LoRA-Merge)
+
+Figure 7. Continual Finetuning for Knowledge Editing. (Top) Mean batch accuracy for update, rephrase, personas, mhop, and locality sets for continual LoRA finetuning (LoRA-FT) with model merging (LoRA-Merge). (Bottom) Accuracy differences for individual timesteps. LoRA-FT degrades over time, while merging ensures consistent editability across all WikiBigEdit .
+
+These results highlight its viability for mid-term knowledge integration but also its limitations at scale. Interestingly however, as we couple continual LoRA fine-tuning with simple model merging (after training of each timestep, current adapter weights are simply merged into preceding adapter weights using an interpolation weight of 0.25), we achieve significantly improved editing per-formance across WikiBigEdit . While LoRA-Merge ini-tially shows lower performance on shorter update sequences, it demonstrates superior stability as updates accumulate; and begins to notably outperform simple continual finetuning (and thereby also any specialized knowledge editing tech-nique) after approximately 100K edits on all evaluation sets, maintaining consistent performance without signifi-cant degradation . Importantly, LoRA-Merge shows at most marginal evidence of catastrophic forgetting, and in parts even exhibits positive backward transfer (where training on a current timestep actually improves performance on all ed-its seen previously) - see Figure 7 bottom row. These results reinforce the effectiveness of model merging for general con-tinual finetuning and pretraining tasks (Stojanovski et al., 2022; Thede et al., 2024; Roth et al., 2024), highlighting its promise for large-scale knowledge editing. Key Takeaway Generic adapter-based finetuning matches special-ized knowledge editing for mid-level knowledge editing; though exhibits catastrophic forgetting at scale. However, equipped with simple model merg-ing, we find consistent inclusion of new facts across all of WikiBigEdit . This suggests better base-line comparisons and studies at scale for the develop-ment of specialized knowledge editing techniques. 
+
+5. Conclusion 
+
+This paper explores lifelong knowledge editing for large language models at a practical scale. We introduce 
+
+WikiBigEdit , a benchmark with an automated data ac-quisition pipeline that extracts real-world factual updates from Wikidata, enabling lifelong expansion. In its first version, WikiBigEdit contains over 500K QA pairs for large-scale lifelong knowledge editing, complemented by a comprehensive evaluation suite covering standard knowl-edge editing criteria, reasoning, and generalization. Leveraging WikiBigEdit , we conduct an extensive ex-perimental study in which we identify key limitations of existing knowledge editing approaches such as ROME, MEMIT, and WISE, which struggle with scalability and stability in large-scale update settings. Our results also demonstrate the efficacy of retrieval-augmented generation (RAG) when no restriction on inference time is given and highlight continual finetuning coupled with model merging as a competitive alternative at an equivalent inference cost. We believe that WikiBigEdit provides an important ref-erence to understand the transfer of knowledge editing meth-ods to real-world scale and facts, as well as suggestions to-wards more complete baseline studies during development of such specialized techniques. 
+
+Acknowledgements 
+
+LT and KR thank the International Max Planck Research School for Intelligent Systems (IMPRS-IS) for support. KR also thanks the European Laboratory for Learning and Intel-ligent Systems (ELLIS) PhD program for support. We are grateful for support by the Carl Zeiss Foundation, project ”Certification and Foundations of Safe Machine Learning Systems in Healthcare”. This work was partially funded by the ERC (853489 - DEXIM) and the Alfried Krupp von Bohlen und Halbach Foundation, which we thank for their generous support. 9Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+Impact Statement 
+
+Maintaining factual accuracy in large language models (LLMs) is critical, as these models are increasingly relied upon in domains where misinformation or outdated knowl-edge can have serious societal consequences. By focusing on the lifelong integration of factual knowledge, this pa-per directly addresses the challenge of ensuring that LLMs remain up-to-date, reliable, and accurate over time. The pro-posed WikiBigEdit benchmark provides a valuable tool for designing and evaluating methods that enhance factual-ity, offering a scalable and realistic framework grounded in real-world knowledge evolution. By advancing techniques for continual factual updates, this work contributes to reduc-ing the risks of outdated or incorrect information, promoting trust and accountability in the use of LLMs for applications in education, healthcare, journalism, and beyond. 
+
+References 
+
+Bajaj, P., Campos, D., Craswell, N., Deng, L., Gao, J., Liu, X., Majumder, R., McNamara, A., Mitra, B., Nguyen, T., Rosenberg, M., Song, X., Stoica, A., Tiwary, S., and Wang, T. Ms marco: A human generated machine reading comprehension dataset, 2018. URL https://arxiv. org/abs/1611.09268 .Bao, Z., Chen, W., Xiao, S., Ren, K., Wu, J., Zhong, C., Peng, J., Huang, X., and Wei, Z. Disc-medllm: Bridging general large language models and real-world medical consultation. arXiv preprint arXiv:2308.14346 , 2023. Bernhardsson, E. Annoy: Approximate Nearest Neighbors in C++/Python , 2018. URL https://pypi.org/ project/annoy/ . Python package version 1.13.0. Borgeaud, S., Mensch, A., Hoffmann, J., Cai, T., Rutherford, E., Millican, K., van den Driessche, G., Lespiau, J.-B., Damoc, B., Clark, A., de Las Casas, D., Guy, A., Menick, J., Ring, R., Hennigan, T., Huang, S., Maggiore, L., Jones, C., Cassirer, A., Brock, A., Paganini, M., Irving, G., Vinyals, O., Osindero, S., Simonyan, K., Rae, J. W., Elsen, E., and Sifre, L. Improving language models by retrieving from trillions of tokens, 2022. URL https://arxiv. org/abs/2112.04426 .Brown, T. B., Mann, B., Ryder, N., Subbiah, M., Kaplan, J., Dhariwal, P., Neelakantan, A., Shyam, P., Sastry, G., Askell, A., Agarwal, S., Herbert-Voss, A., Krueger, G., Henighan, T., Child, R., Ramesh, A., Ziegler, D. M., Wu, J., Winter, C., Hesse, C., Chen, M., Sigler, E., Litwin, M., Gray, S., Chess, B., Clark, J., Berner, C., McCan-dlish, S., Radford, A., Sutskever, I., and Amodei, D. Language models are few-shot learners. arXiv preprint arXiv:2005.14165 , 2020. Chen, Q., Zhang, T., He, X., Li, D., Wang, C., Huang, L., and Xue, H. Lifelong knowledge editing for llms with retrieval-augmented continuous prompt learning, 2024. URL https://arxiv.org/abs/2405.03279 .Cheng, J., Marone, M., Weller, O., Lawrie, D., Khashabi, D., and Durme, B. V. Dated data: Tracing knowl-edge cutoffs in large language models. In First Con-ference on Language Modeling , 2024. URL https: //openreview.net/forum?id=wS7PxDjy6m .Colombo, P., Pires, T. P., Boudiaf, M., Culver, D., Melo, R., Corro, C., Martins, A. F., Esposito, F., Raposo, V. L., Morgado, S., et al. Saullm-7b: A pioneering large lan-guage model for law. arXiv preprint arXiv:2403.03883 ,2024. Dziadzio, S., Udandarao, V., Roth, K., Prabhu, A., Akata, Z., Albanie, S., and Bethge, M. How to merge your multimodal models over time? arXiv preprint arXiv:2412.06712 , 2024. et al., A. G. The llama 3 herd of models, 2024a. URL 
+
+https://arxiv.org/abs/2407.21783 .et al., D.-A. Deepseek llm: Scaling open-source lan-guage models with longtermism, 2024b. URL https: //arxiv.org/abs/2401.02954 .et al., D.-A. Deepseek-v2: A strong, economical, and effi-cient mixture-of-experts language model, 2024c. URL 
+
+https://arxiv.org/abs/2405.04434 .et al., D.-A. Deepseek-v3 technical report, 2024d. URL 
+
+https://arxiv.org/abs/2412.19437 .et al., H. T. Llama 2: Open foundation and fine-tuned chat models, 2023. URL https://arxiv.org/abs/ 2307.09288 .Fan, A., Jernite, Y., Perez, E., Grangier, D., Weston, J., and Auli, M. Eli5: Long form question answering, 2019. URL https://arxiv.org/abs/1907.09190 .Franzmeyer, T., Shtedritski, A., Albanie, S., Torr, P., Hen-riques, J. F., and Foerster, J. N. HelloFresh: LLM evalua-tions on streams of Real-World human editorial actions across X community notes and wikipedia edits. June 2024. Garg, S., Farajtabar, M., Pouransari, H., Vemulapalli, R., Mehta, S., Tuzel, O., Shankar, V., and Faghri, F. Tic-clip: Continual training of clip models, 2024. URL https: //arxiv.org/abs/2310.16226 .Ge, X., Mousavi, A., Grave, E., Joulin, A., Qian, K., Han, B., Arefiyan, M., and Li, Y. Time sensitive knowledge editing through efficient finetuning. arXiv [cs.CL] , June 2024. 10 Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+Ghosh, A., Dziadzio, S., Prabhu, A., Udandarao, V., Al-banie, S., and Bethge, M. Onebench to test them all: Sample-level benchmarking over open-ended capabilities. 
+
+arXiv preprint arXiv:2412.06745 , 2024. Gui, Z., Sun, S., Li, R., Yuan, J., An, Z., Roth, K., Prabhu, A., and Torr, P. knn-clip: Retrieval enables training-free segmentation on continually expanding large vocabular-ies. arXiv preprint arXiv:2404.09447 , 2024. Gupta, A., Baskaran, S., and Anumanchipalli, G. Rebuild-ing ROME : Resolving model collapse during sequential model editing. arXiv [cs.CL] , March 2024a. Gupta, A., Rao, A., and Anumanchipalli, G. Model editing at scale leads to gradual and catastrophic for-getting, 2024b. URL https://arxiv.org/abs/ 2401.07453 .Guti ´errez, B. J., Shu, Y., Gu, Y., Yasunaga, M., and Su, Y. Hipporag: Neurobiologically inspired long-term mem-ory for large language models, 2025. URL https: //arxiv.org/abs/2405.14831 .Guu, K., Lee, K., Tung, Z., Pasupat, P., and Chang, M.-W. Realm: Retrieval-augmented language model pre-training, 2020. URL https://arxiv.org/abs/ 2002.08909 .Hartvigsen, T., Sankaranarayanan, S., Palangi, H., Kim, Y., and Ghassemi, M. Aging with GRACE: Lifelong model editing with discrete key-value adaptors. Advances in Neural Information Processing Systems , November 2023. Honovich, O., Aharoni, R., Herzig, J., Taitelbaum, H., Kuk-liansy, D., Cohen, V., Scialom, T., Szpektor, I., Hassidim, A., and Matias, Y. True: Re-evaluating factual consis-tency evaluation, 2022. URL https://arxiv.org/ abs/2204.04991 .Hsueh, C.-H., Huang, P. K.-M., Lin, T.-H., Liao, C.-W., Fang, H.-C., Huang, C.-W., and Chen, Y.-N. Editing the mind of giants: An in-depth exploration of pitfalls of knowledge editing in large language models. arXiv [cs.CL] , June 2024. Hu, E. J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., Wang, L., and Chen, W. Lora: Low-rank adaptation of large language models, 2021. URL https://arxiv. org/abs/2106.09685 .Ibrahim, A., Th ´erien, B., Gupta, K., Richter, M. L., An-thony, Q., Lesort, T., Belilovsky, E., and Rish, I. Simple and scalable strategies to continually pre-train large lan-guage models, 2024. URL https://arxiv.org/ abs/2403.08763 .Ilharco, G., Wortsman, M., Gadre, S. Y., Song, S., Hajishirzi, H., Kornblith, S., Farhadi, A., and Schmidt, L. Patching open-vocabulary models by interpolating weights, 2022. URL https://arxiv.org/abs/2208.05592 .Izacard, G., Lewis, P., Lomeli, M., Hosseini, L., Petroni, F., Schick, T., Dwivedi-Yu, J., Joulin, A., Riedel, S., and Grave, E. Atlas: Few-shot learning with retrieval augmented language models, 2022. URL https:// arxiv.org/abs/2208.03299 .Jang, J., Ye, S., Lee, C., Yang, S., Shin, J., Han, J., Kim, G., and Seo, M. TemporalWiki: A lifelong benchmark for training and evaluating Ever-Evolving language models. In Goldberg, Y., Kozareva, Z., and Zhang, Y. (eds.), Pro-ceedings of the 2022 Conference on Empirical Methods in Natural Language Processing , pp. 6237–6250, Abu Dhabi, United Arab Emirates, December 2022. Associa-tion for Computational Linguistics. Jeong, D. P., Garg, S., Lipton, Z. C., and Oberst, M. Med-ical adaptation of large language and vision-language models: Are we making progress? arXiv preprint arXiv:2411.04118 , 2024. Jiang, A. Q., Sablayrolles, A., Mensch, A., Bamford, C., Chaplot, D. S., de Las Casas, D., Bressand, F., Lengyel, G., Lample, G., Saulnier, L., Lavaud, L. R., Lachaux, M., Stock, P., Scao, T. L., Lavril, T., Wang, T., Lacroix, T., and Sayed, W. E. Mistral 7b. CoRR , abs/2310.06825, 2023. doi: 10.48550/ARXIV.2310.06825. URL https: //doi.org/10.48550/arXiv.2310.06825 .Joshi, M., Choi, E., Weld, D. S., and Zettlemoyer, L. Triviaqa: A large scale distantly supervised challenge dataset for reading comprehension, 2017. URL https: //arxiv.org/abs/1705.03551 .Karpukhin, V., O ˘guz, B., Min, S., Lewis, P., Wu, L., Edunov, S., Chen, D., and tau Yih, W. Dense passage retrieval for open-domain question answering, 2020. URL https: //arxiv.org/abs/2004.04906 .Khodja, H. A., B ´echet, F., Brabant, Q., Nasr, A., and Lecorv ´e, G. Wikifactdiff: A large, realistic, and tem-porally adaptable dataset for atomic factual knowledge update in causal language models, 2024. URL https: //arxiv.org/abs/2403.14364 .Kirkpatrick, J., Pascanu, R., Rabinowitz, N., Veness, J., Desjardins, G., Rusu, A. A., Milan, K., Quan, J., Ramalho, T., Grabska-Barwinska, A., Hassabis, D., Clopath, C., Kumaran, D., and Hadsell, R. Overcom-ing catastrophic forgetting in neural networks. Pro-ceedings of the National Academy of Sciences , 114 (13):3521–3526, March 2017. ISSN 1091-6490. doi: 10.1073/pnas.1611835114. URL http://dx.doi. org/10.1073/pnas.1611835114 .11 Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+Kozal, J., Wasilewski, J., Krawczyk, B., and Wo ´zniak, M. Continual learning with weight interpolation, 2024. URL 
+
+https://arxiv.org/abs/2404.04002 .Kwiatkowski, T., Palomaki, J., Redfield, O., Collins, M., Parikh, A., Alberti, C., Epstein, D., Polosukhin, I., Kel-cey, M., Devlin, J., Lee, K., Toutanova, K. N., Jones, L., Chang, M.-W., Dai, A., Uszkoreit, J., Le, Q., and Petrov, S. Natural questions: a benchmark for question answering research. Transactions of the Association of Computational Linguistics , 2019. Lai, J., Gan, W., Wu, J., Qi, Z., and Philip, S. Y. Large language models in law: A survey. AI Open , 2024. Langley, P. Crafting papers on machine learning. In Langley, P. (ed.), Proceedings of the 17th International Conference on Machine Learning (ICML 2000) , pp. 1207–1216, Stan-ford, CA, 2000. Morgan Kaufmann. Levy, O., Seo, M., Choi, E., and Zettlemoyer, L. Zero-shot relation extraction via reading comprehension. In Levy, R. and Specia, L. (eds.), Proceedings of the 21st Conference on Computational Natural Language Learn-ing (CoNLL 2017) , pp. 333–342, Vancouver, Canada, August 2017. Association for Computational Linguis-tics. doi: 10.18653/v1/K17-1034. URL https:// aclanthology.org/K17-1034 .Lewis, P., Perez, E., Piktus, A., Petroni, F., Karpukhin, V., Goyal, N., K ¨uttler, H., Lewis, M., Yih, W.-t., Rockt ¨aschel, T., Riedel, S., and Kiela, D. Retrieval-augmented genera-tion for knowledge-intensive nlp tasks. In Larochelle, H., Ranzato, M., Hadsell, R., Balcan, M., and Lin, H. (eds.), 
+
+Advances in Neural Information Processing Systems ,volume 33, pp. 9459–9474. Curran Associates, Inc., 2020. URL https://proceedings.neurips. cc/paper_files/paper/2020/file/ 6b493230205f780e1bc26945df7481e5-Paper. pdf .Li, B. Z., Liu, E., Ross, A., Zeitoun, A., Neubig, G., and Andreas, J. Language modeling with editable external knowledge, 2024. URL https://arxiv.org/abs/ 2406.11830 .Li, J., Armandpour, M., Mirzadeh, I., Mehta, S., Shankar, V., Vemulapalli, R., Bengio, S., Tuzel, O., Farajtabar, M., Pouransari, H., and Faghri, F. Tic-lm: A web-scale benchmark for time-continual llm pretraining, 2025. URL 
+
+https://arxiv.org/abs/2504.02107 .Li ˇska, A., Ko ˇcisk ´y, T., Gribovskaya, E., Terzi, T., Sezener, E., Agrawal, D., de Masson d’Autume, C., Scholtes, T., Zaheer, M., Young, S., Gilsenan-McMahon, E., Austin, S., Blunsom, P., and Lazaridou, A. StreamingQA: A benchmark for adaptation to new knowledge over time in question answering models. May 2022. Liu, J., Min, S., Zettlemoyer, L., Choi, Y., and Hajishirzi, H. Infini-gram: Scaling unbounded n-gram language models to a trillion tokens, 2024a. URL https://arxiv. org/abs/2401.17377 .Liu, J., Yu, P., Zhang, Y., Li, S., Zhang, Z., and Ji, H. EVEDIT: Event-based knowledge editing with deductive editing boundaries. February 2024b. Ma, H., Xu, W., Wei, Y., Chen, L., Wang, L., Liu, Q., Wu, S., and Wang, L. Ex-fever: A dataset for multi-hop explainable fact verification, 2024. URL https: //arxiv.org/abs/2310.09754 .Mallen, A., Asai, A., Zhong, V., Das, R., Khashabi, D., and Hajishirzi, H. When not to trust language models: Inves-tigating effectiveness of parametric and non-parametric memories, 2023. URL https://arxiv.org/abs/ 2212.10511 .Manakul, P., Liusie, A., and Gales, M. SelfCheckGPT: Zero-resource black-box hallucination detection for gen-erative large language models. In Bouamor, H., Pino, J., and Bali, K. (eds.), Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing ,pp. 9004–9017, Singapore, December 2023. Association for Computational Linguistics. doi: 10.18653/v1/2023. emnlp-main.557. URL https://aclanthology. org/2023.emnlp-main.557/ .Marczak, D., Twardowski, B., Trzci ´nski, T., and Cygert, S. Magmax: Leveraging model merging for seamless con-tinual learning, 2024. URL https://arxiv.org/ abs/2407.06322 .Marouf, I. E., Roy, S., Tartaglione, E., and Lathuili `ere, S. Weighted ensemble models are strong continual learn-ers, 2024. URL https://arxiv.org/abs/2312. 08977 .Meng, K., Sharma, A. S., Andonian, A., Belinkov, Y., and Bau, D. Mass-editing memory in a transformer. arXiv [cs.CL] , October 2022. Meng, K., Bau, D., Andonian, A., and Belinkov, Y. Locat-ing and editing factual associations in gpt, 2023. URL 
+
+https://arxiv.org/abs/2202.05262 .Min, T. D., Mancini, M., Alahari, K., Alameda-Pineda, X., and Ricci, E. On the effectiveness of layernorm tuning for continual learning in vision transformers, 2023. URL 
+
+https://arxiv.org/abs/2308.09610 .Mitchell, E., Lin, C., Bosselut, A., Finn, C., and Manning, C. D. Fast model editing at scale. arXiv [cs.LG] , October 2021. 12 Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+Mitchell, E., Lin, C., Bosselut, A., Manning, C. D., and Finn, C. Memory-based model editing at scale, 2022. URL https://arxiv.org/abs/2206.06520 .Nijkamp, E., Xie, T., Hayashi, H., Pang, B., Xia, C., Xing, C., Vig, J., Yavuz, S., Laban, P., Krause, B., et al. Xgen-7b technical report. arXiv preprint arXiv:2309.03450 ,2023. Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., Killeen, T., Lin, Z., Gimelshein, N., Antiga, L., Desmaison, A., Kopf, A., Yang, E., DeVito, Z., Raison, M., Tejani, A., Chilamkurthy, S., Steiner, B., Fang, L., Bai, J., and Chintala, S. Pytorch: An imperative style, high-performance deep learning library. In Advances in Neural Information Processing Systems 32 , pp. 8024– 8035. Curran Associates, Inc., 2019. Peng, H., Wang, X., Li, C., Zeng, K., Duo, J., Cao, Y., Hou, L., and Li, J. Event-level knowledge editing. February 2024. Prabhu, A., Cai, Z., Dokania, P., Torr, P., Koltun, V., and Sener, O. Online continual learning without the storage constraint. arXiv preprint arXiv:2305.09253 , 2023a. Prabhu, A., Hammoud, H. A. A. K., Dokania, P., Torr, P. H. S., Lim, S.-N., Ghanem, B., and Bibi, A. Com-putationally budgeted continual learning: What does matter?, 2023b. URL https://arxiv.org/abs/ 2303.11165 .Prabhu, A., Udandarao, V., Torr, P., Bethge, M., Bibi, A., and Albanie, S. Lifelong benchmarks: Efficient model evaluation in an era of rapid progress. arXiv preprint arXiv:2402.19472 , 2024. Ram ´e, A., Vieillard, N., Hussenot, L., Dadashi, R., Cideron, G., Bachem, O., and Ferret, J. Warm: On the benefits of weight averaged reward models, 2024. URL https: //arxiv.org/abs/2401.12187 .Rashkin, H., Nikolaev, V., Lamm, M., Aroyo, L., Collins, M., Das, D., Petrov, S., Tomar, G. S., Turc, I., and Re-itter, D. Measuring attribution in natural language gen-eration models, 2022. URL https://arxiv.org/ abs/2112.12870 .Reimers, N. and Gurevych, I. Sentence-bert: Sentence em-beddings using siamese bert-networks. In Proceedings of the 2019 Conference on Empirical Methods in Natu-ral Language Processing . Association for Computational Linguistics, 11 2019. URL https://arxiv.org/ abs/1908.10084 .Roth, K., Udandarao, V., Dziadzio, S., Prabhu, A., Cherti, M., Vinyals, O., H ´enaff, O., Albanie, S., Bethge, M., and Akata, Z. A practitioner’s guide to continual multimodal pretraining. arXiv preprint arXiv:2408.14471 , 2024. Song, K., Tan, X., Qin, T., Lu, J., and Liu, T.-Y. Mpnet: Masked and permuted pre-training for language under-standing. Advances in neural information processing systems , 33:16857–16867, 2020. Stojanovski, Z., Roth, K., and Akata, Z. Momentum-based weight interpolation of strong zero-shot models for con-tinual learning, 2022. URL https://arxiv.org/ abs/2211.03186 .Team, G., Mesnard, T., Hardin, C., Dadashi, R., Bhupatiraju, S., Pathak, S., Sifre, L., Rivi `ere, M., Kale, M. S., Love, J., et al. Gemma: Open models based on gemini research and technology. arXiv preprint arXiv:2403.08295 , 2024a. Team, G., Riviere, M., Pathak, S., Sessa, P. G., Hardin, C., Bhupatiraju, S., Hussenot, L., Mesnard, T., Shahri-ari, B., Ram ´e, A., et al. Gemma 2: Improving open language models at a practical size. arXiv preprint arXiv:2408.00118 , 2024b. Team, L., Modi, A., Veerubhotla, A. S., Rysbek, A., Huber, A., Wiltshire, B., Veprek, B., Gillick, D., Kasenberg, D., Ahmed, D., et al. Learnlm: Improving gemini for learning. arXiv preprint arXiv:2412.16429 , 2024c. Thede, L., Roth, K., H ´enaff, O. J., Bethge, M., and Akata, Z. Reflecting on the state of rehearsal-free continual learning with pretrained models, 2024. URL https: //arxiv.org/abs/2406.09384 .Touvron, H., Lavril, T., Izacard, G., Martinet, X., Lachaux, M.-A., Lacroix, T., Rozi `ere, B., Goyal, N., Hambro, E., Azhar, F., Rodriguez, A., Joulin, A., Grave, E., and Lample, G. Llama: Open and efficient foundation lan-guage models, 2023. URL https://arxiv.org/ abs/2302.13971 .Trivedi, H., Balasubramanian, N., Khot, T., and Sabharwal, A. Is multihop qa in dire condition? measuring and reducing disconnected reasoning, 2020. URL https: //arxiv.org/abs/2005.00789 .Udandarao, V., Prabhu, A., Ghosh, A., Sharma, Y., Torr, P., Bibi, A., Albanie, S., and Bethge, M. No ”zero-shot” without exponential data: Pretraining concept frequency determines multimodal model performance. In The Thirty-eighth Annual Conference on Neural In-formation Processing Systems , 2024. URL https: //openreview.net/forum?id=9VbGjXLzig .Vu, T., Iyyer, M., Wang, X., Constant, N., Wei, J., Wei, J., Tar, C., Sung, Y.-H., Zhou, D., Le, Q., et al. Freshllms: Refreshing large language models with search engine augmentation. arXiv preprint arXiv:2310.03214 , 2023. 13 Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+Wang, J., Jatowt, A., and Yoshikawa, M. ArchivalQA: A large-scale benchmark dataset for open domain question answering over historical news collections. September 2021. Wang, P., Li, Z., Zhang, N., Xu, Z., Yao, Y., Jiang, Y., Xie, P., Huang, F., and Chen, H. WISE: Rethinking the knowledge memory for lifelong model editing of large language models. arXiv [cs.CL] , May 2024a. Wang, S., Xu, T., Li, H., Zhang, C., Liang, J., Tang, J., Yu, P. S., and Wen, Q. Large language models for education: A survey and outlook. arXiv preprint arXiv:2403.18105 ,2024b. Wortsman, M., Ilharco, G., Kim, J. W., Li, M., Kornblith, S., Roelofs, R., Gontijo-Lopes, R., Hajishirzi, H., Farhadi, A., Namkoong, H., and Schmidt, L. Robust fine-tuning of zero-shot models, 2022. URL https://arxiv.org/ abs/2109.01903 .Yang, E., Shen, L., Guo, G., Wang, X., Cao, X., Zhang, J., and Tao, D. Model merging in llms, mllms, and beyond: Methods, theories, applications and opportunities. arXiv preprint arXiv:2408.07666 , 2024a. Yang, W., Sun, F., Ma, X., Liu, X., Yin, D., and Cheng, X. The butterfly effect of model editing: Few edits can trigger large language models collapse. arXiv [cs.AI] ,February 2024b. Yang, Z., Qi, P., Zhang, S., Bengio, Y., Cohen, W. W., Salakhutdinov, R., and Manning, C. D. Hotpotqa: A dataset for diverse, explainable multi-hop question an-swering, 2018. URL https://arxiv.org/abs/ 1809.09600 .Yin, X., Jiang, J., Yang, L., and Wan, X. History matters: Temporal knowledge editing in large language model. 
+
+AAAI , 38(17):19413–19421, March 2024. Zaken, E. B., Ravfogel, S., and Goldberg, Y. Bitfit: Simple parameter-efficient fine-tuning for transformer-based masked language-models, 2022. URL https: //arxiv.org/abs/2106.10199 .Zenke, F., Poole, B., and Ganguli, S. Continual learning through synaptic intelligence, 2017. URL https:// arxiv.org/abs/1703.04200 .Zhang, N., Yao, Y., Tian, B., Wang, P., Deng, S., Wang, M., Xi, Z., Mao, S., Zhang, J., Ni, Y., et al. A comprehensive study of knowledge editing for large language models. 
+
+arXiv preprint arXiv:2401.01286 , 2024. Zhao, J., Zhang, Z., Chen, B., Wang, Z., Anandkumar, A., and Tian, Y. Galore: Memory-efficient llm training by gradient low-rank projection, 2024. URL https: //arxiv.org/abs/2403.03507 .Zheng, D., Lapata, M., and Pan, J. Z. Large language models as reliable knowledge bases? arXiv preprint arXiv:2407.13578 , 2024. 14 Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+A. Benchmark Generation 
+
+This section provides additional details about the benchmark generation process, focusing on the templates used to create question-answer pairs from the extracted factual updates. Each subset of the benchmark — update, locality, rephrase, personas, and multi-hop — is generated using carefully designed prompts tailored to their specific evaluation objectives. Below, we describe the prompt templates and methodologies for generating these subsets. 
+
+A.1. Update and Locality Set 
+
+The update set serves as the foundation of our benchmark, containing questions derived directly from the extracted factual updates. The locality set, on the other hand, evaluates the robustness of knowledge updates by ensuring that unrelated but similar facts remain unaffected. We employ the following prompt template to generate both the update and locality sets. The prompt includes a general task description, detailed instructions, and few-shot examples to guide the model in generating high-quality question-answer pairs: 15 Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+Prompt Template Update/Locality 
+
+Given a fact triplet in the format (subject, relation, object) and a description of the relation, generate a question-answer pair where the answer is the object of the triplet. Ensure that the question explicitly references the relation and is structured to lead uniquely to the chosen answer, which must be the exact text of the object. Use the description of the relation to improve the specificity and clarity of the question. Make the question specific enough to ensure that there is only one possible correct answer, eliminating any ambiguity. 
+
+Instructions for Generation: 
+
+1. Construct the Question: • Ensure the question is directly tied to the relation and points exclusively to the selected answer. • Include additional context from the subject to make the question more specific and unambiguous. • Use the description of the relation to enhance the quality of the question. • Use only the exact text of the object in the answer. 2. Format: Provide the question-answer pair in the following format: • Q: • A: 
+
+Examples: 
+
+Fact Triplet: Turnberry Lighthouse, color, white Relation Description: The color of the subject. Q: What is the color of Turnberry Lighthouse? A: white Fact Triplet: Folsom Library, part of, Rensselaer Libraries Relation Description: part of this subject; inverse property of “part of” (P361). See also “has parts of the class” (P2670). Q: What institution does Folsom Library belong to? A: Rensselaer Libraries Fact Triplet: Volt Europa, subsidiary, Volt Netherlands Relation Description: A company controlled by another company. Q: What is the name of the subsidiary of Volt Europa in the Netherlands? A: Volt Netherlands Fact Triplet: Zonia Baber, educated at, Chicago State University Relation Description: The institution where the subject received their education. Q: At which university did Zonia Baber receive her education? A: Chicago State University 
+
+Task: 
+
+According to the instructions and examples, provide a QA pair for the following fact triplet: Fact Triplet: {} , {} , {} 
+
+Relation Description: {} 
+
+A.2. Rephrase Set 
+
+The rephrase set is designed to test the generalization of updated knowledge by reformulating the questions from the update set. The reformulated questions retain the same factual context but vary in phrasing, introducing linguistic diversity to the benchmark. The following prompt is used to generate the rephrased questions: 16 Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+Prompt Template Rephrase      
+
+> You are given a question-answer pair. Reformulate the question such that its content remains identical and the given answer is still the only accurate answer. Instructions for Generation: 1. Question Reformulation: • Restructure the question while maintaining the same content and context. • Ensure that the answer provided in the original question remains the only correct answer. 2. Response Format: Provide the reformulated question in the following format: • Reformulated Question:
+> Examples: Original Question: What is the capital of the United States? Answer: Washington, D.C. Reformulated Question: What city serves as the capital of the United States? Original Question: Who painted the Mona Lisa? Answer: Leonardo da Vinci Reformulated Question: By whom was the Mona Lisa painted? Original Question: When was the Declaration of Independence signed? Answer: July 4, 1776 Reformulated Question: On what date was the Declaration of Independence signed?
+> Task: Original Question: {} Answer: {}
+
+A.3. Persona Set 
+
+The persona set adds a layer of complexity by requiring the model to generate questions in the style of distinct personas. Each question from the update set is rewritten based on the characteristics of a randomly selected persona. 
+
+Persona Description Detective You are a world-weary detective narrating your investigations. Your tone is gritty, mysterious, and evocative of noir fiction. Reformulate the following questions as if you’re puzzling out clues in a case. Keep the core meaning intact but phrase it in your distinct detective style. 
+
+Casual You are a casual, friendly conversationalist with a relaxed and approachable tone. You’re curious and engaging, as if you’re chatting with a friend over coffee or in a group discussion. Reformulate the following questions to sound natural and conversational while keeping the core meaning intact. 
+
+Pirate You are a swashbuckling pirate with a flair for colorful language and sea-themed metaphors. Your tone is bold, rough, and full of pirate lingo, as if you’re recounting tales from the high seas. Reformulate the following questions to sound like they’re being asked by a true pirate. Keep the core meaning intact but add a piratical twist. 
+
+Philosopher You are an ancient philosopher, deeply contemplative and wise, always pondering the greater truths of existence. Your tone is reflective, profound, and formal, as if you are crafting a dialogue or treatise on the nature of knowledge and events. Reformulate the following questions as if they are inquiries befitting philosophical discourse. Keep the core meaning intact but phrase it in your distinct, thoughtful style. 17 Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+Caveman You are a caveman, speaking in simple and primitive language, with short sentences and limited vocabulary. Your tone is direct, straightforward, and reflects the early stages of human communication. Reformulate the following questions in a way that matches your basic and minimalistic speech style, while keeping the core meaning intact. Table 4: Descriptions of the personas used for rephrasing questions with varied styles. The generation process uses the same structure as the rephrase prompt, with the addition of persona-specific descriptions. Table A.3 provides an overview of the personas used, including a detective, casual speaker, pirate, philosopher, and stone-age character. For each question, one persona is chosen, and its description and few-shot examples are inserted into the rephrase prompt to guide the generation process. 
+
+A.4. Mhop Set 
+
+The multi-hop set evaluates the reasoning capabilities of the model by requiring it to combine information from two factual triplets. The questions are designed to omit the middle entity, prompting the model to infer the correct answer by reasoning over both facts. The following prompt is used to formulate the multi-hop questions from the paired factual triplets: Prompt Template Mhop 
+
+Given a multi-hop fact tuple in the format (entity-0, relation-1, [MASKED-ENTITY-1], relation-2, entity-2) and a description of each relation, generate a multi-hop question-answer pair where the answer is “entity-2.” Ensure that the question respects the directional nature of each relation, especially relation-2, so that it logically reflects how the masked entity-1 relates to entity-2. The question should be structured to uniquely lead to entity-2 as the answer. Instructions for Generation: 1. Construct the Question: • Design the question to identify entity-2 by logically combining relation-1 and relation-2. • Respect the directionality of each relation as described: if relation-2 describes a relation where [MASKED-ENTITY-1] is the subject and entity-2 is the object (e.g., “is a member of”), ensure this direction is reflected in the question. • Avoid reversing the direction of relation-2, and confirm the natural flow between [MASKED-ENTITY-1] and entity-2. • Include context from entity-0 to make the question clear and specific. • Do not reference [MASKED-ENTITY-1] in the answer; only entity-2 should be the answer. 2. Format: Provide the output in the following format: • Q: [Constructed Question] • A: [entity-2] Examples: Fact Tuple: Yasis Malih, place of birth, [MASKED-ENTITY-1], member of, Organization of World Heritage Cities Relation Descriptions: Place of birth of this person., Membership of this place. Q: Which organization is the place of birth of Yasis Malih a member of? A: Organization of World Heritage Cities Fact Tuple: Intelligent Land Investments, instance of, [MASKED-ENTITY-1], owned by, entrepreneur Relation Descriptions: Instance type of this entity., Owner of this type. Q: Who owns the instance of Intelligent Land Investments? A: Entrepreneur Fact Tuple: Josef Novak, country of citizenship, [MASKED-ENTITY-1], highest point, K ´ekes Relation Descriptions: Country of citizenship of this person., Highest point of this place. Q: What is the highest point of the country of citizenship of Josef Novak? A: K´ ekes Fact Tuple: Pholidaster squamatus, taxon author, [MASKED-ENTITY-1], field of work, starfish Relation Descriptions: Taxon author of this species., Field of work of this person. Q: What is the field of work of the taxon author of Pholidaster squamatus? A: Starfish Task: According to these instructions and examples, provide a multi-hop QA pair for the following fact tuple: Fact Tuple: {} , {} , [MASKED-ENTITY-1], {} , {} Relation Descriptions: {} , {} 
+
+18 Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+B. Benchmark Description 
+
+This section provides additional insights into the generated benchmark, including its update topics, question types, temporal aspects, and specificity analysis. These analyses aim to highlight the benchmark’s diversity, temporal resolution, and suitability for evaluating knowledge integration methods. 
+
+B.1. Update Topics 
+
+To better understand the focus of the updates in each timestep, we analyze the subjects, relations, and objects of the extracted factual triplets. Figure 8 presents word clouds for each timestep, revealing varying topical focuses across the benchmark. For example, in Timestep 7 (2024/06/01–2024/06/20), terms like solar eclipse frequently appear, indicating a significant number of updates related to this event. This diversity underlines the richness and real-world relevance of the generated benchmark. Subjects        
+
+> 20240201 - 20240220 20240220 - 20240301 20240301 - 20240320 20240320 - 20240401 20240401 - 20240501 20240501 - 20240601 20240601 - 20240620 20240620 - 20240701
+> Relations Objects
+
+Figure 8. Topic word clouds for each timestep in the benchmark, illustrating the diversity of subjects, relations, and objects across different update intervals. Each row represents a component of the factual triplets (subjects, relations, and objects, respectively), while each column corresponds to a specific timestep. Notable patterns include a focus on specific events, such as “solar eclipse” in Timestep 7 (20240601–20240620), and varying distributions of topics across timesteps, emphasizing the richness and real-world relevance of the benchmark. 
+
+B.2. Mhop Questions 
+
+To analyze the characteristics of multi-hop (mhop) questions, we evaluate the performance of LLMs on these questions without updating the models. In the top row of Figure 9, we plot the average accuracy of models on mhop questions as a function of their performance on the individual hops. The x-axis represents the accuracy on questions generated from the first part of the mhop tuple, while the y-axis shows the accuracy on the second part. The color of the markers corresponds to the overall multi-hop accuracy. The results demonstrate a strong dependence on the accuracy of the second hop, which directly determines the final answer. These findings validate the feasibility of the mhop questions, showing that if the individual facts are known to the model, answering the multi-hop question is possible. To probe for shortcut-driven reasoning (Trivedi et al., 2020), we additionally compare multi-hop performance to performance on the individual hops (see Figure 9). While rare, we observe a small fraction of correctly answered multi-hop questions despite incorrect answers to one of the hops, indicating isolated cases of surface-level or heuristic reasoning. 
+
+B.3. Temporal Analysis 
+
+We provide an in-depth analysis of the temporal characteristics of the benchmark. Figure 10 shows the number of samples binned by year. The right subplot zooms into updates dated after 2000 for improved visibility. While the benchmark contains updates from past years, a significant portion is dated to 2024, reflecting its focus on current and relevant knowledge. Figure 11 presents the accuracy of LLMs binned by the timestamp of the updates. For updates dated between 1800 and 2022, performance remains stable, albeit with higher variance for older samples due to fewer data points. However, updates from 2023 and 2024 show a marked drop in accuracy, emphasizing the benchmark’s relevance for studying factual knowledge integration in areas where LLMs struggle most. 19 Understanding the Limits of Lifelong Knowledge Editing in LLMs 0.0 0.2 0.4 0.6 0.8 1.0 
+
+> Hop 1 Accuracy
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Hop 2 Accuracy
+
+Llama 2      
+
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Hop 1 Accuracy
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Hop 2 Accuracy
+
+Llama 3      
+
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Hop 1 Accuracy
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Hop 2 Accuracy
+
+Gemma      
+
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Hop 1 Accuracy
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Hop 2 Accuracy
+
+Mistral      
+
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Hop 1 Accuracy
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Hop 2 Accuracy
+
+XGen                     
+
+> 0510 15 20
+> Hop 1 Specificity
+> 0
+> 5
+> 10
+> 15
+> 20
+> Hop 2 Specificity
+> 0510 15 20
+> Hop 1 Specificity
+> 0
+> 5
+> 10
+> 15
+> 20
+> Hop 2 Specificity
+> 0510 15 20
+> Hop 1 Specificity
+> 0
+> 5
+> 10
+> 15
+> 20
+> Hop 2 Specificity
+> 0510 15 20
+> Hop 1 Specificity
+> 0
+> 5
+> 10
+> 15
+> 20
+> Hop 2 Specificity
+> 0510 15 20
+> Hop 1 Specificity
+> 0
+> 5
+> 10
+> 15
+> 20
+> Hop 2 Specificity
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Mhop Accuracy
+
+Figure 9. Multi-hop (mhop) question accuracy analysis for five models (Llama 2, Llama 3, Gemma, Mistral, XGen). The top row shows the relationship between the accuracy of answering questions from the first (Hop 1) and second (Hop 2) parts of mhop factual tuples and overall mhop accuracy (color-coded). Hop 2 accuracy strongly correlates with mhop question accuracy, highlighting its critical role in multi-hop reasoning. The bottom row explores the relationship between specificity (measured via entity-specificity scores) and accuracy for Hop 1 and Hop 2. Higher mhop accuracy is generally linked to lower specificity, emphasizing the challenge of highly specific entities. 0 250 500 750 1000 1250 1500 1750 2000 
+
+Year 
+
+> 0
+> 500
+> 1000
+> 1500
+> 2000
+> 2500
+> 3000
+> 3500
+> Number of Questions
+
+Number of Questions per Year      
+
+> 2000 2005 2010 2015 2020 2025
+
+Year 
+
+> 0
+> 200
+> 400
+> 600
+> 800
+> 1000
+> Number of Questions
+
+Number of Questions per Year (after 2000) 
+
+Figure 10. Histograms showing the distribution of the number of questions per year in the benchmark. The left plot provides an overview spanning all recorded years, highlighting a sharp increase in questions for recent years. The right plot zooms into the years after 2000, demonstrating a steady growth in questions over time, culminating in a significant spike in 2024, reflecting the focus on current updates in the benchmark. 
+
+B.4. Specificity Analysis 
+
+The benchmark contains a mix of general and highly specific questions. For instance, general questions like “ Which continent is Tokyo a part of? ” contrast with highly specific ones like “ What is the spacing of the rails at Tire railway station? ”Quantifying question specificity is crucial, as highly specific questions may be challenging for LLMs regardless of their knowledge cutoff. We quantify specificity using two measures: 1. Subject and Object Counts : Frequency of the subject and object entities in the v4 dolma-v1 7 llama training corpus, derived using the InfiniGram API. 2. Subject and Object Views : Aggregated Wikipedia page views of the subject and object entities from 01.03.2023 to 01.07.2024, following Khodja et al. (2024). Figure 12 shows the distribution of specificity scores. The count-based measure skews towards lower frequencies (higher specificity) for subjects, while objects are more evenly distributed. By contrast, the view-based measure produces smoother distributions for both entities. We also analyze the relationship between specificity and model performance. Figure 13 shows no clear link between Wikipedia page views and accuracy, while Figure 14 reveals a consistent trend: questions with low specificity scores 20 Understanding the Limits of Lifelong Knowledge Editing in LLMs 1800 1850 1900 1950 2000 
+
+> Year
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> Accuracy
+
+Avg. Accuracy by Year (after 1800)      
+
+> 2000 2005 2010 2015 2020 2025
+> Year
+> 0.35
+> 0.40
+> 0.45
+> 0.50
+> 0.55
+> 0.60
+
+Avg. Accuracy by Year (after 2000)     
+
+> Llama-2-7b Llama-3-8b Gemma-7b Mistral-7b XGen-7b
+
+Figure 11. Average accuracy of five evaluated models on questions binned by their fact timestamp. The left plot includes all questions dated after 1800, showing stable performance across historical facts. The right plot focuses on questions after 2000, revealing a performance decline for facts dated to 2023 and 2024. This drop highlights the challenge of addressing more recent updates, emphasizing the relevance of the benchmark for studying factual knowledge integration in modern contexts. 0 10 20       
+
+> Subject Count
+> 0
+> 20000
+> 40000
+> 60000
+> 80000
+> 100000
+> 120000
+> Number of Questions
+> Subject Count Distribution
+> 010 20
+> Object Count
+> 0
+> 5000
+> 10000
+> 15000
+> 20000
+> 25000
+> 30000
+> Object Count Distribution
+> 010 20
+> Subject Views
+> 0
+> 5000
+> 10000
+> 15000
+> 20000
+> Subject Views Distribution
+> 010 20
+> Object Views
+> 0
+> 5000
+> 10000
+> 15000
+> 20000
+> Object Views Distribution
+
+Figure 12. Distributions of specificity measures for subjects and objects in the benchmark. The left two plots show the frequency-based specificity, measured as the count of occurrences in a reference LLM training corpus (Infini Gram API). The distributions indicate that subjects tend to have lower frequency counts (higher specificity), while objects are more evenly distributed. The right two plots represent specificity based on Wikipedia view counts aggregated over 16 months. These distributions are smoother and centered around a similar mean for both subjects and objects, highlighting different characteristics of the two specificity measures. 
+
+(frequent entities) achieve higher accuracy than those with high specificity scores (rare entities). This suggests that specificity, as measured by training corpus frequency, is a critical factor influencing model performance. Further analysis revealed structural biases in the view-based specificity measure. For instance, questions about languages often receive high specificity scores based on page views despite being general in nature. By contrast, the count-based measure accurately reflects their generality due to the frequent occurrence of language names in training corpora. 
+
+C. Knowledge Integration 
+
+C.1. Problem Formulation 
+
+The task studied in this paper is the large-scale, sequential integration of factual knowledge into a pre-trained language model, denoted as f 0. The model f 0, with frozen parameters, is trained on a dataset Dtrain and deployed to process a stream of factual updates [u1, u 2, . . . , u T ], where each update ut = ( qt, a t) consists of a question qt and its corresponding factual answer at.These updates are grouped into B sequential batches, represented as [U1, U 2, . . . , U B ], where Ub = {ub, 1, u b, 2, . . . , u b,N b }
+
+is the set of updates in batch b, and Nb is the number of updates in that batch. At each timestep b, the model f b−1, which incorporates updates from all prior batches U<b = Sb−1 
+
+> i=1
+
+Ui, is updated with the new batch Ub, resulting in the updated model f b. The goal of this process is to enable f b to integrate the new updates, retain previously integrated knowledge, and maintain its general performance. The objectives of this sequential knowledge integration task can be summarized as follows: 
+
+Successful Update Integration : After processing Ub , the model must correctly answer all questions in Ub, ensuring that the newly introduced knowledge is successfully integrated: 
+
+f b(qt) = at, ∀ut ∈ Ub.
+
+21 Understanding the Limits of Lifelong Knowledge Editing in LLMs Feb1-20 
+
+> Feb20-Mar1
+> Mar1-20
+> Mar20-Apr1
+> Apr1-May1
+> May1-Jun1
+> Jun1-20
+> Jun20-Jul1
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> Objects
+> Mean Accuracy
+
+Llama-2-7b 
+
+> Feb1-20
+> Feb20-Mar1
+> Mar1-20
+> Mar20-Apr1
+> Apr1-May1
+> May1-Jun1
+> Jun1-20
+> Jun20-Jul1
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+
+Llama-3-8b 
+
+> Feb1-20
+> Feb20-Mar1
+> Mar1-20
+> Mar20-Apr1
+> Apr1-May1
+> May1-Jun1
+> Jun1-20
+> Jun20-Jul1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+
+Gemma-7b 
+
+> Feb1-20
+> Feb20-Mar1
+> Mar1-20
+> Mar20-Apr1
+> Apr1-May1
+> May1-Jun1
+> Jun1-20
+> Jun20-Jul1
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+
+Mistral-7b 
+
+> Feb1-20
+> Feb20-Mar1
+> Mar1-20
+> Mar20-Apr1
+> Apr1-May1
+> May1-Jun1
+> Jun1-20
+> Jun20-Jul1
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+
+XGen-7b      
+
+> 0-10 (Most Specific) 10-25 25-50 50-75 75-90 90-100 (Least Specific)
+
+Figure 13. Mean accuracy of object-specific questions across specificity bins, measured using Wikipedia page views, for five evaluated models over different timesteps. The specificity bins range from the most specific (0–10, blue) to the least specific (90–100, red). While no clear trend emerges between specificity and performance, fluctuations in accuracy are observed across timesteps and specificity bins, indicating variability in how models handle questions of different specificity levels. Feb1-20 
+
+> Feb20-Mar1
+> Mar1-20
+> Mar20-Apr1
+> Apr1-May1
+> May1-Jun1
+> Jun1-20
+> Jun20-Jul1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> Mean Accuracy
+
+Llama-2-7b 
+
+> Feb1-20
+> Feb20-Mar1
+> Mar1-20
+> Mar20-Apr1
+> Apr1-May1
+> May1-Jun1
+> Jun1-20
+> Jun20-Jul1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+
+Llama-3-8b 
+
+> Feb1-20
+> Feb20-Mar1
+> Mar1-20
+> Mar20-Apr1
+> Apr1-May1
+> May1-Jun1
+> Jun1-20
+> Jun20-Jul1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+
+Gemma-7b 
+
+> Feb1-20
+> Feb20-Mar1
+> Mar1-20
+> Mar20-Apr1
+> Apr1-May1
+> May1-Jun1
+> Jun1-20
+> Jun20-Jul1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+
+Mistral-7b 
+
+> Feb1-20
+> Feb20-Mar1
+> Mar1-20
+> Mar20-Apr1
+> Apr1-May1
+> May1-Jun1
+> Jun1-20
+> Jun20-Jul1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+
+XGen-7b      
+
+> 0-10 (Most Specific) 10-25 25-50 50-75 75-90 90-100 (Least Specific)
+
+Figure 14. Mean accuracy of object-specific questions across specificity bins, measured using Infinigram counts, for five evaluated models over different timesteps. Specificity bins range from the most specific (0–10, blue) to the least specific (90–100, red). The results indicate a consistent trend where lower specificity (higher Infinigram counts) is associated with better model performance, with the least specific bin showing the highest accuracy across all models and timesteps. This suggests that questions involving more common entities in the training corpus are easier for the models to answer. 
+
+Retention of Prior Updates : The model must retain the factual updates from all previously processed batches, maintaining consistent predictions: 
+
+f b(qt) = at, ∀ut ∈ U<b .
+
+Generalization of Updates : The updated model must correctly answer rephrased questions from Drephrased , which evaluate the generalization ability of the integrated updates: 
+
+f b(qt) = at, ∀qi ∈ Drephrased .
+
+Application of Updates : The model must utilize integrated updates for reasoning tasks, answering multi-hop evaluation questions in Dmhop correctly: 
+
+f b(qt) = at, ∀qi ∈ Dmhop .
+
+Locality of Updates : The model must preserve its predictions on unrelated facts from a control dataset Dlocality , ensuring that updates do not cause spillover or degrade performance on unaffected knowledge: 
+
+f b(qi) = f 0(qi), ∀qi ∈ Dlocality .
+
+To evaluate the performance of the model during this sequential update process, we monitor five key metrics after processing each batch Ub : (1) the accuracy on the current batch Ub, (2) the retention of accuracy on prior updates from U<b , (3) the accuracy on the rephrased questions Dlocality , (4) the accuracy on multi-hop questions Dmhop , and (5) the locality of predictions on unrelated facts in Dlocality . Additionally, forgetting is monitored by continuously evaluating the model on previously updated batches as new batches are integrated. This sequential process ensures that knowledge updates accumulate over time, creating a challenging setting for lifelong factual knowledge integration. 22 Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+C.2. Detailed Results                                                                                                           
+
+> Approach Model Update Rephrase Personas Mhop Locality Pre-Update llama-2-7b 49.90 ( ±2.30) 47.74 ( ±3.65) 41.18 ( ±2.26) 43.91 ( ±6.02) 48.62 ( ±2.41) llama-3-8b 46.87 ( ±3.30) 44.32 ( ±4.09) 40.12 ( ±2.85) 44.29 ( ±8.37) 46.92 ( ±2.54) mistral-7b 48.83 ( ±2.26) 47.02 ( ±3.32) 40.48 ( ±2.24) 42.19 ( ±6.18) 47.97 ( ±2.75) gemma-7b 40.61 ( ±3.33) 38.66 ( ±4.14) 33.08 ( ±3.10) 35.40 ( ±7.36) 40.86 ( ±2.92) xgen-7b 40.80 ( ±1.83) 38.64 ( ±3.33) 33.61 ( ±2.45) 34.87 ( ±5.58) 40.49 ( ±2.13) RAG llama-2-7b 96.17 ( ±0.60) 84.92 ( ±5.76) 72.62 ( ±2.43) 51.08 ( ±6.66) 56.29 ( ±5.09) llama-3-8b 99.18 ( ±0.16) 86.19 ( ±6.37) 74.55 ( ±2.71) 49.67 ( ±8.66) 56.26 ( ±5.45) mistral-7b 99.25 ( ±0.19) 85.89 ( ±6.07) 74.83 ( ±2.50) 51.88 ( ±6.71) 56.97 ( ±5.38) gemma-7b 95.06 ( ±0.73) 81.98 ( ±6.15) 69.34 ( ±2.86) 44.84 ( ±8.02) 49.33 ( ±5.07) xgen-7b 95.98 ( ±0.46) 82.75 ( ±6.11) 71.45 ( ±2.94) 45.54 ( ±6.82) 51.41 ( ±5.22) LoRA-FT llama-2-7b 63.07 ( ±8.10) 56.54 ( ±7.03) 47.19 ( ±7.05) 43.72 ( ±10.17) 46.10 ( ±3.42) llama-3-8b 62.84 ( ±4.54) 56.27 ( ±5.43) 46.74 ( ±5.27) 43.24 ( ±9.06) 45.96 ( ±2.88) mistral-7b 29.21 ( ±22.71) 25.65 ( ±20.85) 21.89 ( ±17.57) 20.29 ( ±18.72) 21.43 ( ±16.47) gemma-7b 57.38 ( ±5.86) 51.33 ( ±6.10) 42.00 ( ±5.07) 38.96 ( ±10.06) 38.35 ( ±2.33) xgen-7b 51.53 ( ±8.10) 46.21 ( ±8.17) 38.07 ( ±8.76) 37.38 ( ±10.20) 36.48 ( ±2.85) LoRA-Merge llama-2-7b 67.36 ( ±3.12) 62.01 ( ±4.71) 56.64 ( ±2.93) 50.29 ( ±7.17) 58.40 ( ±4.44) llama-3-8b 64.84 ( ±2.29) 59.79 ( ±4.56) 55.65 ( ±2.24) 47.68 ( ±8.10) 58.24 ( ±4.26) mistral-7b 61.84 ( ±1.46) 57.17 ( ±3.82) 52.60 ( ±1.66) 49.24 ( ±6.92) 54.68 ( ±3.20) gemma-7b 60.13 ( ±4.57) 54.87 ( ±6.29) 49.84 ( ±3.70) 44.64 ( ±8.09) 53.26 ( ±5.80) xgen-7b 62.38 ( ±2.50) 57.57 ( ±4.49) 51.03 ( ±2.82) 45.16 ( ±7.51) 53.72 ( ±5.01)
+
+Table 5. Detailed evaluation results of different approaches (Pre-Update, RAG, LoRA-FT, and LoRA-Merge) across five metrics: Update, Rephrase, Personas, Mhop, and Locality. Results are presented for five models (Llama-2-7b, Llama-3-8b, Mistral-7b, Gemma-7b, and XGen-7b) and are averaged across all timesteps, weighted by their respective sizes. Each value represents mean accuracy with standard deviation (±). This table highlights the performance variability of different approaches and models across metrics. 
+
+Table 5 provides a comprehensive overview of the performance of the evaluated approaches - Pre-Update, RAG, LoRA-FT, and LoRA-Merge - across the five key metrics: Update, Rephrase, Personas, Mhop, and Locality. The results are reported for five different models (Llama-2-7b, Llama-3-8b, Mistral-7b, Gemma-7b, and XGen-7b) and averaged across all timesteps, weighted by their respective sizes. Each entry in the table displays the mean accuracy with standard deviation over the eight timesteps, offering detailed insights into the effectiveness and stability of each approach under the lifelong knowledge integration setting. 
+
+C.3. Retrieval Augmented Generation (RAG) 
+
+The RAG baseline augments a pre-trained language model f 0 with a non-parametric memory M , enabling retrieval-augmented generation. The memory M stores factual updates and their embeddings, allowing the model to access relevant information dynamically. The components and process of the RAG baseline are described below: 
+
+Memory Construction. For each batch of updates Ub = {ub, 1, u b, 2, . . . , u b,N b } , where ub,i = ( qb,i , a b,i ) , the memory is constructed as follows: • Initialization: Each update question qb,i and its corresponding answer ab,i are stored in memory. • Embedding Computation: The embedding model g encodes each question into a fixed-dimensional vector: eb,i =
+
+g(qb,i ).• Memory Entry: Each memory entry is stored as a tuple (qb,i , a b,i , e b,i ), added to the memory M : M ← M ∪
+
+23 Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+{(qb,i , a b,i , e b,i )}.
+
+Test-Time Retrieval. At test time, given an input query qtest , the RAG baseline retrieves relevant entries from M and augments the input context for the language model: • Embedding Computation for Query: The query embedding is computed as: etest = g(qtest ).• Nearest Neighbor Retrieval: The top-k most similar entries are retrieved based on cosine similarity between etest and stored embeddings eb,i :Retrieve {(qb,j , a b,j )}j = 1 k such that sim (etest , e b,j ) is maximized. Efficient retrieval is implemented using the Annoy solver (Bernhardsson, 2018) for hierarchical navigable small world (HNSW) graphs. • Context Construction: The retrieved questions {qb,j }kj=1 and answers {ab,j }kj=1 are prepended to qtest to form the augmented context: 
+
+Ctest = Concat ([ qb, 1, a b, 1, . . . , q b,k , a b,k , q test ]) .
+
+Response Generation. The augmented context Ctest is passed to the language model f , which generates the response 
+
+atest : atest = f (Ctest ).This retrieval-augmented approach provides a simple yet scalable mechanism for integrating and accessing factual updates during inference, making it well-suited for the lifelong knowledge integration task. 
+
+Parameter Selection and Ablation. For the main experiments, k = 2 was chosen to enable effective multi-hop reasoning while keeping the context length manageable. Figure 15 shows an ablation study over k, using subsets of 5,000 updates per timestep with k ranging from 1 to 100. The results indicate that increasing k improves performance across metrics, especially for rephrased questions, as it increases the likelihood of retrieving relevant entries. The performance on the update sets remains stable regardless of k, as they directly match the stored memory entries. Larger k values result in higher computational overhead, with k = 100 increasing the forward pass time by 3x compared to k = 1 . Balancing performance gains and computational costs is thus critical. 0 100 200 300 400 500                                                        
+
+> Number of Edits (K)
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> 1.0
+> Mean Batch Accuracy
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Update
+> 0100 200 300 400 500
+> Number of Edits (K)
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Rephrase
+> 0100 200 300 400 500
+> Number of Edits (K)
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Personas
+> 0100 200 300 400 500
+> Number of Edits (K)
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Mhop
+> 0100 200 300 400 500
+> Number of Edits (K)
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Locality
+> Pre-Edit
+> Top-1
+> Top-2
+> Top-5
+> Top-10
+
+Figure 15. Ablation results for the top-k parameter of the RAG baseline, evaluating update, rephrase, personas, mhop, and locality sets across 500k updates. Higher top-k values improve performance on rephrase, personas, and mhop sets due to increased retrieval coverage, while update set accuracy remains consistent across top-k values. The locality set shows marginal gains with higher top-k values, indicating reduced spillover effects. However, increasing top-k also leads to greater computational overhead, highlighting the trade-off between retrieval depth and efficiency. 
+
+Computational Overhead. We evaluate the test-time compute of RAG compared to pre-update models and LoRA fine-tuning. Corrected by batch size, forward pass times serve as the measure of computational overhead. Figure 16 shows that LoRA finetuning introduces negligible overhead, with minimal variations attributed to outliers. Meanwhile, RAG approximately doubles the forward pass time across all models due to the additional retrieval and larger context. This tradeoff highlights RAG’s strength in dynamically integrating factual updates but emphasizes the need to balance retrieval efficiency and test-time compute for large-scale applications. 24 Understanding the Limits of Lifelong Knowledge Editing in LLMs 0.020 0.025 0.030 0.035 0.040 
+
+> Forward Pass Time (s)
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> Edit Accuracy
+> Pre-Edit
+> LoRA Post-Edit
+> RAG Post-Edit
+> llama-2-7b
+> llama-3-8b
+> mistral-7b
+> gemma-7b
+> xgen-7b
+
+Figure 16. Trade-off between forward pass time (x-axis) and edit accuracy (y-axis) for RAG and LoRA across five models. Stars denote pre-edit performance, while post-edit performance for RAG and LoRA is represented by circles and crosses, respectively. RAG achieves higher edit accuracy at the cost of increased forward pass time, nearly doubling the average inference latency compared to LoRA. LoRA introduces minimal additional computational overhead while maintaining moderate accuracy improvements over the pre-edit baseline, highlighting its efficiency in resource-constrained settings. 
+
+C.4. Continual Finetuning 
+
+We evaluate the task of continual finetuning using LoRA (Hu et al., 2021) under two distinct configurations: LoRA-FT, where adapters are continuously trained across sequential updates, and LoRA-Merge, which incorporates weight merging and interpolation to balance newly integrated knowledge with prior retained knowledge. Both configurations aim to integrate large-scale factual updates efficiently while minimizing catastrophic forgetting and ensuring stable performance over time. 
+
+Continual LoRA Fine-Tuning (LoRA-FT) 
+
+1. Initialization: For the initial model f 0, LoRA adapters ∆0 with learnable parameters are initialized and attached to specific layers in the model. The updated model f 1 is defined as: f 1(x) = f 0(x) + ∆ 1(x), where ∆1(x) represents the output of the LoRA adapter. 2. Sequential Update Process: For each batch of updates Ub , the LoRA adapters are trained on the corresponding question-answer pairs Ub = {(qb,i , a b,i )}Nb 
+
+> i=1
+
+. The LoRA parameters ∆b from the previous timestep are reused and further optimized: ∆b ← ∆b−1 − η∇∆b−1 L(f b−1(qb,i ), a b,i ), where L is the loss function, and η is the learning rate. Cosine learning rate scheduling with warmup is employed during training, with a fixed number of 10 epochs per batch. 3. Model Behavior: The updated model at timestep b is defined as: f b(x) = f 0(x) + ∆ b(x), where ∆b accumulates adaptations from all previous timesteps U<b .
+
+LoRA Fine-Tuning with Merging (LoRA-Merge) 
+
+1. Initialization: Similar to LoRA-FT, LoRA adapters ∆0 are initialized and attached to the model f 0.2. Weight Merging and Interpolation: After training the LoRA adapters ∆b on the batch Ub, the adapted model weights 
+
+wadapted are merged into the base model weights wbase , creating an interpolated model: wmerged = αw base +(1 −α)wadapted ,where α is the interpolation factor. 3. Sequential Update Process: The merged weights wmerged serve as the starting point for training LoRA adapters on the next batch Ub+1 .4. Model Behavior: This process ensures that each timestep balances newly integrated updates with previously retained knowledge, leveraging the interpolation factor α to control the degree of retention. 
+
+Ablations and Results Parameter Selection LoRA-FT. We conduct an ablation on the rank of the LoRA matrices in the LoRA-FT setting, comparing a high-rank configuration ( rank = 64 ) with a low-rank configuration ( rank = 4 ). As shown in Figure 17, the 25 Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+low-rank setting consistently outperforms the high-rank setting across all metrics. Additionally, the high-rank configuration exhibits greater instability, with instances of catastrophic failure, such as breaking the Mistral model. The results also reveal increased forgetting in the high-rank setting compared to the low-rank setting. 0 100 200 300 400 500        
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Mean Batch Accuracy
+> T1 T2 T3 T4 T5 T6 T7 T8
+
+Update             
+
+> 0100 200 300 400 500
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> T1 T2 T3 T4 T5 T6 T7 T8
+
+Rephrase             
+
+> 0100 200 300 400 500
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> T1 T2 T3 T4 T5 T6 T7 T8
+
+Personas             
+
+> 0100 200 300 400 500
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> T1 T2 T3 T4 T5 T6 T7 T8
+
+Mhop             
+
+> 0100 200 300 400 500
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> T1 T2 T3 T4 T5 T6 T7 T8
+
+Locality                                                              
+
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 40
+> 30
+> 20
+> 10
+> 0
+> 10
+> Acc. Difference [pp]
+> T1 T2 T3 T4 T5 T6 T7 T8
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 40
+> 30
+> 20
+> 10
+> 0
+> 10
+> T1 T2 T3 T4 T5 T6 T7 T8
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 40
+> 30
+> 20
+> 10
+> 0
+> 10
+> T1 T2 T3 T4 T5 T6 T7 T8
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 40
+> 30
+> 20
+> 10
+> 0
+> 10
+> T1 T2 T3 T4 T5 T6 T7 T8
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 40
+> 30
+> 20
+> 10
+> 0
+> 10
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Pre-Edit Post-Edit
+> (LoRA-64)
+> Post-Edit
+> (LoRA-4)
+> Model Avg.
+> LLAMA-2-7B
+> LLAMA-3-8B
+> Mistral-7B
+> Gemma-7B
+> XGen-7B
+> Timestep T1
+> Timestep T2
+> Timestep T3
+> Timestep T4
+> Timestep T5
+> Timestep T6
+> Timestep T7
+> Timestep T8
+> Post-Edit
+> (LoRA-64)
+> Post-Edit
+> (LoRA-4)
+
+Figure 17. Performance of continual LoRA fine-tuning with high-rank (LoRA-64) and low-rank (LoRA-4) configurations across evaluation sets. The top row shows the mean batch accuracy for update, rephrase, personas, mhop, and locality sets, while the bottom row displays accuracy differences for individual timesteps. Low-rank configurations maintain competitive performance initially but degrade over time, while high-rank configurations show instability, including catastrophic failures in certain models. 
+
+Parameter Selection LoRA-Merge. We further investigate the impact of the interpolation factor α in the LoRA-Merge setting, as shown in Figure 18. We evaluate two configurations: one where the base model and adapted model are equally weighted ( α = 0 .5) and another where the base model is given higher weight ( α = 0 .75 ). The results indicate that higher weight given to the adapted model ( α = 0 .5) leads to stronger initial adaptation but results in performance decay over time. Conversely, prioritizing the base model ( α = 0 .75 ) provides more stable performance across timesteps. 0 100 200 300 400 500        
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Mean Batch Accuracy
+> T1 T2 T3 T4 T5 T6 T7 T8
+
+Update             
+
+> 0100 200 300 400 500
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> T1 T2 T3 T4 T5 T6 T7 T8
+
+Rephrase             
+
+> 0100 200 300 400 500
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> T1 T2 T3 T4 T5 T6 T7 T8
+
+Personas             
+
+> 0100 200 300 400 500
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> T1 T2 T3 T4 T5 T6 T7 T8
+
+Mhop             
+
+> 0100 200 300 400 500
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> T1 T2 T3 T4 T5 T6 T7 T8
+
+Locality                                                              
+
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 30
+> 20
+> 10
+> 0
+> 10
+> Acc. Difference [pp]
+> T1 T2 T3 T4 T5 T6 T7 T8
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 30
+> 20
+> 10
+> 0
+> 10
+> T1 T2 T3 T4 T5 T6 T7 T8
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 30
+> 20
+> 10
+> 0
+> 10
+> T1 T2 T3 T4 T5 T6 T7 T8
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 30
+> 20
+> 10
+> 0
+> 10
+> T1 T2 T3 T4 T5 T6 T7 T8
+> 0100 200 300 400 500
+> Number of Edits (K)
+> 30
+> 20
+> 10
+> 0
+> 10
+> T1 T2 T3 T4 T5 T6 T7 T8
+> Pre-Edit Post-Edit
+> (alpha=0.75)
+> Post-Edit
+> (alpha=0.5)
+> Model Avg.
+> Llama-2-7B
+> Llama-3-8B
+> Mistral-7B
+> Gemma-7B
+> XGen-7B
+> Timestep T1
+> Timestep T2
+> Timestep T3
+> Timestep T4
+> Timestep T5
+> Timestep T6
+> Timestep T7
+> Timestep T8
+> Post-Edit
+> (alpha=0.75)
+> Post-Edit
+> (alpha=0.5)
+
+Figure 18. Ablation study on the interpolation factor α in the LoRA-Merge setting, comparing α = 0 .75 (red) and α = 0 .5 (orange). The top row shows the mean batch accuracy for the update, rephrase, personas, mhop, and locality sets, while the bottom row depicts accuracy differences (in percentage points) across timesteps. Higher weight on the base model ( α = 0 .75 ) provides more stable performance and mitigates forgetting, while equal weighting ( α = 0 .5) achieves higher initial performance but leads to greater degradation, particularly on the mhop and locality sets. Bold lines represent average model performance, with lighter lines for individual models. 
+
+C.5. Knowledge Editing 
+
+The knowledge editing task involves updating a pre-trained language model f 0, with frozen parameters trained on Dtrain ,to modify its behavior for specific inputs qt to produce updated outputs at. These updates must be incorporated without retraining the entire model and while preserving the model’s performance on unrelated tasks and previously integrated updates. The key requirements of the task are: 1. Successful Knowledge Integration: The edited model f b should correctly predict at for all edited questions qt.26 Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+2. Retention of Unrelated Knowledge: The edits should not degrade the model’s performance on unrelated queries 
+
+qi ∈ Dlocality , ensuring f b(qi) = f 0(qi).3. Consistency Across Prior Edits: The model should maintain the correctness of previous edits q<t , ensuring f b(qt′) = at′
+
+for all t′ < t .The following describes three prominent knowledge editing methods—ROME, MEMIT, and WISE—using this notation. 
+
+Local Modification Approaches. Local modification approaches focus on directly altering the parameters of the model at specific layers to integrate new knowledge while minimizing unintended side effects. This category includes ROME and MEMIT. 
+
+Rank-One Model Editing (ROME). ROME (Meng et al., 2023) is a method for performing rank-one updates to a specific layer in the model. It focuses on precisely editing the causal pathways responsible for a particular factual association. • Objective: Modify the model f b such that, for an update ut = ( qt, a t), the edited model satisfies: f b(qt) = at, while minimizing interference with unrelated predictions. • Layer Selection: Identify the most causally relevant layer l∗ for the given update by analyzing the model’s causal mediation. • Update Rule: Modify the weights Wl∗ in the key-value projection as: Wl∗ ← Wl∗ + ∆ W , where ∆W = uv ⊤ is a rank-one update computed from the desired output at and intermediate activations at layer l∗.
+
+Multistep Editing for Memory-Intensive Tasks (MEMIT). MEMIT (Meng et al., 2022) extends ROME to handle multiple updates simultaneously and distributes them across multiple layers. • Objective: Modify the model f b to incorporate a batch of updates Ub = {(qb,i , a b,i )}Nb
+
+> i=1
+
+, such that: f b(qb,i ) = 
+
+ab,i , ∀ub,i ∈ Ub, while maintaining performance on unrelated queries. • Layer Selection: Select a set of layers {l1, l 2, . . . , l k} for distributing the updates to reduce interference. • Update Rule: For each selected layer l, apply a weight update: Wl ← Wl + ∆ Wl, where ∆Wl is computed via low-rank decomposition to ensure computational efficiency and scalability. Local modification approaches are effective for small-scale or isolated updates but face challenges with scalability and catastrophic forgetting in sequential update scenarios. 
+
+Lifelong Knowledge Editing Approaches. Lifelong knowledge editing approaches are designed to handle sequential, large-scale updates while mitigating catastrophic forgetting and maintaining stability over time. This category includes WISE. 
+
+Weight Injection for Structured Editing (WISE). WISE (Wang et al., 2024a) leverages a semi-parametric memory to store layer-specific weight adjustments for each update, enabling reversible and modular edits. • Objective: For a sequence of updates [u1, u 2, . . . , u T ], modify the model f b such that f b(qt) = at, ∀t ≤ T , while ensuring f b(qi) = f 0(qi), ∀qi ∈ Dlocality , and retaining accuracy on prior updates u<t .• Memory Construction: For each update ut = ( qt, a t), compute weight adjustments ∆Wl for specific layers l. Store these adjustments in a memory: Ml ← Ml ∪ ∆Wl, ∀l ∈ L, where L is the set of edited layers. • Inference with Memory: During inference, apply the stored adjustments ∆Wl to the forward pass: f b(x) = f 0(x) + P 
+
+> l∈L
+
+∆Wl(x).• Scalability: By maintaining a modular memory, WISE avoids catastrophic forgetting and enables scalability to large sequences of updates. Lifelong editing approaches like WISE are better suited for large-scale, sequential updates, though they may still face challenges with long-term consistency and retrieval efficiency in memory-based systems. 27 Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+Knowledge Editing for Lifelong Knowledge Integration Figure 19 provides additional results on the application of knowledge editing techniques to the lifelong knowledge integration task. The figure presents the accuracy on the update set for the first 500 updates and the entire first timestep (26K updates) for the Llama-2 model. The results highlight the rapid performance deterioration of local modification approaches, with accuracy dropping significantly within the first 250 updates. While WISE performs comparably to RAG for fewer than 500 updates, its performance deteriorates over the first 10K updates, eventually converging to pre-update performance levels. This behavior underscores the challenges faced by knowledge editing approaches in handling larger-scale, sequential updates. 0 100 200 300 400 500      
+
+> Number of Edits
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Edit Accuracy
+> 05000 10000 15000 20000 25000
+> Number of Edits
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Pre-Edit
+> MEMIT
+> R-ROME
+> ROME
+> WISE
+> LoRA FT (Avg.)
+> RAG (Avg.)
+
+Figure 19. Update accuracy of knowledge editing approaches (MEMIT, R-ROME, ROME, and WISE) compared to LoRA-FT and RAG baselines across the first 500 updates (left) and the full first timestep (26k updates, right). Local modification methods (MEMIT, R-ROME, ROME) rapidly degrade within the first 250 updates, converging to near-zero performance. WISE initially performs on par with RAG for fewer than 500 updates but declines over the first 10k updates, converging to pre-update accuracy, highlighting its limitations in maintaining update accuracy for larger-scale knowledge integration. 
+
+In the main experiments, MEMIT exhibits model collapse after approximately 250 sequential edits. This contrasts with the original MEMIT paper (Meng et al., 2022), which demonstrates successful integration of up to 10K edits. To investigate this discrepancy, we conduct an ablation study where we vary the batch size (i.e., the number of edits processed simultaneously) for MEMIT on Llama-2 using the first 10K updates of the WikiBigEdit benchmark. The results, presented in Figure 20, reveal that MEMIT avoids model collapse when edits are processed in larger batches, with the performance remaining stable when all 10K edits are applied at once. However, the overall update accuracy in this setting remains below the pre-edit performance of the model, highlighting a trade-off between stability and efficacy. 0 2000 4000 6000 8000 10000 
+
+> Number of Edits
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Edit Accuracy
+> MEMIT (Batch Size: 1)
+> MEMIT (Batch Size: 1000)
+> MEMIT (Batch Size: 5000)
+> MEMIT (Batch Size: 10000)
+> LoRA FT (Avg.)
+> RAG (Avg.)
+> WISE
+> Pre-Edit (Avg.)
+
+Figure 20. Impact of batch size on MEMIT’s performance for the first 10k updates of the WikiBigEdit benchmark using Llama-2. Larger batch sizes (e.g., 10k edits) prevent model collapse but result in lower update accuracy compared to the model’s pre-edit performance. Smaller batch sizes (e.g., 1 or 1k edits) perform well initially but exhibit rapid degradation in subsequent updates, highlighting MEMIT’s limitations for sequential, large-scale lifelong knowledge editing. 
+
+Interestingly, when applying smaller batch sizes (e.g., 1, 1K, or 5K edits per batch), MEMIT performs well for the initial batch but collapses in subsequent updates. This behavior indicates a severe limitation: while batch processing can temporarily mitigate collapse, it is impractical for real-world scenarios where edits arrive sequentially over time or at a large scale. The need to process edits as they become available underscores MEMIT’s unsuitability for sequential, large-scale lifelong knowledge editing. These findings emphasize the importance of developing methods that remain stable and effective under practical constraints, where timely incorporation of updates is crucial. 28 Understanding the Limits of Lifelong Knowledge Editing in LLMs 
+
+In Figure 21, we present additional experiments with WISE conducted on three language models: Llama-2, Llama-3, and Mistral. These experiments focus on the first timestep of the WikiBigEdit benchmark. The results consistently show that WISE converges to pre-update performance across all evaluated metrics within the first timestep. Although WISE avoids catastrophic forgetting, its inability to maintain the accuracy of newly integrated updates over time highlights its limitations for lifelong knowledge integration tasks. 0 5000 10000 15000 20000 25000 
+
+> Number of Edits (K)
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Mean Batch Accuracy
+> T1
+
+Update      
+
+> 05000 10000 15000 20000 25000
+> Number of Edits (K)
+> T1
+
+Rephrase      
+
+> 05000 10000 15000 20000 25000
+> Number of Edits (K)
+> T1
+
+Personas      
+
+> 05000 10000 15000 20000 25000
+> Number of Edits (K)
+> T1
+
+Mhop      
+
+> 05000 10000 15000 20000 25000
+> Number of Edits (K)
+> T1
+
+Locality 
+
+> Pre-Edit
+> Post-Edit
+> Model Avg.
+> Llama-2-7B
+> Llama-3-8B
+> Mistral-7B
+
+Figure 21. Results of WISE on three language models (Llama-2-7B, Llama-3-8B, and Mistral-7B) for the first timestep of the WikiBigEdit benchmark. Each subplot shows mean batch accuracy for the update, rephrase, personas, mhop, and locality sets over the number of updates. Post-update performance (blue) converges to pre-update levels (gray) across all metrics, highlighting WISE’s limitations in sustaining accuracy after large-scale updates. 
+
+29
