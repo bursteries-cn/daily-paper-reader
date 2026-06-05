@@ -1,0 +1,69 @@
+{
+  "label": "2026-06-05",
+  "date": "2026-06-05",
+  "generated_at": "2026-06-05T21:50:54",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202606/05/2606.05396v1-willing-but-unable-separating-refusal-from-capability-in-code-llms-via-abliteration",
+      "section": "deep",
+      "title_en": "Willing but Unable: Separating Refusal from Capability in Code LLMs via Abliteration",
+      "authors": "Cristina Carleo, Pietro Liguori, Naghmeh Ivaki, Domenico Cotroneo",
+      "date": "2026-06-03",
+      "pdf": "https://arxiv.org/pdf/2606.05396v1",
+      "score": "9.0",
+      "evidence": "使用abliteration（低秩权重编辑）去除拒绝行为",
+      "tldr": "安全对齐的代码LLM在面对漏洞注入提示时会系统性拒绝回答，阻碍了利用其合成漏洞数据集。本文探索abliteration方法，通过低秩权重编辑正交投影出残差流中的拒绝方向，从而移除拒绝行为。以Qwen2.5-Coder-Instruct系列（3B、7B、14B）和CWE-89（SQL注入）为案例，发现拒绝率随模型大小和上下文显著变化，abliteration将拒绝降至接近零，同时保持语法有效性>93%。注入率仍受限于模型能力（14B达88-97%，3B仅25-48%），表明意愿与能力可分离。该方法为大规模合成漏洞数据提供可行路径。",
+      "tags": "query:model-edit",
+      "abstract_en": "Producing a labeled vulnerable code at scale is a recurring obstacle for learning-based vulnerability detection: mined corpora carry substantial label noise, and existing LLM-based augmentation propagates these inaccuracies because it transforms vulnerable seeds rather than synthesising vulnerabilities from a specification. A complementary route is to start from safe code and ask an instruction-tuned LLM to inject a specified CWE (which would shift the labeling burden from open-ended detection to bounded binary confirmation) but safety-aligned code LLMs systematically refuse such prompts. This paper is a preliminary feasibility study of abliteration, a low-rank weight edit that orthogonally projects out the refusal direction in the residual stream, as a tool to remove this barrier. We use Python and CWE-89 (SQL injection) as a case study, evaluating the Qwen2.5-Coder-Instruct family at 3B, 7B, and 14B parameters on safe samples drawn from PromSec and SafeCoder, replicated three times per condition. We find that (i) refusal on injection prompts is strongly size- and prompt-context-dependent: the 14B refuses 100% of prompts, the 7B refuses 73% of PromSec but only 5% of SafeCoder, whereas the 3B is essentially never blocked; (ii) abliteration reduces refusal to zero or near-zero across all sizes while leaving syntactic validity above 93%, supporting the view that, in this setting, refusal can be detached from measured code-generation capability; and (iii) the post-abliteration injection rate remains capacity-bound (88-97% on the 14B, 89-90% on the 7B, and 25-48% on the 3B) separating willingness, which abliteration unlocks, from capability, which scales with parameters. Vulnerability verdicts are produced by a three-tool detector ensemble (CodeQL, Semgrep, Bandit) followed by manual adjudication by two authors on detector-positive outputs.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/05/2606.00150v1-persona-attack-incremental-memory-injection-jailbreak-attack-against-large-language-models",
+      "section": "deep",
+      "title_en": "Persona Attack: Incremental Memory Injection Jailbreak Attack against Large Language Models",
+      "authors": "Junyoung Park, Seongyong Ju, Sunghwan Park, Jaewoo Lee",
+      "date": "2026-05-29",
+      "pdf": "https://arxiv.org/pdf/2606.00150v1",
+      "score": "8.0",
+      "evidence": "通过记忆注入的越狱攻击",
+      "tldr": "针对大语言模型的越狱攻击通常只依赖单次提示注入，忽略了模型对对话历史与用户指令的记忆能力。本文提出Persona Attack，通过逐步向模型上下文窗口注入特定记忆，使其优先执行攻击指令而非安全对齐。实验显示，该方法在多个主流模型上的攻击成功率最高可达95%，且效果与记忆实现方式及指令组合密切相关。该工作揭示了记忆机制对大模型安全性的新威胁。",
+      "tags": "query:model-edit",
+      "abstract_en": "As Large Language Models evolve for user convenience, vulnerability to jailbreak attacks continues to be reported despite ongoing efforts in safety training. Traditional jailbreak techniques typically focus on a single prompt injection, neglecting the models' ability to remember the flow of conversation and the user's instructions. In this paper, we propose Persona Attack, a memory injection based jailbreak method that manipulates the model's context window through a step by step approach. Experimental results from applying Persona Attack to several widely used LLMs reveal that, as injections accumulate in memory, models increasingly prioritize these instructions over their internal safety alignment mechanisms. Furthermore, our experiments empirically demonstrate that the attack success rate varies not only according to the memory implementation of the model, but also combinations of instructions and can reach 95% under specific instruction configurations.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/05/2606.00686v1-dialectics-of-alignment-harnessing-unsafe-knowledge-for-dynamic-safety-routing",
+      "section": "deep",
+      "title_en": "Dialectics of Alignment: Harnessing Unsafe Knowledge for Dynamic Safety Routing",
+      "authors": "Maryam Hashemzadeh, Jerry Huang, Minseon Kim, Marc-Alexandre Côté, Sarath Chandar",
+      "date": "2026-05-30",
+      "pdf": "https://arxiv.org/pdf/2606.00686v1",
+      "score": "8.0",
+      "evidence": "通过隔离不安全知识实现动态安全路由",
+      "tldr": "现有对齐方法通过擦除不安全数据来提升安全性，但导致模型过于保守，对敏感但良性的查询给出无信息量的拒绝。本文提出辩证对齐思路，认为不安全知识蕴含领域特定知识。设计了SafeMoE框架，将不安全知识隔离到LoRA专家中，训练轻量门控网络动态路由，在保持安全的同时利用深度知识。实验表明安全响应率提升20%以上，且生成更信息丰富，零样本泛化到新领域。贡献在于证明安全需要控制性整合而非掩盖不安全知识。",
+      "tags": "query:model-edit",
+      "abstract_en": "The prevailing paradigm in large language model (LLM) alignment operates via erasure, filtering unsafe data or training models to strictly refuse harmful prompts. While effective at reducing immediate toxicity, this approach fundamentally constricts the model's epistemological scope, resulting in over-cautious systems that output uninformative blanket refusals to sensitive yet benign queries. In this work, we challenge the orthodoxy that unsafe data must be discarded. We propose a dialectical approach to alignment, positing that unsafe data encodes rich, domain specific knowledge critical for nuanced, safe, and informative generation. To operationalize this, we introduce SafeMoE, a Mixture-of-Experts (MoE) framework that isolates unsafe knowledge into domain-specific Low-Rank Adapters (LoRA experts) trained exclusively on harmful corpora. To synthesize safety from these unsafe primitives, we train a lightweight gating network using a minimal, highly curated set of safe-informative responses. During inference, this router dynamically orchestrates the unsafe experts, effectively steering the generation trajectory to harness their deep domain knowledge while strictly enforcing safety constraints. Extensive empirical evaluations across stringent safety benchmarks demonstrate that SafeMoE is not only safer, achieving over a 20% relative improvement in safe response rate (more than a 15% absolute gain), but also produces more informative responses when safety and harmfulness are of paramount concern. Furthermore, the routing mechanism exhibits strong zero-shot generalization to unseen domains and broader safety tasks without domain-specific supervision. Our findings suggest a paradigm shift in alignment: true safety requires not the masking of unsafe knowledge, but its controlled integration.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/05/2606.02640v1-d-judge-disrupting-multi-turn-jailbreaks-using-semantics-preserving-output-rewriting",
+      "section": "deep",
+      "title_en": "D-Judge: Disrupting Multi-Turn Jailbreaks using Semantics-Preserving Output Rewriting",
+      "authors": "Huanli Gong, Zhipeng Wei, Yu Fu, Haz Sameen Shahgir, Ananya Gupta, Yue Dong, N. Benjamin Erichson",
+      "date": "2026-05-31",
+      "pdf": "https://arxiv.org/pdf/2606.02640v1",
+      "score": "8.0",
+      "evidence": "通过重写输出来防御多轮越狱攻击",
+      "tldr": "多轮越狱攻击通过辅助裁判模型的反馈信号逐步优化提示，实现有害目标。现有防御多在单轮或最终响应检测，未能破坏裁判驱动的反馈循环。D-Judge提出语义保持的输出重写防御，在攻击者裁判评估前重写受害者LLM响应，保持原意但改变裁判反馈，导致后续查询针对扭曲信号优化。为提升改写能力，构造语义等价但裁判评分不同的响应对，进行监督微调和直接偏好优化。实验表明，D-Judge在HarmBench上显著降低SOTA多轮越狱成功率，同时不损害良性任务性能。",
+      "tags": "query:model-edit",
+      "abstract_en": "Multi-turn jailbreak attacks pose a growing threat to large language model (LLM) safety because they exploit feedback from auxiliary judge models to iteratively refine prompts toward harmful goals. Existing defenses largely detect or block unsafe content at individual turns or at the final response, leaving the judge-driven refinement loop intact and allowing attackers to extract informative feedback from intermediate interactions. We introduce D-Judge, a semantics-preserving output rewriting defense that intervenes directly in this loop by rewriting the victim LLM's responses before they are evaluated by the attacker's judge. By misaligning the judge's feedback signal without changing the meaning of the original response, D-Judge derails the attacker's prompt-refinement process, causing subsequent queries to be optimized against a distorted signal of attack progress. To improve D-Judge's ability to produce such rewrites, we construct a dataset of semantically equivalent response pairs that induce different judge-assigned harmfulness scores, and use it for supervised fine-tuning followed by direct preference optimization. Experiments on HarmBench show that D-Judge reduces the success rate of state-of-the-art multi-turn jailbreaks while preserving performance on benign benchmarks.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
