@@ -6,16 +6,16 @@ date: 2025-05-01
 pdf: "https://openreview.net/pdf?id=aJIoBur0Ef"
 tags: ["query:model-edit"]
 score: 9.0
-evidence: 适用于多种知识格式的自回归编辑范式
-tldr: 现有模型编辑方法受限于单Token隐状态编辑，难以处理诗歌、代码等长格式知识。本文提出AnyEdit自回归编辑范式，将长知识分解为连续块并迭代编辑每个块的关键Token，基于互信息的链式法则保证一致性。实验证明该方法能有效更新任意格式知识，突破了编辑方法的效能屏障。
+evidence: 针对长文本知识的自回归编辑范式
+tldr: 当前模型编辑方法仅修改单个token的隐藏状态，难以处理长格式知识（如诗歌、代码）。AnyEdit提出自回归编辑范式，将长知识分解为连续块并迭代编辑每个块的关键token。理论上基于互信息链式法则，实验证明AnyEdit能有效更新任意格式知识，同时保持输出一致性。
 source: ICML-2025-Accepted
 selection_source: conference_retrieval
 figures_json: "[{\"url\": \"assets/figures/openreview/openreview-icml-2025-ajiobur0ef/fig-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 1761, \"height\": 714, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-ajiobur0ef/fig-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 789, \"height\": 494, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-ajiobur0ef/fig-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 808, \"height\": 508, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-ajiobur0ef/fig-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 1784, \"height\": 563, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-ajiobur0ef/fig-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 1804, \"height\": 818, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-ajiobur0ef/fig-006.webp\", \"caption\": \"\", \"page\": 0, \"index\": 6, \"width\": 1076, \"height\": 705, \"label\": \"Figure\"}]"
 tables_json: "[{\"url\": \"assets/tables/openreview/openreview-icml-2025-ajiobur0ef/table-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 1773, \"height\": 947, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ajiobur0ef/table-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 868, \"height\": 362, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ajiobur0ef/table-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 1757, \"height\": 1720, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ajiobur0ef/table-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 1752, \"height\": 2134, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ajiobur0ef/table-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 1768, \"height\": 1011, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ajiobur0ef/table-006.webp\", \"caption\": \"\", \"page\": 0, \"index\": 6, \"width\": 1767, \"height\": 1008, \"label\": \"Table\"}]"
-motivation: 现有编辑方法在处理长格式知识时因单Token编辑限制而失效。
-method: 提出自回归编辑范式，将长知识分解为块并迭代编辑关键Token。
-result: 成功编辑诗歌、代码等长格式知识，突破效能屏障。
-conclusion: AnyEdit统一了不同知识格式的编辑，提升了模型更新的灵活性和准确性。
+motivation: 现有编辑方法在处理长格式知识时存在‘有效性屏障’，只能编辑单个token。
+method: 提出AnyEdit，自回归编辑，将长知识分解为块并逐块编辑关键token。
+result: AnyEdit有效编辑各种格式的长知识，克服了单token编辑的限制。
+conclusion: AnyEdit为任意知识格式的模型编辑提供了新范式。
 ---
 
 ## Abstract

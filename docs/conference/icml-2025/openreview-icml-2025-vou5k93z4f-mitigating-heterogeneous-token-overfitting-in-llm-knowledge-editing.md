@@ -1,21 +1,21 @@
 ---
 title: Mitigating Heterogeneous Token Overfitting in LLM Knowledge Editing
-title_zh: 缓解大语言模型知识编辑中的异构令牌过拟合
+title_zh: 缓解大语言模型知识编辑中的异质性标记过拟合
 authors: "Tianci Liu, Ruirui Li, Zihan Dong, Hui Liu, Xianfeng Tang, Qingyu Yin, Linjun Zhang, Haoyu Wang, Jing Gao"
 date: 2025-05-01
 pdf: "https://openreview.net/pdf?id=vOu5K93z4f"
 tags: ["query:model-edit"]
 score: 9.0
-evidence: 直接研究大语言模型知识编辑，发现并缓解异构令牌过拟合问题
-tldr: 针对大语言模型知识编辑后推理能力下降的问题，首次发现异构令牌过拟合（HTO）现象，即模型过度拟合编辑知识中的不同令牌，提出相应缓解方法，显著提升了编辑后模型在新知识上的推理表现。
+evidence: 解决大语言模型知识编辑中的异质性标记过拟合问题
+tldr: 知识编辑后大语言模型对新知识推理能力下降，本文发现异质性标记过拟合（HTO）是关键原因。提出缓解HTO的方法，通过调整编辑策略使模型更好地泛化到新知识。实验证明该方法显著提升了编辑后模型的推理性能。
 source: ICML-2025-Accepted
 selection_source: conference_retrieval
 figures_json: "[{\"url\": \"assets/figures/openreview/openreview-icml-2025-vou5k93z4f/fig-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 853, \"height\": 361, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-vou5k93z4f/fig-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 850, \"height\": 498, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-vou5k93z4f/fig-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 1765, \"height\": 804, \"label\": \"Figure\"}]"
 tables_json: "[{\"url\": \"assets/tables/openreview/openreview-icml-2025-vou5k93z4f/table-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 1684, \"height\": 1064, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-vou5k93z4f/table-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 847, \"height\": 242, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-vou5k93z4f/table-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 695, \"height\": 356, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-vou5k93z4f/table-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 1684, \"height\": 1554, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-vou5k93z4f/table-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 1686, \"height\": 1549, \"label\": \"Table\"}]"
-motivation: 现有知识编辑方法更新参数后，模型的推理能力常退化，原因不明。
-method: 通过分析编辑过程中令牌级梯度差异，识别HTO问题，并提出正则化策略。
-result: 在多个编辑基准上，缓解HTO后编辑模型的推理准确性大幅提升。
-conclusion: 揭示并解决HTO问题，为更鲁棒的知识编辑提供了关键方向。
+motivation: 知识编辑后LLM对新知识的推理能力下降，原因是异质性标记过拟合。
+method: 识别HTO问题并提出针对性的缓解方法，通过调整编辑参数避免过拟合特定标记。
+result: 所提方法在多个知识编辑基准上提升了编辑后模型的推理能力。
+conclusion: 缓解HTO是提升知识编辑效果的重要方向。
 ---
 
 ## Abstract

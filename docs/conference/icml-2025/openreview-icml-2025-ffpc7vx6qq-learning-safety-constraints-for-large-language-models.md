@@ -1,21 +1,21 @@
 ---
 title: Learning Safety Constraints for Large Language Models
-title_zh: 学习大型语言模型的安全约束
+title_zh: 为大型语言模型学习安全约束
 authors: "Xin Chen, Yarden As, Andreas Krause"
 date: 2025-05-01
 pdf: "https://openreview.net/pdf?id=Ffpc7vx6qq"
 tags: ["query:model-edit"]
-score: 7.0
-evidence: 表示空间中的几何安全约束用于大模型安全
-tldr: 本文提出SaP方法，在语言模型表示空间中学习安全多面体，通过几何导向检测和修正不安全输出，无需修改权重即可实现安全约束。实验证明，SaP能有效检测不道德输入，同时保持模型原有能力。该方法为安全对齐编辑提供了一种无需重新训练的新途径，可应用于防止攻击等场景。
+score: 4.0
+evidence: 在表示空间学习安全约束并导向安全输出，是一种无需修改权重的模型编辑
+tldr: 大语言模型存在安全风险，现有方法修改模型权重可能损害能力。本文提出SaP方法，利用安全多面体在表示空间学习安全约束，通过几何导向检测和修正不安全输出。该方法后处理，不修改模型权重，保留原有能力。实验证明能有效检测不道德输入并纠正不安全输出，是一种轻量级的安全编辑方法。
 source: ICML-2025-Accepted
 selection_source: conference_retrieval
 figures_json: "[{\"url\": \"assets/figures/openreview/openreview-icml-2025-ffpc7vx6qq/fig-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 1722, \"height\": 568, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-ffpc7vx6qq/fig-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 1781, \"height\": 626, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-ffpc7vx6qq/fig-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 779, \"height\": 482, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-ffpc7vx6qq/fig-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 1637, \"height\": 828, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-ffpc7vx6qq/fig-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 1770, \"height\": 370, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-ffpc7vx6qq/fig-006.webp\", \"caption\": \"\", \"page\": 0, \"index\": 6, \"width\": 1584, \"height\": 475, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-ffpc7vx6qq/fig-007.webp\", \"caption\": \"\", \"page\": 0, \"index\": 7, \"width\": 1729, \"height\": 686, \"label\": \"Figure\"}]"
 tables_json: "[{\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 869, \"height\": 465, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 846, \"height\": 208, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 1536, \"height\": 497, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 892, \"height\": 496, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 1563, \"height\": 496, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-006.webp\", \"caption\": \"\", \"page\": 0, \"index\": 6, \"width\": 925, \"height\": 496, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-007.webp\", \"caption\": \"\", \"page\": 0, \"index\": 7, \"width\": 1606, \"height\": 496, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-008.webp\", \"caption\": \"\", \"page\": 0, \"index\": 8, \"width\": 929, \"height\": 495, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-009.webp\", \"caption\": \"\", \"page\": 0, \"index\": 9, \"width\": 888, \"height\": 495, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-010.webp\", \"caption\": \"\", \"page\": 0, \"index\": 10, \"width\": 925, \"height\": 405, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-011.webp\", \"caption\": \"\", \"page\": 0, \"index\": 11, \"width\": 1586, \"height\": 471, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-012.webp\", \"caption\": \"\", \"page\": 0, \"index\": 12, \"width\": 638, \"height\": 774, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-013.webp\", \"caption\": \"\", \"page\": 0, \"index\": 13, \"width\": 634, \"height\": 770, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-014.webp\", \"caption\": \"\", \"page\": 0, \"index\": 14, \"width\": 639, \"height\": 774, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-015.webp\", \"caption\": \"\", \"page\": 0, \"index\": 15, \"width\": 1551, \"height\": 710, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-016.webp\", \"caption\": \"\", \"page\": 0, \"index\": 16, \"width\": 1659, \"height\": 709, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-017.webp\", \"caption\": \"\", \"page\": 0, \"index\": 17, \"width\": 1602, \"height\": 710, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-ffpc7vx6qq/table-018.webp\", \"caption\": \"\", \"page\": 0, \"index\": 18, \"width\": 1748, \"height\": 711, \"label\": \"Table\"}]"
-motivation: 现有安全方法常需修改权重或影响模型能力，需一种后置的安全约束方法。
-method: 学习表示空间中的安全与不安全区域的多面体，通过几何导向修正输出。
-result: 在多个LLM上有效检测不道德输入，安全性与能力保持均优。
-conclusion: 几何安全约束方法可在不损害模型性能的前提下增强安全性，适用于安全对齐编辑。
+motivation: 现有安全方法修改模型权重会损害能力，需要不改变权重的方式。
+method: 利用多面体在表示空间划分安全与不安全区域，通过几何导向修正输出。
+result: 在多个LLM上有效检测不道德输入并安全纠正，保留模型能力。
+conclusion: SaP是一种后处理的安全约束方法，不修改权重即可提升安全性。
 ---
 
 ## Abstract

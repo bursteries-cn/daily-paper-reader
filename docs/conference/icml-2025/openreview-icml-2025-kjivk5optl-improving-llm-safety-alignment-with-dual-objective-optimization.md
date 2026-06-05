@@ -1,21 +1,21 @@
 ---
 title: Improving LLM Safety Alignment with Dual-Objective Optimization
-title_zh: 基于双目标优化的LLM安全对齐改进
+title_zh: 通过双目标优化改善大语言模型安全对齐
 authors: "Xuandong Zhao, Will Cai, Tianneng Shi, David Huang, Licong Lin, Song Mei, Dawn Song"
 date: 2025-05-01
 pdf: "https://openreview.net/pdf?id=Kjivk5OPtL"
 tags: ["query:model-edit"]
-score: 6.0
-evidence: 针对越狱攻击的双目标安全对齐
-tldr: 现有安全对齐方法对越狱攻击的鲁棒性不足。本文提出双目标优化方法，将直接偏好优化分解为鲁棒拒绝训练和有害知识定向遗忘两个目标，从梯度分析角度改进了损失函数。实验表明该方法能显著提升LLM对抗前缀攻击、后缀攻击等多种越狱方式的防御能力，同时保持通用能力。
+score: 8.0
+evidence: 双目标优化分离拒绝训练和知识遗忘，类似于安全模型编辑
+tldr: 现有安全对齐方法易受越狱攻击。本文分析DPO在拒绝学习上的不足，提出双目标优化：鲁棒拒绝训练鼓励即使部分有害输出也拒绝，以及针对性遗忘有害知识。该方法显著提升对多种越狱攻击（如前缀、后缀、提示注入）的鲁棒性，是一种有效利用知识编辑的安全对齐方法。
 source: ICML-2025-Accepted
 selection_source: conference_retrieval
 figures_json: "[{\"url\": \"assets/figures/openreview/openreview-icml-2025-kjivk5optl/fig-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 1410, \"height\": 633, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kjivk5optl/fig-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 1699, \"height\": 514, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kjivk5optl/fig-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 849, \"height\": 348, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kjivk5optl/fig-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 851, \"height\": 350, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kjivk5optl/fig-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 851, \"height\": 335, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kjivk5optl/fig-006.webp\", \"caption\": \"\", \"page\": 0, \"index\": 6, \"width\": 856, \"height\": 334, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kjivk5optl/fig-007.webp\", \"caption\": \"\", \"page\": 0, \"index\": 7, \"width\": 852, \"height\": 354, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kjivk5optl/fig-008.webp\", \"caption\": \"\", \"page\": 0, \"index\": 8, \"width\": 848, \"height\": 285, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kjivk5optl/fig-009.webp\", \"caption\": \"\", \"page\": 0, \"index\": 9, \"width\": 842, \"height\": 292, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kjivk5optl/fig-010.webp\", \"caption\": \"\", \"page\": 0, \"index\": 10, \"width\": 1683, \"height\": 513, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kjivk5optl/fig-011.webp\", \"caption\": \"\", \"page\": 0, \"index\": 11, \"width\": 1249, \"height\": 504, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kjivk5optl/fig-012.webp\", \"caption\": \"\", \"page\": 0, \"index\": 12, \"width\": 1244, \"height\": 506, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kjivk5optl/fig-013.webp\", \"caption\": \"\", \"page\": 0, \"index\": 13, \"width\": 1596, \"height\": 486, \"label\": \"Figure\"}]"
 tables_json: "[{\"url\": \"assets/tables/openreview/openreview-icml-2025-kjivk5optl/table-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 1767, \"height\": 349, \"label\": \"Table\"}]"
-motivation: DPO损失函数在拒绝学习上存在理论缺陷，导致对齐模型易被越狱。
-method: 解耦DPO目标为鲁棒拒绝训练和有害知识遗忘，基于梯度分析优化损失。
-result: 在多种越狱攻击下防御成功率显著提升，且不影响通用性能。
-conclusion: 双目标优化有效弥补了DPO在安全对齐中的不足，提升了LLM鲁棒性。
+motivation: DPO在拒绝学习上存在不足，导致易受越狱攻击。
+method: 将DPO目标分离为鲁棒拒绝训练和针对性有害知识遗忘。
+result: 在多种越狱攻击下显著提升LLM鲁棒性。
+conclusion: 双目标优化是一种有效的安全对齐改进，其中有害知识遗忘部分类似模型编辑。
 ---
 
 ## Abstract

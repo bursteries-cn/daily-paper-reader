@@ -6,16 +6,16 @@ date: 2025-05-01
 pdf: "https://openreview.net/pdf?id=VdEG08ZJCH"
 tags: ["query:model-edit"]
 score: 9.0
-evidence: 提出大语言模型终身编辑框架，连接标准与终身编辑
-tldr: 为解决标准模型编辑方法在终身场景下失效的问题，提出SimIE框架，通过模拟理想编辑器将参数修改型方法扩展到终身编辑，实验表明在多个编辑基准上持续保持高效，为终身编辑提供了可靠基线。
+evidence: 终身模型编辑框架，模拟理想编辑器
+tldr: 该论文发现标准模型编辑方法和终身编辑方法的发展彼此分离，忽略了将标准方法泛化到终身场景的潜力。为此提出SimIE框架，通过模拟理想编辑器，恢复参数修改型方法在终身编辑中的强大性能。实验表明SimIE为终身编辑提供了鲁棒基线，并能使终身编辑受益于标准编辑的进步。
 source: ICML-2025-Accepted
 selection_source: conference_retrieval
 figures_json: "[{\"url\": \"assets/figures/openreview/openreview-icml-2025-vdeg08zjch/fig-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 824, \"height\": 540, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-vdeg08zjch/fig-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 1775, \"height\": 468, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-vdeg08zjch/fig-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 858, \"height\": 643, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-vdeg08zjch/fig-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 1789, \"height\": 1363, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-vdeg08zjch/fig-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 1790, \"height\": 1037, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-vdeg08zjch/fig-006.webp\", \"caption\": \"\", \"page\": 0, \"index\": 6, \"width\": 1790, \"height\": 1035, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-vdeg08zjch/fig-007.webp\", \"caption\": \"\", \"page\": 0, \"index\": 7, \"width\": 1791, \"height\": 1036, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-vdeg08zjch/fig-008.webp\", \"caption\": \"\", \"page\": 0, \"index\": 8, \"width\": 1790, \"height\": 1045, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-vdeg08zjch/fig-009.webp\", \"caption\": \"\", \"page\": 0, \"index\": 9, \"width\": 1762, \"height\": 1607, \"label\": \"Figure\"}]"
 tables_json: "[{\"url\": \"assets/tables/openreview/openreview-icml-2025-vdeg08zjch/table-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 1776, \"height\": 847, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-vdeg08zjch/table-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 892, \"height\": 488, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-vdeg08zjch/table-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 1336, \"height\": 337, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-vdeg08zjch/table-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 894, \"height\": 754, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-vdeg08zjch/table-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 1781, \"height\": 440, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-vdeg08zjch/table-006.webp\", \"caption\": \"\", \"page\": 0, \"index\": 6, \"width\": 1819, \"height\": 1723, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-vdeg08zjch/table-007.webp\", \"caption\": \"\", \"page\": 0, \"index\": 7, \"width\": 1779, \"height\": 447, \"label\": \"Table\"}]"
-motivation: 标准编辑方法在终身编辑场景中性能显著下降，缺乏有效桥接。
-method: 通过模拟理想编辑器的行为，设计通用框架将标准方法转化为终身编辑方法。
-result: 在多种编辑数据集上，SimIE显著提升了终身编辑的准确性和稳定性。
-conclusion: 该工作建立了标准编辑与终身编辑间的桥梁，推动了模型编辑的实用化。
+motivation: 标准模型编辑方法和终身编辑方法发展脱节，终身编辑缺乏强基线。
+method: 提出SimIE框架，模拟理想编辑器，将标准参数修改方法适应到终身场景。
+result: SimIE在终身编辑中恢复参数修改方法的性能，提供强基线。
+conclusion: 桥接标准与终身编辑，使终身编辑受益于标准编辑的进步。
 ---
 
 ## Abstract

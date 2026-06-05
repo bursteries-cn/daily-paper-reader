@@ -1,21 +1,21 @@
 ---
 title: "BalancEdit: Dynamically Balancing the Generality-Locality Trade-off in Multi-modal Model Editing"
-title_zh: "BalancEdit: 多模态模型编辑中通用性与局部性权衡的动态平衡"
+title_zh: BalancEdit：多模态模型编辑中通用性与局部性的动态平衡
 authors: "Dongliang Guo, Mengxuan Hu, Zihan Guan, Thomas Hartvigsen, Sheng Li"
 date: 2025-05-01
 pdf: "https://openreview.net/pdf?id=JWtcAlXkMN"
 tags: ["query:model-edit"]
-score: 9.0
-evidence: 直接关注多模态模型的知识编辑，提出OKEDIT数据集
-tldr: 现有模型编辑技术忽略了不同事实的影响范围，导致通用性和局部性难以兼顾。本文提出BalancEdit，动态平衡多模态模型编辑中的通用性与局部性权衡，并构建了OKEDIT数据集以有效评估编辑效果。实验表明该方法在保持高通用性的同时显著提升局部性，为多模态知识编辑提供新基准。
+score: 8.0
+evidence: 多模态模型编辑中通用性与局部性的权衡
+tldr: 现有模型编辑技术忽略不同事实的影响范围，导致通用性和局部性受损。BalancEdit通过动态平衡通用性与局部性，提出新的多模态编辑数据集OKEDIT，有效提升了多模态模型编辑的性能。
 source: ICML-2025-Accepted
 selection_source: conference_retrieval
 figures_json: "[{\"url\": \"assets/figures/openreview/openreview-icml-2025-jwtcalxkmn/fig-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 850, \"height\": 167, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-jwtcalxkmn/fig-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 854, \"height\": 411, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-jwtcalxkmn/fig-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 1616, \"height\": 726, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-jwtcalxkmn/fig-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 859, \"height\": 217, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-jwtcalxkmn/fig-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 854, \"height\": 157, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-jwtcalxkmn/fig-006.webp\", \"caption\": \"\", \"page\": 0, \"index\": 6, \"width\": 859, \"height\": 463, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-jwtcalxkmn/fig-007.webp\", \"caption\": \"\", \"page\": 0, \"index\": 7, \"width\": 862, \"height\": 324, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-jwtcalxkmn/fig-008.webp\", \"caption\": \"\", \"page\": 0, \"index\": 8, \"width\": 500, \"height\": 416, \"label\": \"Figure\"}]"
 tables_json: "[{\"url\": \"assets/tables/openreview/openreview-icml-2025-jwtcalxkmn/table-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 854, \"height\": 411, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-jwtcalxkmn/table-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 859, \"height\": 174, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-jwtcalxkmn/table-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 1766, \"height\": 660, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-jwtcalxkmn/table-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 859, \"height\": 256, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-jwtcalxkmn/table-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 792, \"height\": 286, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-jwtcalxkmn/table-006.webp\", \"caption\": \"\", \"page\": 0, \"index\": 6, \"width\": 854, \"height\": 203, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-jwtcalxkmn/table-007.webp\", \"caption\": \"\", \"page\": 0, \"index\": 7, \"width\": 851, \"height\": 137, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-jwtcalxkmn/table-008.webp\", \"caption\": \"\", \"page\": 0, \"index\": 8, \"width\": 1577, \"height\": 250, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-jwtcalxkmn/table-009.webp\", \"caption\": \"\", \"page\": 0, \"index\": 9, \"width\": 850, \"height\": 205, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-jwtcalxkmn/table-010.webp\", \"caption\": \"\", \"page\": 0, \"index\": 10, \"width\": 769, \"height\": 156, \"label\": \"Table\"}]"
-motivation: 现有模型编辑技术忽略不同事实的独特影响范围，导致模型在通用性和局部性上性能受损。
-method: 提出BalancEdit方法，通过动态平衡机制在编辑时自适应调整事实的影响范围。
-result: 在OKEDIT数据集上实验表明，BalancEdit在通用性和局部性指标上均优于现有方法。
-conclusion: 该工作揭示了多模态模型编辑中通用性-局部性权衡的重要性，并为未来研究提供了有效工具。
+motivation: 不同事实在模型编辑中的影响范围不同，需要动态平衡通用性与局部性。
+method: 提出BalancEdit方法，动态调节编辑的力度以平衡通用性和局部性，并构建OKEDIT数据集。
+result: 在OKEDIT等数据集上，BalancEdit在保持局部性的同时提升了通用性。
+conclusion: 该工作首次明确多模态编辑中的通用性-局部性权衡问题，并提供了有效解决方案。
 ---
 
 ## Abstract

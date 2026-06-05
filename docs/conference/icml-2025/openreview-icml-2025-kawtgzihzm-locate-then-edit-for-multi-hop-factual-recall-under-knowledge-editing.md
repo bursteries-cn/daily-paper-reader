@@ -1,21 +1,21 @@
 ---
 title: Locate-then-edit for Multi-hop Factual Recall under Knowledge Editing
-title_zh: 面向多跳事实回忆的知识编辑定位-编辑方法
+title_zh: 知识编辑下的多跳事实回忆定位-编辑方法
 authors: "Zhuoran Zhang, Yongxiang Li, Zijian Kan, Keyuan Cheng, Lijie Hu, Di Wang"
 date: 2025-05-01
 pdf: "https://openreview.net/pdf?id=kAWtGZIHzm"
 tags: ["query:model-edit"]
 score: 9.0
-evidence: 定位-编辑知识编辑用于多跳事实回忆
-tldr: 本文发现多跳事实回忆任务依赖深层MLP层，而现有知识编辑方法仅编辑浅层，导致多跳性能差。基于此，提出一个扩展的定位-编辑框架，同时编辑浅层和深层参数。实验表明，新方法在多跳知识编辑基准上显著提升，解决了知识编辑中多跳回忆的长期难题。
+evidence: 提出定位-编辑方法用于知识编辑后的多跳事实回忆
+tldr: 该论文指出现有定位-编辑方法仅编辑浅层，导致多跳事实回忆困难。通过机制可解释性分析，发现多跳任务依赖深层MLP层，因此提出编辑深层MLP层的方法，显著提升了多跳知识编辑的性能，推动了知识编辑技术的发展。
 source: ICML-2025-Accepted
 selection_source: conference_retrieval
 figures_json: "[{\"url\": \"assets/figures/openreview/openreview-icml-2025-kawtgzihzm/fig-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 1719, \"height\": 663, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kawtgzihzm/fig-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 850, \"height\": 976, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kawtgzihzm/fig-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 807, \"height\": 482, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kawtgzihzm/fig-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 807, \"height\": 476, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kawtgzihzm/fig-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 1412, \"height\": 1360, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kawtgzihzm/fig-006.webp\", \"caption\": \"\", \"page\": 0, \"index\": 6, \"width\": 1388, \"height\": 1016, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-kawtgzihzm/fig-007.webp\", \"caption\": \"\", \"page\": 0, \"index\": 7, \"width\": 1403, \"height\": 1528, \"label\": \"Figure\"}]"
 tables_json: "[{\"url\": \"assets/tables/openreview/openreview-icml-2025-kawtgzihzm/table-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 695, \"height\": 369, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-kawtgzihzm/table-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 862, \"height\": 216, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-kawtgzihzm/table-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 1402, \"height\": 506, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-kawtgzihzm/table-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 761, \"height\": 862, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-kawtgzihzm/table-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 690, \"height\": 276, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-kawtgzihzm/table-006.webp\", \"caption\": \"\", \"page\": 0, \"index\": 6, \"width\": 1605, \"height\": 878, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-kawtgzihzm/table-007.webp\", \"caption\": \"\", \"page\": 0, \"index\": 7, \"width\": 1411, \"height\": 316, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-kawtgzihzm/table-008.webp\", \"caption\": \"\", \"page\": 0, \"index\": 8, \"width\": 1590, \"height\": 687, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-kawtgzihzm/table-009.webp\", \"caption\": \"\", \"page\": 0, \"index\": 9, \"width\": 1591, \"height\": 773, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-kawtgzihzm/table-010.webp\", \"caption\": \"\", \"page\": 0, \"index\": 10, \"width\": 790, \"height\": 544, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-kawtgzihzm/table-011.webp\", \"caption\": \"\", \"page\": 0, \"index\": 11, \"width\": 1801, \"height\": 426, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-kawtgzihzm/table-012.webp\", \"caption\": \"\", \"page\": 0, \"index\": 12, \"width\": 1792, \"height\": 711, \"label\": \"Table\"}]"
-motivation: 现有知识编辑方法在多跳事实回忆任务中表现差，原因在于只编辑了浅层。
-method: 利用机械可解释性工具定位深层知识，编辑浅层和深层MLP层。
-result: 在多跳知识编辑基准上性能大幅提升，优于现有方法。
-conclusion: 同时编辑深浅层可有效支持多跳知识更新，拓展了知识编辑的适用范围。
+motivation: 现有知识编辑方法在单跳任务中表现良好，但多跳事实回忆性能差，原因在于只编辑了浅层。
+method: 利用机械可解释性分析识别多跳任务依赖的深层MLP层，并扩展定位-编辑范式到这些层。
+result: 在多个多跳数据集上，新方法显著提升了编辑后的事实回忆准确率。
+conclusion: 编辑深层是提升多跳知识编辑效果的关键，为后续研究提供了方向。
 ---
 
 ## Abstract

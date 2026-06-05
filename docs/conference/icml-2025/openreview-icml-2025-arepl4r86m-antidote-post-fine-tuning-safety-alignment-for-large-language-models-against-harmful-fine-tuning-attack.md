@@ -1,21 +1,21 @@
 ---
 title: "Antidote: Post-fine-tuning Safety Alignment for Large Language Models against Harmful Fine-tuning Attack"
-title_zh: Antidote：针对有害微调攻击的LLM微调后安全对齐
+title_zh: Antidote：针对有害微调攻击的大语言模型微调后安全对齐
 authors: "Tiansheng Huang, Gautam Bhattacharya, Pratik Joshi, Joshua Kimball, Ling Liu"
 date: 2025-05-01
 pdf: "https://openreview.net/pdf?id=Arepl4R86m"
 tags: ["query:model-edit"]
-score: 8.0
-evidence: 通过移除有害参数实现微调后安全对齐
-tldr: 安全对齐的LLM在微调阶段容易被有害数据破坏，现有防御依赖特定超参数。本文提出Antidote，在微调后移除有害参数以恢复安全性，不依赖于微调超参数选择。实验表明该方法在各种超参数设置下均能有效修复安全漏洞，且不影响模型原有能力。
+score: 9.0
+evidence: 微调后的安全对齐，对抗有害微调攻击
+tldr: 现有防御在特定超参数下失效，Antidote提出微调后阶段的安全对齐方法，通过移除有害参数恢复模型安全性，且不受微调阶段超参数影响。实验表明该方法在各种攻击下均有效。
 source: ICML-2025-Accepted
 selection_source: conference_retrieval
 figures_json: "[{\"url\": \"assets/figures/openreview/openreview-icml-2025-arepl4r86m/fig-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 837, \"height\": 267, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-arepl4r86m/fig-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 833, \"height\": 350, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-arepl4r86m/fig-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 835, \"height\": 352, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-arepl4r86m/fig-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 1235, \"height\": 452, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-arepl4r86m/fig-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 837, \"height\": 348, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-arepl4r86m/fig-006.webp\", \"caption\": \"\", \"page\": 0, \"index\": 6, \"width\": 850, \"height\": 498, \"label\": \"Figure\"}]"
 tables_json: "[{\"url\": \"assets/tables/openreview/openreview-icml-2025-arepl4r86m/table-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 1589, \"height\": 367, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-arepl4r86m/table-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 1588, \"height\": 333, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-arepl4r86m/table-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 1586, \"height\": 332, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-arepl4r86m/table-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 1588, \"height\": 366, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-arepl4r86m/table-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 695, \"height\": 309, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-arepl4r86m/table-006.webp\", \"caption\": \"\", \"page\": 0, \"index\": 6, \"width\": 849, \"height\": 296, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-arepl4r86m/table-007.webp\", \"caption\": \"\", \"page\": 0, \"index\": 7, \"width\": 856, \"height\": 205, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-arepl4r86m/table-008.webp\", \"caption\": \"\", \"page\": 0, \"index\": 8, \"width\": 856, \"height\": 299, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-arepl4r86m/table-009.webp\", \"caption\": \"\", \"page\": 0, \"index\": 9, \"width\": 682, \"height\": 312, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-arepl4r86m/table-010.webp\", \"caption\": \"\", \"page\": 0, \"index\": 10, \"width\": 871, \"height\": 251, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-arepl4r86m/table-011.webp\", \"caption\": \"\", \"page\": 0, \"index\": 11, \"width\": 853, \"height\": 162, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-arepl4r86m/table-012.webp\", \"caption\": \"\", \"page\": 0, \"index\": 12, \"width\": 856, \"height\": 145, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-arepl4r86m/table-013.webp\", \"caption\": \"\", \"page\": 0, \"index\": 13, \"width\": 858, \"height\": 156, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-arepl4r86m/table-014.webp\", \"caption\": \"\", \"page\": 0, \"index\": 14, \"width\": 852, \"height\": 255, \"label\": \"Table\"}]"
-motivation: 现有防御在微调超参数变化时失效，缺乏鲁棒的后处理方法。
-method: 微调后通过识别并移除有害参数来恢复模型安全对齐。
-result: 对不同超参数鲁棒，有效恢复安全性且保持能力。
-conclusion: Antidote提供了一种与微调过程无关的安全修复方法，实用性强。
+motivation: 现有防御在特定超参数下失效，需要一种鲁棒的微调后安全对齐方法。
+method: 提出Antidote，在微调后通过检测和移除有害参数来恢复模型安全性，无需依赖微调阶段超参数。
+result: 实验证明Antidote在不同超参数设置下均能有效恢复模型安全性。
+conclusion: Antidote提供了一种与超参数无关的微调后安全对齐方案，增强了LLM对抗有害微调的鲁棒性。
 ---
 
 ## Abstract

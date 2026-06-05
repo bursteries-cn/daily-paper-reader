@@ -1,21 +1,21 @@
 ---
 title: Reinforced Lifelong Editing for Language Models
-title_zh: 语言模型的强化终身编辑
+title_zh: 基于强化学习的语言模型终身编辑
 authors: "Zherui Li, Houcheng Jiang, Hao Chen, Baolong Bi, Zhenhong Zhou, Fei Sun, Junfeng Fang, Xiang Wang"
 date: 2025-05-01
 pdf: "https://openreview.net/pdf?id=1jUXprrfcb"
 tags: ["query:model-edit"]
 score: 9.0
-evidence: 基于超网络和强化学习的终身模型编辑
-tldr: 针对现有超网络方法在终身编辑中与动态参数不兼容的问题，本文提出RLEdit，将编辑损失视为奖励，利用强化学习优化超网络参数，使其适应知识序列变化。实验表明，RLEdit在多次编辑后仍能保持模型性能，有效支持大规模知识更新，为模型编辑的实用化提供了新思路。
+evidence: 基于强化学习的语言模型终身编辑方法
+tldr: 现有超网络编辑方法在终身编辑中与动态变化的LLM参数不兼容。RLEdit将编辑损失视为奖励，在完整知识序列上优化超网络参数，实现持续有效的模型编辑。实验证明其在多轮编辑中性能优越。
 source: ICML-2025-Accepted
 selection_source: conference_retrieval
 figures_json: "[{\"url\": \"assets/figures/openreview/openreview-icml-2025-1juxprrfcb/fig-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 884, \"height\": 858, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-1juxprrfcb/fig-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 1704, \"height\": 801, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-1juxprrfcb/fig-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 832, \"height\": 790, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-1juxprrfcb/fig-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 858, \"height\": 504, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-1juxprrfcb/fig-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 862, \"height\": 488, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-1juxprrfcb/fig-006.webp\", \"caption\": \"\", \"page\": 0, \"index\": 6, \"width\": 844, \"height\": 436, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-1juxprrfcb/fig-007.webp\", \"caption\": \"\", \"page\": 0, \"index\": 7, \"width\": 1745, \"height\": 925, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-1juxprrfcb/fig-008.webp\", \"caption\": \"\", \"page\": 0, \"index\": 8, \"width\": 1785, \"height\": 742, \"label\": \"Figure\"}]"
 tables_json: "[{\"url\": \"assets/tables/openreview/openreview-icml-2025-1juxprrfcb/table-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 777, \"height\": 330, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-1juxprrfcb/table-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 1776, \"height\": 1135, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-1juxprrfcb/table-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 1224, \"height\": 470, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-1juxprrfcb/table-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 1775, \"height\": 596, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-1juxprrfcb/table-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 1764, \"height\": 1850, \"label\": \"Table\"}]"
-motivation: 现有超网络在终身编辑中因参数动态变化而失效，需要一种能适应知识序列的方法。
-method: 将超网络终身编辑建模为强化学习，用编辑损失作为奖励，优化超网络参数。
-result: RLEdit在多个数据集上优于基线，支持数百次编辑，保持模型性能。
-conclusion: 强化学习框架有效解决了超网络不适应动态参数的问题，提升了终身编辑的稳定性。
+motivation: 现有超网络编辑方法无法适应LLM参数在终身编辑中的动态变化。
+method: 将终身编辑建模为强化学习问题，以编辑损失为奖励，在完整知识序列上优化超网络参数。
+result: RLEdit在多个基准上超越了现有方法，特别是在长序列编辑任务中。
+conclusion: RL框架为终身模型编辑提供了新的有效范式。
 ---
 
 ## Abstract

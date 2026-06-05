@@ -1,21 +1,21 @@
 ---
 title: Adaptive Localization of Knowledge Negation for Continual LLM Unlearning
-title_zh: 自适应定位知识否定以实现持续的大语言模型遗忘
+title_zh: 用于持续LLM遗忘的自适应知识否定定位
 authors: "Abudukelimu Wuerkaixi, Qizhou Wang, Sen Cui, Wutong Xu, Bo Han, Gang Niu, Masashi Sugiyama, Changshui Zhang"
 date: 2025-05-01
 pdf: "https://openreview.net/pdf?id=tcK4PV3VN4"
 tags: ["query:model-edit"]
 score: 8.0
-evidence: 大语言模型遗忘（unlearning）用于安全，删除有害知识
-tldr: 针对大语言模型持续遗忘中的效用退化问题，提出基于自适应定位的知识否定方法，通过选择性更新与目标知识相关的参数，在多次遗忘任务中保持模型性能，实验表明该方法有效平衡了遗忘效果与模型效用。
+evidence: 知识遗忘作为知识编辑的一种形式用于LLM安全
+tldr: 针对LLM持续遗忘中参数更新导致效用下降的问题，提出基于任务向量的自适应知识否定定位方法，通过选择性更新与目标知识相关的参数，在保持模型效用的同时有效移除有害内容，实验证明在持续遗忘场景下优于基线。
 source: ICML-2025-Accepted
 selection_source: conference_retrieval
 figures_json: "[{\"url\": \"assets/figures/openreview/openreview-icml-2025-tck4pv3vn4/fig-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 858, \"height\": 619, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-tck4pv3vn4/fig-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 837, \"height\": 500, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-tck4pv3vn4/fig-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 846, \"height\": 502, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-tck4pv3vn4/fig-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 856, \"height\": 613, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-tck4pv3vn4/fig-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 642, \"height\": 548, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-tck4pv3vn4/fig-006.webp\", \"caption\": \"\", \"page\": 0, \"index\": 6, \"width\": 871, \"height\": 703, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-tck4pv3vn4/fig-007.webp\", \"caption\": \"\", \"page\": 0, \"index\": 7, \"width\": 1240, \"height\": 714, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-tck4pv3vn4/fig-008.webp\", \"caption\": \"\", \"page\": 0, \"index\": 8, \"width\": 1584, \"height\": 685, \"label\": \"Figure\"}, {\"url\": \"assets/figures/openreview/openreview-icml-2025-tck4pv3vn4/fig-009.webp\", \"caption\": \"\", \"page\": 0, \"index\": 9, \"width\": 868, \"height\": 522, \"label\": \"Figure\"}]"
 tables_json: "[{\"url\": \"assets/tables/openreview/openreview-icml-2025-tck4pv3vn4/table-001.webp\", \"caption\": \"\", \"page\": 0, \"index\": 1, \"width\": 1768, \"height\": 537, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-tck4pv3vn4/table-002.webp\", \"caption\": \"\", \"page\": 0, \"index\": 2, \"width\": 836, \"height\": 389, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-tck4pv3vn4/table-003.webp\", \"caption\": \"\", \"page\": 0, \"index\": 3, \"width\": 717, \"height\": 316, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-tck4pv3vn4/table-004.webp\", \"caption\": \"\", \"page\": 0, \"index\": 4, \"width\": 1761, \"height\": 581, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-tck4pv3vn4/table-005.webp\", \"caption\": \"\", \"page\": 0, \"index\": 5, \"width\": 1759, \"height\": 506, \"label\": \"Table\"}, {\"url\": \"assets/tables/openreview/openreview-icml-2025-tck4pv3vn4/table-006.webp\", \"caption\": \"\", \"page\": 0, \"index\": 6, \"width\": 1232, \"height\": 114, \"label\": \"Table\"}]"
-motivation: 现有持续遗忘方法在多次任务后导致模型效用严重下降，亟需高效方法以最小化参数变化。
-method: 基于任务向量框架，自适应定位与需遗忘知识相关的参数，对其进行局部更新。
-result: 在多个持续遗忘场景下，该方法在保持高遗忘率的同时显著降低了效用损失。
-conclusion: 提出的自适应定位方法为持续遗忘提供了一种高效、实用的解决方案，有助于提升LLM安全性。
+motivation: 持续遗忘任务会导致模型效用急剧下降，需要最小化参数变化以保护其他知识。
+method: 基于任务向量框架，自适应定位与目标知识相关的参数，仅对这些参数进行选择性更新。
+result: 在持续遗忘场景下，该方法有效移除有害内容并保持模型效用。
+conclusion: 提出一种实用的持续遗忘方法，平衡了安全要求与模型性能。
 ---
 
 ## Abstract
