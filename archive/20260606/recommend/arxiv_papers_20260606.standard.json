@@ -1,0 +1,61 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-06T20:25:30.383053+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2606.05290v1",
+      "source": "arxiv",
+      "title": "Do Models Share Safety Representations? Cross-Model Steering for Safe Visual Generation",
+      "abstract": "Recent progress in generative modeling has made safety control a central challenge, yet existing approaches remain largely model-specific, requiring retraining or tailored interventions for each new architecture. In this work, we ask whether safety can be represented as a portable latent direction, learned once and reused across heterogeneous generators. We introduce the first framework for cross-model safety steering, in which a safety direction is estimated in a source LLM from paired safe-unsafe prompts, transported to a target generator through a lightweight alignment fitted on benign data alone, and applied at inference time. Crucially, our pipeline never accesses unsafe data on the target side, isolating whether safety can be transferred through shared representation geometry. Beyond a single global direction, we also identify a multi-vector extension that captures category-specific safety behaviors, enabling more selective control. We evaluate our approach in text-to-image and text-to-video generation across diverse source-target model pairs. Across models, transferred safety directions achieve ASR reduction and CLIP-Score/FID trade-offs comparable to directions learned natively on the target model using unsafe data, while requiring no target-side unsafe data. This indicates that safety improvements do not come at the expense of generation quality. Our results point to a modular view of safety: safety-relevant behavior is not purely model-local, but can be controlled through latent directions that persist across models. This suggests a new path toward lightweight, reusable safety mechanisms that do not require target-side unsafe data.",
+      "authors": [
+        "Tobia Poppi",
+        "Silvia Cappelletti",
+        "Sara Sarto",
+        "Florian Schiffers",
+        "Garin Kessler",
+        "Marcella Cornia",
+        "Lorenzo Baraldi",
+        "Rita Cucchiara"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.MM"
+      ],
+      "published": "2026-06-03T18:00:04+00:00",
+      "link": "https://arxiv.org/pdf/2606.05290v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "cross-model safety steering for safe visual generation",
+      "llm_evidence_cn": "跨模型安全引导用于安全视觉生成",
+      "llm_evidence": "跨模型安全引导用于安全视觉生成",
+      "canonical_evidence": "跨模型安全引导用于安全视觉生成",
+      "llm_tldr_en": "Introduces cross-model safety steering, learning a portable safety direction from LLM and transferring to target generators for inference-time safety control.",
+      "llm_tldr_cn": "该论文探索安全表示的可移植性，提出跨模型安全引导框架：在源LLM上估计安全方向，通过轻量级对齐迁移到目标生成器，实现推理时安全控制。该方法本质上是模型编辑（激活编辑）的一种跨模型变体，适用于安全对齐编辑需求。",
+      "llm_tldr": "该论文探索安全表示的可移植性，提出跨模型安全引导框架：在源LLM上估计安全方向，通过轻量级对齐迁移到目标生成器，实现推理时安全控制。该方法本质上是模型编辑（激活编辑）的一种跨模型变体，适用于安全对齐编辑需求。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

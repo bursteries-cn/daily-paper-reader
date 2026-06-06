@@ -6,35 +6,26 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-05
-- 运行时间：2026-06-05 21:50:43 UTC
+- 最新运行日期：2026-06-06
+- 运行时间：2026-06-06 20:26:46 UTC
 - 运行状态：成功
-- 本次总论文数：4
-- 精读区：4
-- 速读区：0
+- 本次总论文数：1
+- 精读区：0
+- 速读区：1
 
 ### 今日简报（AI）
-今日精读4篇论文，聚焦代码LLM的拒绝与能力分离（Abliteration，9.0分）及人格攻击渐进记忆注入越狱攻击（8.0分）两大方向。  
-最值得关注：代码模型“愿意但无力”的根源在于误拒，以及通过增量记忆注入绕过安全防线的新威胁。  
-建议读者优先了解Abliteration如何区分模型真实能力与防御性拒绝，并警惕人格攻击对LLM长期记忆的操控风险。
-- 详情：[/202606/05/README](/202606/05/README)
+1) 今日重点解读一篇关于跨模型安全表征的视觉生成研究，探索不同模型间安全导向的通用性。  
+2) 核心发现：安全表征可在不同扩散模型间迁移，通过“跨模型引导”提升生成内容安全性，无需单独训练。  
+3) 建议关注此方法的实际部署潜力，如将成熟模型的安全机制快速迁移至新模型，降低内容风险。
+- 详情：[/202606/06/README](/202606/06/README)
 
 ### 精读区论文标签
-1. [Willing but Unable: Separating Refusal from Capability in Code LLMs via Abliteration](/202606/05/2606.05396v1-willing-but-unable-separating-refusal-from-capability-in-code-llms-via-abliteration)  
-   标签：评分：9.0/10、query:model-edit
-   evidence：使用abliteration（低秩权重编辑）去除拒绝行为
-2. [Persona Attack: Incremental Memory Injection Jailbreak Attack against Large Language Models](/202606/05/2606.00150v1-persona-attack-incremental-memory-injection-jailbreak-attack-against-large-language-models)  
-   标签：评分：8.0/10、query:model-edit
-   evidence：通过记忆注入的越狱攻击
-3. [Dialectics of Alignment: Harnessing Unsafe Knowledge for Dynamic Safety Routing](/202606/05/2606.00686v1-dialectics-of-alignment-harnessing-unsafe-knowledge-for-dynamic-safety-routing)  
-   标签：评分：8.0/10、query:model-edit
-   evidence：通过隔离不安全知识实现动态安全路由
-4. [D-Judge: Disrupting Multi-Turn Jailbreaks using Semantics-Preserving Output Rewriting](/202606/05/2606.02640v1-d-judge-disrupting-multi-turn-jailbreaks-using-semantics-preserving-output-rewriting)  
-   标签：评分：8.0/10、query:model-edit
-   evidence：通过重写输出来防御多轮越狱攻击
+- 本次无精读推荐。
 
 ### 速读区论文标签
-- 本次无速读推荐。
+1. [Do Models Share Safety Representations? Cross-Model Steering for Safe Visual Generation](/202606/06/2606.05290v1-do-models-share-safety-representations-cross-model-steering-for-safe-visual-generation)  
+   标签：评分：7.0/10、query:model-edit
+   evidence：跨模型安全引导用于安全视觉生成
 
 
 <div class="dpr-home-promo-card">
