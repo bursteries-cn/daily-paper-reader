@@ -6,26 +6,28 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-06
-- 运行时间：2026-06-06 20:26:46 UTC
+- 最新运行日期：2026-06-07
+- 运行时间：2026-06-07 20:33:22 UTC
 - 运行状态：成功
-- 本次总论文数：1
-- 精读区：0
+- 本次总论文数：2
+- 精读区：1
 - 速读区：1
 
 ### 今日简报（AI）
-1) 今日重点解读一篇关于跨模型安全表征的视觉生成研究，探索不同模型间安全导向的通用性。  
-2) 核心发现：安全表征可在不同扩散模型间迁移，通过“跨模型引导”提升生成内容安全性，无需单独训练。  
-3) 建议关注此方法的实际部署潜力，如将成熟模型的安全机制快速迁移至新模型，降低内容风险。
-- 详情：[/202606/06/README](/202606/06/README)
+今天精读一篇关于自回归一致性损害安全对齐的论文，并速读一篇探讨安全意识增强反而导致后门攻击风险的安全悖论研究。  
+最值得关注的是：自回归一致性可能削弱安全对齐，而过度增强安全机制会滋生后门漏洞。  
+建议关注模型训练中安全性与一致性间的平衡，警惕“越安全反而越脆弱”的陷阱。
+- 详情：[/202606/07/README](/202606/07/README)
 
 ### 精读区论文标签
-- 本次无精读推荐。
+1. [When Autoregressive Consistency Hurts Safety Alignment](/202606/07/2606.04168v1-when-autoregressive-consistency-hurts-safety-alignment)  
+   标签：评分：8.0/10、query:model-edit
+   evidence：安全对齐编辑，越狱攻击预测
 
 ### 速读区论文标签
-1. [Do Models Share Safety Representations? Cross-Model Steering for Safe Visual Generation](/202606/06/2606.05290v1-do-models-share-safety-representations-cross-model-steering-for-safe-visual-generation)  
+1. [Safety Paradox: How Enhanced Safety Awareness Leaves LLMs Vulnerable to Posterior Attack](/202606/07/2606.05614v1-safety-paradox-how-enhanced-safety-awareness-leaves-llms-vulnerable-to-posterior-attack)  
    标签：评分：7.0/10、query:model-edit
-   evidence：跨模型安全引导用于安全视觉生成
+   evidence：越狱编辑，后验攻击
 
 
 <div class="dpr-home-promo-card">

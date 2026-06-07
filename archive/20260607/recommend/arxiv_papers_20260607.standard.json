@@ -1,0 +1,95 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-07T20:30:52.048044+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2606.04168v1",
+      "source": "arxiv",
+      "title": "When Autoregressive Consistency Hurts Safety Alignment",
+      "abstract": "Safety alignment in large language models (LLMs) is fragile in part because it is often shallow: fine-tuning mainly reshapes the model's behavior near the first few output tokens. We argue that this phenomenon can be understood through autoregressive consistency, the tendency of next-token prediction to preserve and extend the current response trajectory consistently. By analyzing the learning dynamics of safety alignment, we show that autoregressive consistency can concentrate alignment updates on early tokens, offering a mechanistic explanation for shallow safety alignment. The same mechanism also predicts a broader class of attacks on LLMs: attacks that induce harmful continuation states at arbitrary positions in the output trajectory. As a concrete example, we introduce random insertion attack, which inserts a short harmful span into an otherwise safe refusal trajectory and exploits autoregressive consistency to sustain the resulting harmful branch, thereby bypassing safety alignment. Notably, a short harmful span can redirect the generation to be harmful even after a long refusal prefix, highlighting autoregressive consistency as a potential broader failure mechanism. This suggests that safety alignment should also break harmful autoregressive consistency throughout the output trajectory. We therefore propose adversarial safety alignment, an initial framework based on worst-case harmful continuation states, and instantiate it with random worst-insertion training. Overall, our results suggest that autoregressive consistency should be treated as a central consideration in both safety alignment and attack design.",
+      "authors": [
+        "Bochen Lyu",
+        "Yiyang Jia",
+        "Xiaohao Cai",
+        "Zhanxing Zhu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CR"
+      ],
+      "published": "2026-06-02T19:32:23+00:00",
+      "link": "https://arxiv.org/pdf/2606.04168v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "safety alignment editing, jailbreak attack prediction",
+      "llm_evidence_cn": "安全对齐编辑，越狱攻击预测",
+      "llm_evidence": "安全对齐编辑，越狱攻击预测",
+      "canonical_evidence": "安全对齐编辑，越狱攻击预测",
+      "llm_tldr_en": "Reveals that autoregressive consistency causes shallow safety alignment, concentrating updates on early tokens, and predicts a broader class of attacks that induce harmful continuations at arbitrary positions.",
+      "llm_tldr_cn": "本文揭示自回归一致性机制导致大语言模型安全对齐浅层化，即微调主要改变早期token行为。该机制不仅解释了安全对齐的脆弱性，还预测了一类更广泛的攻击：在输出轨迹任意位置诱导有害延续状态的攻击。通过分析学习动力学，作者提出了具体攻击实例，实证了该理论。这项工作为理解安全对齐脆弱性提供了新视角，并警示当前对齐方法的不足。",
+      "llm_tldr": "本文揭示自回归一致性机制导致大语言模型安全对齐浅层化，即微调主要改变早期token行为。该机制不仅解释了安全对齐的脆弱性，还预测了一类更广泛的攻击：在输出轨迹任意位置诱导有害延续状态的攻击。通过分析学习动力学，作者提出了具体攻击实例，实证了该理论。这项工作为理解安全对齐脆弱性提供了新视角，并警示当前对齐方法的不足。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.05614v1",
+      "source": "arxiv",
+      "title": "Safety Paradox: How Enhanced Safety Awareness Leaves LLMs Vulnerable to Posterior Attack",
+      "abstract": "Large language models (LLMs) are rigorously aligned to refuse harmful requests, a process that inherently cultivates a latent capacity to evaluate and recognize unsafe content. In this work, we reveal that this advanced safety awareness inadvertently introduces a fatal vulnerability. We introduce Posterior Attack, a single-query jailbreak that bypasses guardrails by prompting the model to generate the exact harmful response its internal classifier would normally flag as unsafe. Through extensive empirical evaluation across 30 open-source LLMs (up to 35B parameters in size) and frontier models (e.g., GPT-5, Claude 4.6), we observe a striking phenomenon: models with superior safety-judgment capabilities are disproportionately more susceptible to this exploitation. To explain this, we formalize the Safety Paradox, analytically showing that monotonic improvements in safety alignment naturally amplify posterior vulnerability. Finally, we establish a causal link via reinforcement learning interventions, exemplifying that artificially degrading a model's safety judgment immunizes it against the attack, whereas enhancing judgment exacerbates the vulnerability. Our findings highlight potential flaws in current alignment paradigms, indicating that defense mechanisms may require further structural refinement.",
+      "authors": [
+        "Long P. Hoang",
+        "Hai V. Le",
+        "Shaoyang Xu",
+        "Wei Lu",
+        "Wenxuan Zhang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-04T02:36:41+00:00",
+      "link": "https://arxiv.org/pdf/2606.05614v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "jailbreak editing, posterior attack",
+      "llm_evidence_cn": "越狱编辑，后验攻击",
+      "llm_evidence": "越狱编辑，后验攻击",
+      "canonical_evidence": "越狱编辑，后验攻击",
+      "llm_tldr_en": "Introduces Posterior Attack, a single-query jailbreak that exploits LLMs' safety awareness to generate harmful responses, showing that better safety judgment leads to higher vulnerability.",
+      "llm_tldr_cn": "本文发现安全对齐中培养的安全意识反而引入致命脆弱性，提出后验攻击：只需一次查询，通过提示模型生成其内部分类器标记为不安全的回应。在30个开源和前沿模型上实验，显示安全判断能力越强的模型越易受攻击。这一发现揭示了安全对齐的悖论，提醒设计更鲁棒的对齐方法时需谨慎。",
+      "llm_tldr": "本文发现安全对齐中培养的安全意识反而引入致命脆弱性，提出后验攻击：只需一次查询，通过提示模型生成其内部分类器标记为不安全的回应。在30个开源和前沿模型上实验，显示安全判断能力越强的模型越易受攻击。这一发现揭示了安全对齐的悖论，提醒设计更鲁棒的对齐方法时需谨慎。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
