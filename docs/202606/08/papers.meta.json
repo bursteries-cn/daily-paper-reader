@@ -1,0 +1,54 @@
+{
+  "label": "2026-06-08",
+  "date": "2026-06-08",
+  "generated_at": "2026-06-08T20:57:43",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202606/08/2606.06519v1-safegene-reusable-adapters-for-transferable-safety-alignment",
+      "section": "deep",
+      "title_en": "SafeGene: Reusable Adapters for Transferable Safety Alignment",
+      "authors": "Yanghan Wang, Zhiqiang Kou, Fu Feng, Jing Wang, Xin Geng",
+      "date": "2026-06-02",
+      "pdf": "https://arxiv.org/pdf/2606.06519v1",
+      "score": "9.0",
+      "evidence": "可重用安全适配器用于对齐编辑",
+      "tldr": "开源大模型微调为定制助手时，下游任务微调易导致安全对齐退化。SafeGene将安全能力解耦为可重用的适配器模块，从对齐模型与退化模型的差异中提取安全表示，通过数据感知的层选择优化为任务可迁移向量，并在下游模型中经少量样本逐层系数重新校准实现跨任务复用。实验表明，SafeGene在多个模型系列和任务上显著降低有害响应率，同时保持下游性能，在安全-效用权衡上优于现有方法，为模型迭代中的安全对齐恢复提供了可迁移的解决方案。",
+      "tags": "query:model-edit",
+      "abstract_en": "Open-weight LLMs are increasingly fine-tuned into customized assistants, but downstream fine-tuning can weaken safety alignment and make models more vulnerable to malicious prompts, even when the training data is not intentionally harmful. This creates a recurring safety recovery problem as target models are repeatedly updated with new task data or user interactions. We propose SafeGene, a reusable safety-adapter module designed for cross-task reuse within each architecture-compatible model family. Rather than treating safety recovery as a model-specific repair step, SafeGene treats safety capability as an independent, reusable adapter representation decoupled from task-specific updates. This representation is obtained from aligned--degraded model discrepancies, refined into task-transferable safety vectors through data-aware layer selection, and expressed in each downstream task-adapted model via few-shot layer-wise coefficient recalibration. Experiments across multiple model families, downstream tasks, and safety judges show that SafeGene-enhanced models reduce harmful response rates while maintaining downstream performance, outperforming representative safe adaptation methods in safety--utility trade-off.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/08/2606.04160v1-expert-aware-refusal-steering",
+      "section": "quick",
+      "title_en": "Expert-Aware Refusal Steering",
+      "authors": "Anna C. Marbut, Daniel R. Olson, Travis J. Wheeler",
+      "date": "2026-06-02",
+      "pdf": "https://arxiv.org/pdf/2606.04160v1",
+      "score": "6.0",
+      "evidence": "在混合专家大模型中通过转向向量操控拒绝行为，探索安全对齐编辑",
+      "tldr": "安全对齐的指令微调大语言模型依赖于可靠地拒绝有害请求。现有转向向量方法在稠密模型上有效，但MoE架构的复杂路由可能影响转向。本文首次将拒绝转向应用于MoE模型，发现路由模式不抑制转向，并提出两种专家感知转向方法，利用单个专家输出即可有效抑制拒绝行为，表明注意力机制在MoE拒绝行为中起重要作用。",
+      "tags": "query:model-edit",
+      "abstract_en": "Safety alignment in instruction-tuned large language models (LLMs) depends on a model's ability to reliably refuse to respond to harmful or disallowed requests. Recent work has shown that a steering vector can be applied to a dense LLM during inference to effectively suppress refusal behavior, inducing response to harmful requests. We extend this refusal steering method to three open-source Mixture-of-Experts (MoE) LLMs and find that steering performance is uninhibited by the complex routing patterns inherent to the MoE architecture. We then propose two expert-aware refusal steering methods that leverage refusal-specific expert routing patterns and expert-specific steering directions to suppress normal refusal behavior. We find that refusal behavior can be effectively steered based on the output of a single expert. Our results show that refusal signals captured by steering methods differ from expert routing behavior, suggesting a substantial role for attention in MoE refusal behavior.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/08/2606.04778v1-inference-time-vulnerability-beyond-shallow-safety-alignment-along-generation-trajectories",
+      "section": "quick",
+      "title_en": "Inference-Time Vulnerability Beyond Shallow Safety: Alignment Along Generation Trajectories",
+      "authors": "Kyungmin Park, Taesup Kim",
+      "date": "2026-06-03",
+      "pdf": "https://arxiv.org/pdf/2606.04778v1",
+      "score": "6.0",
+      "evidence": "在生成轨迹上对齐以提升安全性",
+      "tldr": "安全对齐的大语言模型在推理时易受干扰，浅层安全仅关注早期token，但研究发现短token注入在任何生成步骤都能改变安全行为，且隐藏状态中的拒绝方向不能预测鲁棒性。为此，提出在生成轨迹上直接对齐模型，通过构建中序列扰动进行训练，显著提升了对中序列注入的鲁棒性并泛化到早期攻击。结果表明，鲁棒安全对齐需要训练生成过程本身，而不仅限于输出。",
+      "tags": "query:model-edit",
+      "abstract_en": "Safety-aligned Large Language Models (LLMs) remain vulnerable to interventions during inference that redirect generation toward harmful outputs. Recent work attributes this to shallow safety, where alignment concentrates in the first few output tokens. We show that shallow safety is a special case of a broader inference-time vulnerability, in which short token injections at any generation step can substantially alter subsequent safety behavior. We also find that a model's alignment with refusal directions in its hidden states does not predict its robustness to such injection, revealing that internal state alone does not determine generation behavior under perturbation. To address this, we align models directly on generation trajectories constructed by simulating mid-sequence perturbation, and show that this improves robustness to mid-sequence injection and generalizes to attacks that exploit early-token generation. Our work argues that robust safety alignment requires training on the generation process itself, not only its outputs.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

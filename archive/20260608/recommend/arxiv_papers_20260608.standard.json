@@ -1,0 +1,133 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-08T20:54:45.780335+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2606.06519v1",
+      "source": "arxiv",
+      "title": "SafeGene: Reusable Adapters for Transferable Safety Alignment",
+      "abstract": "Open-weight LLMs are increasingly fine-tuned into customized assistants, but downstream fine-tuning can weaken safety alignment and make models more vulnerable to malicious prompts, even when the training data is not intentionally harmful. This creates a recurring safety recovery problem as target models are repeatedly updated with new task data or user interactions. We propose SafeGene, a reusable safety-adapter module designed for cross-task reuse within each architecture-compatible model family. Rather than treating safety recovery as a model-specific repair step, SafeGene treats safety capability as an independent, reusable adapter representation decoupled from task-specific updates. This representation is obtained from aligned--degraded model discrepancies, refined into task-transferable safety vectors through data-aware layer selection, and expressed in each downstream task-adapted model via few-shot layer-wise coefficient recalibration. Experiments across multiple model families, downstream tasks, and safety judges show that SafeGene-enhanced models reduce harmful response rates while maintaining downstream performance, outperforming representative safe adaptation methods in safety--utility trade-off.",
+      "authors": [
+        "Yanghan Wang",
+        "Zhiqiang Kou",
+        "Fu Feng",
+        "Jing Wang",
+        "Xin Geng"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-06-02T14:51:14+00:00",
+      "link": "https://arxiv.org/pdf/2606.06519v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "reusable safety adapter for alignment editing",
+      "llm_evidence_cn": "可重用安全适配器用于对齐编辑",
+      "llm_evidence": "可重用安全适配器用于对齐编辑",
+      "canonical_evidence": "可重用安全适配器用于对齐编辑",
+      "llm_tldr_en": "Proposes SafeGene, a reusable safety-adapter module that decouples safety capability from task-specific updates, enabling cross-task safety recovery without model-specific repair.",
+      "llm_tldr_cn": "针对下游微调削弱安全对齐的问题，提出SafeGene可重用安全适配器模块，将安全能力与任务更新解耦。通过从对齐与退化模型的差异中学习，适配器可跨任务复用，避免每次更新后重新修复安全。实验验证了其有效性和迁移性，为安全对齐编辑提供了轻量级方案。",
+      "llm_tldr": "针对下游微调削弱安全对齐的问题，提出SafeGene可重用安全适配器模块，将安全能力与任务更新解耦。通过从对齐与退化模型的差异中学习，适配器可跨任务复用，避免每次更新后重新修复安全。实验验证了其有效性和迁移性，为安全对齐编辑提供了轻量级方案。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.04160v1",
+      "source": "arxiv",
+      "title": "Expert-Aware Refusal Steering",
+      "abstract": "Safety alignment in instruction-tuned large language models (LLMs) depends on a model's ability to reliably refuse to respond to harmful or disallowed requests. Recent work has shown that a steering vector can be applied to a dense LLM during inference to effectively suppress refusal behavior, inducing response to harmful requests. We extend this refusal steering method to three open-source Mixture-of-Experts (MoE) LLMs and find that steering performance is uninhibited by the complex routing patterns inherent to the MoE architecture. We then propose two expert-aware refusal steering methods that leverage refusal-specific expert routing patterns and expert-specific steering directions to suppress normal refusal behavior. We find that refusal behavior can be effectively steered based on the output of a single expert. Our results show that refusal signals captured by steering methods differ from expert routing behavior, suggesting a substantial role for attention in MoE refusal behavior.",
+      "authors": [
+        "Anna C. Marbut",
+        "Daniel R. Olson",
+        "Travis J. Wheeler"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.LG"
+      ],
+      "published": "2026-06-02T19:23:46+00:00",
+      "link": "https://arxiv.org/pdf/2606.04160v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "steering refusal behavior in MoE LLMs for safety alignment editing",
+      "llm_evidence_cn": "在混合专家大模型中通过转向向量操控拒绝行为，探索安全对齐编辑",
+      "llm_evidence": "在混合专家大模型中通过转向向量操控拒绝行为，探索安全对齐编辑",
+      "canonical_evidence": "在混合专家大模型中通过转向向量操控拒绝行为，探索安全对齐编辑",
+      "llm_tldr_en": "Expert-Aware Refusal Steering extends refusal steering to MoE LLMs, showing that steering effectively suppresses refusal via expert-specific directions, revealing safety alignment vulnerabilities.",
+      "llm_tldr_cn": "安全对齐依赖模型可靠拒绝有害请求，现有拒绝转向方法仅用于密集模型。本文将其扩展到混合专家（MoE）架构，发现转向效果不受路由机制影响。进一步提出两种专家感知的拒绝转向方法，利用拒绝相关专家路由模式和专家特定转向方向来抑制正常拒绝行为。实验证明MoE模型同样易受转向攻击，为安全对齐编辑提供了新视角。",
+      "llm_tldr": "安全对齐依赖模型可靠拒绝有害请求，现有拒绝转向方法仅用于密集模型。本文将其扩展到混合专家（MoE）架构，发现转向效果不受路由机制影响。进一步提出两种专家感知的拒绝转向方法，利用拒绝相关专家路由模式和专家特定转向方向来抑制正常拒绝行为。实验证明MoE模型同样易受转向攻击，为安全对齐编辑提供了新视角。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.04778v1",
+      "source": "arxiv",
+      "title": "Inference-Time Vulnerability Beyond Shallow Safety: Alignment Along Generation Trajectories",
+      "abstract": "Safety-aligned Large Language Models (LLMs) remain vulnerable to interventions during inference that redirect generation toward harmful outputs. Recent work attributes this to shallow safety, where alignment concentrates in the first few output tokens. We show that shallow safety is a special case of a broader inference-time vulnerability, in which short token injections at any generation step can substantially alter subsequent safety behavior. We also find that a model's alignment with refusal directions in its hidden states does not predict its robustness to such injection, revealing that internal state alone does not determine generation behavior under perturbation. To address this, we align models directly on generation trajectories constructed by simulating mid-sequence perturbation, and show that this improves robustness to mid-sequence injection and generalizes to attacks that exploit early-token generation. Our work argues that robust safety alignment requires training on the generation process itself, not only its outputs.",
+      "authors": [
+        "Kyungmin Park",
+        "Taesup Kim"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.LG"
+      ],
+      "published": "2026-06-03T12:01:27+00:00",
+      "link": "https://arxiv.org/pdf/2606.04778v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "alignment on generation trajectories to improve safety",
+      "llm_evidence_cn": "在生成轨迹上对齐以提升安全性",
+      "llm_evidence": "在生成轨迹上对齐以提升安全性",
+      "canonical_evidence": "在生成轨迹上对齐以提升安全性",
+      "llm_tldr_en": "This paper reveals that shallow safety is a special case of broader inference-time vulnerability and proposes aligning LLMs directly on generation trajectories to improve robustness against token injections.",
+      "llm_tldr_cn": "本文发现浅层安全是更广泛推理时漏洞的特例，短令牌注入可在任意生成步骤改变模型安全行为。为此，作者直接在生成轨迹上对齐模型，以增强对注入攻击的鲁棒性。实验表明该方法有效提升了模型在推理时的安全性，且不依赖内部状态预测。",
+      "llm_tldr": "本文发现浅层安全是更广泛推理时漏洞的特例，短令牌注入可在任意生成步骤改变模型安全行为。为此，作者直接在生成轨迹上对齐模型，以增强对注入攻击的鲁棒性。实验表明该方法有效提升了模型在推理时的安全性，且不依赖内部状态预测。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "Find papers about model editing for safety in large language models",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
