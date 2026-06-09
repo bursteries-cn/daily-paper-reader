@@ -1,0 +1,226 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-09T21:52:46.264809+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [
+    {
+      "id": "2606.07963v1",
+      "source": "arxiv",
+      "title": "Shared Latent Structures Enable Unified Backdoor Detection and Mitigation in LLMs",
+      "abstract": "Backdoor attacks in large language models (LLMs) are often treated as isolated trigger-response failures, motivating defenses tailored to specific triggers or behaviors. We show this view is incomplete. Across diverse backdoor behaviors, we identify a shared latent mechanism that can be detected, causally controlled, and suppressed. Using sparse autoencoders (SAEs) on residual-stream activations, we find a small set of latent features consistently activated across jailbreaking, refusal manipulation, password-locking, bias induction, sentiment misclassification, and country-conditioned harmful advice. These features generalize across Qwen3, Gemma~3, and Llama~3.1 models from 4B to 32B parameters, and across both fine-tuning and weight-editing attacks. Through bidirectional activation steering, we show these features are causal: suppressing them reduces attack success, while amplifying them induces target behaviors on clean prompts. We further train lightweight SAE-feature classifiers that generalize zero-shot to unseen backdoors and outperform residual-stream and weight-diffing baselines. Finally, we introduce Concept Ablation Fine-Tuning (CAFT), which suppresses backdoor formation by ablating the shared latent subspace during training. Together, our results suggest that many backdoors rely on a transferable latent mechanism, enabling unified detection and mitigation.",
+      "authors": [
+        "Omar Mahmoud",
+        "Aly M. Kassem",
+        "Thommen George Karimpanal",
+        "Buddhika Laknath Semage",
+        "Negar Rostamzadeh",
+        "Golnoosh Farnadi",
+        "Santu Rana"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-06-06T03:41:44+00:00",
+      "link": "https://arxiv.org/pdf/2606.07963v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "shared latent features for backdoor detection and weight-editing",
+      "llm_evidence_cn": "共享隐特征用于后门检测与权值编辑",
+      "llm_evidence": "共享隐特征用于后门检测与权值编辑",
+      "canonical_evidence": "共享隐特征用于后门检测与权值编辑",
+      "llm_tldr_en": "Discovers shared latent features across diverse backdoor behaviors in LLMs, enabling unified detection and mitigation via sparse autoencoders.",
+      "llm_tldr_cn": "后门攻击通常被孤立处理。本文发现不同后门行为共享隐层机制，通过稀疏自编码器识别一组跨任务、跨模型的隐特征。这些特征可被因果控制和抑制，用于统一检测和缓解后门，且兼容权值编辑。成果直接支持模型编辑安全。",
+      "llm_tldr": "后门攻击通常被孤立处理。本文发现不同后门行为共享隐层机制，通过稀疏自编码器识别一组跨任务、跨模型的隐特征。这些特征可被因果控制和抑制，用于统一检测和缓解后门，且兼容权值编辑。成果直接支持模型编辑安全。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.09033v1",
+      "source": "arxiv",
+      "title": "CRANE: Knowledge Editing for Reasoning MLLMs",
+      "abstract": "The emergence of reasoning multimodal large language models (MLLMs), which generate explicit chain-of-thought (CoT) reasoning before producing answers, has introduced a new challenge for knowledge editing: methods that appear successful under traditional metrics (teacher-forcing accuracy up to 100%) can fail severely when the model's reasoning process is examined (Grounded Success as low as 0%). We identify three failure modes: (1) Structural Collapse, where weight-modifying methods destroy the CoT format; (2) Cognitive Dissonance, where the model's reasoning chain actively rejects the injected edit fact based on visual evidence; and (3) Shallow Internalization, where methods succeed on exact queries but fail on rephrase or multi-hop variants. On reasoning MLLMs, these modes interact: methods that generalize (FT, LoRA) trigger format collapse, while methods without deep modification cannot generalize. To expose these failures, we propose a CoT-aware evaluation protocol and construct ReasonEdit-Bench, with conflict stratification, multi-level probes, and multi-hop portability tests.   We propose CRANE, a retrieval-augmented framework that requires no per-edit parameter modification. CRANE combines a modality-aware dual-library retrieval system with a two-phase training strategy: Supervised Fine-Tuning (SFT) for structural initialization, followed by GRPO with a Cognitive Routing Reward that trains the model to arbitrate between visual priors and injected edit facts. On ReasonEdit-Bench, CRANE achieves 96.9% Grounded Success on conflict scenarios and 96.9% intermediate entity usage in multi-hop chains, with 97.6% text-locality and 68.1% image-locality Edit Independence. On the out-of-distribution MMEVOKE benchmark, CRANE reaches 87.0% under gold retrieval.",
+      "authors": [
+        "Han Huang",
+        "Hao Wang",
+        "Mengqi Zhang",
+        "Shu Wu",
+        "Qiang Liu",
+        "Liang Wang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.CL"
+      ],
+      "published": "2026-06-08T05:01:11+00:00",
+      "link": "https://arxiv.org/pdf/2606.09033v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "knowledge editing for reasoning MLLMs, failure modes",
+      "llm_evidence_cn": "为推理多模态大模型进行知识编辑，发现失败模式",
+      "llm_evidence": "为推理多模态大模型进行知识编辑，发现失败模式",
+      "canonical_evidence": "为推理多模态大模型进行知识编辑，发现失败模式",
+      "llm_tldr_en": "Identifies three failure modes of knowledge editing on reasoning MLLMs: structural collapse, cognitive dissonance, shallow internalization, and proposes CRANE to address them.",
+      "llm_tldr_cn": "推理多模态大模型的知识编辑面临新挑战：传统指标成功但实际推理链失败。本文识别出三种失败模式：结构坍塌、认知失调、浅层内化。提出CRANE方法，通过保持推理链完整性和视觉一致性，显著提升编辑在推理任务中的成功率。",
+      "llm_tldr": "推理多模态大模型的知识编辑面临新挑战：传统指标成功但实际推理链失败。本文识别出三种失败模式：结构坍塌、认知失调、浅层内化。提出CRANE方法，通过保持推理链完整性和视觉一致性，显著提升编辑在推理任务中的成功率。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.08044v1",
+      "source": "arxiv",
+      "title": "When Behavioral Safety Evaluation Fails: A Representation-Level Perspective",
+      "abstract": "Large Language Model (LLM) safety has often been evaluated at the behavior level, which provides limited evidence of internal robustness, as these evaluations target outputs rather than representation-level vulnerability under intervention. We formalize this discrepancy as the audit gap: the difference between behavioral safety and robustness under intervention. To study this gap, we construct dissociated models that preserve safe outward behavior while remaining vulnerable in the latent space. We introduce an intervention-based evaluation framework to test model robustness through soft interventions in parameter and latent spaces, including harmful fine-tuning and layer-wise latent perturbations. To formalize the evaluation, we propose the Latent Vulnerability Score (LVS) to measure how easily harmful behavior can be elicited by bounded latent perturbations. Using this evaluation framework, we show that behavioral safety metrics are insufficient measures of representation-level robustness across multiple safely and unsafely aligned state-of-the-art models. Notably, dissociated models show substantially elevated LVSs despite comparable refusal behavior under harmful intervention, with intermediate representations being the most sensitive to intervention. Our results suggest that behavioral safety evaluation alone provides an incomplete picture of model robustness, motivating representation-aware audits of latent vulnerability and observable behavior.",
+      "authors": [
+        "Enyi Jiang",
+        "Anders Gjølbye",
+        "Yibo Jacky Zhang",
+        "Sanmi Koyejo"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-06-06T08:10:56+00:00",
+      "link": "https://arxiv.org/pdf/2606.08044v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "intervention-based evaluation framework tests model robustness through soft interventions",
+      "llm_evidence_cn": "基于干预的评估框架，通过软干预测试模型鲁棒性",
+      "llm_evidence": "基于干预的评估框架，通过软干预测试模型鲁棒性",
+      "canonical_evidence": "基于干预的评估框架，通过软干预测试模型鲁棒性",
+      "llm_tldr_en": "Identifies audit gap between behavioral safety and intervention robustness; proposes dissociated models and intervention-based evaluation for LLM safety.",
+      "llm_tldr_cn": "论文指出LLM行为安全评估无法反映表示层面的脆弱性，提出“审计差距”概念。通过构建表里不一的模型，引入基于干预的评估框架，在参数和潜在空间进行软干预（如有害微调、层扰动），从而揭示安全对齐的不健壮性。该方法为模型编辑安全评估提供了新视角。",
+      "llm_tldr": "论文指出LLM行为安全评估无法反映表示层面的脆弱性，提出“审计差距”概念。通过构建表里不一的模型，引入基于干预的评估框架，在参数和潜在空间进行软干预（如有害微调、层扰动），从而揭示安全对齐的不健壮性。该方法为模型编辑安全评估提供了新视角。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.07678v1",
+      "source": "arxiv",
+      "title": "DOG-DPO:Dynamic Optimization in Geometry for Safety Alignment",
+      "abstract": "Safety alignment for large language models relies on preference data, but current pipelines often train on large, redundant datasets. Existing data selection methods typically score each preference pair independently, collapsing directional preference information into scalar quality or diversity scores. This sample-centric view is especially limiting in multi-dataset settings, where shared safety directions coexist with dataset-specific residual risks. We propose DOG-DPO, a training-free data selection framework that treats preference pairs as structured geometric signals. DOG-DPO first represents each preference pair as a direction in model representation space. It then decomposes multi-dataset preference geometry into a global anchor subspace and dataset-specific residual subspaces. Finally, it selects subsets by maximizing diversity-based coverage, encouraging broad, non-redundant coverage of alignment directions before DPO training. Across six safety benchmarks and two model backbones, DOG-DPO achieves a strong utility-robustness trade-off using only 11% of the preference pairs. It recovers most of the safety gains of full-data training while remaining entirely teacher-free, training-free, and substantially faster than representative selection baselines.",
+      "authors": [
+        "Yi Nian",
+        "Tiankai Yang",
+        "Yudi Zhang",
+        "Qi Pan",
+        "Zelong Xu",
+        "Shenzhe Zhu",
+        "Qingqing Luan",
+        "Yue Huang",
+        "Xiangliang Zhang",
+        "Yue Zhao"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-06-04T20:23:23+00:00",
+      "link": "https://arxiv.org/pdf/2606.07678v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "training-free data selection for safety alignment geometry",
+      "llm_evidence_cn": "安全对齐的无训练数据选择，基于几何优化",
+      "llm_evidence": "安全对齐的无训练数据选择，基于几何优化",
+      "canonical_evidence": "安全对齐的无训练数据选择，基于几何优化",
+      "llm_tldr_en": "Proposes DOG-DPO, a training-free data selection framework for safety alignment that treats preference pairs as geometric directions and decomposes multi-dataset geometry.",
+      "llm_tldr_cn": "安全对齐依赖偏好数据，但现有数据选择方法忽略方向信息。提出DOG-DPO，将偏好对表示为模型表示空间中的方向，分解为全局锚点子空间和数据集特定残差，无需训练即可选择代表性数据。实验证明该框架能有效提升对齐效率，减少冗余数据。",
+      "llm_tldr": "安全对齐依赖偏好数据，但现有数据选择方法忽略方向信息。提出DOG-DPO，将偏好对表示为模型表示空间中的方向，分解为全局锚点子空间和数据集特定残差，无需训练即可选择代表性数据。实验证明该框架能有效提升对齐效率，减少冗余数据。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.07970v1",
+      "source": "arxiv",
+      "title": "Defending Against Malicious Finetuning by Scaling Train-time Adversarial Attacks",
+      "abstract": "Current open-weight large language models (LLMs) are prone to malicious finetuning attacks, which could compromise the safety alignment of LLMs with only a few steps of supervised finetuning (SFT) on poisoned datasets. Existing alignment-stage defenses are primarily designed to defend against attacks that use parameter-efficient finetuning methods. However, they fail to defend against stronger attacks that use full-parameter finetuning. In this paper, we propose Patcher, a method inspired by adversarial training and bi-level optimization, to combat such attacks. Patcher strengthens the simulated attack by scaling up the optimization steps in the adversarial loop, thus forcing the defender to find model parameters that are insensitive to stronger attacks. Furthermore, we propose an efficient parallel algorithm to implement Patcher, decreasing the wall-clock time of training while preserving Patcher's performance. Extensive experiments show that Patcher substantially improves the model's robustness compared to vanilla SFT alignment, and transfers to diverse attack scenarios and model sizes. Code is available at https://github.com/haomingwen/patcher.",
+      "authors": [
+        "Haoming Wen",
+        "Shi Chen",
+        "Qingyu Shi",
+        "Siyuan Liu",
+        "Minrui Luo",
+        "Jingzhao Zhang",
+        "Tianxing He"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-06-06T04:04:57+00:00",
+      "link": "https://arxiv.org/pdf/2606.07970v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "defense against malicious finetuning via adversarial training",
+      "llm_evidence_cn": "通过对抗训练防御恶意微调",
+      "llm_evidence": "通过对抗训练防御恶意微调",
+      "canonical_evidence": "通过对抗训练防御恶意微调",
+      "llm_tldr_en": "Patcher defends LLMs against malicious finetuning by scaling adversarial optimization steps, making model parameters insensitive to attacks.",
+      "llm_tldr_cn": "针对恶意微调攻击（全参数微调），提出Patcher方法，通过在对抗循环中扩展优化步数来增强模拟攻击，迫使防御者找到对攻击不敏感的模型参数。该方法受对抗训练和双层优化启发，实验证明能有效抵御强攻击，为模型编辑安全提供训练时防御思路。",
+      "llm_tldr": "针对恶意微调攻击（全参数微调），提出Patcher方法，通过在对抗循环中扩展优化步数来增强模拟攻击，迫使防御者找到对攻击不敏感的模型参数。该方法受对抗训练和双层优化启发，实验证明能有效抵御强攻击，为模型编辑安全提供训练时防御思路。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "How can model editing prevent attacks on large language models",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
