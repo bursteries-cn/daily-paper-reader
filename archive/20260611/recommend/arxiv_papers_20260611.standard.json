@@ -1,0 +1,178 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-11T21:37:53.361626+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2606.11817v1",
+      "source": "arxiv",
+      "title": "Grammar-Constrained Decoding Can Jailbreak LLMs into Generating Malicious Code",
+      "abstract": "Large Language Models (LLMs) are increasingly used for code generation, raising concerns that they may be misused to produce malicious code. Meanwhile, Grammar-Constrained Decoding (GCD) has been widely adopted to improve the reliability of LLM-generated code by enforcing syntactic validity. In this paper, we reveal a counterintuitive risk: this reliability-oriented technique can itself become an attack surface. We uncover a new jailbreak attack, termed CodeSpear, that exploits GCD to induce LLMs into generating malicious code. Our experiments show that simply applying a benign code grammar constraint can effectively jailbreak LLMs.   To address this vulnerability, we propose CodeShield, a safety alignment approach that robustly preserves safe behavior even under attacker-controlled grammar constraints. CodeShield aligns the model in the code modality by teaching it to generate honeypot code under GCD. Such code is semantically harmless, so it does not implement the malicious request, and structurally diverse, so it is difficult to suppress through grammar tightening. At the same time, CodeShield still preserves natural-language refusals when natural language is available. Experiments on 10 popular LLMs across 4 benchmarks show that CodeSpear outperforms representative jailbreak baselines and increases the attack success rate by more than 30 percentage points on average. CodeShield also restores safety under CodeSpear while preserving benign utility. Our findings reveal a fundamental risk of GCD and call for greater attention to its potential security implications.",
+      "authors": [
+        "Yitong Zhang",
+        "Shiteng Lu",
+        "Jia Li"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.CL",
+        "cs.SE"
+      ],
+      "published": "2026-06-10T08:50:59+00:00",
+      "link": "https://arxiv.org/pdf/2606.11817v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "jailbreak attack via GCD and safety alignment defense",
+      "llm_evidence_cn": "通过语法约束解码的越狱攻击及其安全对齐防御",
+      "llm_evidence": "通过语法约束解码的越狱攻击及其安全对齐防御",
+      "canonical_evidence": "通过语法约束解码的越狱攻击及其安全对齐防御",
+      "llm_tldr_en": "Reveals that grammar-constrained decoding can be exploited as a jailbreak attack (CodeSpear) on LLMs for malicious code generation, and proposes CodeShield, a safety alignment approach to mitigate the vulnerability.",
+      "llm_tldr_cn": "本文揭示了一个反直觉的风险：原本用于提升代码生成可靠性的语法约束解码（GCD）可被利用为越狱攻击（CodeSpear），诱导大语言模型生成恶意代码。实验表明，简单的良性代码语法约束即可有效越狱。为应对此漏洞，提出了CodeShield安全对齐方法，该鲁棒的防御策略可有效保护模型。",
+      "llm_tldr": "本文揭示了一个反直觉的风险：原本用于提升代码生成可靠性的语法约束解码（GCD）可被利用为越狱攻击（CodeSpear），诱导大语言模型生成恶意代码。实验表明，简单的良性代码语法约束即可有效越狱。为应对此漏洞，提出了CodeShield安全对齐方法，该鲁棒的防御策略可有效保护模型。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.12342v1",
+      "source": "arxiv",
+      "title": "ALIGNBEAM : Inference-Time Alignment Transfer via Cross-Vocabulary Logit Mixing",
+      "abstract": "Domain fine-tuning degrades the safety of large language models: fine-tuned specialists readily comply with harmful prompts framed in domain language. Existing inference-time defenses that mix logits from a safe anchor model require both models to share a vocabulary, which rules them out for the cross-family specialists where safety is most degraded. We present ALIGNBEAM, a training-free method that lifts this restriction by translating anchor logits into the target model's vocabulary token-by-token at each decoding step; a small LLM judge then selects the safest among K candidate continuations. No weights are changed, and the safety-utility trade-off can be tuned at deployment without retraining. Across both cross-vocabulary and same-vocabulary evaluation pairs, ALIGNBEAM substantially raises refusal on adversarial benchmarks while keeping task accuracy and inference overhead within practical bounds. The results show that safety alignment can be transferred between model families at inference time, without touching either model's weights.",
+      "authors": [
+        "Chirag Chawla",
+        "Pratinav Seth",
+        "Vinay Kumar Sankarapu"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI",
+        "cs.ET",
+        "cs.LG"
+      ],
+      "published": "2026-06-10T17:15:28+00:00",
+      "link": "https://arxiv.org/pdf/2606.12342v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "inference-time alignment transfer via logit mixing for safety, direct method for safety alignment editing",
+      "llm_evidence_cn": "通过logit混合实现推理时对齐迁移以保持安全，直接对应安全对齐编辑需求",
+      "llm_evidence": "通过logit混合实现推理时对齐迁移以保持安全，直接对应安全对齐编辑需求",
+      "canonical_evidence": "通过logit混合实现推理时对齐迁移以保持安全，直接对应安全对齐编辑需求",
+      "llm_tldr_en": "ALIGNBEAM transfers safety from an anchor model to a target model at inference time without retraining, handling cross-vocabulary scenarios.",
+      "llm_tldr_cn": "该论文针对领域微调导致大模型安全问题，提出ALIGNBEAM方法，在推理时通过跨词汇logit混合将安全锚模型的对齐迁移至目标模型，无需重新训练。实验表明，该方法在跨词汇和同词汇场景下均能有效恢复安全性，且不牺牲实用性。这是一种推理时模型编辑技术，直接服务于安全对齐编辑需求。",
+      "llm_tldr": "该论文针对领域微调导致大模型安全问题，提出ALIGNBEAM方法，在推理时通过跨词汇logit混合将安全锚模型的对齐迁移至目标模型，无需重新训练。实验表明，该方法在跨词汇和同词汇场景下均能有效恢复安全性，且不牺牲实用性。这是一种推理时模型编辑技术，直接服务于安全对齐编辑需求。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.11648v1",
+      "source": "arxiv",
+      "title": "Dummy Backdoor as a Defense: Removing Unknown Backdoors via Shared Internal Mechanisms for Generative LLMs",
+      "abstract": "Backdoor attacks pose a serious threat to the safety and reliability of Large Language Models (LLMs), as they cause models to behave normally on clean inputs while producing attacker-specified responses when hidden triggers are present. Removing such unknown backdoors is particularly challenging when the defender does not know the backdoor attack types or the internal mechanisms formed through backdoor training. In this work, we propose a simple but effective backdoor removal method based on shared internal mechanisms across different backdoors. First, we show that different backdoors with the same task (attack objective) induce similar trigger-activated changes in the internal activations. Motivated by this observation, our method intentionally embeds a backdoor with a known trigger (\\emph{dummy backdoor}) and then removes it through further fine-tuning on dummy-triggered inputs paired with clean responses. Since the dummy backdoor and the unknown backdoor can rely on shared internal mechanisms, removing the dummy backdoor also reduces the effect of the unknown backdoor. We evaluate our method on three backdoor attack types across multiple model families. Experimental results show that our method substantially reduces the attack success rate of the unknown backdoor while preserving model utility, outperforming representative existing defense methods in both backdoor removal effectiveness and utility preservation. These findings suggest that a defender-controllable backdoor can serve as a helpful proxy for mitigating unknown backdoors in generative LLMs.",
+      "authors": [
+        "Kazuki Iwahana",
+        "Masaru Matsubayashi",
+        "Takuma Koyama",
+        "Toshiki Shibahara",
+        "Kenichiro Omintato",
+        "Akira Ito"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.CL"
+      ],
+      "published": "2026-06-10T04:26:57+00:00",
+      "link": "https://arxiv.org/pdf/2606.11648v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "backdoor removal via internal mechanism editing",
+      "llm_evidence_cn": "通过共享内部机制的后门移除方法",
+      "llm_evidence": "通过共享内部机制的后门移除方法",
+      "canonical_evidence": "通过共享内部机制的后门移除方法",
+      "llm_tldr_en": "Proposes a backdoor removal method for LLMs by exploiting shared internal mechanisms across backdoors, achieving effective defense without knowing attack types.",
+      "llm_tldr_cn": "当前大语言模型面临后门攻击的严重威胁，而已知的后门移除方法往往需要了解攻击类型。本文提出一种基于共享内部机制的后门移除方法，利用不同后门在激活变化上的共性，在不预知攻击类型的情况下有效清除后门。实验表明该方法能广泛防御多种未知后门，显著提升模型安全性。",
+      "llm_tldr": "当前大语言模型面临后门攻击的严重威胁，而已知的后门移除方法往往需要了解攻击类型。本文提出一种基于共享内部机制的后门移除方法，利用不同后门在激活变化上的共性，在不预知攻击类型的情况下有效清除后门。实验表明该方法能广泛防御多种未知后门，显著提升模型安全性。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "Find papers about model editing for safety in large language models",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.06244v1",
+      "source": "arxiv",
+      "title": "Steering LLM Viewpoints through Fabricated Evidence Injection",
+      "abstract": "As chatbots increasingly influence daily decision-making, their potential to produce misleading responses poses substantial risks to users. This paper investigates a critical cognitive vulnerability in LLMs: their tendency to uncritically trust external context when presented with fabricated evidence bearing markers of credibility. We introduce Ghostwriter, a two-phase attack framework that first repackages misleading statements with fabricated rationales, then instruct target LLMs to incorporate these viewpoints when responding to relevant queries. Experiments on BBQ, ToxiGen, and our specialized dataset reveal that commercial LLMs without external safety classifiers remain highly vulnerable, while even frontier classifier-guarded models (e.g., GPT-5.4) reduce but do not eliminate the attack. Building on this, we explore multiple defense strategies, among which a tailored safety policy enables gpt-oss-safeguard to achieve 81% detection rate.",
+      "authors": [
+        "Xi Yang",
+        "Chang Liu",
+        "Zhenglin Huang",
+        "Haoran Li",
+        "Weiming Zhang",
+        "Jian Weng",
+        "Yangqiu Song"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-06-04T14:48:23+00:00",
+      "link": "https://arxiv.org/pdf/2606.06244v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "attack framework that injects fabricated evidence to steer LLM viewpoints, related to jailbreak editing",
+      "llm_evidence_cn": "通过注入虚假证据操控LLM观点的攻击框架，与越狱编辑相关",
+      "llm_evidence": "通过注入虚假证据操控LLM观点的攻击框架，与越狱编辑相关",
+      "canonical_evidence": "通过注入虚假证据操控LLM观点的攻击框架，与越狱编辑相关",
+      "llm_tldr_en": "Ghostwriter is a two-phase attack that fabricates evidence to mislead LLMs, exposing vulnerability to context manipulation; even guarded models are affected.",
+      "llm_tldr_cn": "本文提出Ghostwriter攻击框架，利用LLM对看似可信的虚假证据的盲目信任，通过两阶段注入策略操控模型观点。实验表明商业LLM极易受影响，即使具有安全分类器的前沿模型也难完全防御。该研究揭示了模型编辑安全中未受重视的认知漏洞，为防御设计提供新视角。",
+      "llm_tldr": "本文提出Ghostwriter攻击框架，利用LLM对看似可信的虚假证据的盲目信任，通过两阶段注入策略操控模型观点。实验表明商业LLM极易受影响，即使具有安全分类器的前沿模型也难完全防御。该研究揭示了模型编辑安全中未受重视的认知漏洞，为防御设计提供新视角。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

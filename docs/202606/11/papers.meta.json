@@ -1,0 +1,69 @@
+{
+  "label": "2026-06-11",
+  "date": "2026-06-11",
+  "generated_at": "2026-06-11T21:41:39",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202606/11/2606.11817v1-grammar-constrained-decoding-can-jailbreak-llms-into-generating-malicious-code",
+      "section": "deep",
+      "title_en": "Grammar-Constrained Decoding Can Jailbreak LLMs into Generating Malicious Code",
+      "authors": "Yitong Zhang, Shiteng Lu, Jia Li",
+      "date": "2026-06-10",
+      "pdf": "https://arxiv.org/pdf/2606.11817v1",
+      "score": "9.0",
+      "evidence": "通过语法约束解码的越狱攻击及其安全对齐防御",
+      "tldr": "本文发现语法约束解码（GCD）在提升代码生成可靠性时，意外成为攻击面，可被利用来诱导LLM生成恶意代码。作者提出CodeSpear攻击，仅用良性代码语法约束即可越狱，攻击成功率平均提升30个百分点。为防御该漏洞，提出CodeShield对齐方法，通过生成语义无害结构多样的蜜罐代码来保持安全，同时保留自然语言拒绝。实验在10个流行LLM上验证了攻击有效性和防御恢复能力，警示GCD存在根本性风险。",
+      "tags": "query:model-edit",
+      "abstract_en": "Large Language Models (LLMs) are increasingly used for code generation, raising concerns that they may be misused to produce malicious code. Meanwhile, Grammar-Constrained Decoding (GCD) has been widely adopted to improve the reliability of LLM-generated code by enforcing syntactic validity. In this paper, we reveal a counterintuitive risk: this reliability-oriented technique can itself become an attack surface. We uncover a new jailbreak attack, termed CodeSpear, that exploits GCD to induce LLMs into generating malicious code. Our experiments show that simply applying a benign code grammar constraint can effectively jailbreak LLMs.   To address this vulnerability, we propose CodeShield, a safety alignment approach that robustly preserves safe behavior even under attacker-controlled grammar constraints. CodeShield aligns the model in the code modality by teaching it to generate honeypot code under GCD. Such code is semantically harmless, so it does not implement the malicious request, and structurally diverse, so it is difficult to suppress through grammar tightening. At the same time, CodeShield still preserves natural-language refusals when natural language is available. Experiments on 10 popular LLMs across 4 benchmarks show that CodeSpear outperforms representative jailbreak baselines and increases the attack success rate by more than 30 percentage points on average. CodeShield also restores safety under CodeSpear while preserving benign utility. Our findings reveal a fundamental risk of GCD and call for greater attention to its potential security implications.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/11/2606.12342v1-alignbeam--inference-time-alignment-transfer-via-cross-vocabulary-logit-mixing",
+      "section": "deep",
+      "title_en": "ALIGNBEAM : Inference-Time Alignment Transfer via Cross-Vocabulary Logit Mixing",
+      "authors": "Chirag Chawla, Pratinav Seth, Vinay Kumar Sankarapu",
+      "date": "2026-06-10",
+      "pdf": "https://arxiv.org/pdf/2606.12342v1",
+      "score": "9.0",
+      "evidence": "通过logit混合实现推理时对齐迁移以保持安全，直接对应安全对齐编辑需求",
+      "tldr": "领域微调会破坏大语言模型的安全性，微调后的专家模型更容易遵循有害指令。现有推理时防御通过混合安全锚点模型的logits来增强安全，但要求模型共享词汇表，无法用于跨族模型。ALIGNBEAM是一种无需训练的方法，在每个解码步骤将锚点logits逐词翻译到目标词汇表，再用小LLM评判器从K个候选续写中选择最安全的。实验表明，该方法在跨词汇表和同词汇表设置下均显著提升对抗样本的拒绝率，同时保持任务准确性和推理开销在实用范围内。结论是安全对齐可在推理时跨模型族迁移，无需修改权重。",
+      "tags": "query:model-edit",
+      "abstract_en": "Domain fine-tuning degrades the safety of large language models: fine-tuned specialists readily comply with harmful prompts framed in domain language. Existing inference-time defenses that mix logits from a safe anchor model require both models to share a vocabulary, which rules them out for the cross-family specialists where safety is most degraded. We present ALIGNBEAM, a training-free method that lifts this restriction by translating anchor logits into the target model's vocabulary token-by-token at each decoding step; a small LLM judge then selects the safest among K candidate continuations. No weights are changed, and the safety-utility trade-off can be tuned at deployment without retraining. Across both cross-vocabulary and same-vocabulary evaluation pairs, ALIGNBEAM substantially raises refusal on adversarial benchmarks while keeping task accuracy and inference overhead within practical bounds. The results show that safety alignment can be transferred between model families at inference time, without touching either model's weights.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/11/2606.11648v1-dummy-backdoor-as-a-defense-removing-unknown-backdoors-via-shared-internal-mechanisms-for-generative-llms",
+      "section": "quick",
+      "title_en": "Dummy Backdoor as a Defense: Removing Unknown Backdoors via Shared Internal Mechanisms for Generative LLMs",
+      "authors": "Kazuki Iwahana, Masaru Matsubayashi, Takuma Koyama, Toshiki Shibahara, Kenichiro Omintato, Akira Ito",
+      "date": "2026-06-10",
+      "pdf": "https://arxiv.org/pdf/2606.11648v1",
+      "score": "7.0",
+      "evidence": "通过共享内部机制的后门移除方法",
+      "tldr": "大语言模型面临未知后门攻击的威胁。本文基于不同后门共享内部机制的观察，提出主动嵌入一个已知触发器的后门（dummy backdoor），再通过微调将其移除，从而连带消除未知后门。实验表明该方法在多种攻击类型下均优于现有防御，有效降低攻击成功率并保持模型性能。",
+      "tags": "query:model-edit",
+      "abstract_en": "Backdoor attacks pose a serious threat to the safety and reliability of Large Language Models (LLMs), as they cause models to behave normally on clean inputs while producing attacker-specified responses when hidden triggers are present. Removing such unknown backdoors is particularly challenging when the defender does not know the backdoor attack types or the internal mechanisms formed through backdoor training. In this work, we propose a simple but effective backdoor removal method based on shared internal mechanisms across different backdoors. First, we show that different backdoors with the same task (attack objective) induce similar trigger-activated changes in the internal activations. Motivated by this observation, our method intentionally embeds a backdoor with a known trigger (\\emph{dummy backdoor}) and then removes it through further fine-tuning on dummy-triggered inputs paired with clean responses. Since the dummy backdoor and the unknown backdoor can rely on shared internal mechanisms, removing the dummy backdoor also reduces the effect of the unknown backdoor. We evaluate our method on three backdoor attack types across multiple model families. Experimental results show that our method substantially reduces the attack success rate of the unknown backdoor while preserving model utility, outperforming representative existing defense methods in both backdoor removal effectiveness and utility preservation. These findings suggest that a defender-controllable backdoor can serve as a helpful proxy for mitigating unknown backdoors in generative LLMs.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/11/2606.06244v1-steering-llm-viewpoints-through-fabricated-evidence-injection",
+      "section": "quick",
+      "title_en": "Steering LLM Viewpoints through Fabricated Evidence Injection",
+      "authors": "Xi Yang, Chang Liu, Zhenglin Huang, Haoran Li, Weiming Zhang, Jian Weng, Yangqiu Song",
+      "date": "2026-06-04",
+      "pdf": "https://arxiv.org/pdf/2606.06244v1",
+      "score": "6.0",
+      "evidence": "通过注入虚假证据操控LLM观点的攻击框架，与越狱编辑相关",
+      "tldr": "聊天机器人可能产生误导性回复，对用户造成风险。本文发现大语言模型存在认知漏洞，倾向于信任带有可信标记的外部证据。作者提出Ghostwriter攻击框架，通过两阶段注入捏造证据来操控模型观点。实验表明商业LLM高度脆弱，即使有安全分类器的GPT-5.4也未能完全防御。本文还探索了多种防御策略，其中定制安全策略使gpt-oss-safeguard达到81%检测率。",
+      "tags": "query:model-edit",
+      "abstract_en": "As chatbots increasingly influence daily decision-making, their potential to produce misleading responses poses substantial risks to users. This paper investigates a critical cognitive vulnerability in LLMs: their tendency to uncritically trust external context when presented with fabricated evidence bearing markers of credibility. We introduce Ghostwriter, a two-phase attack framework that first repackages misleading statements with fabricated rationales, then instruct target LLMs to incorporate these viewpoints when responding to relevant queries. Experiments on BBQ, ToxiGen, and our specialized dataset reveal that commercial LLMs without external safety classifiers remain highly vulnerable, while even frontier classifier-guarded models (e.g., GPT-5.4) reduce but do not eliminate the attack. Building on this, we explore multiple defense strategies, among which a tailored safety policy enables gpt-oss-safeguard to achieve 81% detection rate.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

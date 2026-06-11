@@ -6,37 +6,32 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-10
-- 运行时间：2026-06-10 22:13:06 UTC
+- 最新运行日期：2026-06-11
+- 运行时间：2026-06-11 21:41:33 UTC
 - 运行状态：成功
-- 本次总论文数：5
-- 精读区：3
+- 本次总论文数：4
+- 精读区：2
 - 速读区：2
 
 ### 今日简报（AI）
-今日推荐5篇论文，精读重点为基于逻辑规则的知识编辑与响应指定的大模型遗忘方法。  
-最值得关注的是两篇高分精读：逻辑规则提升了知识编辑的准确性，低秩适配方法有效解决大模型遗忘问题。  
-建议将精读方法应用于实际模型更新与隐私保护场景，同时留意速读中语音模型的安全对齐风险。
-- 详情：[/202606/10/README](/202606/10/README)
+今日推荐4篇论文，精读关注语法约束解码越狱生成恶意代码及推理时对齐转移方法。最值得关注两大方向：大模型安全漏洞（语法约束解码可被利用）与对齐技术改进（跨词表logit混合）。建议优先精读这两篇9分论文，深入理解大模型安全风险与对齐优化策略。
+- 详情：[/202606/11/README](/202606/11/README)
 
 ### 精读区论文标签
-1. [Benchmarking Knowledge Editing using Logical Rules](/202606/10/2606.10554v1-benchmarking-knowledge-editing-using-logical-rules)  
+1. [Grammar-Constrained Decoding Can Jailbreak LLMs into Generating Malicious Code](/202606/11/2606.11817v1-grammar-constrained-decoding-can-jailbreak-llms-into-generating-malicious-code)  
    标签：评分：9.0/10、query:model-edit
-   evidence：知识编辑基准测试
-2. [Null-Space Constrained Low-Rank Adaptation for Response-Specified Large Language Model Unlearning](/202606/10/2606.10989v1-null-space-constrained-low-rank-adaptation-for-response-specified-large-language-model-unlearning)  
+   evidence：通过语法约束解码的越狱攻击及其安全对齐防御
+2. [ALIGNBEAM : Inference-Time Alignment Transfer via Cross-Vocabulary Logit Mixing](/202606/11/2606.12342v1-alignbeam--inference-time-alignment-transfer-via-cross-vocabulary-logit-mixing)  
    标签：评分：9.0/10、query:model-edit
-   evidence：LLM遗忘用于安全响应
-3. [Emergent Misalignment Can Be Induced by Sycophancy and Reversed via Alignment Gating](/202606/10/2606.09068v1-emergent-misalignment-can-be-induced-by-sycophancy-and-reversed-via-alignment-gating)  
-   标签：评分：8.0/10、query:model-edit
-   evidence：对齐门控逆转因谄媚导致的误对齐
+   evidence：通过logit混合实现推理时对齐迁移以保持安全，直接对应安全对齐编辑需求
 
 ### 速读区论文标签
-1. [SpeechJBB: Probing Safety Alignment and Comprehension in Large Audio Language Models under Code-Switched Speech](/202606/10/2606.06037v2-speechjbb-probing-safety-alignment-and-comprehension-in-large-audio-language-models-under-code-switched-speech)  
+1. [Dummy Backdoor as a Defense: Removing Unknown Backdoors via Shared Internal Mechanisms for Generative LLMs](/202606/11/2606.11648v1-dummy-backdoor-as-a-defense-removing-unknown-backdoors-via-shared-internal-mechanisms-for-generative-llms)  
    标签：评分：7.0/10、query:model-edit
-   evidence：引入音频越狱数据集用于探测安全对齐
-2. [When Recovery Matters: The Blind Spot of Surrogate Privacy in MLLM Editing](/202606/10/2606.07171v1-when-recovery-matters-the-blind-spot-of-surrogate-privacy-in-mllm-editing)  
+   evidence：通过共享内部机制的后门移除方法
+2. [Steering LLM Viewpoints through Fabricated Evidence Injection](/202606/11/2606.06244v1-steering-llm-viewpoints-through-fabricated-evidence-injection)  
    标签：评分：6.0/10、query:model-edit
-   evidence：研究多模态大模型编辑中的隐私保护与恢复基准
+   evidence：通过注入虚假证据操控LLM观点的攻击框架，与越狱编辑相关
 
 
 <div class="dpr-home-promo-card">
