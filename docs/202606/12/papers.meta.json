@@ -1,0 +1,54 @@
+{
+  "label": "2026-06-12",
+  "date": "2026-06-12",
+  "generated_at": "2026-06-12T21:53:29",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202606/12/2606.09388v1-distilling-safe-llm-systems-via-soft-prompts-for-on-device-settings",
+      "section": "quick",
+      "title_en": "Distilling Safe LLM Systems via Soft Prompts for On Device Settings",
+      "authors": "Motasem Alfarra, Cristina Pinneri, Dana Kianfar, Mohammed Almousa, Christos Louizos",
+      "date": "2026-06-08",
+      "pdf": "https://arxiv.org/pdf/2606.09388v1",
+      "score": "7.0",
+      "evidence": "通过软提示和蒸馏的参数高效安全对齐，类似于模型编辑",
+      "tldr": "边缘设备部署安全LLM面临资源限制，双模型系统开销过大。本文提出软提示蒸馏方法，利用总变差和KL散度从守卫模型迁移安全行为。实验表明，该方法在安全-有用性权衡上优于LoRA、转向向量等，且推理时额外内存和计算需求极小。这确立了软提示蒸馏作为边缘LLM安全对齐的首选方案。",
+      "tags": "query:model-edit",
+      "abstract_en": "Deploying safe large language models (LLMs) on resource-constrained edge devices presents a critical challenge: while dual-model systems combining LLMs with guard models provide effective safety guarantees, their substantial memory and computational demands make them prohibitively expensive for on-device deployment. This paper presents a comprehensive study of parameter-efficient safety alignment methods for resource-constrained settings. Through systematic evaluation across multiple LLM architectures, training objectives, and parameter-efficient fine-tuning approaches, we identify that soft prompts combined with distillation-based training consistently outperform alternative methods. We introduce distillation frameworks based on total variation and KL divergence that effectively transfer safety behaviors from guard models into learned soft prompts. Our evaluations on various benchmarks demonstrate that this combination achieves superior safety-usefulness trade-offs compared to LoRA adapters, steering vectors, and direct optimization methods, while requiring minimal additional memory and compute at inference time. These findings establish soft prompt distillation as the preferred approach for safety alignment in on-device LLM deployment.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/12/2606.11262v1-permdora----understanding-adapter-interference-in-language-models-limits-of-parameter-space-geometry",
+      "section": "quick",
+      "title_en": "PermDoRA -- Understanding Adapter Interference in Language Models: Limits of Parameter-Space Geometry",
+      "authors": "Gowtham Sivaramakrishnan, Sarvesha Kumar Kombaiah Seetha, Kishan Gupta Balaji, Santhosh Baradwaj Vaduvur Ranganathan",
+      "date": "2026-06-09",
+      "pdf": "https://arxiv.org/pdf/2606.11262v1",
+      "score": "7.0",
+      "evidence": "研究LLM中适配器干扰的参数空间几何，与模型编辑技术相关",
+      "tldr": "大型语言模型需要模块化访问控制，但适配器组合时存在干扰。常见假设认为干扰源于线性参数更新重叠，因此正交性可缓解。本文提出DoRA-RBAC框架，基于权重分解低秩适配，比较标准欧几里得合并与几何感知的黎曼合并（近似Frechet均值）在多领域QA任务上的表现。实验显示几何感知合并无优势，适配器更新的角度对齐和正交性不能预测组合性能。结论表明适配器干扰主要由共享非线性表示交互而非参数空间几何决定。",
+      "tags": "query:model-edit",
+      "abstract_en": "Access control in large language models (LLMs) requires modular mechanisms to enable domain-specific behavior without retraining or cross-domain interference. A common hypothesis is that interference during adapter composition arises from overlap in linear parameter updates, suggesting that enforcing orthogonality or directional independence should improve multi-domain performance. We test this hypothesis using DoRA-RBAC, a hierarchical adapter composition framework based on weight-decomposed low-rank adaptation. We compare conventional Euclidean merging with a geometry-aware Riemannian-inspired merging strategy that approximates the Frechet mean via normalized directional averaging across multiple QA benchmarks (GPQA, PubMedQA, SimpleQA, WMDP) on LLaMA-3.1-8B and Mistral-7B. Our results show that while single-domain performance matches LoRA, geometry-aware merging provides no consistent advantage over standard averaging in multi-domain settings.Diagnostic analysis further reveals that angular alignment and orthogonality of adapter updates are weak predictors of composition performance. These findings suggest that adapter interference is not governed primarily by parameter-space geometry, but is instead consistent with interactions in shared nonlinear representations.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/12/2606.05743v1-membrane-a-self-evolving-contrastive-safety-memory-for-llm-agent-defense",
+      "section": "quick",
+      "title_en": "Membrane: A Self-Evolving Contrastive Safety Memory for LLM Agent Defense",
+      "authors": "Minseok Choi, Seungbin Yang, Dongjin Kim, Subin Kim, Jungmin Son, Yunseung Lee, Jaegul Choo, Youngjun Kwak",
+      "date": "2026-06-04",
+      "pdf": "https://arxiv.org/pdf/2606.05743v1",
+      "score": "6.0",
+      "evidence": "提出自进化防护栏，利用对比安全记忆防御越狱攻击，与越狱编辑防御相关",
+      "tldr": "大语言模型面临不断演变的越狱攻击，现有防护方法难以适应新攻击或过度拒绝良性请求。提出Membrane，一种基于对比安全记忆（CSM）的自进化防护栏，通过将有害与良性交互蒸馏成以攻击策略索引的对比单元，无需重训即可自适应。在HarmBench和AgentHarm上六种攻击均取得最高F1，良性拒绝率仅7-14%，远低于先前方法的28-85%。跨攻击转移下F1保持87-88%，且抗记忆中毒。",
+      "tags": "query:model-edit",
+      "abstract_en": "Despite advances in safety alignment, large language models remain vulnerable to continuously evolving jailbreaks. Existing fine-tuned safety classifiers cannot adapt to these evolving attacks, while adaptive memory-based guardrails tend to over-refuse benign queries that resemble stored attacks. We propose Membrane, a self-evolving guardrail built on Contrastive Safety Memory (CSM): each cell pairs the conditions for blocking a harmful query with those for permitting a superficially similar benign request. Without retraining, Membrane evolves CSM by distilling each harmful interaction and its benign counterpart into a contrastive cell indexed by the underlying attack strategy, so that one cell generalizes across topical variants of the same mechanism. At inference, retrieved cells serve as grounding context for precise safety decisions. Across model-level safety on HarmBench and agent-level safety on AgentHarm, Membrane achieves the highest F1 on all six jailbreak attacks. Notably, benign refusal on AgentHarm stays at 7-14%, well below the 28-85% range of prior guards. Memory cells also retain 87-88% F1 under cross-attack transfer and remain stable under memory poisoning.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

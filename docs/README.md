@@ -6,32 +6,30 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-11
-- 运行时间：2026-06-11 21:41:33 UTC
+- 最新运行日期：2026-06-12
+- 运行时间：2026-06-12 21:53:20 UTC
 - 运行状态：成功
-- 本次总论文数：4
-- 精读区：2
-- 速读区：2
+- 本次总论文数：3
+- 精读区：0
+- 速读区：3
 
 ### 今日简报（AI）
-今日推荐4篇论文，精读关注语法约束解码越狱生成恶意代码及推理时对齐转移方法。最值得关注两大方向：大模型安全漏洞（语法约束解码可被利用）与对齐技术改进（跨词表logit混合）。建议优先精读这两篇9分论文，深入理解大模型安全风险与对齐优化策略。
-- 详情：[/202606/11/README](/202606/11/README)
+今天速读了3篇关于LLM安全性与适配器干扰的论文，聚焦设备端蒸馏与参数空间几何。最值得看《Distilling Safe LLM Systems via Soft Prompts》和《PermDoRA》，分别提供软提示安全蒸馏与适配器干扰极限分析。下一步可关注如何利用软提示在资源受限场景平衡安全与性能。
+- 详情：[/202606/12/README](/202606/12/README)
 
 ### 精读区论文标签
-1. [Grammar-Constrained Decoding Can Jailbreak LLMs into Generating Malicious Code](/202606/11/2606.11817v1-grammar-constrained-decoding-can-jailbreak-llms-into-generating-malicious-code)  
-   标签：评分：9.0/10、query:model-edit
-   evidence：通过语法约束解码的越狱攻击及其安全对齐防御
-2. [ALIGNBEAM : Inference-Time Alignment Transfer via Cross-Vocabulary Logit Mixing](/202606/11/2606.12342v1-alignbeam--inference-time-alignment-transfer-via-cross-vocabulary-logit-mixing)  
-   标签：评分：9.0/10、query:model-edit
-   evidence：通过logit混合实现推理时对齐迁移以保持安全，直接对应安全对齐编辑需求
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Dummy Backdoor as a Defense: Removing Unknown Backdoors via Shared Internal Mechanisms for Generative LLMs](/202606/11/2606.11648v1-dummy-backdoor-as-a-defense-removing-unknown-backdoors-via-shared-internal-mechanisms-for-generative-llms)  
+1. [Distilling Safe LLM Systems via Soft Prompts for On Device Settings](/202606/12/2606.09388v1-distilling-safe-llm-systems-via-soft-prompts-for-on-device-settings)  
    标签：评分：7.0/10、query:model-edit
-   evidence：通过共享内部机制的后门移除方法
-2. [Steering LLM Viewpoints through Fabricated Evidence Injection](/202606/11/2606.06244v1-steering-llm-viewpoints-through-fabricated-evidence-injection)  
+   evidence：通过软提示和蒸馏的参数高效安全对齐，类似于模型编辑
+2. [PermDoRA -- Understanding Adapter Interference in Language Models: Limits of Parameter-Space Geometry](/202606/12/2606.11262v1-permdora----understanding-adapter-interference-in-language-models-limits-of-parameter-space-geometry)  
+   标签：评分：7.0/10、query:model-edit
+   evidence：研究LLM中适配器干扰的参数空间几何，与模型编辑技术相关
+3. [Membrane: A Self-Evolving Contrastive Safety Memory for LLM Agent Defense](/202606/12/2606.05743v1-membrane-a-self-evolving-contrastive-safety-memory-for-llm-agent-defense)  
    标签：评分：6.0/10、query:model-edit
-   evidence：通过注入虚假证据操控LLM观点的攻击框架，与越狱编辑相关
+   evidence：提出自进化防护栏，利用对比安全记忆防御越狱攻击，与越狱编辑防御相关
 
 
 <div class="dpr-home-promo-card">

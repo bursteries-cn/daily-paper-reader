@@ -1,0 +1,138 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-12T21:51:31.547444+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2606.09388v1",
+      "source": "arxiv",
+      "title": "Distilling Safe LLM Systems via Soft Prompts for On Device Settings",
+      "abstract": "Deploying safe large language models (LLMs) on resource-constrained edge devices presents a critical challenge: while dual-model systems combining LLMs with guard models provide effective safety guarantees, their substantial memory and computational demands make them prohibitively expensive for on-device deployment. This paper presents a comprehensive study of parameter-efficient safety alignment methods for resource-constrained settings. Through systematic evaluation across multiple LLM architectures, training objectives, and parameter-efficient fine-tuning approaches, we identify that soft prompts combined with distillation-based training consistently outperform alternative methods. We introduce distillation frameworks based on total variation and KL divergence that effectively transfer safety behaviors from guard models into learned soft prompts. Our evaluations on various benchmarks demonstrate that this combination achieves superior safety-usefulness trade-offs compared to LoRA adapters, steering vectors, and direct optimization methods, while requiring minimal additional memory and compute at inference time. These findings establish soft prompt distillation as the preferred approach for safety alignment in on-device LLM deployment.",
+      "authors": [
+        "Motasem Alfarra",
+        "Cristina Pinneri",
+        "Dana Kianfar",
+        "Mohammed Almousa",
+        "Christos Louizos"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-06-08T12:03:51+00:00",
+      "link": "https://arxiv.org/pdf/2606.09388v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "parameter-efficient safety alignment via soft prompts and distillation, akin to model editing",
+      "llm_evidence_cn": "通过软提示和蒸馏的参数高效安全对齐，类似于模型编辑",
+      "llm_evidence": "通过软提示和蒸馏的参数高效安全对齐，类似于模型编辑",
+      "canonical_evidence": "通过软提示和蒸馏的参数高效安全对齐，类似于模型编辑",
+      "llm_tldr_en": "Shows that soft prompts combined with distillation-based training achieve parameter-efficient safety alignment for on-device LLMs, outperforming other methods.",
+      "llm_tldr_cn": "该论文针对资源受限设备上部署安全大语言模型的挑战，系统评估了多种参数高效的安全对齐方法。发现软提示结合蒸馏训练持续优于其他方法，并基于总变差和KL散度提出了蒸馏框架。该方法通过轻量级修改（软提示）实现模型安全对齐，与模型编辑思想一致，为低成本安全编辑提供了有效途径。",
+      "llm_tldr": "该论文针对资源受限设备上部署安全大语言模型的挑战，系统评估了多种参数高效的安全对齐方法。发现软提示结合蒸馏训练持续优于其他方法，并基于总变差和KL散度提出了蒸馏框架。该方法通过轻量级修改（软提示）实现模型安全对齐，与模型编辑思想一致，为低成本安全编辑提供了有效途径。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "Find papers about model editing for safety in large language models",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.05743v1",
+      "source": "arxiv",
+      "title": "Membrane: A Self-Evolving Contrastive Safety Memory for LLM Agent Defense",
+      "abstract": "Despite advances in safety alignment, large language models remain vulnerable to continuously evolving jailbreaks. Existing fine-tuned safety classifiers cannot adapt to these evolving attacks, while adaptive memory-based guardrails tend to over-refuse benign queries that resemble stored attacks. We propose Membrane, a self-evolving guardrail built on Contrastive Safety Memory (CSM): each cell pairs the conditions for blocking a harmful query with those for permitting a superficially similar benign request. Without retraining, Membrane evolves CSM by distilling each harmful interaction and its benign counterpart into a contrastive cell indexed by the underlying attack strategy, so that one cell generalizes across topical variants of the same mechanism. At inference, retrieved cells serve as grounding context for precise safety decisions. Across model-level safety on HarmBench and agent-level safety on AgentHarm, Membrane achieves the highest F1 on all six jailbreak attacks. Notably, benign refusal on AgentHarm stays at 7-14%, well below the 28-85% range of prior guards. Memory cells also retain 87-88% F1 under cross-attack transfer and remain stable under memory poisoning.",
+      "authors": [
+        "Minseok Choi",
+        "Seungbin Yang",
+        "Dongjin Kim",
+        "Subin Kim",
+        "Jungmin Son",
+        "Yunseung Lee",
+        "Jaegul Choo",
+        "Youngjun Kwak"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.CL"
+      ],
+      "published": "2026-06-04T06:14:08+00:00",
+      "link": "https://arxiv.org/pdf/2606.05743v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "proposes self-evolving guardrail against jailbreak attacks using contrastive safety memory, relevant to jailbreak editing defense",
+      "llm_evidence_cn": "提出自进化防护栏，利用对比安全记忆防御越狱攻击，与越狱编辑防御相关",
+      "llm_evidence": "提出自进化防护栏，利用对比安全记忆防御越狱攻击，与越狱编辑防御相关",
+      "canonical_evidence": "提出自进化防护栏，利用对比安全记忆防御越狱攻击，与越狱编辑防御相关",
+      "llm_tldr_en": "Membrane introduces a self-evolving guardrail with Contrastive Safety Memory that adapts to evolving jailbreaks without retraining, pairing harmful and benign conditions for each strategy.",
+      "llm_tldr_cn": "针对不断演化的越狱攻击，Membrane提出基于对比安全记忆的自进化防护栏，无需重新训练即可适应新攻击。每个单元将有害查询和良性查询的条件配对，通过蒸馏攻击策略实现跨主题泛化，有效减少过度拒绝。",
+      "llm_tldr": "针对不断演化的越狱攻击，Membrane提出基于对比安全记忆的自进化防护栏，无需重新训练即可适应新攻击。每个单元将有害查询和良性查询的条件配对，通过蒸馏攻击策略实现跨主题泛化，有效减少过度拒绝。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.11262v1",
+      "source": "arxiv",
+      "title": "PermDoRA -- Understanding Adapter Interference in Language Models: Limits of Parameter-Space Geometry",
+      "abstract": "Access control in large language models (LLMs) requires modular mechanisms to enable domain-specific behavior without retraining or cross-domain interference. A common hypothesis is that interference during adapter composition arises from overlap in linear parameter updates, suggesting that enforcing orthogonality or directional independence should improve multi-domain performance. We test this hypothesis using DoRA-RBAC, a hierarchical adapter composition framework based on weight-decomposed low-rank adaptation. We compare conventional Euclidean merging with a geometry-aware Riemannian-inspired merging strategy that approximates the Frechet mean via normalized directional averaging across multiple QA benchmarks (GPQA, PubMedQA, SimpleQA, WMDP) on LLaMA-3.1-8B and Mistral-7B. Our results show that while single-domain performance matches LoRA, geometry-aware merging provides no consistent advantage over standard averaging in multi-domain settings.Diagnostic analysis further reveals that angular alignment and orthogonality of adapter updates are weak predictors of composition performance. These findings suggest that adapter interference is not governed primarily by parameter-space geometry, but is instead consistent with interactions in shared nonlinear representations.",
+      "authors": [
+        "Gowtham Sivaramakrishnan",
+        "Sarvesha Kumar Kombaiah Seetha",
+        "Kishan Gupta Balaji",
+        "Santhosh Baradwaj Vaduvur Ranganathan"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-06-09T02:52:48+00:00",
+      "link": "https://arxiv.org/pdf/2606.11262v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "studies adapter interference in LLMs with parameter-space geometry, relevant to model editing techniques",
+      "llm_evidence_cn": "研究LLM中适配器干扰的参数空间几何，与模型编辑技术相关",
+      "llm_evidence": "研究LLM中适配器干扰的参数空间几何，与模型编辑技术相关",
+      "canonical_evidence": "研究LLM中适配器干扰的参数空间几何，与模型编辑技术相关",
+      "llm_tldr_en": "Investigates adapter interference in LLMs using DoRA-RBAC, revealing limits of orthogonality assumptions for multi-domain performance, relevant to model editing.",
+      "llm_tldr_cn": "该论文研究了大型语言模型中适配器组合时的干扰问题，通过DoRA-RBAC框架分析了参数空间几何对多领域性能的影响。实验表明，单纯追求正交性无法解决干扰，而基于黎曼几何的融合策略有所改善。这项工作揭示了模型编辑中参数更新的潜在限制，为安全编辑提供理论指导。",
+      "llm_tldr": "该论文研究了大型语言模型中适配器组合时的干扰问题，通过DoRA-RBAC框架分析了参数空间几何对多领域性能的影响。实验表明，单纯追求正交性无法解决干扰，而基于黎曼几何的融合策略有所改善。这项工作揭示了模型编辑中参数更新的潜在限制，为安全编辑提供理论指导。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
