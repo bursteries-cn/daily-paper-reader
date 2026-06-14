@@ -1,0 +1,92 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-14T21:19:49.192091+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 0,
+    "quick_skim_target": 11,
+    "quick_selected": 0
+  },
+  "deep_dive": [
+    {
+      "id": "2606.13461v1",
+      "source": "arxiv",
+      "title": "Reinforcement Learning for Neural Model Editing",
+      "abstract": "Editing pretrained neural networks requires specialized algorithms tailored to specific objectives. Designing such algorithms is often time-consuming and demands significant effort. We present an exploratory framework that formulates neural model editing as a reinforcement learning problem, where agents modify models using reward feedback. We introduce two environments: MaskWorld, where agents scale weights multiplicatively, and ShiftWorld, where agents apply additive weight updates. The reward function combines a utility-preservation objective with a task-specific editing objective, enabling agents to learn targeted modifications while maintaining overall model performance. We evaluate the framework on bias mitigation in text classification and machine unlearning in image classification, both of which traditionally rely on specialized algorithms. Our results show that the learned policies reduce forget set accuracy to nearly 0% while preserving over 90% retain set accuracy on the unlearning task. In the bias mitigation setting, the learned policies improve bias-related performance by more than 5% while maintaining general classification utility. Our findings show that neural model editing can be cast as a reinforcement learning problem, allowing editing policies to be learned from reward feedback rather than manually engineered for each task.",
+      "authors": [
+        "Shaivi Malik"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CV"
+      ],
+      "published": "2026-06-11T15:16:42+00:00",
+      "link": "https://arxiv.org/pdf/2606.13461v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Reinforcement learning framework for neural model editing",
+      "llm_evidence_cn": "强化学习框架用于神经网络模型编辑",
+      "llm_evidence": "强化学习框架用于神经网络模型编辑",
+      "canonical_evidence": "强化学习框架用于神经网络模型编辑",
+      "llm_tldr_en": "Proposes a reinforcement learning framework for editing neural networks, evaluated on bias mitigation and machine unlearning.",
+      "llm_tldr_cn": "本文提出一个将神经网络模型编辑形式化为强化学习问题的框架，通过智能体利用奖励反馈修改模型权重，在MaskWorld和ShiftWorld两种环境中分别进行乘法缩放和加法更新。该框架结合效用保持目标和任务特定编辑目标的奖励函数，实现了有针对性修改同时保持整体性能。实验证明在文本分类中的偏见缓解和图像中的机器遗忘任务上有效。",
+      "llm_tldr": "本文提出一个将神经网络模型编辑形式化为强化学习问题的框架，通过智能体利用奖励反馈修改模型权重，在MaskWorld和ShiftWorld两种环境中分别进行乘法缩放和加法更新。该框架结合效用保持目标和任务特定编辑目标的奖励函数，实现了有针对性修改同时保持整体性能。实验证明在文本分类中的偏见缓解和图像中的机器遗忘任务上有效。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.12498v1",
+      "source": "arxiv",
+      "title": "From Parameters to Feature Space: Task Arithmetic for Backdoor Mitigation in Model Merging",
+      "abstract": "Model merging (MM) has gained significant attention as a cost-effective approach to integrate multiple task-specific models into a unified model. However, recent work reveals that MM is highly susceptible to backdoor attacks. Existing defenses based on task arithmetic often fail to eliminate backdoors without substantially degrading clean-task performance, owing to their reliance on direct parameter-space editing. To address this gap, we propose Linear Feature Path Minimization (LFPM), a backdoor mitigation framework for model merging, which introduces an anti-backdoor task vector into the backdoored merged model. Unlike prior approaches, LFPM formulates the backdoor robustness of the merged model from a unified feature-space perspective under the Cross-Task Linearity (CTL) framework, which leverages the approximate linearity of features across tasks. This perspective guides the optimization of the anti-backdoor task to suppress backdoors while preserving clean-task performance. Furthermore, we introduce an effective optimization mechanism based on gradient accumulation and loss path-integral, ensuring robust backdoor suppression along the interpolation path. Extensive experiments demonstrate that LFPM consistently exhibits strong robustness against backdoor attacks in both full fine-tuning and Parameter-Efficient Fine-Tuning (PEFT) settings.",
+      "authors": [
+        "Zhenqian Zhu",
+        "Yamin Hu",
+        "Yiya Diao",
+        "Weixiang Li",
+        "Haodong Li",
+        "Wenjian Luo"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-06-10T13:51:36+00:00",
+      "link": "https://arxiv.org/pdf/2606.12498v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "backdoor mitigation via feature-space task vectors in model merging",
+      "llm_evidence_cn": "通过特征空间任务向量缓解模型合并中的后门攻击",
+      "llm_evidence": "通过特征空间任务向量缓解模型合并中的后门攻击",
+      "canonical_evidence": "通过特征空间任务向量缓解模型合并中的后门攻击",
+      "llm_tldr_en": "LFPM mitigates backdoors in model merging by introducing anti-backdoor task vectors in feature space, outperforming parameter-space editing.",
+      "llm_tldr_cn": "本文关注模型合并中的后门攻击安全问题。现有参数空间编辑防御会损害干净任务性能，提出线性特征路径最小化（LFPM）框架，在特征空间中引入反后门任务向量。实验表明LFPM有效消除后门且保持性能，为模型编辑安全提供新方法。",
+      "llm_tldr": "本文关注模型合并中的后门攻击安全问题。现有参数空间编辑防御会损害干净任务性能，提出线性特征路径最小化（LFPM）框架，在特征空间中引入反后门任务向量。实验表明LFPM有效消除后门且保持性能，为模型编辑安全提供新方法。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": []
+}
