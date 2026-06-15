@@ -1,0 +1,133 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-15T21:57:49.137350+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2606.14668v1",
+      "source": "arxiv",
+      "title": "When to Write and When to Suppress: Route-Specialized Dual Adapters for Memory-Assisted Knowledge Editing",
+      "abstract": "Knowledge editing systems must update selected facts while preserving nearby but irrelevant behavior. This paper studies this problem in a memory-assisted setting where an edit memory is retrieved at inference time and a parameter-efficient adapter corrects the model's object preference. We argue that the central design question is not only how to write an edit, but also when to suppress it. We introduce \\method{}, a route-specialized dual-adapter editor. A relevance router first decides whether a prompt should receive an edit memory. Routed prompts use an edit adapter trained to prefer the new object over the original object; unrouted non-direct prompts use a separate locality adapter trained to preserve or restore the original-object preference. We evaluate \\method{} on three 1,000-case protocols, \\cf{}, \\zsre{}, and \\mquake{}, under the same memory protocol and two 7B/8B base models. On Llama-3.1-8B-Instruct, \\method{} obtains the best overall probability-preference accuracy on all three benchmarks: 0.8180 on \\cf{}, 0.8946 on \\zsre{}, and 0.9922 on \\mquake{}. The same trend holds on Qwen3-8B. Router ablations show that the relevant memory boundary differs across datasets: a lexical neural router is safest on \\cf{}, while BGE embedding routing is better on \\zsre{} and \\mquake{}. Component and module ablations show that the gain mainly comes from separating edit injection from off-route suppression rather than from simply increasing LoRA capacity.",
+      "authors": [
+        "Yining Huang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-06-12T17:37:32+00:00",
+      "link": "https://arxiv.org/pdf/2606.14668v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "knowledge editing with dual adapters",
+      "llm_evidence_cn": "双适配器知识编辑",
+      "llm_evidence": "双适配器知识编辑",
+      "canonical_evidence": "双适配器知识编辑",
+      "llm_tldr_en": "Route-specialized dual-adapter editor for memory-assisted knowledge editing that decides when to apply edits and when to preserve original behavior.",
+      "llm_tldr_cn": "知识编辑系统需在更新目标事实的同时保持无关行为不变。本文提出路由专用双适配器方法：一个相关性路由器判断是否触发编辑，触发时使用编辑适配器修正，未触发时使用 locality 适配器保持原有行为。在多个知识编辑基准上，该方法在编辑成功率和 locality 上均达到最先进水平。",
+      "llm_tldr": "知识编辑系统需在更新目标事实的同时保持无关行为不变。本文提出路由专用双适配器方法：一个相关性路由器判断是否触发编辑，触发时使用编辑适配器修正，未触发时使用 locality 适配器保持原有行为。在多个知识编辑基准上，该方法在编辑成功率和 locality 上均达到最先进水平。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.14243v1",
+      "source": "arxiv",
+      "title": "Decoupled Mixture-of-Experts for Parametric Knowledge Injection",
+      "abstract": "Knowledge injection aims to equip large language models (LLMs) with external, domain-specific, or time-sensitive knowledge. Existing approaches typically face a trade-off between flexibility and integration: retrieval-augmented generation keeps knowledge outside the model but only provides prompt-level augmentation, whereas post-training based methods encode new knowledge into shared parameters but may introduce catastrophic forgetting, knowledge conflict, and costly updates. In this paper, we propose Decoupled Mixture-of-Experts (DMoE), a modular architecture for parametric knowledge injection that decouples both experts and the router from the base model. DMoE converts external knowledge corpora into independently updatable expert modules and uses a lightweight uncertainty-aware router to activate relevant experts only when the base model lacks sufficient knowledge during generation. To support efficient auto-regressive inference, DMoE attaches experts only to the final-layer feed-forward network, preserving KV-cache reuse while enabling parameter-level knowledge augmentation. Experiments on knowledge-intensive benchmarks show that DMoE consistently improves answer quality over retrieval and adapter-based baselines.",
+      "authors": [
+        "Baoqing Yue",
+        "Weihang Su",
+        "Qingyao Ai",
+        "Yichen Tang",
+        "Changyue Wang",
+        "Jiacheng Kang",
+        "Jingtao Zhan",
+        "Yiqun Liu"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-12T08:21:28+00:00",
+      "link": "https://arxiv.org/pdf/2606.14243v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "parametric knowledge injection for knowledge editing",
+      "llm_evidence_cn": "参数知识注入实现知识编辑",
+      "llm_evidence": "参数知识注入实现知识编辑",
+      "canonical_evidence": "参数知识注入实现知识编辑",
+      "llm_tldr_en": "DMoE proposes a decoupled mixture-of-experts architecture for parametric knowledge injection in LLMs, enabling modular and updatable expert modules without catastrophic forgetting, evaluated on knowledge-intensive tasks.",
+      "llm_tldr_cn": "针对现有知识注入方法在灵活性和集成性上的权衡，本文提出解耦专家混合（DMoE）架构，将外部知识语料解耦为独立可更新的专家模块，通过轻量级路由器与基座模型分离，避免了灾难性遗忘和知识冲突。实验表明，DMoE在多个知识密集型任务上有效提升了知识注入能力，同时保持了模型的原有性能。该工作为大规模语言模型的知识编辑提供了模块化、低成本的解决方案。",
+      "llm_tldr": "针对现有知识注入方法在灵活性和集成性上的权衡，本文提出解耦专家混合（DMoE）架构，将外部知识语料解耦为独立可更新的专家模块，通过轻量级路由器与基座模型分离，避免了灾难性遗忘和知识冲突。实验表明，DMoE在多个知识密集型任务上有效提升了知识注入能力，同时保持了模型的原有性能。该工作为大规模语言模型的知识编辑提供了模块化、低成本的解决方案。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.12747v1",
+      "source": "arxiv",
+      "title": "Prefill Awareness in Large Language Models",
+      "abstract": "Safety-relevant studies of language models, including alignment and jailbreaking evaluations and AI control protocols, often rely on prefilling model outputs. If AI models can recognize and act on the fact their prior assistant messages have been inserted or edited, the effectiveness and validity of these methods could be compromised. We investigate whether frontier language models can distinguish between tampered and untampered assistant-side context, a capability we call prefill awareness. To do so, we construct a binary preference benchmark across three prefill mechanisms, filtering for cases where models show consistent stances. We find that frontier models show substantial prefill awareness: Claude Opus 4.5 detects prefills opposing its preferences in 9-35% of cases with a 0% false positive rate when prompted; additionally, models often revert towards baseline behavior without explicitly reporting that the prefill was foreign. Controlled ablations later also show that detection and resistance rely on different cues, where stylistic mismatch mainly affects whether models flag a prefill as foreign, while preference mismatch mainly affects whether they revert toward their baseline answer. We also examine more realistic agentic settings such as misalignment-continuation evaluations and SWE-bench trajectories, where frontier models sometimes disavow prefilled assistant turns in ways that depend strongly on dataset, task success, and hidden formatting artifacts. Our results indicate that prefill awareness is already a substantial confound for some prefill-based methods. We recommend that model developers track this capability in frontier systems.",
+      "authors": [
+        "Andy Wang",
+        "Parv Mahajan",
+        "David Demitri Africa",
+        "Alexandra Souly",
+        "Jordan Taylor",
+        "Robert Kirk"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-10T23:26:39+00:00",
+      "link": "https://arxiv.org/pdf/2606.12747v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "investigates whether LLMs detect edited assistant-side context, impacting safety evaluations",
+      "llm_evidence_cn": "研究LLM能否检测到助手侧上下文被编辑，影响安全性评估",
+      "llm_evidence": "研究LLM能否检测到助手侧上下文被编辑，影响安全性评估",
+      "canonical_evidence": "研究LLM能否检测到助手侧上下文被编辑，影响安全性评估",
+      "llm_tldr_en": "Shows frontier LLMs can detect when their prior assistant messages have been inserted or edited, a capability called prefill awareness, which can compromise safety evaluation methods like alignment and jailbreaking tests.",
+      "llm_tldr_cn": "本文研究前沿大语言模型能否识别助手侧上下文被篡改或编辑，即预填充感知能力。通过构建二元偏好基准测试，覆盖三种预填充机制，发现Claude Opus 4.5等前沿模型在9-35%的案例中能检测到与其偏好相反的预填充。该能力可能破坏依赖预填充的安全评估方法，如对齐测试和越狱评估，为模型编辑安全领域带来新挑战，提示需要更鲁棒的编辑后安全验证策略。",
+      "llm_tldr": "本文研究前沿大语言模型能否识别助手侧上下文被篡改或编辑，即预填充感知能力。通过构建二元偏好基准测试，覆盖三种预填充机制，发现Claude Opus 4.5等前沿模型在9-35%的案例中能检测到与其偏好相反的预填充。该能力可能破坏依赖预填充的安全评估方法，如对齐测试和越狱评估，为模型编辑安全领域带来新挑战，提示需要更鲁棒的编辑后安全验证策略。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

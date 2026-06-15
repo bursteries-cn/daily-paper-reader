@@ -1,0 +1,269 @@
+Title: When to Write and When to Suppress: Route-Specialized Dual Adapters for Memory-Assisted Knowledge Editing
+
+URL Source: https://arxiv.org/pdf/2606.14668v1
+
+Published Time: Mon, 15 Jun 2026 01:14:48 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+# When to Write and When to Suppress: Route-Specialized Dual Adapters for Memory-Assisted Knowledge Editing 
+
+Yining Huang 
+
+huangyining1987@gmail.com 
+
+Abstract. Knowledge editing systems must update selected facts while preserving nearby but irrelevant behavior. This paper studies this prob-lem in a memory-assisted setting where an edit memory is retrieved at inference time and a parameter-efficient adapter corrects the model’s object preference. We argue that the central design question is not only how to write an edit, but also when to suppress it. We introduce RRDA, a route-specialized dual-adapter editor. A relevance router first decides whether a prompt should receive an edit memory. Routed prompts use an edit adapter trained to prefer the new object over the original object; unrouted non-direct prompts use a separate locality adapter trained to preserve or restore the original-object preference. We evaluate RRDA on three 1,000-case protocols, CounterFact, ZsRE, and MQuAKE-CF, un-der the same memory protocol and two 7B/8B base models. On Llama-3.1-8B-Instruct, RRDA obtains the best overall probability-preference accuracy on all three benchmarks: 0.8180 on CounterFact, 0.8946 on ZsRE, and 0.9922 on MQuAKE-CF. The same trend holds on Qwen3-8B. Router ablations show that the relevant memory boundary differs across datasets: a lexical neural router is safest on CounterFact, while BGE em-bedding routing is better on ZsRE and MQuAKE-CF. Component and module ablations show that the gain mainly comes from separating edit injection from off-route suppression rather than from simply increasing LoRA capacity. 
+
+Keywords: Knowledge editing · Parameter-efficient fine-tuning · LoRA 
+
+· Retrieval · Locality · Large language models 
+
+## 1 Introduction 
+
+Large language models store factual associations that may become outdated, wrong, or inconsistent with a target application. Knowledge editing aims to change such associations after pretraining without retraining the entire model [29, 2, 14, 12]. A useful editor should be reliable on the edited prompt, generalize to paraphrases, and remain local: nearby prompts that mention related subjects or relations should not inherit the edit. Locality is the hard part. In parametric editing, a local weight update can over-generalize to neighboring facts [13, 7]. In memory-based editing, a retrieved  
+
+> arXiv:2606.14668v1 [cs.LG] 12 Jun 2026 2Yining Huang
+
+edit can be injected into prompts where it does not belong [15, 27, 20]. Parameter-efficient fine-tuning (PEFT) does not remove this problem. A LoRA adapter [9] trained to promote the new object can be helpful on relevant prompts but unsafe if it is activated for an irrelevant prompt. Thus a memory-assisted editor must solve two linked decisions: when should the edit memory be retrieved, and which correction module should be active after retrieval? This paper builds around that observation. We use a probability-preference view of editing. Each case has a subject, a relation, an original object o0, and a desired new object o⋆. On direct and paraphrase prompts, success means that the model assigns a higher normalized log-probability to o⋆ than to o0. On locality prompts, success means that the protected or original object remains preferred. This metric is stricter than generation no-leak because it catches cases where the edited object has silently become more probable even if greedy decoding does not yet reveal it. We propose RRDA (Relevance-Routed Dual Adapters), a small memory-assisted editor that separates writing from suppression. A router chooses whether an input is relevant to a stored edit memory. If the prompt is direct or routed as relevant, RRDA inserts the memory and activates an edit LoRA adapter. If the prompt is not routed and is non-direct, RRDA does not insert memory and activates a separate locality adapter. The edit adapter is trained with edited-answer cross-entropy and pairwise ranking. The locality adapter is trained only to restore locality preferences. The route policy is fixed after validation, which makes the inference path deterministic and auditable. The experiments support a broader route-specialization story. First, router ablations show that no single relevance rule is best everywhere. CounterFact clean prompts favor subject or lexical neural routing; stress tests expose subject-only routing failures; ZsRE favors semantic embedding routing because local-ity prompts often share the subject but change the relation; MQuAKE-CF fa-vors semantic retrieval because multi-hop questions differ lexically from stored single-hop edits. Second, the main editor comparison uses three benchmarks, three method families, and two base models. Across CounterFact, ZsRE, and MQuAKE-CF, RRDA improves overall probability-preference accuracy over resource-matched LocFT-style and PRUNE-style PEFT baselines on both Llama-3.1-8B-Instruct [4] and Qwen3-8B [25]. Third, ablations show why: component ablations isolate the locality adapter’s role, and module sweeps show that expanding LoRA targets beyond q/v gives little benefit. Our contributions are: 
+
+– We formulate memory-assisted PEFT editing as a routed probability-preference problem, with one path for writing edits and another for suppressing off-route edit leakage. 
+
+– We introduce RRDA, a route-specialized dual-adapter editor that uses an edit adapter for routed prompts and a locality adapter for unrouted non-direct prompts. 
+
+– We provide a 3-benchmark, 3-method, 2-base-model evaluation under a shared memory protocol, plus router, adapter, and target-module ablations. Route-Specialized Dual Adapters 3
+
+– We clarify the limitations of the current protocol, especially that our MQuAKE-CF evaluation is probability-preference with synthetic locality rather than the official exact-match generation benchmark. 
+
+## 2 Related Work 
+
+Knowledge editing. Early work edited factual behavior through constrained fine-tuning or learned update networks [29, 2, 14]. ROME localizes factual associa-tions in transformer MLPs [12], and MEMIT extends this idea to many edits [13]. Later work studies scaling and stability, including MALMEN [18], null-space preservation in AlphaEdit [5], perturbation-restrained editing in PRUNE [11], and analyses of norm growth in sequential editing [7]. Our setting is more modest: base weights remain frozen, and edited knowledge is partly supplied by external memory. The question is how to route and correct probabilities safely. 
+
+Memory-based and in-context editors. SERAC routes inputs to a memory-based counterfactual model [15]. IKE shows that factual editing can be framed through in-context examples [27]. GRACE, WISE, and MemEIC study memory struc-tures for lifelong or continual editing [8, 20, 17]. These methods highlight an im-portant systems principle: the edit store is useful only when relevance is correctly identified. RRDA follows this hybrid direction, but focuses on route-conditioned low-rank correction rather than a standalone retrieval or reasoning engine. 
+
+PEFT-based editing. LoRA and QLoRA make low-rank adaptation practical for large models [9, 3]. Recent editing work explores efficient or sparse low-rank updates, including time-sensitive editing [6], RoseLoRA [19], MEMLA [24], and fine-tuning protocols that make FT competitive for editing [26]. In contrast, our adapter is not expected to store all edited facts by itself. The memory carries the edited fact; the adapter changes the probability boundary and the locality adapter suppresses off-route leakage. 
+
+Evaluation and routing. CounterFact is widely used for factual association edit-ing [12]. ZsRE tests relation extraction style edits [10], and MQuAKE-CF stresses multi-hop consequences after edits [28]. EasyEdit standardizes reliability, gen-erality, and locality tooling [21], while RippleEdits studies logical ripple effects [1]. Our router experiments also use semantic retrieval tools: BGE embeddings [23], sentence-transformer style scoring [16], and MiniLM cross-encoder rerank-ing [22]. The empirical point is that relevance routing is not universal; different benchmarks reward different no-route boundaries. 
+
+## 3 Methodology 
+
+3.1 Problem Setup 
+
+An edit case is represented as (s, r, o 0, o ⋆): subject, relation, original object, and new object. The memory bank contains one textual memory record per edit case. 4 Yining Huang 
+
+A query prompt x is direct, paraphrased, or local. Direct and paraphrase prompts should prefer o⋆; local prompts should prefer o0 or a protected locality answer. For a candidate object string y, we use length-normalized log-probability: 
+
+score θ,ϕ,g (x, y ) = 1
+
+|y|
+
+> |y|
+
+X
+
+> t=1
+
+log pθ,ϕ,g (yt | x, y <t ), (1) where θ is the frozen language model, ϕ denotes active LoRA parameters, and 
+
+g is the adapter gate. Direct and paraphrase prompts are correct when 
+
+score( x, o ⋆) > score( x, o 0), (2) while locality prompts are correct when the protected object remains preferred. Overall accuracy is the micro-average over all test prompts. 
+
+3.2 Relevance Routing and Memory Construction 
+
+The memory bank is built from direct edit records. CounterFact memory is a direct prompt followed by o⋆; ZsRE memory is a question-answer style record; MQuAKE-CF memory concatenates the requested single-hop rewrites in the composed case. At inference, a router chooses either one memory record or no memory. We evaluate four router families: 
+
+– Subject : route if the query contains the edited subject string. 
+
+– Subject+relation : require subject match plus relation-token overlap. 
+
+– NN : a hashed bag-of-words MLP over query-candidate pairs, trained with positive same-case pairs and random, locality, and hard subject negatives. 
+
+– Semantic : BGE embedding similarity, optionally followed by MiniLM cross-encoder reranking over the embedding top-k.The selected editor router is validation driven: CounterFact uses NN routing; ZsRE and MQuAKE-CF use BGE embedding routing. The router is not trained to decide which examples enter memory; the memory bank is fixed before eval-uation. 
+
+3.3 Route-Specialized Dual Adapters 
+
+Figure 1 shows RRDA. The edit adapter handles direct prompts and routed non-direct prompts. It is trained with edited-answer cross-entropy and pairwise ranking: 
+
+Ledit = λce Lce + λrank Lrank , (3) where 
+
+Lrank = softplus( m − score( x, y +) + score( x, y −)) . (4) For direct and paraphrase examples, (y+, y −) = ( o⋆, o 0). For locality examples used by the locality adapter, the preference is reversed. Route-Specialized Dual Adapters 5Query Prompt 
+
+> Relevance Router
+> EditMemory Selected
+> NoMemory Selected
+> WritePath EditAdapter
+> SuppressPath EditAdapter
+> FrozenLLM +Gate
+> routed
+> unrouted
+> PreferNewObject
+> PreferOriginalObject
+> whentowrite
+> whentosuppress
+
+Fig. 1. Route-specialized memory-assisted editing. A relevance router decides whether to retrieve edit memory. Routed prompts use the edit adapter and are optimized to prefer the new object. Unrouted non-direct prompts use the locality adapter and are optimized to prefer the protected original object. 
+
+The locality adapter is trained only on no-memory locality ranking examples: 
+
+Lloc = softplus( mloc − score( x, o 0) + score( x, o ⋆)) . (5) At inference, the fixed route policy is: 
+
+(ϕ, g )( x) = 
+
+
+
+(ϕedit , 0.75) , direct prompt ,
+
+(ϕedit , 0.50) , non-direct routed prompt ,
+
+(ϕloc , 0.75) , non-direct unrouted prompt .
+
+(6) The gates are selected on validation and then held fixed for all reported test results. This design makes the method deliberately simple: the module that writes an edit is not active when the router judges the prompt irrelevant. 
+
+3.4 Baselines 
+
+We compare with two resource-matched PEFT-style baselines under the same test items, memory bank, and router: 
+
+– LocFT-style : a single LoRA adapter trained with direct edited-answer cross-entropy, inspired by the strong fine-tuning baseline in model editing [26]. 
+
+– PRUNE-style : a single LoRA adapter trained with direct cross-entropy plus locality KL regularization, inspired by perturbation-restrained editing [11]. These are not official reproductions of LocFT-BF or PRUNE. They are local, resource-matched PEFT baselines designed to isolate the value of dual adapters under a shared memory protocol. 6 Yining Huang               
+
+> Table 1. Main evaluation protocols. Counts are prompt counts before validation/test filtering. MQuAKE-CF locality is synthetic cross-case locality in our probability-preference protocol, not the official MQuAKE-CF exact-match generation evaluation. Benchmark Edit cases Direct Paraphrase Locality / no-route CounterFact 1,000 1,000 2,000 3,000 CounterFact neighborhoods ZsRE 1,000 1,000 1,000 2,000 relation-specific locality prompts MQuAKE-CF 1,000 1,000 2,000 synthetic cross-case locality for editor eval
+
+## 4 Experiments 
+
+4.1 Setup 
+
+Table 1 summarizes the main protocols. All main runs use 1,000 edit cases per benchmark, 500 adapter steps, rank-8 LoRA, alpha 16, dropout 0.05, 4-bit model loading, and frozen base-model weights. The main Llama model is Llama-3.1-8B-Instruct; the robustness check uses Qwen3-8B. Experiments were run on a single 32GB GPU server. No paid external LLM API calls or annotation services were used. For CounterFact, the test split contains 800 direct, 1,600 paraphrase, and 1,600 locality prompts, with no non-direct prompt overlap between training, validation, and test. ZsRE and MQuAKE-CF are converted to the same local schema and evaluated under the same memory protocol. We report direct, para-phrase, locality, overall accuracy, and the router’s case-level correctness when applicable. 
+
+4.2 Main Results Across Benchmarks and Base Models 
+
+Table 2 gives the main results. RRDA has the highest overall accuracy on every benchmark for both base models. On Llama, RRDA improves over the better single-adapter baseline by 0.0250 on CounterFact, 0.0417 on ZsRE, and 0.0594 on MQuAKE-CF. On Qwen, the gains are 0.0105, 0.0583, and 0.0581. Figure 2 visualizes the same pattern. The gain is not uniform across benchmarks. On CounterFact, direct accu-racy is already near saturated for all methods, and the main gain is locality: RRDA reaches 0.9188 on Llama versus about 0.878 for the baselines. On ZsRE, the baselines have comparable paraphrase accuracy but much worse locality, which fits the same-subject different-relation failure mode. On MQuAKE-CF, RRDA improves all three metrics, but this result should be interpreted within our composed-memory probability protocol. 
+
+4.3 Router Ablation 
+
+Table 3 and Figure 3 show why router choice is part of the method rather than a replaceable detail. The phrase “different relevance boundaries” means Route-Specialized Dual Adapters 7 
+
+> Table 2. Main probability-preference results. All methods share the same split, mem-ory bank, and selected router within each benchmark. Bold indicates the best overall result for each model-benchmark block.
+
+Base model Benchmark Method Overall Direct Paraphrase Locality Llama-3.1-8B CounterFact 
+
+RRDA 0.8180 0.9975 0.6275 0.9188 LocFT-style 0.7928 0.9950 0.6063 0.8781 PRUNE-style 0.7930 0.9938 0.6088 0.8769 ZsRE 
+
+RRDA 0.8946 0.9675 0.8363 0.8800 LocFT-style 0.8529 0.9563 0.8400 0.7625 PRUNE-style 0.8525 0.9588 0.8363 0.7625 MQuAKE-CF 
+
+RRDA 0.9922 1.0000 0.9931 0.9825 LocFT-style 0.9328 0.9263 0.9225 0.9600 PRUNE-style 0.9319 0.9250 0.9213 0.9600 Qwen3-8B CounterFact 
+
+RRDA 0.8133 0.9988 0.6381 0.8956 LocFT-style 0.8025 0.9950 0.6413 0.8675 PRUNE-style 0.8028 0.9975 0.6406 0.8675 ZsRE 
+
+RRDA 0.8933 0.9713 0.8375 0.8713 LocFT-style 0.8346 0.9663 0.8425 0.6950 PRUNE-style 0.8350 0.9663 0.8438 0.6950 MQuAKE-CF 
+
+RRDA 0.9906 1.0000 0.9913 0.9800 LocFT-style 0.9325 0.9288 0.9244 0.9525 PRUNE-style 0.9322 0.9288 0.9219 0.9563 
+
+that the same surface cue is not safe for every dataset: CounterFact rewards routers that avoid over-routing locality prompts, ZsRE requires relation-sensitive routing because locality prompts may share the subject, and MQuAKE-CF needs semantic retrieval for multi-hop questions. On CounterFact, BGE has the highest pair F1, but it over-routes neighborhoods and drops no-route locality to 0.4900; we therefore select NN because it has the best route accuracy and no-route locality. On ZsRE and MQuAKE-CF, BGE is selected because it gives the best route accuracy. We also ran a CounterFact stress set with lexical distractors, same-subject different-relation negatives, and multi-subject prompts. Subject-only routing reaches only 0.7925 route accuracy because it routes distractors whenever the subject appears. The NN router reaches about 0.9900 route accuracy on this stress set. This motivates hybrid future routers: semantic retrieval for recall plus supervised calibration for no-route boundaries. 
+
+4.4 Component Ablation 
+
+Table 4 isolates the two adapters. On CounterFact, editor-only has stronger paraphrase behavior than suppressor-only but worse locality; suppressor-only has 8 Yining Huang CounterFact ZsRE MQuAKE     
+
+> 0.75
+> 0.80
+> 0.85
+> 0.90
+> 0.95
+> 1.00
+> Overall probability-preference accuracy  Llama-3.1-8B
+> CounterFact ZsRE MQuAKE
+> Qwen3-8B
+> RRDA LocFT-style PRUNE-style
+
+Fig. 2. Overall probability-preference accuracy on two base models. RRDA is best on all three benchmarks for both Llama-3.1-8B and Qwen3-8B. 
+
+Table 3. Router ablation. The selected router is used in the main editor evaluation. Dashes indicate that a no-route locality split is not part of the router-only MQuAKE-CF protocol. Benchmark Router Selected Pair F1 Route acc. Direct No-route CounterFact subject no 0.8129 0.8633 0.9900 0.9800 CounterFact NN yes 0.8258 0.8667 1.0000 0.9850 CounterFact BGE no 0.8889 0.7567 1.0000 0.4900 ZsRE subject no 0.6143 0.6150 0.9550 0.0000 ZsRE subject+relation no 0.8632 0.8700 0.9750 0.9100 ZsRE BGE yes 0.8849 0.9067 1.0000 0.9000 MQuAKE-CF subject no 0.7740 0.6300 0.6200 –MQuAKE-CF NN no 0.8590 0.7767 0.8133 –MQuAKE-CF BGE yes 0.9926 1.0000 1.0000 –
+
+better locality but worse direct and paraphrase. The full dual policy combines the relevant strengths. ZsRE is even clearer: the suppressor-only row has high locality but lower edit accuracy, while the dual policy recovers a better overall balance. MQuAKE-CF is the outlier because the current semantic router routes almost all evaluated prompts into the edit path; therefore the locality adapter is rarely used. 
+
+4.5 Target Module Ablation 
+
+We next test whether the method’s gain comes simply from more LoRA target modules. Table 5 reports a rank-8, 500-step CounterFact target-module sweep. We intentionally report the practically relevant target sets used in the main design. q/v reaches the best overall among the shown settings, while attention-Route-Specialized Dual Adapters 90.0 0.2 0.4 0.6 0.8 1.0      
+
+> Accuracy
+> CounterFact / subject
+> CounterFact / NN
+> CounterFact / BGE
+> ZsRE / subject
+> ZsRE / subject+rel
+> ZsRE / BGE
+> MQuAKE / subject
+> MQuAKE / NN
+> MQuAKE / BGE
+> Route accuracy
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Accuracy
+> CounterFact / subject
+> CounterFact / NN
+> CounterFact / BGE
+> ZsRE / subject
+> ZsRE / subject+rel
+> ZsRE / BGE
+> MQuAKE no-route prompts are not part of this router-only split.
+> No-route locality
+
+Fig. 3. Different relevance boundaries are needed across benchmarks. CounterFact se-lects NN because it preserves no-route locality, while ZsRE and MQuAKE-CF select BGE semantic routing. 
+
+all, MLP, and all-module LoRA add many more trainable parameters without improving accuracy. Figure 5 shows the same pattern. 
+
+## 5 Discussion 
+
+The experiments support three lessons. First, the boundary for relevant memory is dataset dependent. A subject router can be strong on clean CounterFact, but it fails relation-specific locality on ZsRE and lexical distractors in stress tests. A semantic router improves ZsRE and MQuAKE-CF, but can over-route CounterFact neighborhoods. Second, edit injection and locality preservation are different operations. The edit adapter is useful when the memory is relevant; the locality adapter is useful when the system should avoid using the edit. Third, simply increasing LoRA capacity is not enough. The strongest evidence is the component ablation, where the two adapters have visibly different strengths. The method should therefore be read as a route-specialized design pattern rather than a claim of universal state of the art. It is attractive because it is deterministic, cheap, and auditable: memory records are explicit, the router can be inspected, and the active adapter is known for each prompt. This is useful in applications where edit provenance matters and where silent probability leakage is unacceptable. 10 Yining Huang 
+
+Table 4. Component ablation on Llama-3.1-8B. The dual row is the corresponding main-result RRDA run. Benchmark Component Overall Direct Paraphrase Locality CounterFact editor only 0.8038 0.9975 0.6325 0.8781 CounterFact suppressor only 0.7998 0.9850 0.5888 0.9181 CounterFact dual policy 0.8180 0.9975 0.6275 0.9188 
+
+ZsRE editor only 0.8588 0.9675 0.8463 0.7625 ZsRE suppressor only 0.8788 0.9413 0.8138 0.8813 
+
+ZsRE dual policy 0.8946 0.9675 0.8363 0.8800 MQuAKE-CF editor only 0.9922 1.0000 0.9931 0.9825 
+
+MQuAKE-CF suppressor only 0.9238 0.9238 0.9050 0.9613 MQuAKE-CF dual policy 0.9922 1.0000 0.9931 0.9825 CounterFact ZsRE MQuAKE   
+
+> 0.75
+> 0.80
+> 0.85
+> 0.90
+> 0.95
+> 1.00
+> Locality accuracy
+> Editor only Suppressor only Dual policy
+
+Fig. 4. Locality in the component ablation. The locality adapter is most informative on CounterFact and ZsRE, where off-route prompts are present and nontrivial. 
+
+## 6 Limitations 
+
+There are several important limitations. First, the baselines are resource-matched PEFT-style implementations, not official reproductions of LocFT-BF, PRUNE, ROME, MEMIT, MEND, SERAC, or MeLLo under EasyEdit. Second, MQuAKE-CF is evaluated with composed edit memory and probability preference plus synthetic locality; it is not the official MQuAKE-CF exact-match generation benchmark. Third, CounterFact paraphrase accuracy remains low, around 0.63, even though direct and locality accuracy are high. This suggests that paraphrase augmentation or stronger semantic routing is still needed. Fourth, the current semantic router is not calibrated enough for CounterFact no-route locality. Fifth, all main results use 7B/8B instruction models and short 500-step adapter train-ing; larger models and longer sequential-edit settings may reveal different failure modes. Finally, the method can edit model behavior in ways that may be socially Route-Specialized Dual Adapters 11 
+
+Table 5. Rank-8, 500-step target-module ablation on CounterFact. The main method uses q/v as a compact default. Target set Trainable params Overall Direct Paraphrase Locality v 1.31M 0.8013 0.9975 0.6269 0.8775 q/v 3.41M 0.8033 0.9975 0.6319 0.8775 attention 6.82M 0.8028 0.9975 0.6306 0.8775 MLP 14.16M 0.8010 0.9975 0.6263 0.8775 all modules 20.97M 0.8020 0.9975 0.6288 0.8775 2.5 5.0 7.5 10.0 12.5 15.0 17.5 20.0     
+
+> Trainable parameters (millions)
+> 0.625
+> 0.650
+> 0.675
+> 0.700
+> 0.725
+> 0.750
+> 0.775
+> 0.800
+> Accuracy
+> vqv attn mlp all
+> Overall
+> Paraphrase
+
+Fig. 5. More target modules do not materially improve CounterFact accuracy under the rank-8, 500-step setting. 
+
+sensitive, so deployment should require edit authorization, provenance logging, and post-edit audits. 
+
+## 7 Conclusion 
+
+We presented RRDA, a route-specialized dual-adapter editor for memory-assisted knowledge editing. The method asks two separate questions: when should an edit be written, and when should its effect be suppressed? A relevance router chooses memory; an edit adapter handles routed prompts; a locality adapter handles unrouted non-direct prompts. Across CounterFact, ZsRE, and MQuAKE-CF, and across Llama-3.1-8B and Qwen3-8B, this simple separation gives the best overall probability-preference accuracy among the tested method families. The ablations show that the core improvement is not just LoRA capacity, but the explicit separation of edit injection from off-route locality suppression. 
+
+## References 
+
+1. Cohen, R., Biran, E., Yoran, O., Globerson, A., Geva, M.: Evaluat-ing the ripple effects of knowledge editing in language models. Transac-12 Yining Huang tions of the Association for Computational Linguistics 12 , 283–298 (2024). https://doi.org/10.1162/tacl_a_00644 2. De Cao, N., Aziz, W., Titov, I.: Editing factual knowledge in language models. In: Proceedings of the 2021 Conference on Empirical Methods in Natural Lan-guage Processing. pp. 6491–6506 (2021). https://doi.org/10.18653/v1/2021.emnlp-main.522 3. Dettmers, T., Pagnoni, A., Holtzman, A., Zettlemoyer, L.: QLoRA: Efficient fine-tuning of quantized LLMs. In: Advances in Neural Information Processing Systems. vol. 36 (2023) 4. Dubey, A., Jauhri, A., Pandey, A., Kadian, A., Al-Dahle, A., Letman, A., Mathur, A., Schelten, A., Yang, A., Fan, A., et al.: The Llama 3 herd of models. arXiv preprint arXiv:2407.21783 (2024) 5. Fang, J., Jiang, H., Wang, K., Ma, Y., Shi, J., Wang, X., He, X., Chua, T.S.: AlphaEdit: Null-space constrained knowledge editing for language models. In: In-ternational Conference on Learning Representations (2025) 6. Ge, X., Mousavi, A., Grave, E., Joulin, A., Qian, K., Han, B., Arefiyan, M., Li, Y.: Time sensitive knowledge editing through efficient finetuning. arXiv preprint arXiv:2406.04496 (2024) 7. Gupta, A., Fang, C., Ozdemir, A., Lu, M., Alaa, A., Hartvigsen, T., Anu-manchipalli, G.: Norm growth and stability challenges in localized sequential knowledge editing. arXiv preprint arXiv:2502.19416 (2025) 8. Hartvigsen, T., Sankaranarayanan, S., Palangi, H., Kim, Y., Ghassemi, M.: Ag-ing with GRACE: Lifelong model editing with discrete key-value adaptors. arXiv preprint arXiv:2211.11031 (2023) 9. Hu, E.J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., Wang, L., Chen, W.: LoRA: Low-rank adaptation of large language models. In: International Conference on Learning Representations (2022) 10. Levy, O., Seo, M., Choi, E., Zettlemoyer, L.: Zero-shot relation extraction via read-ing comprehension. In: Proceedings of the 21st Conference on Computational Nat-ural Language Learning. pp. 333–342 (2017). https://doi.org/10.18653/v1/K17-1034 11. Ma, J.Y., Wang, H., Xu, H.X., Ling, Z.H., Gu, J.C.: Perturbation-restrained se-quential model editing. In: International Conference on Learning Representations (2025) 12. Meng, K., Bau, D., Andonian, A., Belinkov, Y.: Locating and editing factual asso-ciations in GPT. In: Advances in Neural Information Processing Systems. vol. 35 (2022) 13. Meng, K., Sharma, A.S., Andonian, A., Belinkov, Y., Bau, D.: Mass-editing mem-ory in a transformer. In: International Conference on Learning Representations (2023) 14. Mitchell, E., Lin, C., Bosselut, A., Manning, C.D., Finn, C.: Fast model editing at scale. In: International Conference on Learning Representations (2022) 15. Mitchell, E., Lin, C., Bosselut, A., Manning, C.D., Finn, C.: Memory-based model editing at scale. In: Proceedings of the 39th International Conference on Machine Learning. Proceedings of Machine Learning Research, vol. 162, pp. 15817–15831 (2022) 16. Reimers, N., Gurevych, I.: Sentence-BERT: Sentence embeddings using siamese BERT-networks. In: Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natu-ral Language Processing. pp. 3982–3992 (2019). https://doi.org/10.18653/v1/D19-1410 Route-Specialized Dual Adapters 13 17. Seong, J., Park, J., Liermann, W., Choi, H., Nam, Y., Kim, H., Lim, S., Lee, N.: MemEIC: A step toward continual and compositional knowledge editing. In: Advances in Neural Information Processing Systems (2025) 18. Tan, C., Zhang, G., Fu, J.: Massive editing for large language models via meta learning. arXiv preprint arXiv:2311.04661 (2023) 19. Wang, H., Liu, T., Li, R., Cheng, M.X., Zhao, T., Gao, J.: RoseLoRA: Row and column-wise sparse low-rank adaptation of pre-trained language model for knowl-edge editing and fine-tuning. In: Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing (2024) 20. Wang, P., Li, Z., Zhang, N., Xu, Z., Yao, Y., Jiang, Y., Xie, P., Huang, F., Chen, H.: WISE: Rethinking the knowledge memory for lifelong model editing of large language models. In: Advances in Neural Information Processing Systems (2024) 21. Wang, P., Zhang, N., Tian, B., Xi, Z., Yao, Y., Xu, Z., Wang, M., Mao, S., Wang, X., Cheng, S., Liu, K., Ni, Y., Zheng, G., Chen, H.: EasyEdit: An easy-to-use knowledge editing framework for large language models. In: Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (System Demonstrations). pp. 82–93 (2024). https://doi.org/10.18653/v1/2024.acl-demos.9 22. Wang, W., Wei, F., Dong, L., Bao, H., Yang, N., Zhou, M.: MiniLM: Deep self-attention distillation for task-agnostic compression of pre-trained transformers. In: Advances in Neural Information Processing Systems. vol. 33 (2020) 23. Xiao, S., Liu, Z., Zhang, P., Muennighoff, N.: C-Pack: Packaged resources to ad-vance general chinese embedding. arXiv preprint arXiv:2309.07597 (2023) 24. Xie, J., Cao, P., Chen, Y., Chen, Y., Liu, K., Zhao, J.: MEMLA: Enhancing multi-lingual knowledge editing with neuron-masked low-rank adaptation. arXiv preprint arXiv:2406.11566 (2024) 25. Yang, A., Li, A., Yang, B., Zhang, B., Hui, B., Zheng, B., Yu, B., Gao, C., Huang, C., Lv, C., et al.: Qwen3 technical report. arXiv preprint arXiv:2505.09388 (2025) 26. Yang, W., Tang, R., Zang, H., Su, D., Cao, Q., Wang, J., Shen, H., Cheng, X., Sun, F.: Fine-tuning done right in model editing. In: International Conference on Learning Representations (2026) 27. Zheng, C., Li, L., Dong, Q., Fan, Y., Wu, Z., Xu, J., Chang, B.: Can we edit factual knowledge by in-context learning? In: Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing. pp. 4862–4876 (2023). https://doi.org/10.18653/v1/2023.emnlp-main.296 28. Zhong, Z., Wu, Z., Manning, C.D., Potts, C., Chen, D.: MQuAKE: Assessing knowledge editing in language models via multi-hop questions. In: Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing. pp. 15686–15702 (2023). https://doi.org/10.18653/v1/2023.emnlp-main.971 29. Zhu, C., Rawat, A.S., Zaheer, M., Bhojanapalli, S., Li, D., Yu, F.X., Kumar, S.: Modifying memories in transformer models. arXiv preprint arXiv:2012.00363 (2020)
