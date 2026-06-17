@@ -6,30 +6,38 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-16
-- 运行时间：2026-06-16 22:47:09 UTC
+- 最新运行日期：2026-06-17
+- 运行时间：2026-06-17 21:31:18 UTC
 - 运行状态：成功
-- 本次总论文数：2
-- 精读区：1
-- 速读区：1
+- 本次总论文数：6
+- 精读区：3
+- 速读区：3
 
 ### 今日简报（AI）
-今日精读1篇、速读1篇，聚焦KV缓存与推理模型安全。
-
-最值得关注的是9.0分精读《KVEraser》，提出通过控制KV缓存实现高效的局部上下文擦除。
-
-建议优先精读该论文，了解其缓存调控机制；速读可了解大推理模型的安全意识触发方法。
-- 详情：[/202606/16/README](/202606/16/README)
+今日聚焦知识编辑与模型遗忘两项前沿研究，均获9.0高分推荐。精读方向明确指向“何时写入抑制”和“鲁棒遗忘”两大核心问题，值得优先关注。建议后续深入阅读原文及相关代码实现，并尝试在自用模型中验证双适配器方法的实际效果。
+- 详情：[/202606/17/README](/202606/17/README)
 
 ### 精读区论文标签
-1. [KVEraser: Learning to Steer KV Cache for Efficient Localized Context Erasing](/202606/16/2606.17034v1-kveraser-learning-to-steer-kv-cache-for-efficient-localized-context-erasing)  
+1. [When to Write and When to Suppress: Route-Specialized Dual Adapters for Memory-Assisted Knowledge Editing](/202606/17/2606.14668v2-when-to-write-and-when-to-suppress-route-specialized-dual-adapters-for-memory-assisted-knowledge-editing)  
    标签：评分：9.0/10、query:model-edit
-   evidence：KV缓存编辑用于局部上下文擦除，直接适用于模型编辑以提升安全性
+   evidence：直接知识编辑方法，采用双适配器
+2. [RepSelect: Robust LLM Unlearning via Representation Selectivity](/202606/17/2606.17168v1-repselect-robust-llm-unlearning-via-representation-selectivity)  
+   标签：评分：9.0/10、query:model-edit
+   evidence：大语言模型中的遗忘方法，属于知识编辑
+3. [GAS-Leak-LLM: Genetic Algorithm-Based Suffix Optimization for Black-Box LLM Jailbreaking](/202606/17/2606.15788v1-gas-leak-llm-genetic-algorithm-based-suffix-optimization-for-black-box-llm-jailbreaking)  
+   标签：评分：8.0/10、query:model-edit
+   evidence：使用遗传算法的越狱攻击以绕过安全约束
 
 ### 速读区论文标签
-1. [Adaptive and Explicit safe: Triggering Latent Safety Awareness in Large Reasoning Models](/202606/16/2606.16808v1-adaptive-and-explicit-safe-triggering-latent-safety-awareness-in-large-reasoning-models)  
+1. [Risk Under Pressure: Compute-Aware Evaluation of Adversarial Robustness in Language Models](/202606/17/2606.11409v1-risk-under-pressure-compute-aware-evaluation-of-adversarial-robustness-in-language-models)  
    标签：评分：6.0/10、query:model-edit
-   evidence：通过SFT触发潜在安全意识实现安全对齐
+   evidence：提出计算感知的对抗鲁棒性评估框架，可用于衡量模型编辑对攻击的防御效果
+2. [SHARD: Safe and Helpful Alignment via Self-Reframing Distillation](/202606/17/2606.15517v1-shard-safe-and-helpful-alignment-via-self-reframing-distillation)  
+   标签：评分：6.0/10、query:model-edit
+   evidence：自重构蒸馏实现安全有用对齐，与安全对齐编辑相关
+3. [Automated jailbreak attack targeting multiple defense strategies](/202606/17/2606.16751v1-automated-jailbreak-attack-targeting-multiple-defense-strategies)  
+   标签：评分：6.0/10、query:model-edit
+   evidence：自动化越狱攻击框架，用于测试模型编辑防御方法
 
 
 <div class="dpr-home-promo-card">

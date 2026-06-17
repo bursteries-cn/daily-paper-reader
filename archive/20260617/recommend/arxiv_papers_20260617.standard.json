@@ -1,0 +1,251 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-17T21:27:33.689018+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 3,
+    "deep_cap": 6,
+    "deep_selected": 3,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [
+    {
+      "id": "2606.14668v2",
+      "source": "arxiv",
+      "title": "When to Write and When to Suppress: Route-Specialized Dual Adapters for Memory-Assisted Knowledge Editing",
+      "abstract": "Knowledge editing systems must update selected facts while preserving nearby but irrelevant behavior. This paper studies this problem in a memory-assisted setting where an edit memory is retrieved at inference time and a parameter-efficient adapter corrects the model's object preference. We argue that the central design question is not only how to write an edit, but also when to suppress it. We introduce \\method{}, a route-specialized dual-adapter editor. A relevance router first decides whether a prompt should receive an edit memory. Routed prompts use an edit adapter trained to prefer the new object over the original object; unrouted non-direct prompts use a separate locality adapter trained to preserve or restore the original-object preference. We evaluate \\method{} on three 1,000-case protocols, \\cf{}, \\zsre{}, and \\mquake{}, under the same memory protocol and two 7B/8B base models. On Llama-3.1-8B-Instruct, \\method{} obtains the best overall probability-preference accuracy on all three benchmarks: 0.8180 on \\cf{}, 0.8946 on \\zsre{}, and 0.9922 on \\mquake{}. The same trend holds on Qwen3-8B. Router ablations show that the relevant memory boundary differs across datasets: a lexical neural router is safest on \\cf{}, while BGE embedding routing is better on \\zsre{} and \\mquake{}. Component and module ablations show that the gain mainly comes from separating edit injection from off-route suppression rather than from simply increasing LoRA capacity.",
+      "authors": [
+        "Baijia Zhang",
+        "Yining Huang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-06-12T17:37:32+00:00",
+      "link": "https://arxiv.org/pdf/2606.14668v2",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "direct knowledge editing method with dual adapters",
+      "llm_evidence_cn": "直接知识编辑方法，采用双适配器",
+      "llm_evidence": "直接知识编辑方法，采用双适配器",
+      "canonical_evidence": "直接知识编辑方法，采用双适配器",
+      "llm_tldr_en": "Proposes a route-specialized dual-adapter editor for memory-assisted knowledge editing, with a relevance router to decide when to apply edits vs preserve locality.",
+      "llm_tldr_cn": "知识编辑系统需要更新选定事实同时保持无关行为不变。本文针对记忆辅助场景，提出路由专用双适配器编辑方法，包含相关性路由器决定是否应用编辑，编辑适配器学习新对象偏好，局部性适配器维护未路由提示的原始行为。实验验证了在准确编辑和保持局部性上的有效性，为知识编辑提供了可泛化的框架。",
+      "llm_tldr": "知识编辑系统需要更新选定事实同时保持无关行为不变。本文针对记忆辅助场景，提出路由专用双适配器编辑方法，包含相关性路由器决定是否应用编辑，编辑适配器学习新对象偏好，局部性适配器维护未路由提示的原始行为。实验验证了在准确编辑和保持局部性上的有效性，为知识编辑提供了可泛化的框架。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.17168v1",
+      "source": "arxiv",
+      "title": "RepSelect: Robust LLM Unlearning via Representation Selectivity",
+      "abstract": "Making large language models (LLMs) deeply forget specific knowledge and values without sacrificing general capabilities remains a central challenge in unlearning. However, current methods are easily reversed by fine-tuning or few-shot prompting, suggesting their forgetting is only shallow. We identify the root cause. Existing methods target representations shared with both the retain set and the subspace recovered by a fine-tuning attacker, making unlearning both disruptive to general capabilities and easy to reverse. We propose RepSelect (Representation Selectivity), isolates forget-set-specific representations by collapsing top principal components of weight gradients before each update, leaving general capabilities intact while limiting what fine-tuning can recover. We evaluate across two forget categories, biohazardous knowledge and abusive tendencies, and four model families spanning dense and Mixture-of-Experts architectures (Llama 3, Qwen 3.5, Gemma 4 E4B, DeepSeek V2 Lite). Compared to five popular baselines (GradDiff, NPO, SimNPO, RMU, UNDIAL), RepSelect achieves a 4-50x larger reduction in post-relearning answer accuracy than the strongest baseline, and is near-perfectly robust to few-shot prompting attacks. Targeting selective representations is thus an important step towards deep and robust LLM forgetting.",
+      "authors": [
+        "Filip Sondej",
+        "Yushi Yang",
+        "Adam Mahdi"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-15T18:06:59+00:00",
+      "link": "https://arxiv.org/pdf/2606.17168v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "unlearning for knowledge removal in LLMs",
+      "llm_evidence_cn": "大语言模型中的遗忘方法，属于知识编辑",
+      "llm_evidence": "大语言模型中的遗忘方法，属于知识编辑",
+      "canonical_evidence": "大语言模型中的遗忘方法，属于知识编辑",
+      "llm_tldr_en": "RepSelect achieves robust LLM unlearning by isolating forget-set-specific representations via collapsing top principal components of weight gradients.",
+      "llm_tldr_cn": "针对当前遗忘方法易被微调或少量样本提示逆转、且破坏通用能力的问题，本文提出RepSelect。该方法通过压缩权重梯度的主成分来隔离遗忘集特定表示，保持通用能力的同时限制微调攻击者的恢复能力。实验证明RepSelect显著提升遗忘鲁棒性，为知识编辑的安全应用提供关键技术。",
+      "llm_tldr": "针对当前遗忘方法易被微调或少量样本提示逆转、且破坏通用能力的问题，本文提出RepSelect。该方法通过压缩权重梯度的主成分来隔离遗忘集特定表示，保持通用能力的同时限制微调攻击者的恢复能力。实验证明RepSelect显著提升遗忘鲁棒性，为知识编辑的安全应用提供关键技术。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.15788v1",
+      "source": "arxiv",
+      "title": "GAS-Leak-LLM: Genetic Algorithm-Based Suffix Optimization for Black-Box LLM Jailbreaking",
+      "abstract": "Large Language Models (LLMs) constitute pivotal components within the AI-dominated information technology ecosystem. To mitigate risks associated with harmful or policy-violating outputs, commercial systems employ advanced alignment strategies and multi-layered content moderation mechanisms. Despite these safeguards, recent research has demonstrated that LLMs remain vulnerable to adversarial manipulation, particularly through jailbreaking and prompt injection techniques. In this work, we propose GAS-Leak-LLM a novel jailbreaking attack based on a genetic algorithm that systematically evolves adversarial suffix to bypass safety constraints. Operating in a strict black-box setting, our method requires no access to model parameters or internals, thereby reflecting realistic threat scenarios in deployed systems. Through the iterative application of selection, mutation, and crossover heuristics, the framework systematically explores the discrete prompt space to identify high-fitness adversarial suffixes. Empirical findings reveal critical shortcomings in existing safety enforcement mechanisms and confirm the effectiveness and practical viability of the proposed attack.",
+      "authors": [
+        "Aman Anifer",
+        "Vignesh Kumar Kembu",
+        "Vishnu M",
+        "Antonino Nocera",
+        "Vinod P.",
+        "Amal Murali PK",
+        "Akshay S Rajan"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-06-14T12:41:21+00:00",
+      "link": "https://arxiv.org/pdf/2606.15788v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "jailbreaking attack using genetic algorithm to bypass safety constraints",
+      "llm_evidence_cn": "使用遗传算法的越狱攻击以绕过安全约束",
+      "llm_evidence": "使用遗传算法的越狱攻击以绕过安全约束",
+      "canonical_evidence": "使用遗传算法的越狱攻击以绕过安全约束",
+      "llm_tldr_en": "Proposes GAS-Leak-LLM, a black-box jailbreaking attack using genetic algorithm to evolve adversarial suffixes, successfully bypassing safety constraints across multiple LLMs.",
+      "llm_tldr_cn": "提出GAS-Leak-LLM黑盒越狱攻击方法，基于遗传算法进化对抗后缀以绕过安全约束；在严格黑盒设置下无需模型参数或内部信息；实验证明该方法能有效越狱多种LLM，揭示了模型编辑安全的新风险。",
+      "llm_tldr": "提出GAS-Leak-LLM黑盒越狱攻击方法，基于遗传算法进化对抗后缀以绕过安全约束；在严格黑盒设置下无需模型参数或内部信息；实验证明该方法能有效越狱多种LLM，揭示了模型编辑安全的新风险。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.11409v1",
+      "source": "arxiv",
+      "title": "Risk Under Pressure: Compute-Aware Evaluation of Adversarial Robustness in Language Models",
+      "abstract": "Adversarial robustness evaluations of large language models (LLMs) typically report attack success rate (ASR) under fixed query budgets, implicitly treating all attacks as equally costly. In practice, the computational expense of different attack strategies can vary by orders of magnitude. Consequently, ASR at a fixed budget can obscure the true effort required to jailbreak a model, thereby making it hard to determine whether an attack's cost justifies its payoff to the attacker. We propose a compute-aware evaluation framework based on computational pressure, measured in cumulative floating-point operations (FLOPs), as a proxy for adversarial effort. We introduce risk-compute curves, which map compute budgets to attack risk, and derive two metrics that summarize the average pressure required for a given attack to succeed. Across ten models spanning three families and four different stages in language model training and alignment, evaluated with three attack strategies (gradient-based, iterative refinement, and template-based) on two jailbreak robustness benchmarks, we find: (1) alignment training has non-monotonic effects on compute-space robustness; (2) scaling model size reduces gradient-based attack effectiveness but has limited impact on cheaper template-based attacks; (3) gradient-based attacks optimized on a surrogate model can transfer to a separate target model, providing a way to reduce attacker costs; (4) compute cost varies by up to ${\\approx}5{\\times}$ across harm categories within a single model; and (5) safety-aligned RL increases aggregate cost while leaving some categories disproportionately accessible. We release our framework to enable compute-aware risk assessment and evaluation.",
+      "authors": [
+        "Malikeh Ehghaghi",
+        "Boglárka Ecsedi",
+        "Marsha Chechik",
+        "Colin Raffel"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CR"
+      ],
+      "published": "2026-06-09T19:59:12+00:00",
+      "link": "https://arxiv.org/pdf/2606.11409v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Compute-aware evaluation framework for adversarial robustness, useful for assessing model editing defenses",
+      "llm_evidence_cn": "提出计算感知的对抗鲁棒性评估框架，可用于衡量模型编辑对攻击的防御效果",
+      "llm_evidence": "提出计算感知的对抗鲁棒性评估框架，可用于衡量模型编辑对攻击的防御效果",
+      "canonical_evidence": "提出计算感知的对抗鲁棒性评估框架，可用于衡量模型编辑对攻击的防御效果",
+      "llm_tldr_en": "Risk Under Pressure introduces risk-compute curves to evaluate attack cost vs success, providing a tool to assess model editing effectiveness against jailbreaks.",
+      "llm_tldr_cn": "现有对抗鲁棒性评估以固定查询次数衡量攻击成功率，忽略了不同攻击的计算开销差异。本文提出计算压力（累积FLOPs）作为攻击努力代理，构建风险-计算曲线，映射计算预算与攻击风险的关系。该框架可公平比较不同攻击的性价比，并可用于评估模型编辑后模型的鲁棒性变化。为模型编辑防御的评估提供了更精确的度量。",
+      "llm_tldr": "现有对抗鲁棒性评估以固定查询次数衡量攻击成功率，忽略了不同攻击的计算开销差异。本文提出计算压力（累积FLOPs）作为攻击努力代理，构建风险-计算曲线，映射计算预算与攻击风险的关系。该框架可公平比较不同攻击的性价比，并可用于评估模型编辑后模型的鲁棒性变化。为模型编辑防御的评估提供了更精确的度量。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "How can model editing prevent attacks on large language models",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.15517v1",
+      "source": "arxiv",
+      "title": "SHARD: Safe and Helpful Alignment via Self-Reframing Distillation",
+      "abstract": "Large language models often struggle with sensitive prompts. They may refuse outright, provide generic safety boilerplate, or fail to address the user's legitimate informational needs that can be answered safely. We introduce SHARD, a self-reframing distillation method to improve safe-helpfulness. It first rewrites sensitive prompts to surface benign intent using philosophical guidelines, then reframes its original responses into safe, more helpful ones, and finally fine-tunes the model on its self-reframed responses. Across DNA and the English subset of LINGUASAFE, SHARD improves helpfulness for most model families while preserving safety. It also remains competitive with distillation from a larger teacher model, suggesting that models can internalize safe and helpful behavior elicited from their own. Warning: This paper contains content that may be offensive or harmful.",
+      "authors": [
+        "Viswonathan Manoranjan",
+        "Amogh Gupta",
+        "Anvesh Rao Vijjini",
+        "Thomas Hofweber",
+        "Snigdha Chaturvedi"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-14T00:12:53+00:00",
+      "link": "https://arxiv.org/pdf/2606.15517v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "self-reframing distillation for safe and helpful alignment, relevant to safety alignment editing",
+      "llm_evidence_cn": "自重构蒸馏实现安全有用对齐，与安全对齐编辑相关",
+      "llm_evidence": "自重构蒸馏实现安全有用对齐，与安全对齐编辑相关",
+      "canonical_evidence": "自重构蒸馏实现安全有用对齐，与安全对齐编辑相关",
+      "llm_tldr_en": "Introduces SHARD, a self-reframing distillation method that reframes sensitive prompts and responses to improve safe-helpfulness in LLMs while preserving safety, competitive with teacher distillation.",
+      "llm_tldr_cn": "针对大语言模型处理敏感提示时要么拒绝要么给出笼统安全回应的不足，提出SHARD自重构蒸馏方法。首先将敏感提示重写为良性意图，再将原始回应重构为安全且更有帮助的版本，最后在自重构数据上微调模型。在DNA和LINGUASAFE数据集上，SHARD在保持安全性的同时提升了有用性，与从大教师模型蒸馏效果相当，为安全对齐编辑提供了轻量级方案。",
+      "llm_tldr": "针对大语言模型处理敏感提示时要么拒绝要么给出笼统安全回应的不足，提出SHARD自重构蒸馏方法。首先将敏感提示重写为良性意图，再将原始回应重构为安全且更有帮助的版本，最后在自重构数据上微调模型。在DNA和LINGUASAFE数据集上，SHARD在保持安全性的同时提升了有用性，与从大教师模型蒸馏效果相当，为安全对齐编辑提供了轻量级方案。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.16751v1",
+      "source": "arxiv",
+      "title": "Automated jailbreak attack targeting multiple defense strategies",
+      "abstract": "Large language models (LLMs) have demonstrated remarkable capabilities across a wide range of tasks. However, their safety remains a critical concern due to their susceptibility to adversarial prompt-based attacks. In this paper, we present UNIATTACK, an adversarial testing framework designed from a defense-oriented perspective to systematically construct effective black-box attack prompts. Unlike prior approaches that rely on static templates or iterative model-specific tuning, UNIATTACK extracts minimal but high-impact attack features from diverse existing attacks, optimizes them via a specialized attacker LLM, and composes them into flexible templates through automated refinement process. This feature-centric construction enables one-shot attacks that generalize across multiple models and safety categories, providing a practical tool for assessing LLM robustness. Our evaluation results shows that compared to the baselines, UNIATTACK achieves an average attack success rate (ASR) improvement of 64.63\\%-248.82\\% on models deployed with multi-layered defense mechanisms and it only takes 0.03\\%-4.96\\% cost of the baselines. UNIATTACK artifact is available at https://anonymous.4open.science/r/UniAttack-Artifact-30F1.",
+      "authors": [
+        "Qi Wang",
+        "Chengcheng Wan",
+        "Weijia He",
+        "Yanqing Li",
+        "Hanqi Sun",
+        "Xiaodong Gu",
+        "Jiangtao Wang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-06-15T14:09:37+00:00",
+      "link": "https://arxiv.org/pdf/2606.16751v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Automated jailbreak attack framework for testing model editing defenses",
+      "llm_evidence_cn": "自动化越狱攻击框架，用于测试模型编辑防御方法",
+      "llm_evidence": "自动化越狱攻击框架，用于测试模型编辑防御方法",
+      "canonical_evidence": "自动化越狱攻击框架，用于测试模型编辑防御方法",
+      "llm_tldr_en": "UNIATTACK is an automated black-box attack framework that extracts attack features to generate one-shot jailbreak prompts, enabling evaluation of model editing defenses against jailbreaks.",
+      "llm_tldr_cn": "越狱攻击是LLM安全的主要威胁，现有攻击方法依赖于静态模板或模型特定优化。本文提出UNIATTACK，一种从防御视角设计的自动化攻击框架，通过从多种已有攻击中提取高影响力特征，由专用攻击者LLM优化并组合成灵活模板，实现一次性黑盒越狱攻击。实验表明UNIATTACK能有效绕过多种防御策略。该工作为评估模型编辑的越狱防御效果提供了可量化的攻击测试工具。",
+      "llm_tldr": "越狱攻击是LLM安全的主要威胁，现有攻击方法依赖于静态模板或模型特定优化。本文提出UNIATTACK，一种从防御视角设计的自动化攻击框架，通过从多种已有攻击中提取高影响力特征，由专用攻击者LLM优化并组合成灵活模板，实现一次性黑盒越狱攻击。实验表明UNIATTACK能有效绕过多种防御策略。该工作为评估模型编辑的越狱防御效果提供了可量化的攻击测试工具。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
