@@ -1,0 +1,69 @@
+{
+  "label": "2026-06-18",
+  "date": "2026-06-18",
+  "generated_at": "2026-06-18T22:07:29",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202606/18/2606.18309v1-sage-retain-aware-post-hoc-sanitization-of-final-unlearning-vector",
+      "section": "deep",
+      "title_en": "SAGE: Retain-Aware Post-Hoc Sanitization of Final Unlearning Vector",
+      "authors": "Jingyuan Zhang, Yucheng Bai, Peixi Wen, Zhehao Huang, Zhengbao He, Hanling Tian, Xinwen Cheng, Haiyin Ran, Xiaolin Huang",
+      "date": "2026-06-16",
+      "pdf": "https://arxiv.org/pdf/2606.18309v1",
+      "score": "10.0",
+      "evidence": "对LLM遗忘向量进行后处理清洗，属于模型编辑的一种形式",
+      "tldr": "大型语言模型遗忘在移除不良知识时往往损害保留能力。本文发现保留激活偏差可量化这种损害，提出后处理方法SAGE，通过分析保留数据的激活几何，闭式优化修正最终更新向量。实验证明该方法能有效缓解遗忘与保留的权衡，为机器遗忘提供新方向。",
+      "tags": "query:model-edit",
+      "abstract_en": "Large Language Model (LLM) unlearning aims to remove undesirable knowledge or behaviors while preserving retained capabilities. Current unlearning methods all involve a trade-off between unlearning and retention. We have found that the retention activation bias can also be used to quantify the damage an unlearning method inflicts on retention, without considering the specific implementation of the unlearning process. This allows us to restore retention performance for any unlearning method using a post-hoc approach. Therefore, we propose a complementary post-hoc setting to sanitize the final update vector without rerunning the original unlearning pipeline. In this setting, we design SAGE, Spectral Activation-GEometry Sanitization, a source-agnostic correction for final unlearning updates. SAGE collects real module inputs from a small retain proxy, extracts their dominant activation geometry, and solves a source-anchored optimization objective in closed form, which suppresses update components aligned with high-energy retained directions while preserving the source method's forgetting carrier. Across multiple unlearning methods, model scales, and benchmarks, SAGE consistently relieves the retain-forget trade-off, identifying post-hoc sanitization of final vectors as a practical and underexplored axis for machine unlearning.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/18/2606.18473v1-preunlearn-auditing-collateral-knowledge-damage-before-large-language-model-unlearning",
+      "section": "deep",
+      "title_en": "PreUnlearn: Auditing Collateral Knowledge Damage Before Large Language Model Unlearning",
+      "authors": "Bo Su, Ankit Shah, Thai Le",
+      "date": "2026-06-16",
+      "pdf": "https://arxiv.org/pdf/2606.18473v1",
+      "score": "9.0",
+      "evidence": "审计反学习损害用于知识编辑",
+      "tldr": "大语言模型机器遗忘旨在移除特定知识，但知识边界模糊导致附带损害。本文从数据视角测量遗忘影响在同域和远域知识中的传播，发现损害随语义距离衰减但持续存在。提出遗忘集审计，通过预遗忘预测任务分析数据特征，发现遗忘集与评估集的交互特征最能预测损害。该方法可作为早期预警工具，识别风险遗忘并设计更可靠的遗忘流程。",
+      "tags": "query:model-edit",
+      "abstract_en": "Machine unlearning for large language models (LLMs) aims to remove specified knowledge while preserving the rest of the model's capabilities. However, the boundary between knowledge to forget and knowledge to retain is often unclear, since related and even distant information may be entangled in the model. In this paper, we study LLM unlearning from a data-centric perspective and measure how unlearning effects propagate from the forget set to same-domain and distant-domain knowledge. We find a consistent decay pattern: collateral damage is strongest near the forget set, weakens with semantic distance, but does not disappear at domain boundaries. We further ask whether such damage can be audited before unlearning is executed. We formulate forget-set auditing as a pre-unlearning prediction task and analyze which data features are most predictive of downstream damage. Our results show that interaction features between the forget set and evaluation set provide the strongest signals, suggesting that collateral damage is partly reflected in data geometry before model updates occur. These findings position forget-set auditing as an early warning tool for identifying risky unlearning runs and designing more reliable unlearning procedures.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/18/2606.18767v1-output-vector-editing-for-memorization-mitigation-in-large-language-models",
+      "section": "deep",
+      "title_en": "Output Vector Editing for Memorization Mitigation in Large Language Models",
+      "authors": "Ahmad Dawar Hakimi, Kaiwei Lei, Isabelle Augenstein, Hinrich Schütze",
+      "date": "2026-06-17",
+      "pdf": "https://arxiv.org/pdf/2606.18767v1",
+      "score": "9.0",
+      "evidence": "通过修改输出向量的模型编辑以缓解记忆效应",
+      "tldr": "大型语言模型会记忆训练数据中的序列，引发隐私、版权和安全问题。现有神经元级编辑方法仅将激活置零，但输出向量才写入残差流并编码多个特征。本文提出输出向量编辑，通过约束优化定位少量MLP神经元，修改其输出向量在词汇空间引入干扰，不改变激活。在OLMo-7B上挖掘6831个记忆序列，抑制率达87.9%，比零消融高2.7倍；四种编辑模式组合覆盖96.5%。该方法揭示了约14%序列无法通过MLP编辑到达的机械边界，注意力头可恢复其中60-64%，定位注意力作为互补机制。编辑模式顺序和成功-局部性权衡跨模型迁移，成功率随模型规模提升。",
+      "tags": "query:model-edit",
+      "abstract_en": "Large language models memorize and reproduce sequences from their training data, creating privacy, copyright, and security risks. Existing neuron-level mitigation methods equate editing with zeroing out neuron activations, but the activation only controls whether a neuron engages; the output vector is what writes to the residual stream and, through superposition, encodes multiple features. We propose output vector editing, a constrained-optimization weight edit that locates a small set of MLP neurons responsible for a memorized continuation and minimally modifies their output vectors to introduce a distractor in vocabulary space, redirecting their residual-stream contributions while leaving activations unchanged. Evaluating on four models from 360M to 7B parameters (SmolLM-360M, OLMo-1B, OLMo-7B, Llama2-7B), we center on OLMo-7B (whose open weights and pretraining corpus enable systematic mining) and mine 6831 memorized sequences, achieving up to 87.9% suppression. The 2.7$\\times$ gap over zero ablation on the same located neurons shows the suppression comes from the output-vector edit, not localization alone. Four edit modes span a spectrum from aggressive suppression to minimal redirection; in ensemble they cover 96.5% of memorized sequences, while our recommended single-mode configuration reaches 81.5% with no catastrophic locality failures. We further identify a mechanistic boundary at ${\\sim}14%$ of sequences unreachable by MLP-only editing; while these failures are not attention-driven overall, ablating the top contributing attention heads recovers 60--64% of them, with stronger recovery on continuations that copy tokens from the prefix, positioning attention as a complementary fallback rather than a primary mechanism. Edit mode ordering and the success-locality trade-off transfer across all four models, with success rates scaling with model size rather than family.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/18/2606.17872v1-anchorkv-safety-aware-kv-cache-compression-via-soft-penalty-with-a-refusal-anchor",
+      "section": "quick",
+      "title_en": "AnchorKV: Safety-Aware KV Cache Compression via Soft Penalty with a Refusal Anchor",
+      "authors": "Ning Ni, Yingjie Lao",
+      "date": "2026-06-16",
+      "pdf": "https://arxiv.org/pdf/2606.17872v1",
+      "score": "7.0",
+      "evidence": "提出安全意识KV缓存压缩方法来防御越狱攻击",
+      "tldr": "大语言模型在长上下文推理时KV缓存开销巨大，现有压缩方法仅保留注意力相关token，但无法防御越狱攻击或导致安全对齐退化。AnchorKV通过离线构造安全锚点（基于表示工程），在token选择时对与有害提示方向相近的token施加软惩罚，从而偏向安全方向。实验表明，该方法在轻微牺牲推理效用的情况下显著提升安全对齐，且惩罚系数为零时完全退化为原压缩器。AnchorKV可作为即插即用模块增强任何KV缓存压缩器的安全性。",
+      "tags": "query:model-edit",
+      "abstract_en": "Large language models (LLMs) outperform earlier architectures on generative inference and long-context tasks, but their large size introduces significant challenges in memory usage, energy cost, and on-device deployment. Since scaling pre-trained language models improves downstream capability \\cite{zhao2023survey}, the key-value (KV) cache becomes a dominant inference bottleneck. Recent KV cache compression methods \\cite{jo2025fastkv,li2024snapkv,zhou2024dynamickv} reduce this cost by retaining only a subset of attention-relevant tokens. However, while these approaches preserve accuracy on benign workloads, their compression policies either fail to defend against jailbreak attacks \\cite{jiang2024robustkv} or degrade safety alignment under aggressive eviction.   We propose AnchorKV, a drop-in modification to KV cache compression that biases token retention scores away from directions in key space associated with harmful prompts. AnchorKV constructs an offline safety anchor by adapting a difference-of-means representation engineering approach \\cite{arditi2024refusal,zou2023representation} to the layer-specific key projection space used in KV caching. Based on this anchor, a soft penalty token selection rule trades a small amount of utility for substantially improved safety alignment, while reducing to the original compressor when the penalty is zero.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

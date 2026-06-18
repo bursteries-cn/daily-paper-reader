@@ -1,0 +1,367 @@
+Title: PreUnlearn: Auditing Collateral Knowledge Damage Before Large Language Model Unlearning
+
+URL Source: https://arxiv.org/pdf/2606.18473v1
+
+Published Time: Thu, 18 Jun 2026 00:16:06 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# PRE UNLEARN : Auditing Collateral Knowledge Damage Before Large Language Model Unlearning 
+
+Bo Su 
+
+Indiana University Bloomington, IN, USA 
+
+subo@iu.edu 
+
+Ankit Shah 
+
+Indiana University Bloomington, IN, USA 
+
+ankit@iu.edu 
+
+Thai Le 
+
+Indiana University Bloomington, IN, USA 
+
+tle@iu.edu 
+
+Abstract 
+
+Machine unlearning for large language mod-els (LLMs) aims to remove specified knowl-edge while preserving the rest of the model’s capabilities. However, the boundary between knowledge to forget and knowledge to retain is often unclear, since related and even distant information may be entangled in the model. In this paper, we study LLM unlearning from a data-centric perspective and measure how un-learning effects propagate from the forget set to same-domain and distant-domain knowledge. We find a consistent decay pattern: collateral damage is strongest near the forget set, weak-ens with semantic distance, but does not dis-appear at domain boundaries. We further ask whether such damage can be audited before un-learning is executed. We formulate forget-set auditing as a pre-unlearning prediction task and analyze which data features are most predic-tive of downstream damage. Our results show that interaction features between the forget set and evaluation set provide the strongest signals, suggesting that collateral damage is partly re-flected in data geometry before model updates occur. These findings position forget-set au-diting as an early warning tool for identifying risky unlearning runs and designing more reli-able unlearning procedures. 
+
+1 Introduction 
+
+As large language models (LLMs) are increasingly deployed in high-stakes settings, machine unlearn-ing has become essential for removing sensitive, harmful, outdated, or legally restricted information while preserving overall model utility. Practical motivations for unlearning span privacy regulations, copyright disputes, user deletion requests, and the removal of toxic or unsafe content (Geng et al., 2025; Nguyen et al., 2025; Maini et al., 2024; Shi et al., 2024; Li et al., 2024; Dorna et al., 2025). In some applications, unlearning may also be required to suppress domain-specific capabilities associated 
+
+Figure 1: PreUnlearn framework with two stages: (1) Three-layer Unlearning Impact where an LLM is un-learned on a candidate forget set Df and scored across three semantic layers ( L1, L 2, L 3) of decreasing rele-vancy to Df and ultimately, (2) Pre-unlearn Impact Auditing produces a lightweight auditor to estimate per-layer potential collateral damage risk on retain knowl-edge, screening the candidate Df before unlearning. 
+
+with safety risks, including offensive cybersecu-rity knowledge such as exploit-development proce-dures, vulnerability analysis, or other misuse-prone behaviors. Since retraining from scratch is typi-cally impractical, LLM unlearning seeks to sup-press target knowledge through post-training up-dates (Eldan and Russinovich, 2023; Jang et al., 2023; Li et al., 2024) while preserving the model’s remaining capabilities and factual knowledge. This preservation requirement is central to practical de-ployment: an unlearning procedure is incomplete if the same update unintentionally degrades neighbor-ing facts, distant knowledge, or otherwise unrelated capabilities. Hence, it is critical to evaluate whether unlearning targeted knowledge (the forget set) inad-vertently affects semantically related or unrelated knowledge elsewhere in the model, which is the central focus of this study (see Figure 1). Existing unlearning evaluations do not yet char-acterize collateral damage with sufficient granular-ity. Most prior studies report aggregate utility met-rics or a limited set of post-hoc probes, which often 1
+
+> arXiv:2606.18473v1 [cs.CL] 16 Jun 2026
+
+fail to capture the data-centric structure of unlearn-ing damage, including how performance degrada-tion propagates as evaluation data moves from the forget set itself, to same-domain knowledge, and further toward distantly related or even orthogonal knowledge. Recent work has shown that standard utility benchmarks can remain deceptively high even when same-domain or distant-domain knowl-edge has already been substantially corrupted (Ko et al., 2025), raising concerns about the adequacy of current evaluation practices. At the same time, most existing benchmarks assume a fixed forget set and implicitly treat the choice of evaluation set as given. Consequently, two practical research ques-tions (RQs) remain largely unexplored: “How will unlearning with forget set X affect the model on knowledge Y?” ( RQ.1. ), and then “Can we predict ahead of time such a potential impact or collat-eral damage even before unlearning?” (RQ.2. )
+
+This will enable practitioners to anticipate high-risk unlearning runs before expensive optimization is performed. 
+
+RQ.1. (Three-layer Unlearning Impact) -How does unlearning impact spread from the forget set X to same-domain and distant-domain knowledge Y? 
+
+RQ.2. (Pre-unlearn Impact Auditing) - Can we predict the collateral damage would result knowledge Y from unlearning knowledge X even before unlearning? We address these two questions by formulating pre-unlearning auditing as a supervised modeling problem (Fig. 1). Organizing a dataset into L1 (in-tended degradation), L2 (same-domain damage), and L3 (irrelevant-domain damage), we predict fu-ture unlearning impact using features of the forget set, the evaluation set, their interaction. This for-mulation uses prediction not as an end in itself, but as a tool to identify which pre-unlearning signals explain later collateral damage. The measurements reveal a consistent but imper-fect decay pattern: unlearning impact is strongest on forget set, weaker on same-domain knowledge, and weakest, but still present, on distant-domain knowledge. The audit further shows that interac-tion features between the forget and evaluation sets, such as semantic proximity, representation-shape ratios, and lexical or length relationships, are espe-cially predictive and remain stable across unlearn-ing algorithms. 
+
+Our main contributions are: 
+
+1. Three-layer measurement framework. We or-ganize unlearning impact into intended ( L1), same-domain ( L2), and distant-domain ( L3)degradation, and show across two model fami-lies and three algorithms that damage consis-tently decays with semantic distance but re-mains visible beyond the direct target, with sub-stantial variation across forget sets under fixed hyperparameters. 2. Pre-unlearning auditing as supervised pre-diction. We formulate forget-set auditing as a regression problem over (forget, evaluation) pairs, using only pre-update features of the data, with no access to gradients, unlearned check-points, or post-hoc measurements. 3. Empirical characterization of predictive sig-nals. We show that cross-set geometric features (centroid distance, similarity, length and lexi-cal ratios) dominate over intrinsic properties of either set, remain stable across unlearning algo-rithms, and yield ranking quality strong enough for practical triage. 
+
+2 Related Work 
+
+2.1 LLM Unlearning 
+
+LLM unlearning aims to remove selected knowl-edge from a pretrained model while preserving overall utility (Geng et al., 2025). Existing work follows two paradigms: fine-tuning-then-unlearning , where the forget set is a subset of a known fine-tuning corpus (e.g., TOFU, MUSE, FIUBench (Maini et al., 2024; Shi et al., 2024; Ma et al., 2025)), and direct unlearning , where the target knowledge is already embedded in the pretrained model (e.g., WMDP, RWKU (Li et al., 2024; Jin et al., 2024)). Our setting follows the latter, which is closer to real deployment. 
+
+2.2 Collateral Damage in LLM Unlearning 
+
+Unlearning can degrade knowledge beyond the for-get set Df . Ko et al. (2025) introduce knowledge hole probing and show that static benchmarks such as MMLU (Hendrycks et al., 2021) and TruthfulQA (Lin et al., 2022) can miss collateral damage in-curred by unlearning, motivating evaluations that go beyond whether Df is removed. A related question is which forget sets are likely to cause such damage. Prior work studies which data is hardest to remove or induces the largest side 2WikiText-103 raw passages     
+
+> Filter usable passages
+> Embed passages
+> Cluster semantic passage pools
+> Exclude noise
+> Sample unlearn datasets
+> Figure 2: Dataset construction schema. WikiText-103 passages are filtered, embedded, clustered into semantic passage pools, and then sampled into unlearning datasets. Each dataset contains disjoint forget and retain splits, which later support direct unlearning and three-layer impact evaluation.
+
+effects (Thudi et al., 2022; Kurmanji et al., 2023). Influence-based selection (Koh and Liang, 2020) is related but requires model gradients, scales poorly to LLMs, and yields per-example rather than forget-set-level scores. Closer to our approach, a data-centric line predicts downstream behavior from dataset properties (Dang et al., 2024; Ilyas et al., 2022); we extend this to pre-unlearning auditing over forget–evaluation pairs. 
+
+3 RQ.1. Three-layer Unlearning Impact 
+
+3.1 Problem Formulation 
+
+Let Mθ0 denote the target LLM before unlearning, and let U(·) denote a fixed post-training unlearning algorithm. We consider a collection of candidate se-mantic domains G = {Gi}Ni=1 , where each domain contains documents covering a coherent semantic topic. For each domain Gi, we construct a forget subset Gf 
+
+> i
+
+⊂ Gi, which serves as the candidate forget set for unlearning. For each candidate do-main Gi, we define the forget set as Df ← Gf 
+
+> i
+
+and obtain the corresponding unlearned checkpoint: 
+
+M ∗ 
+
+> θ
+
+← U (Mθ, D f ).
+
+Throughout this work, we fix the base model Mθ0
+
+and U, while varying only the semantic content of the forget set Df . This allows us to isolate and analyze how unlearning different semantic domains affects the resulting model behavior and knowledge impact patterns. For each unlearning run, we compare the un-learned model M ∗ 
+
+> θ
+
+against the original model Mθ
+
+on a shared evaluation set constructed from all do-mains Gi. This shared evaluation design then lets us ask where the impact of unlearning Df leaves on a three-layer knowledge impact to be described below. 
+
+Three-layer Knowledge Impact. To character-ize the effect of unlearning, we organize post-unlearning knowledge degradation into three se-mantic layers. Given a forget set Df , the first layer measures degradation on the forget set itself, de-noted as L1, corresponding to the intended effect of unlearning. The second layer measures degra-dation on held-out passages that are semantically close to the forget domain, denoted as L2, captur-ing local collateral damage on related knowledge. The third layer measures degradation on passages drawn from other semantic domains, denoted as 
+
+L3, capturing unintended forgetting on distant and irrelevant knowledge. We can then summarize the resulting three-layer collateral profile as: 
+
+y = ( L1, L 2, L 3)
+
+3.2 Experimental Setup Dataset Preparation. We use WikiText-103 (Merity et al., 2016), which was constructed from Wikipedia articles, for unlearning because Wikipedia text is widely used in LLM pretraining, making it reasonable to assume that the target models have already learned much of this content. We confirmed this assumption by observing consistently low PPL on sampled WikiText-103 passages. Thus, WikiText-103 provides a suitable testbed for studying unlearning on knowledge that is plausibly already present in the models. We process WikiText-103 via a quality control pipeline (Fig. 2), resulting in 10 well-separated 
+
+semantic clusters used to construct forget-set can-didates. From the yielding clusters, we construct 
+
+100 unlearning datasets, 10 for each cluster, each of which contains two same-cluster but mutually disjoint splits of 50 texts: a forget set Df , which is the direct unlearning target, and a retain set Dr,which provides same-domain text that should re-main usable after unlearning. This forget/retain construction matches the standard unlearning setup: unlearning is to remove Df while preserving per-formance on Dr. Details on the dataset construc-tion are provided in the Appendix A. Let I(·) denote the unlearning impact metric, which we will later define, we can define the three evaluation layers L1, L2, and L3 as follows: 
+
+L1=I(Df ), L 2=I(Gi \ Df ), L 3=I
+
+ [  
+
+> j̸=i
+
+Gj
+
+
+
+,
+
+3Figure 3: PPL ratio distribution by layer across six settings. CDF of PPL ratio (after / before unlearning) for L1     
+
+> (self), L2(same domain), L3(different domain). Dotted grey verticals mark per-layer medians; dashed line at ratio
+> = 1 is the no-change reference.
+
+Target Unlearning Model. We use two open-weight instruction-tuned target models: Llama-3.1-8B-Instruct (Grattafiori et al., 2024) and Qwen2.5-7B-Instruct (Qwen et al., 2025). As a sanity check, we measured base-model PPL on sampled WikiText-103 passages and observed low values, which provides indirect evidence that these pas-sages are familiar to the target models. Using two model families lets us check whether the results are specific to a single architecture family. 
+
+Unlearning Algorithm. We evaluate three un-learning algorithms Gradient Ascent (GA) (Jang et al., 2023), Negative Preference Optimization (NPO)(Zhang et al., 2024) and Unlearning via Self-Distillation on Adjusted Logits (UNDIAL)(Dong et al., 2025) because they can represent three dis-tinct families of LLM unlearning methods. 
+
+Evaluation and Metrics. For an evaluation set 
+
+S, we measure the impact of unlearning Df via U
+
+using the perplexity ratio: 
+
+R(S) = PPL( M ∗ 
+
+> θ
+
+, x )PPL( Mθ, x ) ≥ 1.0, (1) where the degree by which R(S) increases from 
+
+1.0 indicates the impact of unlearning or how much the model forgets on average the knowledge of each passage x∈S.
+
+3.3 Experiment Results 
+
+Figure 3 reports the profile across all model ×algorithm settings, from which we draw three distinct observations and findings: 
+
+Finding #1: Unlearning impact decays with distance from the forget set. For every model ×algorithm pairs, the average PPL ratio satis-fies L1>L 2>L 3. For instance, Llama-3.1-8B with GA yields L1=5 .20 ×>L 2=3 .80 ×>L 3=2 .42 ×,an across-layer spread of 2.15 × (Figure 3). This monotonic decay holds in all settings, indicating that unlearning induces geometry-dependent ripple effects that spread outward from the forget set. 
+
+Finding #2: Impact magnitude is algorithm-dependent. GA produces the most aggressive impact, reaching L1=12 .85 × on Qwen2.5-7B, whereas NPO, UNDIAL remain within 1.05 –
+
+1.65 × at L1 across base models. Consistent with GA’s lack of a regularizer on a retain set, this gap shows that the choice of algorithm is determinant of impact magnitude, while the layered ordering of Finding #1 is preserved across the full range. 
+
+Finding #3: The impact on three-layer pro-files varies with the forget set. The same algo-rithm and hyper-parameters do not produce a single fixed impact profile. Across the 100 forget sets, the spread is 2.15 × (max/min) under the Llama-3.1-8B when unlearning with GA (Figure 3). This variation makes the forget set itself worth audit-4(a) NPO (b) UNDIAL 
+
+> Figure 4: Mean PPL ratio per domain pair on Llama-3.1-8B-Instruct under NPO and UNDIAL.
+
+ing before paying for full unlearning and cross-evaluation. 
+
+Finding #4: Layer-wise impact separates at the distribution level. The empirical CDFs in Fig. 3 show a clear distribution-level ordering: L1
+
+is shifted furthest to the right, followed by L2 and then L3, across nearly all six settings. This sepa-ration persists across quantiles, showing that the layered structure is not only an average-level phe-nomenon. While a small fraction of points, espe-cially in the farther layers, remain near or slightly below the no-change reference ratio 1, the distribu-tions also exhibit substantial right tails. In particu-lar, the GA settings contain many evaluation points with very large PPL-ratio increases, indicating that unlearning can induce severe collateral damage rather than merely mild average degradation. 
+
+Finding #5: The layered unlearning pattern per-sists with domain-pair heterogeneity. Figure 3 shows that L1>L 2>L 3 holds on average, and Fig-ure 4 shows that this pattern persists across do-main pairs. We aggregate the 100 ×100 evalua-tion matrix into 10 ×10 heatmaps for NPO and UNDIAL on Llama-3.1-8B- Instruct, where diag-onal cells denote matched forget–evaluation do-mains and off-diagonal cells denote cross-domain evaluation. In both heatmaps, diagonal cells are consistently stronger than off-diagonal cells, show-ing that same-domain knowledge is more affected than distant-domain knowledge. The heatmaps also reveal domain-pair heterogeneity: some forget domains induce broader off-domain damage, and some evaluation domains are more vulnerable. 
+
+4 RQ.2. Pre-unlearn Impact Auditing 
+
+The previous section shows that three-layer unlearn-ing impact varies substantially with the choice of forget data, making forget-set selection a critical design decision. However, this impact is only ob-servable after running unlearning, which is ineffi-cient when multiple candidate forget sets must be tested to achieve a desirable forget-retain trade-off. We therefore ask whether we can audit, before un-learning , which forget–evaluation pairs are likely to experience larger post-unlearning degradation. Moreover, this audit is not intended to replace fi-nal evaluation, but to provide an early sanity check and also to identify predictive features that are con-sistently associated with future collateral damage, providing deeper understanding on the collateral damage explored in RQ.1. .
+
+4.1 Problem Formulation 
+
+We formulate pre-unlearning auditing as a super-vised prediction problem over forget–evaluation pairs. Each audit example is a pair (Df , D e),where Df is the candidate forget set and De is an evaluation set whose future degradation we want to estimate before unlearning. We constrain the auditor to have no access to target LLM’s gradi-ents, unlearned checkpoints, or any post-unlearning measurements as input. For a fixed target model 
+
+Mθ and unlearning algorithm U, we extract pre-unlearning features: 
+
+xf,e = ϕ(Df , D e, M θ),
+
+describing the forget set, the evaluation set, their interaction. The auditor then learns a predictor that 5predict an estimated collateral damage ratio :
+
+ˆρf,e = hψ(xf,e ),
+
+which is trained by optimize a MSE loss: 
+
+min 
+
+> ψ
+
+X 
+
+> (Df,D e)
+
+(hψ(xf,e ) − ρf,e )2 .
+
+This pair-level formulation lets the auditor ask whether a forget set is risky in isolation, and which evaluation sets are most exposed to that forget set. We define the prediction target ρf,e as a collat-eral damage ratio: 
+
+ρf,e = log  PPL after  
+
+> e
+
+/PPL before 
+
+> e
+
+
+
+log  PPL after  
+
+> f
+
+/PPL before 
+
+> f
+
+ . (2) This ratio measures how much degradation leaks from the forget set to the evaluation set, normalized by the achieved forgetting strength. A value ρ≈0
+
+indicates selective unlearning or minimal collateral damage to De, ρ≈1 indicates uniform degradation, and ρ> 1 flags cases where the evaluation set is harmed more than the targeted forget set. 
+
+4.2 Experimental Setup Training Supervised Regression Model We train three regression classifiers hψ(·): ridge regres-sion, random forests (RF), and gradient-boosted trees (XGBoost). All three predict the collateral damage ratio from the 80 -dimensional feature vec-tor described in §4.3. 
+
+Evaluation Protocol. To assess whether the trained audit regressor hψ(·) generalizes beyond forget sets seen during training, we use two com-plementary splits. First, LODO CV performs leave-one-domain-out evaluation over the K domain clus-ters obtained from HDBSCAN (Campello et al., 2015) across the 90 training forget_set groups of 9 domains. For each held-out domain Gi, we train 
+
+hψ(·) on all forget sets drawn from the remaining 
+
+K−1 domains and evaluate it on every forget set belonging to Gi. This ensures that no forget set in the test split shares the same domain with any training example, eliminating domain-level leak-age. Reported LODO results aggregate predictions across all K folds, so every forget set is evaluated exactly once under a model that has never seen its domain. Second, Held-out Test evaluates general-ization to a fully held-out semantic domain. 
+
+4.3 Feature Engineering 
+
+Each row of our auditing dataset corresponds to a forget set and eval set pair. We engineer features of each pair organized into the three families summa-rized in Table 3 in Appendix: intrinsic features of 
+
+Df and De, pair-interaction features that capture relationships between the two sets. The first three families are entirely model-agnostic, depending only on the raw texts and their sentence-transformer embeddings. The two set-intrinsic features share identical definitions, applied independently to Df
+
+and De. Each features covers five complemen-tary aspects of the text describing how large, how diverse, how tight, and how low-dimensional the set is. The pair features then exposes quantities that cannot be recovered from Df and De in isola-tion: three features describe the centroid relation between Df and De (cosine similarity, Euclidean distance, and norm ratio), with the cosine term serving as a direct proxy for topical overlap, and the remaining features are cross-set e/f ratios of representative scalar descriptors. 
+
+4.4 Results Overall Auditability. Table 1 shows that au-ditability depends on both the unlearning algorithm and the base model. Across models, UNDIAL is the easiest objective to predict, NPO the hardest, and GA intermediate, but the best regressor fam-ily and the held-out degradation pattern vary by model. UNDIAL is the most stable case: held-out pre-dictability remains high on both models and is rel-atively insensitive to regressor choice, suggesting that its damage aligns well with our geometry and length features. GA shows the strongest algorithm– model interaction. On Llama, tree-based models preserve their LODO advantage on held-out do-mains, whereas on Qwen, ridge generalizes most stably: rank ordering remains reliable, but error magnitude drifts across domains. NPO is the most difficult and regressor-sensitive objective on both models, with different failure modes across Llama and Qwen. Overall, the LODO–held-out gap widens from UNDIAL to GA to NPO, but performance does not collapse to chance. This indicates that the auditor captures cross-domain structure rather than mem-orizing domain identity, supporting our view that collateral damage depends on dataset geometry. 6Model Algorithm Regressor LODO CV Held-out Test RMSE ↓ MAE ↓ R2 ↑ RMSE ↓ MAE ↓ R2 ↑                                                                                                            
+
+> Llama-3.1-8B  GA Ridge 0.0725 0.0572 0.7487 0.0825 0.0651 0.6439 RF 0.0621 0.0497 0.8153 0.0911 0.0740 0.5663 XGB 0.0661 0.0521 0.7907 0.0749 0.0621 0.7067
+> NPO Ridge 0.0751 0.0500 0.5464 0.0867 0.0645 0.5420 RF 0.0486 0.0380 0.8101 0.0833 0.0649 0.5775
+> XGB 0.0473 0.0368 0.8202 0.0850 0.0661 0.5599 UNDIAL Ridge 0.0665 0.0511 0.7584 0.0984 0.0843 0.6058 RF 0.0527 0.0398 0.8482 0.0567 0.0464 0.8691
+> XGB 0.0523 0.0391 0.8503 0.0665 0.0570 0.8199 Qwen2.5-7B  GA Ridge 0.0549 0.0409 0.7948 0.0683 0.0591 0.7488
+> RF 0.0431 0.0322 0.8738 0.0965 0.0865 0.4993 XGB 0.0432 0.0327 0.8733 0.1173 0.1073 0.2599 NPO Ridge 0.0967 0.0665 0.3397 0.0855 0.0648 0.3913 RF 0.0813 0.0634 0.5335 0.0765 0.0594 0.5133 XGB 0.0854 0.0648 0.4855 0.0614 0.0494 0.6863
+> UNDIAL Ridge 0.1239 0.0897 0.6234 0.0762 0.0606 0.8579 RF 0.0853 0.0602 0.8217 0.0677 0.0478 0.8877
+> XGB 0.0825 0.0587 0.8331 0.0715 0.0518 0.8749
+
+Table 1: Audit-model performance excluding Spearman correlation. Best score within each model, algorithm, and split block is highlighted and shown in bold.                                                      
+
+> Family Feature coef zP>|z|
+> Pair Centroid Euclidean dist. -0.077 -33.014 0.000 Centroid cosine sim. 0.016 7.440 0.000 Mean word count ratio -0.037 -5.887 0.000 Top-1 variance ratio 0.021 5.809 0.000 Type-token ratio -0.026 -4.520 0.000 Forget Char length 0.044 20.059 0.000 Word count -0.050 -12.849 0.000 Char length 0.044 10.960 0.000 Pairwise emb. sim. 0.061 10.578 0.000 Char length 0.015 8.265 0.000 Eval Pairwise emb. sim. -0.036 -7.347 0.000 Char length 0.011 5.832 0.000 Word count -0.020 -5.185 0.000 Nearest-neighbor sim. -0.022 -5.176 0.000 Spread / centroid norm 0.025 4.465 0.000
+
+Table 2: Top-5 most predictive features per cate-gory, including Pair (cross-set forget–evaluation ge-ometry), Forget (intra-forget statistics), and Eval (intra-evaluation statistics), in the audit predictor’s ridge re-gression. All coefficients are statistically significant. The sign indicates direction of effect on predicted collat-eral damage, and |z| reflects standardized importance. 
+
+Feature Importance Analysis. Table 4 reports regression coefficients for the most predictive features in our collateral-damage audit predictor, grouped into three families: Pair features, Forget features, and Eval features. All listed coefficients are highly significant. The dominant signal comes from Pair features, where the centroid Euclidean distance between forget and eval sets carries by far the largest effect: the farther apart the two sets sit in representation space, the smaller the collateral dam-age. This is reinforced by the positive coefficient on centroid cosine similarity and the negative coef-ficients on cross-set ratio features , indicating that surface- and geometry-level proximity between for-get and eval jointly drives utility loss. Within the Forget family, longer documents and heavier simi-larity tails increase damage, suggesting that long, homogeneous forget clusters exert broader influ-ence on the model. Eval-only features contribute smaller effects, suggesting that the relative geome-try between forget and eval, rather than either set’s intrinsic structure, is the primary determinant of collateral damage, in line with the fixed-evaluation-manifold view underlying our framework. 
+
+Audit Sensitivity Analysis. To test whether the auditor responds to meaningful changes in the eval-uation set rather than random sampling noise, we keep each trained regressor fixed and vary only the risk composition of the held-out evaluation set. We construct mixtures with different high-risk proportions α, where α=0 contains only low-risk blocks and α=1 contains only high-risk blocks, while keeping the number of evaluation blocks per forget set fixed. As a control, we also randomly resample evaluation blocks without controlling the high-risk proportion. If the auditor is sensitive to evaluation risk, its predicted corruption score 7Figure 5: Sensitivity of fixed corruption regressors to evaluation composition. Each panel varies the fraction 
+
+α of high-risk evaluation examples. Error bars show 95% bootstrap confidence intervals over sampling seeds. The gray band shows the 95% range induced by random resampling of the held-out evaluation set without con-trolling the high-risk proportion. 
+
+should increase as α grows. Figure 5 shows exactly this pattern: across GA, NPO, and UNDIAL, all re-gressors produce steadily increasing scores, while random resampling stays within the gray control band. This suggests that the auditors capture mean-ingful shifts in evaluation-set vulnerability rather than random variation. 
+
+5 Potential Application 
+
+In practice, the auditor is most useful not as an ex-act simulator of post-unlearning perplexity, but as a pre-unlearning ranking tool. Given multiple candi-date forget–evaluation pairs, practitioners typically face three triage questions: which pairs should be inspected first, which forget sets are likely to cause broader collateral damage, and where lim-ited evaluation or retain-data budgets should be allocated. Figure 6 reports Spearman rank corre-lation between predicted and observed collateral damage across the three regressors. Under LODO cross-validation, the best auditor reaches ρ = 0 .93 
+
+on GA and ρ = 0 .86 to 0.90 on UNDIAL across both base models, and stays at ρ ≥ 0.51 even on the harder NPO objective. On the fully held-out domain, ranking quality drops as expected but re-mains informative for UNDIAL and for GA, where Qwen generalizes notably better than Llama, while NPO degrades more sharply. This pattern indicates that the auditor captures cross-domain risk struc-ture rather than memorizing domain identity, and that the ordering signal is most reliable precisely NPO GA UNDIAL       
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Best Spearman  ρ
+> 0.74
+> 0.89 0.86
+> 0.51
+> 0.93 0.90
+> LODO CV
+> NPO GA UNDIAL
+> 0.28
+> 0.69
+> 0.85
+> 0.44
+> 0.87 0.89
+> Held-out Test
+> Llama-3.1-8B Qwen2.5-7B
+
+Figure 6: Best Spearman correlation across the three regressors for each model, algorithm, and evaluation settings. 
+
+for the algorithms whose collateral damage is most tightly coupled to forget–evaluation geometry. Even when exact magnitude prediction varies across domains, a reliable ordering is sufficient for triage: users can prioritize the top-ranked risky pairs for full unlearning evaluation, add retain data around vulnerable domains, or reject risky forget-set choices early in the pipeline before any opti-mization is run. The application of pre-unlearning auditing is therefore to turn post-hoc damage mea-surement, which requires one unlearning run per candidate forget set, into a cheaper ranking prob-lem whose marginal cost is dominated by fea-ture extraction, allowing large-scale unlearning pipelines to be guided by upfront risk estimates rather than purely post-hoc evaluation. 
+
+6 Conclusion 
+
+We formalize unlearning impact as a three-layer profile and show that damage is not confined to the intended target: across WikiText forget sets, it decays with distance from the forget data but does not disappear, and varies substantially under fixed hyper-parameters, making the forget set itself an object of audit rather than a static benchmark. Asking what can be known before unlearning, we find the strongest audit signals are not intrinsic properties of the forget set, but cross-set features comparing forget and evaluation data (centroid sim-ilarity, centroid distance, lexical and length ratios), and their importance is stable across unlearning algorithms, suggesting collateral damage is partly determined by pre-existing coupling between the two. We therefore position forget-set auditing as a screening tool that surfaces interpretable risk fac-tors and prioritizes which candidates deserve ex-pensive audit-then-unlearn, rather than replacing full evaluation. 8Limitations 
+
+Model and algorithm coverage. Our study covers several representative unlearning objectives, includ-ing GA, NPO, and UNDIAL, but it does not ex-haust the full design space of unlearning methods. The behavior of the audit features may vary across base models, model scales, instruction-tuned check-points, and representation-level approaches such as RMU. This is expected, since different algorithms intervene at different stages of the optimization or representation pipeline. As a result, the same forget–evaluation geometry may not induce iden-tical collateral-damage patterns across all settings. We therefore view our results as an initial charac-terization of pre-unlearning auditability, rather than a universal claim about all unlearning algorithms. 
+
+Evaluation metrics. We measure unlearning impact mainly through changes in perplexity. Per-plexity is scalable and fine-grained, but it is still a proxy for behavioral degradation. A model may show higher perplexity without a large drop in downstream task performance, or may preserve perplexity while changing answer correctness, re-fusal behavior, calibration, or factual consistency. Future work should extend the audit to task-level, generation-level, and human-judged outcomes. 
+
+Fixed experimental design. We hold several design choices fixed to isolate the effect of the for-get set, including hyperparameters, evaluation con-struction, and the three-layer view of L1 intended, L2 same-domain, and L3 distant-domain impact. Real unlearning pipelines may tune hyperparame-ters per request or face overlapping domains that do not fit cleanly into discrete layers. 
+
+Ethics Statement 
+
+LLM-based assistants (ChatGPT, Claude) were used solely to polish prose on drafts fully writ-ten by authors, and code assistants (Codex, Claude Code) were used to implement designs and ideas originated by the authors. All scientific contribu-tions, technical methods, and code results are the authors’ original work. 9References 
+
+Ricardo J. G. B. Campello, Davoud Moulavi, Arthur Zimek, and Jörg Sander. 2015. Hierarchical den-sity estimates for data clustering, visualization, and outlier detection. ACM Trans. Knowl. Discov. Data ,10(1). Cuong Dang, Dung D. Le, and Thai Le. 2024. A curious case of searching for the correlation between training data and adversarial robustness of transformer textual models. Yijiang River Dong, Hongzhou Lin, Mikhail Belkin, Ramon Huerta, and Ivan Vuli´ c. 2025. UNDIAL: Self-distillation with adjusted logits for robust un-learning in large language models. In Proceedings of the 2025 Conference of the Nations of the Americas Chapter of the Association for Computational Lin-guistics: Human Language Technologies (Volume 1: Long Papers) , pages 8827–8840, Albuquerque, New Mexico. Association for Computational Linguistics. Vineeth Dorna, Anmol Mekala, Wenlong Zhao, An-drew McCallum, Zachary C Lipton, J Zico Kolter, and Pratyush Maini. 2025. OpenUnlearning: Ac-celerating LLM unlearning via unified benchmark-ing of methods and metrics. arXiv preprint arXiv:2506.12618 .Ronen Eldan and Mark Russinovich. 2023. Who’s harry potter? approximate unlearning in llms. Preprint ,arXiv:2310.02238. Jiahui Geng, Qing Li, Herbert Woisetschlaeger, Zongx-iong Chen, Fengyu Cai, Yuxia Wang, Preslav Nakov, Hans-Arno Jacobsen, and Fakhri Karray. 2025. A comprehensive survey of machine unlearn-ing techniques for large language models. Preprint ,arXiv:2503.01854. Aaron Grattafiori, Abhimanyu Dubey, Abhinav Jauhri, Abhinav Pandey, Abhishek Kadian, Ahmad Al-Dahle, Aiesha Letman, Akhil Mathur, Alan Schel-ten, Alex Vaughan, Amy Yang, Angela Fan, Anirudh Goyal, Anthony Hartshorn, Aobo Yang, Archi Mi-tra, Archie Sravankumar, Artem Korenev, Arthur Hinsvark, and 542 others. 2024. The llama 3 herd of models. Preprint , arXiv:2407.21783. Dan Hendrycks, Collin Burns, Steven Basart, Andy Zou, Mantas Mazeika, Dawn Song, and Jacob Steinhardt. 2021. Measuring massive multitask language under-standing. Preprint , arXiv:2009.03300. Andrew Ilyas, Sung Min Park, Logan Engstrom, Guil-laume Leclerc, and Aleksander Madry. 2022. Data-models: Predicting predictions from training data. 
+
+Preprint , arXiv:2202.00622. Joel Jang, Dongkeun Yoon, Sohee Yang, Sungmin Cha, Moontae Lee, Lajanugen Logeswaran, and Minjoon Seo. 2023. Knowledge unlearning for mitigating privacy risks in language models. In Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) ,pages 14389–14408, Toronto, Canada. Association for Computational Linguistics. Zhuoran Jin, Pengfei Cao, Chenhao Wang, Zhitao He, Hongbang Yuan, Jiachun Li, Yubo Chen, Kang Liu, and Jun Zhao. 2024. Rwku: Benchmarking real-world knowledge unlearning for large language mod-els. Preprint , arXiv:2406.10890. Myeongseob Ko, Hoang Anh Just, Charles Fleming, Ming Jin, and Ruoxi Jia. 2025. Probing knowledge holes in unlearned llms. Preprint , arXiv:2511.00030. Pang Wei Koh and Percy Liang. 2020. Understand-ing black-box predictions via influence functions. 
+
+Preprint , arXiv:1703.04730. Meghdad Kurmanji, Peter Triantafillou, Jamie Hayes, and Eleni Triantafillou. 2023. Towards unbounded machine unlearning. Preprint , arXiv:2302.09880. Nathaniel Li, Alexander Pan, Anjali Gopal, Sum-mer Yue, Daniel Berrios, Alice Gatti, Justin D. Li, Ann-Kathrin Dombrowski, Shashwat Goel, Long Phan, Gabriel Mukobi, Nathan Helm-Burger, Rassin Lababidi, Lennart Justen, Andrew B. Liu, Michael Chen, Isabelle Barrass, Oliver Zhang, Xiaoyuan Zhu, and 38 others. 2024. The wmdp benchmark: Mea-suring and reducing malicious use with unlearning. 
+
+Preprint , arXiv:2403.03218. Stephanie Lin, Jacob Hilton, and Owain Evans. 2022. Truthfulqa: Measuring how models mimic human falsehoods. Preprint , arXiv:2109.07958. Yingzi Ma, Jiongxiao Wang, Fei Wang, Siyuan Ma, Jiazhao Li, Jinsheng Pan, Xiujun Li, Furong Huang, Lichao Sun, Bo Li, Yejin Choi, Muhao Chen, and Chaowei Xiao. 2025. Benchmarking vision language model unlearning via fictitious facial identity dataset. 
+
+Preprint , arXiv:2411.03554. Pratyush Maini, Zhili Feng, Avi Schwarzschild, Zachary C. Lipton, and J. Zico Kolter. 2024. Tofu: A task of fictitious unlearning for llms. Preprint ,arXiv:2401.06121. Stephen Merity, Caiming Xiong, James Bradbury, and Richard Socher. 2016. Pointer sentinel mixture mod-els. Preprint , arXiv:1609.07843. Thanh Tam Nguyen, Thanh Trung Huynh, Zhao Ren, Phi Le Nguyen, Alan Wee-Chung Liew, Hongzhi Yin, and Quoc Viet Hung Nguyen. 2025. A survey of ma-chine unlearning. ACM Trans. Intell. Syst. Technol. ,16(5). Qwen, :, An Yang, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo Zheng, Bowen Yu, Chengyuan Li, Dayiheng Liu, Fei Huang, Haoran Wei, Huan Lin, Jian Yang, Jianhong Tu, Jianwei Zhang, Jianxin Yang, Jiaxi Yang, Jingren Zhou, and 25 oth-ers. 2025. Qwen2.5 technical report. Preprint ,arXiv:2412.15115. 
+
+10 Weijia Shi, Jaechan Lee, Yangsibo Huang, Sadhika Mal-ladi, Jieyu Zhao, Ari Holtzman, Daogao Liu, Luke Zettlemoyer, Noah A. Smith, and Chiyuan Zhang. 2024. MUSE: Machine unlearning six-way evalua-tion for language models. Anvith Thudi, Gabriel Deza, Varun Chandrasekaran, and Nicolas Papernot. 2022. Unrolling sgd: Un-derstanding factors influencing machine unlearning. 
+
+Preprint , arXiv:2109.13398. Wenhui Wang, Hangbo Bao, Shaohan Huang, Li Dong, and Furu Wei. 2021. MiniLMv2: Multi-head self-attention relation distillation for compressing pre-trained transformers. In Findings of the Association for Computational Linguistics: ACL-IJCNLP 2021 ,pages 2140–2151, Online. Association for Computa-tional Linguistics. Ruiqi Zhang, Licong Lin, Yu Bai, and Song Mei. 2024. Negative preference optimization: From catas-trophic collapse to effective unlearning. Preprint ,arXiv:2404.05868. 
+
+11 Prefix Feature Family Examples            
+
+> f_ Dfintrinsic length, embedding spread
+> e_ Deintrinsic length, lexical diversity
+> pair_ Df–Deinteraction centroid distance, ratio features
+
+Table 3: Features Family used for pre-unlearning audit-ing. 
+
+A Reproducibility Details 
+
+Data. To utilize WikiText-103 for our work, we first segment the corpus into passage-level units and remove passages that are too short or other-wise unsuitable for stable PPL evaluation. We then embed each passage with all-MiniLM-L6-v2 
+
+(Wang et al., 2021), obtaining a 384 -dimensional semantic vector per passage. We cluster these pas-sage embeddings to obtain coherent topical pools from which forget sets can be sampled. Specifi-cally, we use HDBSCAN (Campello et al., 2015) with min_cluster_size =200 , min_samples =5,Euclidean distance, and default Excess-of-Mass (EOM) cluster selection. To This produces 10 
+
+non-noise semantic clusters and a noise pool. We discard the noise pool and use only the clustered passages when constructing forget-set candidates. Fig. 2 summarize the construction.               
+
+> Component Setting HDBSCAN min cluster 200 ; min samples 5
+> Distance Euclidean; EOM selection Cluster sizes 202 /346 /3,276 (min/median/max) Triplets 100 triplets, seed 42
+> Split size 50 texts each; disjoint within triplet Eligibility cluster size at least 150
+
+Hyperparameters Hyperparameters follow de-faults from OpenUnlearning (Dorna et al., 2025): learning rate 1 × 10 −5 with linear decay, paged AdamW (32-bit), per-device batch size 1 with gra-dient accumulation 4 (effective batch 4), 5 epochs, weight decay 0.01 , BF16. All runs use a sin-gle H100 80 GB and produce ≈ 1.5 TB of check-points ( ≈ 15 GB each) for one combination (e.g. GA+Llama-3.1-8B). 
+
+Evaluation. PPL is computed in BF16 with stride 512 and context 1024 ; each text is scored independently. Base-model PPL is cached once per evaluation, then reused across the 100 unlearned checkpoints. 
+
+Hardware. All runs use a single H100 (80 GB) node.                                             
+
+> Family Feature coef std err z P >|z|
+> Pair centroid eucl -0.077 0.002 -33.014 0.000 centroid cos sim 0.016 0.002 7.440 0.000 word count mean ratio -0.037 0.006 -5.887 0.000 top1 pc ratio ratio 0.021 0.004 5.809 0.000 type token ratio ratio -0.026 0.006 -4.520 0.000 Forget char len p50 0.044 0.002 20.059 0.000 word count std -0.050 0.004 -12.849 0.000 char len std 0.044 0.004 10.960 0.000 pairwise sim q90 0.061 0.006 10.578 0.000 char len p95 0.015 0.002 8.265 0.000 Eval pairwise sim std -0.036 0.005 -7.347 0.000 char len p95 0.011 0.002 5.832 0.000 word count std -0.020 0.004 -5.185 0.000 nn sim mean -0.022 0.004 -5.176 0.000 spread over centroid 0.025 0.006 4.465 0.000
+
+Table 4: Top-5 most predictive features per family in the audit predictor’s ridge regression. Features are grouped into three families: Pair (cross-set forget–evaluation geometry), Forget (intra-forget statistics), and Eval 
+
+(intra-evaluation statistics). All listed coefficients are statistically significant ( p < 0.001 ). The sign indicates direction of effect on predicted collateral damage, and 
+
+|z| reflects standardized importance. 
+
+B Feature Engineering Hyper-parameters 
+
+Hyperparameters are tuned with Randomized-SearchCV ( 40 iterations, 5-fold GroupKFold on forget_set, R2 as the inner scoring criterion). To respect the LODO protocol of §4.1, the search is run only on the K−1 training domains of each outer fold; the held-out domain is never seen at tuning time. We report RMSE, MAE, coefficient of determination R2, and Spearman rank correlation 
+
+ρ. Two evaluation splits are distinguished through-out: LODO CV, leave-one-domain-out across the 
+
+90 training forget_set cluster, and Held-out Test, a fully held-out family of 10 clusters whose domain never appears in any training fold. 12

@@ -1,0 +1,171 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-18T22:04:17.831567+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 3,
+    "deep_cap": 6,
+    "deep_selected": 3,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2606.18309v1",
+      "source": "arxiv",
+      "title": "SAGE: Retain-Aware Post-Hoc Sanitization of Final Unlearning Vector",
+      "abstract": "Large Language Model (LLM) unlearning aims to remove undesirable knowledge or behaviors while preserving retained capabilities. Current unlearning methods all involve a trade-off between unlearning and retention. We have found that the retention activation bias can also be used to quantify the damage an unlearning method inflicts on retention, without considering the specific implementation of the unlearning process. This allows us to restore retention performance for any unlearning method using a post-hoc approach. Therefore, we propose a complementary post-hoc setting to sanitize the final update vector without rerunning the original unlearning pipeline. In this setting, we design SAGE, Spectral Activation-GEometry Sanitization, a source-agnostic correction for final unlearning updates. SAGE collects real module inputs from a small retain proxy, extracts their dominant activation geometry, and solves a source-anchored optimization objective in closed form, which suppresses update components aligned with high-energy retained directions while preserving the source method's forgetting carrier. Across multiple unlearning methods, model scales, and benchmarks, SAGE consistently relieves the retain-forget trade-off, identifying post-hoc sanitization of final vectors as a practical and underexplored axis for machine unlearning.",
+      "authors": [
+        "Jingyuan Zhang",
+        "Yucheng Bai",
+        "Peixi Wen",
+        "Zhehao Huang",
+        "Zhengbao He",
+        "Hanling Tian",
+        "Xinwen Cheng",
+        "Haiyin Ran",
+        "Xiaolin Huang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-06-16T08:29:43+00:00",
+      "link": "https://arxiv.org/pdf/2606.18309v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "post-hoc sanitization of unlearning vector for LLM forgetting, a form of model editing",
+      "llm_evidence_cn": "对LLM遗忘向量进行后处理清洗，属于模型编辑的一种形式",
+      "llm_evidence": "对LLM遗忘向量进行后处理清洗，属于模型编辑的一种形式",
+      "canonical_evidence": "对LLM遗忘向量进行后处理清洗，属于模型编辑的一种形式",
+      "llm_tldr_en": "SAGE post-hoc sanitizes the final unlearning vector to restore retention in LLM unlearning, enabling model editing without retraining.",
+      "llm_tldr_cn": "大型语言模型遗忘（LLM unlearning）旨在移除不良知识同时保留已有能力，但现有方法在遗忘与保留之间存在权衡。本文提出SAGE，一种后处理清洗方法，通过谱激活几何清洗（Spectral Activation-GEometry Sanitization）对最终更新向量进行修正，无需重新运行遗忘流程即可恢复保留性能。实验表明，SAGE能够有效提升多种遗忘方法的保留效果，为模型编辑提供了一种高效、灵活的补充方案，在安全对齐编辑等场景具有重要应用价值。",
+      "llm_tldr": "大型语言模型遗忘（LLM unlearning）旨在移除不良知识同时保留已有能力，但现有方法在遗忘与保留之间存在权衡。本文提出SAGE，一种后处理清洗方法，通过谱激活几何清洗（Spectral Activation-GEometry Sanitization）对最终更新向量进行修正，无需重新运行遗忘流程即可恢复保留性能。实验表明，SAGE能够有效提升多种遗忘方法的保留效果，为模型编辑提供了一种高效、灵活的补充方案，在安全对齐编辑等场景具有重要应用价值。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.18473v1",
+      "source": "arxiv",
+      "title": "PreUnlearn: Auditing Collateral Knowledge Damage Before Large Language Model Unlearning",
+      "abstract": "Machine unlearning for large language models (LLMs) aims to remove specified knowledge while preserving the rest of the model's capabilities. However, the boundary between knowledge to forget and knowledge to retain is often unclear, since related and even distant information may be entangled in the model. In this paper, we study LLM unlearning from a data-centric perspective and measure how unlearning effects propagate from the forget set to same-domain and distant-domain knowledge. We find a consistent decay pattern: collateral damage is strongest near the forget set, weakens with semantic distance, but does not disappear at domain boundaries. We further ask whether such damage can be audited before unlearning is executed. We formulate forget-set auditing as a pre-unlearning prediction task and analyze which data features are most predictive of downstream damage. Our results show that interaction features between the forget set and evaluation set provide the strongest signals, suggesting that collateral damage is partly reflected in data geometry before model updates occur. These findings position forget-set auditing as an early warning tool for identifying risky unlearning runs and designing more reliable unlearning procedures.",
+      "authors": [
+        "Bo Su",
+        "Ankit Shah",
+        "Thai Le"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-16T20:32:11+00:00",
+      "link": "https://arxiv.org/pdf/2606.18473v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "auditing unlearning damage for knowledge editing",
+      "llm_evidence_cn": "审计反学习损害用于知识编辑",
+      "llm_evidence": "审计反学习损害用于知识编辑",
+      "canonical_evidence": "审计反学习损害用于知识编辑",
+      "llm_tldr_en": "Proposes PreUnlearn to audit collateral knowledge damage before LLM unlearning, revealing decay pattern with semantic distance.",
+      "llm_tldr_cn": "本文研究大语言模型反学习中的附带损害蔓延问题，从数据角度测量遗忘效应在同领域和跨领域知识中的传播。发现损害在语义近邻区域最强，随距离衰减但不消失。提出PreUnlearn框架，在真正执行反学习前即可审计可能损害，为知识编辑中的遗忘安全提供预警。",
+      "llm_tldr": "本文研究大语言模型反学习中的附带损害蔓延问题，从数据角度测量遗忘效应在同领域和跨领域知识中的传播。发现损害在语义近邻区域最强，随距离衰减但不消失。提出PreUnlearn框架，在真正执行反学习前即可审计可能损害，为知识编辑中的遗忘安全提供预警。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.18767v1",
+      "source": "arxiv",
+      "title": "Output Vector Editing for Memorization Mitigation in Large Language Models",
+      "abstract": "Large language models memorize and reproduce sequences from their training data, creating privacy, copyright, and security risks. Existing neuron-level mitigation methods equate editing with zeroing out neuron activations, but the activation only controls whether a neuron engages; the output vector is what writes to the residual stream and, through superposition, encodes multiple features. We propose output vector editing, a constrained-optimization weight edit that locates a small set of MLP neurons responsible for a memorized continuation and minimally modifies their output vectors to introduce a distractor in vocabulary space, redirecting their residual-stream contributions while leaving activations unchanged. Evaluating on four models from 360M to 7B parameters (SmolLM-360M, OLMo-1B, OLMo-7B, Llama2-7B), we center on OLMo-7B (whose open weights and pretraining corpus enable systematic mining) and mine 6831 memorized sequences, achieving up to 87.9% suppression. The 2.7$\\times$ gap over zero ablation on the same located neurons shows the suppression comes from the output-vector edit, not localization alone. Four edit modes span a spectrum from aggressive suppression to minimal redirection; in ensemble they cover 96.5% of memorized sequences, while our recommended single-mode configuration reaches 81.5% with no catastrophic locality failures. We further identify a mechanistic boundary at ${\\sim}14%$ of sequences unreachable by MLP-only editing; while these failures are not attention-driven overall, ablating the top contributing attention heads recovers 60--64% of them, with stronger recovery on continuations that copy tokens from the prefix, positioning attention as a complementary fallback rather than a primary mechanism. Edit mode ordering and the success-locality trade-off transfer across all four models, with success rates scaling with model size rather than family.",
+      "authors": [
+        "Ahmad Dawar Hakimi",
+        "Kaiwei Lei",
+        "Isabelle Augenstein",
+        "Hinrich Schütze"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-17T07:29:18+00:00",
+      "link": "https://arxiv.org/pdf/2606.18767v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "model editing via output vector modification to mitigate memorization",
+      "llm_evidence_cn": "通过修改输出向量的模型编辑以缓解记忆效应",
+      "llm_evidence": "通过修改输出向量的模型编辑以缓解记忆效应",
+      "canonical_evidence": "通过修改输出向量的模型编辑以缓解记忆效应",
+      "llm_tldr_en": "Proposes output vector editing, a constrained-optimization weight edit that modifies MLP neuron output vectors to redirect residual-stream contributions, mitigating memorization without changing activations.",
+      "llm_tldr_cn": "针对大语言模型记忆训练数据导致隐私和版权风险的问题，本文提出输出向量编辑方法。通过约束优化定位少数负责记忆的MLP神经元，并最小化修改其输出向量，在词汇空间中引入干扰项，从而重定向残差流贡献，同时保持激活不变。在360M至1.5B参数模型上实验，有效降低了记忆风险，同时保持模型性能。",
+      "llm_tldr": "针对大语言模型记忆训练数据导致隐私和版权风险的问题，本文提出输出向量编辑方法。通过约束优化定位少数负责记忆的MLP神经元，并最小化修改其输出向量，在词汇空间中引入干扰项，从而重定向残差流贡献，同时保持激活不变。在360M至1.5B参数模型上实验，有效降低了记忆风险，同时保持模型性能。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.17872v1",
+      "source": "arxiv",
+      "title": "AnchorKV: Safety-Aware KV Cache Compression via Soft Penalty with a Refusal Anchor",
+      "abstract": "Large language models (LLMs) outperform earlier architectures on generative inference and long-context tasks, but their large size introduces significant challenges in memory usage, energy cost, and on-device deployment. Since scaling pre-trained language models improves downstream capability \\cite{zhao2023survey}, the key-value (KV) cache becomes a dominant inference bottleneck. Recent KV cache compression methods \\cite{jo2025fastkv,li2024snapkv,zhou2024dynamickv} reduce this cost by retaining only a subset of attention-relevant tokens. However, while these approaches preserve accuracy on benign workloads, their compression policies either fail to defend against jailbreak attacks \\cite{jiang2024robustkv} or degrade safety alignment under aggressive eviction.   We propose AnchorKV, a drop-in modification to KV cache compression that biases token retention scores away from directions in key space associated with harmful prompts. AnchorKV constructs an offline safety anchor by adapting a difference-of-means representation engineering approach \\cite{arditi2024refusal,zou2023representation} to the layer-specific key projection space used in KV caching. Based on this anchor, a soft penalty token selection rule trades a small amount of utility for substantially improved safety alignment, while reducing to the original compressor when the penalty is zero.",
+      "authors": [
+        "Ning Ni",
+        "Yingjie Lao"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-06-16T12:43:18+00:00",
+      "link": "https://arxiv.org/pdf/2606.17872v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "safety-aware KV cache compression against jailbreak attacks",
+      "llm_evidence_cn": "提出安全意识KV缓存压缩方法来防御越狱攻击",
+      "llm_evidence": "提出安全意识KV缓存压缩方法来防御越狱攻击",
+      "canonical_evidence": "提出安全意识KV缓存压缩方法来防御越狱攻击",
+      "llm_tldr_en": "AnchorKV introduces a safety-aware KV cache compression method using soft penalty and refusal anchor to defend against jailbreak attacks while maintaining inference efficiency.",
+      "llm_tldr_cn": "现有KV缓存压缩方法主要关注推理效率，但忽略了安全性，容易被越狱攻击利用或损害安全对齐。本文提出AnchorKV，通过软惩罚机制和拒绝锚点，在压缩过程中优先保留安全相关的token。实验表明，该方法在不牺牲效率的前提下，有效降低了越狱攻击成功率，同时保持了模型的安全对齐性能。该工作为在KV缓存压缩中融入安全意识提供了有效范式。",
+      "llm_tldr": "现有KV缓存压缩方法主要关注推理效率，但忽略了安全性，容易被越狱攻击利用或损害安全对齐。本文提出AnchorKV，通过软惩罚机制和拒绝锚点，在压缩过程中优先保留安全相关的token。实验表明，该方法在不牺牲效率的前提下，有效降低了越狱攻击成功率，同时保持了模型的安全对齐性能。该工作为在KV缓存压缩中融入安全意识提供了有效范式。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

@@ -6,38 +6,32 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-17
-- 运行时间：2026-06-17 21:31:18 UTC
+- 最新运行日期：2026-06-18
+- 运行时间：2026-06-18 22:07:20 UTC
 - 运行状态：成功
-- 本次总论文数：6
+- 本次总论文数：4
 - 精读区：3
-- 速读区：3
+- 速读区：1
 
 ### 今日简报（AI）
-今日聚焦知识编辑与模型遗忘两项前沿研究，均获9.0高分推荐。精读方向明确指向“何时写入抑制”和“鲁棒遗忘”两大核心问题，值得优先关注。建议后续深入阅读原文及相关代码实现，并尝试在自用模型中验证双适配器方法的实际效果。
-- 详情：[/202606/17/README](/202606/17/README)
+今日共筛选4篇论文，其中精读2篇、速读1篇，聚焦大模型遗忘安全与KV缓存压缩。最值得关注的方向：一是遗忘向量后处理的保留感知净化（SAGE，满分10分），二是遗忘前审计附带知识损伤（PreUnlearn，9分）。建议优先阅读这两篇，掌握模型遗忘安全的前沿方法。
+- 详情：[/202606/18/README](/202606/18/README)
 
 ### 精读区论文标签
-1. [When to Write and When to Suppress: Route-Specialized Dual Adapters for Memory-Assisted Knowledge Editing](/202606/17/2606.14668v2-when-to-write-and-when-to-suppress-route-specialized-dual-adapters-for-memory-assisted-knowledge-editing)  
+1. [SAGE: Retain-Aware Post-Hoc Sanitization of Final Unlearning Vector](/202606/18/2606.18309v1-sage-retain-aware-post-hoc-sanitization-of-final-unlearning-vector)  
+   标签：评分：10.0/10、query:model-edit
+   evidence：对LLM遗忘向量进行后处理清洗，属于模型编辑的一种形式
+2. [PreUnlearn: Auditing Collateral Knowledge Damage Before Large Language Model Unlearning](/202606/18/2606.18473v1-preunlearn-auditing-collateral-knowledge-damage-before-large-language-model-unlearning)  
    标签：评分：9.0/10、query:model-edit
-   evidence：直接知识编辑方法，采用双适配器
-2. [RepSelect: Robust LLM Unlearning via Representation Selectivity](/202606/17/2606.17168v1-repselect-robust-llm-unlearning-via-representation-selectivity)  
+   evidence：审计反学习损害用于知识编辑
+3. [Output Vector Editing for Memorization Mitigation in Large Language Models](/202606/18/2606.18767v1-output-vector-editing-for-memorization-mitigation-in-large-language-models)  
    标签：评分：9.0/10、query:model-edit
-   evidence：大语言模型中的遗忘方法，属于知识编辑
-3. [GAS-Leak-LLM: Genetic Algorithm-Based Suffix Optimization for Black-Box LLM Jailbreaking](/202606/17/2606.15788v1-gas-leak-llm-genetic-algorithm-based-suffix-optimization-for-black-box-llm-jailbreaking)  
-   标签：评分：8.0/10、query:model-edit
-   evidence：使用遗传算法的越狱攻击以绕过安全约束
+   evidence：通过修改输出向量的模型编辑以缓解记忆效应
 
 ### 速读区论文标签
-1. [Risk Under Pressure: Compute-Aware Evaluation of Adversarial Robustness in Language Models](/202606/17/2606.11409v1-risk-under-pressure-compute-aware-evaluation-of-adversarial-robustness-in-language-models)  
-   标签：评分：6.0/10、query:model-edit
-   evidence：提出计算感知的对抗鲁棒性评估框架，可用于衡量模型编辑对攻击的防御效果
-2. [SHARD: Safe and Helpful Alignment via Self-Reframing Distillation](/202606/17/2606.15517v1-shard-safe-and-helpful-alignment-via-self-reframing-distillation)  
-   标签：评分：6.0/10、query:model-edit
-   evidence：自重构蒸馏实现安全有用对齐，与安全对齐编辑相关
-3. [Automated jailbreak attack targeting multiple defense strategies](/202606/17/2606.16751v1-automated-jailbreak-attack-targeting-multiple-defense-strategies)  
-   标签：评分：6.0/10、query:model-edit
-   evidence：自动化越狱攻击框架，用于测试模型编辑防御方法
+1. [AnchorKV: Safety-Aware KV Cache Compression via Soft Penalty with a Refusal Anchor](/202606/18/2606.17872v1-anchorkv-safety-aware-kv-cache-compression-via-soft-penalty-with-a-refusal-anchor)  
+   标签：评分：7.0/10、query:model-edit
+   evidence：提出安全意识KV缓存压缩方法来防御越狱攻击
 
 
 <div class="dpr-home-promo-card">
