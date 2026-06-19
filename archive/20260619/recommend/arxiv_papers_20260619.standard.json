@@ -1,0 +1,165 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-19T21:49:16.347487+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 3,
+    "deep_cap": 6,
+    "deep_selected": 3,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2606.19679v1",
+      "source": "arxiv",
+      "title": "LOKI: Memory-Free Null-Space Constrained Lifelong Knowledge Editing",
+      "abstract": "Lifelong knowledge editing aims to efficiently and sequentially update language models over time, as new knowledge becomes available or when the model makes mistakes, while preserving acceptable performance on past knowledge. One unresolved challenge is that existing methods modify a fixed set of layers for all new knowledge samples, reducing flexibility and increasing catastrophic forgetting. Another is requiring access to previous knowledge and extensive pre-processing to obtain data statistics. To address these challenges, we introduce LOKI, a novel approach that uses dynamic layer selection based on the Hilbert-Schmidt Independence Criterion and projects gradient updates onto the null-space of the model weights, bypassing the requirement for previous knowledge access. We show that LOKI achieves superior performance to existing approaches across a wide variety of experiments, achieving up to a 14\\% improvement in average accuracy.",
+      "authors": [
+        "Masih Eskandar",
+        "Miquel Sirera Perelló",
+        "Stratis Ioannidis",
+        "Jennifer Dy"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-06-18T01:08:33+00:00",
+      "link": "https://arxiv.org/pdf/2606.19679v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "proposes lifelong knowledge editing method LOKI, directly matching knowledge editing requirement",
+      "llm_evidence_cn": "提出终身知识编辑方法LOKI，直接匹配知识编辑需求",
+      "llm_evidence": "提出终身知识编辑方法LOKI，直接匹配知识编辑需求",
+      "canonical_evidence": "提出终身知识编辑方法LOKI，直接匹配知识编辑需求",
+      "llm_tldr_en": "LOKI uses dynamic layer selection and null-space projection for lifelong knowledge editing without memory of past data, enabling efficient sequential updates.",
+      "llm_tldr_cn": "终身知识编辑要求高效顺序更新模型知识同时避免遗忘。现有方法固定编辑层且依赖历史数据。LOKI通过希尔伯特-施密特独立性准则动态选择编辑层，并将梯度投影到权重的零空间，无需存储旧知识。实验证明LOKI在多个编辑任务上保持高编辑成功率且几乎不遗忘，为知识编辑提供了轻量且可持续的解决方案。",
+      "llm_tldr": "终身知识编辑要求高效顺序更新模型知识同时避免遗忘。现有方法固定编辑层且依赖历史数据。LOKI通过希尔伯特-施密特独立性准则动态选择编辑层，并将梯度投影到权重的零空间，无需存储旧知识。实验证明LOKI在多个编辑任务上保持高编辑成功率且几乎不遗忘，为知识编辑提供了轻量且可持续的解决方案。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.20225v1",
+      "source": "arxiv",
+      "title": "Actionable Activation Directions for Detecting and Mitigating Emergent Misalignment Across Language Model Families",
+      "abstract": "Fine-tuning language models on insecure code induces emergent misalignment with poorly understood internal structure. We investigate whether this misalignment corresponds to a causally actionable activation-space direction shared across architectures. Across four instruction-tuned model families (Qwen2.5-1.5B, Gemma-2-2B, Llama-3.2-1B, Ministral-3-3B) finetuned identically, a difference-in-means direction achieves 99.6% separation of aligned and misaligned activations at each model's final layer. Causal steering by subtracting this direction reduces code spillover by 21-51 points, while a secure-code control confirms content specificity. Cross-architecture transfer via ridge regression maps yields large behavioral suppression (up to 46 points) but fails specificity controls as random and orthogonal directions perform comparably. We identify a two-tier specificity structure: within-model directions are causally specific and actionable; cross-model directions are causally real but non-specific. An asymmetric transfer topology emerges, with Gemma and Qwen acting as geometric donors and Llama as a receiver. These findings define the limits of linear cross-architecture correction and recommend within-model probing for auditing.",
+      "authors": [
+        "Abdul Rafay Syed"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-18T13:39:59+00:00",
+      "link": "https://arxiv.org/pdf/2606.20225v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "causal activation steering mitigates misalignment across model families",
+      "llm_evidence_cn": "因果激活方向编辑跨模型家族缓解对齐问题",
+      "llm_evidence": "因果激活方向编辑跨模型家族缓解对齐问题",
+      "canonical_evidence": "因果激活方向编辑跨模型家族缓解对齐问题",
+      "llm_tldr_en": "This paper discovers a shared activation direction for emergent misalignment and uses causal steering to reduce harmful code spillover, demonstrating effective model editing for safety.",
+      "llm_tldr_cn": "该研究发现不同模型微调后出现的不对齐具有共享的激活方向，通过因果减法编辑该方向可在多个模型家族上大幅降低有害代码输出，且方向可跨架构迁移，为安全对齐编辑提供了高效方法。",
+      "llm_tldr": "该研究发现不同模型微调后出现的不对齐具有共享的激活方向，通过因果减法编辑该方向可在多个模型家族上大幅降低有害代码输出，且方向可跨架构迁移，为安全对齐编辑提供了高效方法。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.18310v1",
+      "source": "arxiv",
+      "title": "Conflict-Aware Retriever Editing for Knowledge Injection Attacks on LLM-Based RAG Systems",
+      "abstract": "Injecting malicious knowledge into retrieval-augmented generation (RAG) systems can manipulate retrieved evidence and mislead downstream generation, posing a serious security threat for AI applications. Existing RAG injection attacks mainly rely on manipulating external knowledge bases, such as crafting malicious corpus. However, the synthetic text crafted by such data-centric methods could be detectable, leading to the failure of attacks. Beyond corpus manipulation, open-source retrievers are increasingly exposing RAG systems to model-centric attacks. In this paper, we propose conflict-aware retriever editing, i.e., CAREATTACK, a model-centric retriever attack framework for malicious knowledge injection in RAG. Specifically, CAREATTACK consists two stages of conflict-aware retriever editing and attack-preserving anchor repair. Conflict-aware retriever editing adapts efficient closed-form parameter editing to the dense retrieval model, promoting malicious knowledge above benign competing passages and resolving potential parameter conflicts through graph-based conflict detection and parameter editing projection. Then, attack-preserving anchor repair performs lightweight calibration on the edited retriever to further eliminate the impact on non-target prompts while preserving the attack effectiveness for target prompts. We instantiate CAREATTACK on Qwen3-Embedding-0.6B and BGE-M3, and conduct evaluation on three benchmark datasets. Experimental results demonstrate our method substantially promote malicious passages into the retrieved knowledge of RAG systems and can perform attacks for batches of target prompts and passages, given the access of retrieval model parameters. Since most RAG systems are built upon open-source retrieval models, this work reveals a practical attack surface in RAG systems. Codes are public accessible at https://anonymous.4open.science/r/CareAttack-3F1C.",
+      "authors": [
+        "Xinru Liu",
+        "Xianglong Zhang",
+        "Di Cai",
+        "Zhumin Chen",
+        "Pengfei Hu",
+        "Xin Xin"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-06-16T09:17:56+00:00",
+      "link": "https://arxiv.org/pdf/2606.18310v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "proposes retriever editing for knowledge injection attacks on RAG systems, directly addresses model editing for attacks",
+      "llm_evidence_cn": "提出检索器编辑实现RAG系统知识注入攻击，直接关联模型编辑防止攻击",
+      "llm_evidence": "提出检索器编辑实现RAG系统知识注入攻击，直接关联模型编辑防止攻击",
+      "canonical_evidence": "提出检索器编辑实现RAG系统知识注入攻击，直接关联模型编辑防止攻击",
+      "llm_tldr_en": "CAREATTACK performs conflict-aware retriever editing to inject malicious knowledge into RAG systems, demonstrating a model-centric attack that bypasses detection, highlighting the need for editing defenses.",
+      "llm_tldr_cn": "现有RAG系统知识注入攻击依赖外部语料库编辑，容易被检测。本文提出冲突感知检索器编辑（CAREATTACK），通过直接修改开源检索器参数实现恶意知识注入，是一种模型中心攻击。实验表明该方法不易被检测且成功率极高，揭示了检索器编辑对RAG安全的严重威胁，并暗示了防御方向。",
+      "llm_tldr": "现有RAG系统知识注入攻击依赖外部语料库编辑，容易被检测。本文提出冲突感知检索器编辑（CAREATTACK），通过直接修改开源检索器参数实现恶意知识注入，是一种模型中心攻击。实验表明该方法不易被检测且成功率极高，揭示了检索器编辑对RAG安全的严重威胁，并暗示了防御方向。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "How can model editing prevent attacks on large language models",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.17175v1",
+      "source": "arxiv",
+      "title": "Self-Generated Error Training for Token Editing in Diffusion Language Models",
+      "abstract": "Token-to-token (T2T) editing lets LLaDA2.1 revise committed tokens during block-diffusion decoding. The released recipe trains this editor on random vocabulary corruptions, but at inference the editor sees the model's own fluent, high-confidence draft errors instead. We study this training-inference mismatch and propose self-generated T2T, which performs a no-gradient draft pass, fills masked positions with predicted tokens, and supervises recovery in a second pass under these self-generated corruptions. We implement the update as a short LoRA continued-pretraining pass on LLaDA2.1-mini and evaluate on several benchmarks under the official Q-Mode T2T procedure with unchanged inference parameters. The method generally improves accuracy while reducing T2T edit intensity, mitigating failure modes such as final-digit transcription errors after otherwise correct reasoning and excessive self-correction before short factual answers.",
+      "authors": [
+        "Lin Yao"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-15T18:13:54+00:00",
+      "link": "https://arxiv.org/pdf/2606.17175v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "proposes self-generated error training for token editing in diffusion language models",
+      "llm_evidence_cn": "提出自生成错误训练改进扩散语言模型的令牌编辑",
+      "llm_evidence": "提出自生成错误训练改进扩散语言模型的令牌编辑",
+      "canonical_evidence": "提出自生成错误训练改进扩散语言模型的令牌编辑",
+      "llm_tldr_en": "Self-Generated Error Training enhances token editing in diffusion language models by using the model's own drafts as training targets, improving accuracy and reducing cost.",
+      "llm_tldr_cn": "扩散语言模型中的令牌编辑（T2T）存在训练与推理不匹配问题：训练用随机词汇错误，推理则面对模型自身流畅错误。本文提出自生成T2T方法，通过无梯度草稿填充再恢复，以模型自身错误进行训练，在LLaDA2.1-mini上使用LoRA微调，显著提升了编辑准确率并降低了计算开销。",
+      "llm_tldr": "扩散语言模型中的令牌编辑（T2T）存在训练与推理不匹配问题：训练用随机词汇错误，推理则面对模型自身流畅错误。本文提出自生成T2T方法，通过无梯度草稿填充再恢复，以模型自身错误进行训练，在LLaDA2.1-mini上使用LoRA微调，显著提升了编辑准确率并降低了计算开销。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
