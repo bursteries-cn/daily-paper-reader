@@ -1,0 +1,53 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-20T20:19:54.277506+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2606.17107v1",
+      "source": "arxiv",
+      "title": "Models Take Notes at Prefill: KV Cache Can Be Editable and Composable",
+      "abstract": "Prefix caching reuses prefill only across an exactly shared prefix, so one changed field invalidates the entire downstream cache. Yet overwriting the field's own key/value vectors and reusing the rest leaves the model acting on the old value. The reason, established causally across four model families: at prefill the model has already written the field-conditioned conclusion onto downstream notes; the field's own key/value drives under 1% of the decision. Read as a notebook of memoized conclusions, two capabilities follow. (1) It is editable. A salient erratum amends the notes; and with chain-of-thought, editing the field alone recovers the decision (1.00 at 8B, ~1% compute), while without CoT it is ignored. (2) It is composable. The notes are position-portable, so a precompiled skill can be RoPE-repositioned and spliced into any context, indistinguishable from full recompute (logit cosine 0.90-0.999, twelve models) at O(L) rather than O(L^2) time-to-first-token. A unified edit+compose agent stays decision-identical to recompute at up to 14.9x lower latency. The approach applies to any per-token attention KV cache, validated across scale, quantization, Mixture-of-Experts, and multimodal caches, and extends to several attention variants through small adapters. Because the erratum is append-only, it composes with production prefix caching: in an online vLLM benchmark it keeps the prefix cache-aligned (98.5% hit-rate), cutting p90 time-to-first-token by 53-398x.",
+      "authors": [
+        "Bojie Li"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-06-14T15:31:23+00:00",
+      "link": "https://arxiv.org/pdf/2606.17107v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "editable KV cache at prefill",
+      "llm_evidence_cn": "预填充阶段可编辑的KV缓存",
+      "llm_evidence": "预填充阶段可编辑的KV缓存",
+      "canonical_evidence": "预填充阶段可编辑的KV缓存",
+      "llm_tldr_en": "Shows KV cache can be edited by amending field notes; with CoT editing alone recovers decisions with 1% compute.",
+      "llm_tldr_cn": "本文发现大型语言模型在预填充阶段已经将场条件结论写入下游笔记，导致直接修改字段键值无效。通过将模型视为备忘录笔记本，提出可编辑能力：使用思维链纠正单一字段即可恢复决策（8B模型约1%计算量），而无思维链时编辑被忽略。该工作揭示了缓存编辑的新机制，为高效模型编辑提供了新视角。",
+      "llm_tldr": "本文发现大型语言模型在预填充阶段已经将场条件结论写入下游笔记，导致直接修改字段键值无效。通过将模型视为备忘录笔记本，提出可编辑能力：使用思维链纠正单一字段即可恢复决策（8B模型约1%计算量），而无思维链时编辑被忽略。该工作揭示了缓存编辑的新机制，为高效模型编辑提供了新视角。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

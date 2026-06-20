@@ -1,0 +1,24 @@
+{
+  "label": "2026-06-20",
+  "date": "2026-06-20",
+  "generated_at": "2026-06-20T20:21:29",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202606/20/2606.17107v1-models-take-notes-at-prefill-kv-cache-can-be-editable-and-composable",
+      "section": "quick",
+      "title_en": "Models Take Notes at Prefill: KV Cache Can Be Editable and Composable",
+      "authors": "Bojie Li",
+      "date": "2026-06-14",
+      "pdf": "https://arxiv.org/pdf/2606.17107v1",
+      "score": "6.0",
+      "evidence": "预填充阶段可编辑的KV缓存",
+      "tldr": "前缀缓存仅重用完全相同的共享前缀，一个字段变化即失效，因为模型在预填充时已将字段条件结论写入下游notes，自身KV向量贡献很小。本文提出可编辑和可组合的KV缓存：通过追加erratum编辑字段，或利用RoPE位置移植组合预编译技能。编辑字段配合CoT可恢复决策（8B准确率1.00，计算量约1%），组合技能与重计算高度一致（logit余弦0.90-0.999），延迟从O(L^2)降至O(L)，统一agent延迟降低14.9倍。与生产前缀缓存兼容，在vLLM中保持98.5%命中率，p90 TTFT降低53-398倍。",
+      "tags": "query:model-edit",
+      "abstract_en": "Prefix caching reuses prefill only across an exactly shared prefix, so one changed field invalidates the entire downstream cache. Yet overwriting the field's own key/value vectors and reusing the rest leaves the model acting on the old value. The reason, established causally across four model families: at prefill the model has already written the field-conditioned conclusion onto downstream notes; the field's own key/value drives under 1% of the decision. Read as a notebook of memoized conclusions, two capabilities follow. (1) It is editable. A salient erratum amends the notes; and with chain-of-thought, editing the field alone recovers the decision (1.00 at 8B, ~1% compute), while without CoT it is ignored. (2) It is composable. The notes are position-portable, so a precompiled skill can be RoPE-repositioned and spliced into any context, indistinguishable from full recompute (logit cosine 0.90-0.999, twelve models) at O(L) rather than O(L^2) time-to-first-token. A unified edit+compose agent stays decision-identical to recompute at up to 14.9x lower latency. The approach applies to any per-token attention KV cache, validated across scale, quantization, Mixture-of-Experts, and multimodal caches, and extends to several attention variants through small adapters. Because the erratum is append-only, it composes with production prefix caching: in an online vLLM benchmark it keeps the prefix cache-aligned (98.5% hit-rate), cutting p90 time-to-first-token by 53-398x.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
