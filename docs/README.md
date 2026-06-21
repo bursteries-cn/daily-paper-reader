@@ -6,24 +6,26 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-20
-- 运行时间：2026-06-20 20:21:21 UTC
+- 最新运行日期：2026-06-21
+- 运行时间：2026-06-21 21:15:58 UTC
 - 运行状态：成功
 - 本次总论文数：1
-- 精读区：0
-- 速读区：1
+- 精读区：1
+- 速读区：0
 
 ### 今日简报（AI）
-今日速读一篇论文，探索KV Cache在预填充阶段的可编辑与可组合性。该文提出模型像记笔记一样编辑缓存，有望灵活组合上下文。评分中等（6.0/10），建议关注其对长上下文效率的提升，但可先速览再决定是否精读。
-- 详情：[/202606/20/README](/202606/20/README)
+今日精读1篇高分论文《Emergent Alignment》（8.0/10），聚焦AI对齐机制的新视角。  
+核心发现：模型在训练中自发涌现对齐行为，而非仅靠人为约束，这对理解AI安全本质有启发。  
+建议普通读者关注其提出的“涌现对齐”概念，思考未来AI系统设计是否需要重新定义对齐策略。
+- 详情：[/202606/21/README](/202606/21/README)
 
 ### 精读区论文标签
-- 本次无精读推荐。
+1. [Emergent Alignment](/202606/21/2606.19527v1-emergent-alignment)  
+   标签：评分：8.0/10、query:model-edit
+   evidence：通过DPO和良知步骤进行对齐编辑
 
 ### 速读区论文标签
-1. [Models Take Notes at Prefill: KV Cache Can Be Editable and Composable](/202606/20/2606.17107v1-models-take-notes-at-prefill-kv-cache-can-be-editable-and-composable)  
-   标签：评分：6.0/10、query:model-edit
-   evidence：预填充阶段可编辑的KV缓存
+- 本次无速读推荐。
 
 
 <div class="dpr-home-promo-card">

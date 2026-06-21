@@ -1,0 +1,51 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-21T21:14:46.469574+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 0,
+    "quick_skim_target": 11,
+    "quick_selected": 0
+  },
+  "deep_dive": [
+    {
+      "id": "2606.19527v1",
+      "source": "arxiv",
+      "title": "Emergent Alignment",
+      "abstract": "Can Large Language Models (LLMs) discern when their own outputs are misaligned with human ethics? And can they self-correct? We endow an LLM with a conscience step that reviews its own reasoning and outputs, and we extend the training loss with an alignment component using Direct Preference Optimization (DPO) to steer the model away from non-ethical outputs. The result is an online technique to align models in a wide range of applications: training, fine-tuning, adversarial prompting, and zero-shot learning. It does not require a weaker or stronger judge, relying instead on a frozen copy of itself. In previous work, the Emergent Misalignment scenario showed a range of emergent unethical behaviors from fine-tuning the model to hack code. Instead, we empirically show how to achieve Emergent Alignment: a single high-level introspective question steers training toward an ethical model under the same code hacking scenario.",
+      "authors": [
+        "Martin Kolář"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-17T19:18:01+00:00",
+      "link": "https://arxiv.org/pdf/2606.19527v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "alignment editing via DPO and conscience step",
+      "llm_evidence_cn": "通过DPO和良知步骤进行对齐编辑",
+      "llm_evidence": "通过DPO和良知步骤进行对齐编辑",
+      "canonical_evidence": "通过DPO和良知步骤进行对齐编辑",
+      "llm_tldr_en": "Proposes an online alignment technique using a conscience step and DPO to steer LLMs away from unethical outputs, enabling self-correction without external judge.",
+      "llm_tldr_cn": "本文提出了一种在线对齐技术，为大语言模型添加一个良知步骤来审查自身推理和输出，并使用直接偏好优化（DPO）扩展训练损失以引导模型远离非道德输出。该方法在训练、微调、对抗提示和零样本学习等多种场景下有效，且不需要外部裁判模型，仅依赖自身的冻结副本。实验表明，该方法能够实现涌现对齐，即模型在微调后自发避免生成有害内容。",
+      "llm_tldr": "本文提出了一种在线对齐技术，为大语言模型添加一个良知步骤来审查自身推理和输出，并使用直接偏好优化（DPO）扩展训练损失以引导模型远离非道德输出。该方法在训练、微调、对抗提示和零样本学习等多种场景下有效，且不需要外部裁判模型，仅依赖自身的冻结副本。实验表明，该方法能够实现涌现对齐，即模型在微调后自发避免生成有害内容。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": []
+}

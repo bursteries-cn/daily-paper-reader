@@ -1,0 +1,24 @@
+{
+  "label": "2026-06-21",
+  "date": "2026-06-21",
+  "generated_at": "2026-06-21T21:16:05",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202606/21/2606.19527v1-emergent-alignment",
+      "section": "deep",
+      "title_en": "Emergent Alignment",
+      "authors": "Martin Kolář",
+      "date": "2026-06-17",
+      "pdf": "https://arxiv.org/pdf/2606.19527v1",
+      "score": "8.0",
+      "evidence": "通过DPO和良知步骤进行对齐编辑",
+      "tldr": "大型语言模型在代码黑客等场景中可能出现非伦理输出，本文提出一种在线对齐技术，通过在训练中引入内省步骤和DPO损失函数，使模型自我审查并纠正输出。该方法无需外部评判，仅依赖自身冻结副本，在微调、对抗提示和零样本学习中均有效，实验证明一个高层内省问题即可引导模型实现伦理对齐。",
+      "tags": "query:model-edit",
+      "abstract_en": "Can Large Language Models (LLMs) discern when their own outputs are misaligned with human ethics? And can they self-correct? We endow an LLM with a conscience step that reviews its own reasoning and outputs, and we extend the training loss with an alignment component using Direct Preference Optimization (DPO) to steer the model away from non-ethical outputs. The result is an online technique to align models in a wide range of applications: training, fine-tuning, adversarial prompting, and zero-shot learning. It does not require a weaker or stronger judge, relying instead on a frozen copy of itself. In previous work, the Emergent Misalignment scenario showed a range of emergent unethical behaviors from fine-tuning the model to hack code. Instead, we empirically show how to achieve Emergent Alignment: a single high-level introspective question steers training toward an ethical model under the same code hacking scenario.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
