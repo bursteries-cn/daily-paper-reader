@@ -1,0 +1,24 @@
+{
+  "label": "2026-06-22",
+  "date": "2026-06-22",
+  "generated_at": "2026-06-22T22:18:18",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202606/22/2606.16527v1-doubtprobe-black-box-jailbreak-defense-via-structural-verification-and-semantic-auditing",
+      "section": "deep",
+      "title_en": "DoubtProbe: Black-Box Jailbreak Defense via Structural Verification and Semantic Auditing",
+      "authors": "Xuanyu Yin, Yilin Jiang, Jun Zhou, Kai Chen, Zhengfu Cao, Xiaolei Dong",
+      "date": "2026-06-15",
+      "pdf": "https://arxiv.org/pdf/2606.16527v1",
+      "score": "8.0",
+      "evidence": "通过结构验证和语义审计的黑盒越狱防御",
+      "tldr": "大语言模型面临黑盒越狱攻击风险，现有防御在提示重组和结构操纵下不稳定。本文提出DoubtProbe双分支防御框架，通过结构验证提取重构表示并检测信息一致性，同时进行语义审计。在Qwen2.5-72B上，将JBB攻击成功率从0.293降至0.100，CodeAttack成功率从0.152降至0.001，误报率仅0.022。该方法在Llama-3.1-70B上也表现出相同稳定性，证明结构不一致信号是黑盒防御的实用基础。",
+      "tags": "query:model-edit",
+      "abstract_en": "As large language models (LLMs) are increasingly deployed in user-facing systems, black-box jailbreak defense has become an important practical problem. Existing defenses often rely on known-attack coverage, prompt-level semantic judgment, or local runtime control, yet these paths can become unstable under evolving prompt packaging, expression rewriting, and structure manipulation. We observe that many black-box jailbreaks do not remove the harmful goal, but reorganize the information needed to express and execute it, thereby evading safety alignment while remaining recoverable during generation. Motivated by this observation, we propose DoubtProbe, a dual-branch inference-time defense framework that combines structural verification with semantic auditing and formulates black-box jailbreak defense as consistency checking under controlled transformation. The structural branch extracts a structured representation from the original request, reconstructs the request under representation constraints, and detects information-preservation failures between the original and reconstructed requests; the semantic branch audits the original prompt directly. We evaluate DoubtProbe against representative black-box defenses on jailbreak and benign-request benchmarks, and further test backbone transfer from Qwen2.5-72B to Llama-3.1-70B. Results show that DoubtProbe achieves a stronger and more stable defense-utility trade-off: on Qwen2.5-72B, it reduces the JBB attack success rate from 0.293 to 0.100 and the CodeAttack attack success rate from 0.152 to 0.001, while maintaining false positive rates of 0.022 and 0.016 on AlpacaEval and OR-Bench; the same pattern remains stable on Llama-3.1-70B. These findings show that structural inconsistency signals provide a practical and generalizable basis for black-box jailbreak defense, especially when combined with semantic auditing.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
