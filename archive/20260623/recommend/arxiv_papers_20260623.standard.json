@@ -1,0 +1,249 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-23T21:43:50.213347+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 4,
+    "deep_cap": 6,
+    "deep_selected": 4,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2606.17168v2",
+      "source": "arxiv",
+      "title": "RepSelect: Robust LLM Unlearning via Representation Selectivity",
+      "abstract": "Making large language models (LLMs) deeply forget specific knowledge and values without sacrificing general capabilities remains a central challenge in unlearning. Current methods are easily reversed by fine-tuning or few-shot prompting, suggesting their forgetting is only shallow. We identify the root cause. Existing methods target representations shared with both the retain set and the subspace recovered by a fine-tuning attacker, making unlearning both disruptive to general capabilities and easy to reverse. We propose RepSelect (Representation Selectivity), which isolates forget-set-specific representations by collapsing top principal components of weight gradients before each update, leaving general capabilities intact while limiting what fine-tuning can recover. We evaluate across two forget categories, biohazardous knowledge and abusive tendencies, and four model families spanning dense and Mixture-of-Experts architectures (Llama 3, Qwen 3.5, Gemma 4 E4B, DeepSeek V2 Lite). Compared to five popular baselines (GradDiff, NPO, SimNPO, RMU, UNDIAL), RepSelect achieves a 4-50x larger reduction in post-relearning answer accuracy than the strongest baseline, and is near-perfectly robust to few-shot prompting attacks. Targeting selective representations is thus an important step towards deep and robust LLM forgetting.",
+      "authors": [
+        "Filip Sondej",
+        "Yushi Yang",
+        "Adam Mahdi"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-15T18:06:59+00:00",
+      "link": "https://arxiv.org/pdf/2606.17168v2",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "robust LLM unlearning via representation selectivity",
+      "llm_evidence_cn": "通过表示选择性实现鲁棒的LLM遗忘",
+      "llm_evidence": "通过表示选择性实现鲁棒的LLM遗忘",
+      "canonical_evidence": "通过表示选择性实现鲁棒的LLM遗忘",
+      "llm_tldr_en": "Proposes RepSelect for robust LLM unlearning by isolating forget-set-specific representations via collapsing top principal components of weight gradients, making unlearning resistant to reversal by fine-tuning.",
+      "llm_tldr_cn": "现有LLM遗忘方法易被微调或少量样本提示逆转，遗忘仅停留在表面。本文识别其根因为方法针对的是保留集和攻击者可恢复的共享表示。提出RepSelect，通过坍缩权重梯度的主成分来隔离遗忘集特定表示，从而保持通用能力并抵抗微调逆转。实验表明RepSelect在遗忘效果和鲁棒性上显著优于现有方法。",
+      "llm_tldr": "现有LLM遗忘方法易被微调或少量样本提示逆转，遗忘仅停留在表面。本文识别其根因为方法针对的是保留集和攻击者可恢复的共享表示。提出RepSelect，通过坍缩权重梯度的主成分来隔离遗忘集特定表示，从而保持通用能力并抵抗微调逆转。实验表明RepSelect在遗忘效果和鲁棒性上显著优于现有方法。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.22627v1",
+      "source": "arxiv",
+      "title": "Orthogonal Representation Editing: Decoupling Semantic Entanglement in Batch Knowledge Editing of LLMs",
+      "abstract": "Knowledge editing aims to efficiently update factual information in Large Language Models (LLMs) without full retraining. However, existing methods still suffer from performance degradation in batch knowledge editing. We identify that semantic representation entanglement, such as overlapping concepts and shared syntactic patterns, accumulates interference in the representation space and reduces editing precision. To bridge this gap, in this paper, we propose Orthogonal Representation Editing (ORE), which performs edits in the hidden representation space of LLMs by constructing a general semantic subspace and enforcing orthogonal constraints on edit vectors, effectively decoupling semantic entanglement. Furthermore, we introduce a gated non-linear representation head to enable adaptive learning of editing locations and precise control over knowledge injection. Extensive experiments show that ORE outperforms existing methods and achieves superior performance in cross-lingual knowledge editing scenarios. We release our code at https://github.com/YVVH/ORE.",
+      "authors": [
+        "Wenhao Yu",
+        "Zhicong Lu",
+        "Bo Lv",
+        "Fangyin Ma",
+        "Kaiwen Wei",
+        "Shihao Yang",
+        "Nayu Liu"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-06-21T18:29:40+00:00",
+      "link": "https://arxiv.org/pdf/2606.22627v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "proposes Orthogonal Representation Editing for batch knowledge editing",
+      "llm_evidence_cn": "提出正交表示编辑以改进批量知识编辑",
+      "llm_evidence": "提出正交表示编辑以改进批量知识编辑",
+      "canonical_evidence": "提出正交表示编辑以改进批量知识编辑",
+      "llm_tldr_en": "Proposes Orthogonal Representation Editing (ORE) to decouple semantic entanglement in batch knowledge editing of LLMs, improving editing precision.",
+      "llm_tldr_cn": "批量知识编辑中语义表示纠缠导致精度下降。本文提出正交表示编辑（ORE），在隐表示空间中构建通用语义子空间并对编辑向量施加正交约束，有效解耦语义纠缠，提升批量编辑精度。",
+      "llm_tldr": "批量知识编辑中语义表示纠缠导致精度下降。本文提出正交表示编辑（ORE），在隐表示空间中构建通用语义子空间并对编辑向量施加正交约束，有效解耦语义纠缠，提升批量编辑精度。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.22686v1",
+      "source": "arxiv",
+      "title": "The Geometry of Refusal: Linear Instability in Safety-Aligned LLMs",
+      "abstract": "Modern Large Language Models (LLMs) rely on extensive safety alignment, yet the mechanistic basis of refusal remains opaque. In this work, we investigate whether safety compliance is a deep semantic decision or a manipulable linear feature. We introduce Contrastive Logit Steering (CLS), a zero-optimization framework that isolates the \"refusal direction\" by contrasting hidden states derived from safe and unrestricted system prompts. Unlike representation engineering methods that intervene on internal activations, CLS operates directly on the output distribution, serving as a diagnostic probe for alignment fragility. When coupled with prefix injection to bypass initial refusal reflexes, this method induces a phase transition where guardrails collapse. Our experiments on 7 model families reveal that safety implementation is architecturally deterministic. While models like Llama-3.1 exhibit a \"Late Decision\" topology that is easily bypassed by CLS (reaching 95% ASR in approximately one second), others like Qwen-2.5 demonstrate \"Early Divergence\" by integrating safety mid-computation. Direct comparison with established activation-level steering methods shows that CLS achieves substantially higher attack success rates on Llama 2 (73% vs. 22.6%) and Qwen 7B (91% vs. 79.2%), demonstrating that logit-level intervention exposes alignment vulnerabilities that hidden-state methods underestimate. Beyond attacks, we show that this linearity enables bidirectional control: inverting the steering vector \"hardens\" models against jailbreaks without retraining. Our findings suggest that current alignment techniques create a steerable \"safety axis\" that serves as both a critical vulnerability and a precise primitive for defense.",
+      "authors": [
+        "Shivam Ratnakar",
+        "Kartikeya Vats"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-06-21T22:04:48+00:00",
+      "link": "https://arxiv.org/pdf/2606.22686v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "introduces Contrastive Logit Steering to probe refusal direction and induce guardrail collapse",
+      "llm_evidence_cn": "引入对比对数几率操控以探测拒绝方向并诱导安全护栏崩溃",
+      "llm_evidence": "引入对比对数几率操控以探测拒绝方向并诱导安全护栏崩溃",
+      "canonical_evidence": "引入对比对数几率操控以探测拒绝方向并诱导安全护栏崩溃",
+      "llm_tldr_en": "Introduces Contrastive Logit Steering (CLS) to isolate refusal direction and shows that prefix injection can cause safety guardrails to collapse, revealing linear instability in safety-aligned LLMs.",
+      "llm_tldr_cn": "大型语言模型的安全对齐机制存在线性不稳定性。本文提出对比对数几率操控（CLS）框架，通过对比安全与自由系统提示的隐状态提取拒绝方向，并配合前缀注入绕过初始拒绝反射，诱导安全护栏发生相变式崩溃，揭示了对齐脆弱性的机械论根源。",
+      "llm_tldr": "大型语言模型的安全对齐机制存在线性不稳定性。本文提出对比对数几率操控（CLS）框架，通过对比安全与自由系统提示的隐状态提取拒绝方向，并配合前缀注入绕过初始拒绝反射，诱导安全护栏发生相变式崩溃，揭示了对齐脆弱性的机械论根源。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.23276v1",
+      "source": "arxiv",
+      "title": "Exposing the Illusion of Erasure in Knowledge Editing for LLMs",
+      "abstract": "Knowledge Editing (KE) has emerged as a frontier for updating specific facts in LLMs without costly retraining, but its reliability and underlying mechanisms remain poorly understood. In this work, we examine KE from an adversarial elicitation perspective, revealing that edited knowledge is often not fully erased and continues to surface, with consistent failures observed across diverse model architectures. To explain this behavior, we conduct a mechanistic analysis of popular KE methods. We show that low-rank updates do not overwrite existing knowledge but instead redistribute it within the model's representation space. Furthermore, we find that these methods act as targeted suppression mechanisms that reduce the likelihood of expressing original facts, rather than removing them from the model. Analysis of the loss landscape reveals that edited knowledge lies in narrow, anisotropic regions that are highly sensitive to perturbations, making them highly vulnerable to indirect prompting and adversarial attacks. By exposing these profound architectural vulnerabilities, our work proves that KE algorithms are inherently bypassable and motivates a fundamental reevaluation of how we deploy post-hoc updates in several LLM applications.",
+      "authors": [
+        "Advik Raj Basani",
+        "Anshuman Chhabra"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CR"
+      ],
+      "published": "2026-06-22T12:53:54+00:00",
+      "link": "https://arxiv.org/pdf/2606.23276v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "exposing illusion of erasure in knowledge editing",
+      "llm_evidence_cn": "揭露知识编辑中的擦除幻觉",
+      "llm_evidence": "揭露知识编辑中的擦除幻觉",
+      "canonical_evidence": "揭露知识编辑中的擦除幻觉",
+      "llm_tldr_en": "Examines knowledge editing from an adversarial elicitation perspective, revealing that edited knowledge is often not fully erased and surfaces under attack, with mechanistic analysis showing low-rank updates redistribute rather than overwrite knowledge.",
+      "llm_tldr_cn": "知识编辑旨在无需重训练更新事实，但其可靠性存疑。本文从对抗性引出的视角研究知识编辑，发现编辑后的知识并未完全擦除，在不同模型架构上均持续显现。机制分析表明，低秩更新并未覆写原有知识，而是将其重新分布，本质是抑制而非删除。该发现质疑了知识编辑用于安全擦除的可靠性。",
+      "llm_tldr": "知识编辑旨在无需重训练更新事实，但其可靠性存疑。本文从对抗性引出的视角研究知识编辑，发现编辑后的知识并未完全擦除，在不同模型架构上均持续显现。机制分析表明，低秩更新并未覆写原有知识，而是将其重新分布，本质是抑制而非删除。该发现质疑了知识编辑用于安全擦除的可靠性。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.22676v1",
+      "source": "arxiv",
+      "title": "Skin-Deep: A Geometric Diagnostic for Alignment Fragility in Large Language Model Representations",
+      "abstract": "Alignment tuning is meant to make harmful-request refusal robust, yet this safety behavior can be erased by a small set of benign fine-tuning examples. This is a deployment risk for open-weight models because a checkpoint can pass refusal tests at release time and later lose refusal under low-cost downstream fine-tuning. Prior work has established these refusal failures, but existing studies do not show how to detect this fragility in the aligned model itself before an attack or fine-tuning intervention is run. We introduce Skin-Deep, a geometric diagnostic that detects alignment fragility directly from the aligned model's hidden-state activations before such an intervention is run and compresses the layer-wise safety geometry into a single scalar, the Geometric Fragility Score (GFS). Applied to twenty-one instruction-tuned models spanning six alignment recipes and 3B--32B parameters, Skin-Deep reveals a recurring low-rank safety subspace across model families. Direction ablations show that removing directions in this subspace weakens harmful-request refusal, providing causal evidence that the recovered geometry underlies refusal behavior. Crucially, GFS identifies, before any fine-tuning, the initially safe model that retains the most refusal after small-scale LoRA fine-tuning. These results establish GFS as a practical pre-deployment diagnostic for flagging fragile refusal behavior without running an attack.",
+      "authors": [
+        "Dongyub Jude Lee",
+        "Jungseob Lee",
+        "Seungyoon Lee",
+        "Seongtae Hong",
+        "Suhyune Son",
+        "Sugyeong Eo",
+        "Jaehyung Seo",
+        "Heuiseok Lim"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-21T21:30:15+00:00",
+      "link": "https://arxiv.org/pdf/2606.22676v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "geometric diagnostic for alignment fragility in LLMs",
+      "llm_evidence_cn": "LLM对齐脆弱性的几何诊断",
+      "llm_evidence": "LLM对齐脆弱性的几何诊断",
+      "canonical_evidence": "LLM对齐脆弱性的几何诊断",
+      "llm_tldr_en": "Skin-Deep introduces a geometric diagnostic that detects alignment fragility in LLMs before attacks or fine-tuning, using hidden-state activations to predict refusal robustness.",
+      "llm_tldr_cn": "对齐微调后的LLM在少量良性微调下可能失去安全拒绝能力，这构成部署风险。Skin-Deep提出一种几何诊断方法，直接从对齐模型的隐藏状态激活中检测对齐脆弱性，无需运行任何攻击或微调。它将逐层安全几何压缩为标量指标，有效预测模型在微调后是否仍能保持拒绝能力。该方法有助于在模型发布前评估编辑安全性，是模型编辑安全评估的重要工具。",
+      "llm_tldr": "对齐微调后的LLM在少量良性微调下可能失去安全拒绝能力，这构成部署风险。Skin-Deep提出一种几何诊断方法，直接从对齐模型的隐藏状态激活中检测对齐脆弱性，无需运行任何攻击或微调。它将逐层安全几何压缩为标量指标，有效预测模型在微调后是否仍能保持拒绝能力。该方法有助于在模型发布前评估编辑安全性，是模型编辑安全评估的重要工具。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "Find papers about model editing for safety in large language models",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.23313v1",
+      "source": "arxiv",
+      "title": "Uncertainty-based Debiasing and Unlearning for Decontamination",
+      "abstract": "Benchmark-based evaluation is the dominant paradigm for assessing large language model (LLM) capabilities, yet data contamination inflates reported performance and undermines fair comparison. Existing decontamination methods are evaluated solely through aggregate accuracy, which can obscure substantial differences in per-sample model behaviour, and many require access to an uncontaminated model. In this paper, we propose a sample-level evaluation framework for decontamination that complements accuracy-based assessment with distributional distance metrics, measuring how closely a decontaminated model recovers the output distribution of an uncontaminated model on each sample. Building on this framework, we introduce Uncertainty-Based Decontamination (UBD), a family of methods that leverage deep ensembles of the contaminated model to estimate per-sample memorization without requiring a uncontaminated model or knowledge of which samples are contaminated. UBD estimates a per-sample correction scalar from ensemble uncertainty, which is used to construct a debiased target distribution that suppresses the inflated probability mass on correct answers induced by contamination. This target is then used either as a post-hoc output correction (debiasing) or as a soft training signal for parameter update (unlearning). Experiments on MMLU-Pro and MATH-MCQA across multiple LLM backbones demonstrate that UBD produces per-sample output distributions substantially closer to those of an uncontaminated model than paraphrasing or choice-permutation baselines, while preserving model performance on uncontaminated data.",
+      "authors": [
+        "Guangzhi Sun",
+        "Xiao Zhan",
+        "Mark Gales"
+      ],
+      "primary_category": "cs.CY",
+      "categories": [
+        "cs.CY",
+        "cs.CL"
+      ],
+      "published": "2026-06-22T13:26:29+00:00",
+      "link": "https://arxiv.org/pdf/2606.23313v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "introduces unlearning for decontamination, a form of model editing",
+      "llm_evidence_cn": "引入用于去污染的去学习，是一种模型编辑形式",
+      "llm_evidence": "引入用于去污染的去学习，是一种模型编辑形式",
+      "canonical_evidence": "引入用于去污染的去学习，是一种模型编辑形式",
+      "llm_tldr_en": "Proposes Uncertainty-Based Decontamination (UBD) using unlearning to remove contaminated data influence, introducing sample-level evaluation for decontamination.",
+      "llm_tldr_cn": "数据污染影响LLM评估的公平性。本文提出基于不确定性的去污染方法（UBD），利用去学习技术移除污染样本影响，并引入样本级评估框架，测量去污染模型恢复无污染模型分布的程度，弥补了传统聚合精度评估的不足。",
+      "llm_tldr": "数据污染影响LLM评估的公平性。本文提出基于不确定性的去污染方法（UBD），利用去学习技术移除污染样本影响，并引入样本级评估框架，测量去污染模型恢复无污染模型分布的程度，弥补了传统聚合精度评估的不足。",
+      "llm_tags": [
+        "query:model-edit:composite"
+      ],
+      "matched_query_tag": "query:model-edit:composite",
+      "matched_query_text": "Papers central to 查找大模型安全领域的模型编辑方向论文, especially work that connects or combines: large language model editing; model editing safety; knowledge editing; safety alignment editing; jailbreak editing; Find papers about model editing for safety in large language models; Research on knowledge editing to improve LLM safety; How can model editing prevent attacks on large language models.",
+      "matched_requirement_id": "req-composite-model-edit",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
