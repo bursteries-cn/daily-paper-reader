@@ -1,0 +1,96 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-24T21:31:27.315057+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2606.21638v1",
+      "source": "arxiv",
+      "title": "Toward Open Weight Models Without Risks: Separating Public and Private Capabilities in LLMs",
+      "abstract": "Open-weight Large Language Models (LLMs) enable scientific progress and broad deployment. However, they make it difficult to control access to sensitive capabilities. Current practice either suppresses dangerous capabilities before release or mediates access through closed services that use specialized model variants, input/output monitors, and API permissions. The former is susceptible to jailbreaks while sacrificing capability for all users to mitigate the risks posed by a few, and the latter is fundamentally incompatible with open-weight release. In this paper, we propose Tiered Language Models (TLMs), where a single set of released weights supports multiple capability levels. In its default public configuration, a TLM behaves as a conventional LLM. A compact secret key specifies a permutation over a small parameter subset, inducing an alternative computation graph over the same weights that exposes additional capabilities. We develop a training protocol that jointly pretrains both configurations from scratch, then fine-tunes the keyed configuration on private data with regularization to preserve the public model's behavior. We pretrain 180M- and 650M-parameter TLMs and demonstrate that the keyed configuration can acquire a new language, gain instruction-following ability, and memorize private factual knowledge, whereas the public configuration exhibits none of these capabilities. Moreover, we show that our approach extends naturally to multiple hierarchical tiers. Because authorization operates on the model's weight structure rather than in the input space, the mechanism resists fine-tuning-based extraction and partial key compromise. In general, TLMs take a step toward reconciling open-weight release with selective capability control.",
+      "authors": [
+        "Charbel El Feghali",
+        "Arkil Patel",
+        "Nicholas Meade",
+        "Spandana Gella",
+        "Verna Dankers",
+        "Siva Reddy"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.CL"
+      ],
+      "published": "2026-06-19T17:44:22+00:00",
+      "link": "https://arxiv.org/pdf/2606.21638v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Proposes TLM to separate capabilities for safety in LLMs",
+      "llm_evidence_cn": "提出TLM分离能力以增强LLM安全性",
+      "llm_evidence": "提出TLM分离能力以增强LLM安全性",
+      "canonical_evidence": "提出TLM分离能力以增强LLM安全性",
+      "llm_tldr_en": "Proposes Tiered Language Models (TLMs) to separate public and private capabilities in open-weight LLMs, enabling safety without restricting open release.",
+      "llm_tldr_cn": "开放权重大语言模型在推动应用的同时，也带来了敏感能力难以控制的安全风险。本文提出分层语言模型（TLM），通过单一权重集支持多个能力级别，默认公共配置下行为受限，授权用户可解锁更强能力。该方法避免了传统方案对全体用户的牺牲，与开放权重发布兼容，为模型编辑在安全对齐中的应用提供了新的方向。",
+      "llm_tldr": "开放权重大语言模型在推动应用的同时，也带来了敏感能力难以控制的安全风险。本文提出分层语言模型（TLM），通过单一权重集支持多个能力级别，默认公共配置下行为受限，授权用户可解锁更强能力。该方法避免了传统方案对全体用户的牺牲，与开放权重发布兼容，为模型编辑在安全对齐中的应用提供了新的方向。",
+      "llm_tags": [
+        "query:model-edit:composite"
+      ],
+      "matched_query_tag": "query:model-edit:composite",
+      "matched_query_text": "Papers central to 查找大模型安全领域的模型编辑方向论文, especially work that connects or combines: large language model editing; model editing safety; knowledge editing; safety alignment editing; jailbreak editing; Find papers about model editing for safety in large language models; Research on knowledge editing to improve LLM safety; How can model editing prevent attacks on large language models.",
+      "matched_requirement_id": "req-composite-model-edit",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.23313v1",
+      "source": "arxiv",
+      "title": "Uncertainty-based Debiasing and Unlearning for Decontamination",
+      "abstract": "Benchmark-based evaluation is the dominant paradigm for assessing large language model (LLM) capabilities, yet data contamination inflates reported performance and undermines fair comparison. Existing decontamination methods are evaluated solely through aggregate accuracy, which can obscure substantial differences in per-sample model behaviour, and many require access to an uncontaminated model. In this paper, we propose a sample-level evaluation framework for decontamination that complements accuracy-based assessment with distributional distance metrics, measuring how closely a decontaminated model recovers the output distribution of an uncontaminated model on each sample. Building on this framework, we introduce Uncertainty-Based Decontamination (UBD), a family of methods that leverage deep ensembles of the contaminated model to estimate per-sample memorization without requiring a uncontaminated model or knowledge of which samples are contaminated. UBD estimates a per-sample correction scalar from ensemble uncertainty, which is used to construct a debiased target distribution that suppresses the inflated probability mass on correct answers induced by contamination. This target is then used either as a post-hoc output correction (debiasing) or as a soft training signal for parameter update (unlearning). Experiments on MMLU-Pro and MATH-MCQA across multiple LLM backbones demonstrate that UBD produces per-sample output distributions substantially closer to those of an uncontaminated model than paraphrasing or choice-permutation baselines, while preserving model performance on uncontaminated data.",
+      "authors": [
+        "Guangzhi Sun",
+        "Xiao Zhan",
+        "Mark Gales"
+      ],
+      "primary_category": "cs.CY",
+      "categories": [
+        "cs.CY",
+        "cs.CL"
+      ],
+      "published": "2026-06-22T13:26:29+00:00",
+      "link": "https://arxiv.org/pdf/2606.23313v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Unlearning for decontamination, uncertainty-based",
+      "llm_evidence_cn": "基于不确定性的去学习用于数据去污染",
+      "llm_evidence": "基于不确定性的去学习用于数据去污染",
+      "canonical_evidence": "基于不确定性的去学习用于数据去污染",
+      "llm_tldr_en": "Proposes Uncertainty-Based Decontamination (UBD) that uses unlearning to remove benchmark contamination effects, with sample-level evaluation; relevant to knowledge editing through unlearning mechanisms.",
+      "llm_tldr_cn": "基准数据污染使LLM评估失真，现有去污染方法依赖聚合指标且需无污染参照。论文提出不确定性基去污染（UBD），利用去学习去除样本级污染效应，并引入分布距离指标评估去污染质量。在多个基准上，UBD有效恢复模型真实分布，无需无污染模型。将去学习用于数据去污染，拓展了知识编辑的应用场景。",
+      "llm_tldr": "基准数据污染使LLM评估失真，现有去污染方法依赖聚合指标且需无污染参照。论文提出不确定性基去污染（UBD），利用去学习去除样本级污染效应，并引入分布距离指标评估去污染质量。在多个基准上，UBD有效恢复模型真实分布，无需无污染模型。将去学习用于数据去污染，拓展了知识编辑的应用场景。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

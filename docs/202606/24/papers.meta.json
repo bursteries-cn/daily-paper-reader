@@ -1,0 +1,39 @@
+{
+  "label": "2026-06-24",
+  "date": "2026-06-24",
+  "generated_at": "2026-06-24T21:33:35",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202606/24/2606.21638v1-toward-open-weight-models-without-risks-separating-public-and-private-capabilities-in-llms",
+      "section": "deep",
+      "title_en": "Toward Open Weight Models Without Risks: Separating Public and Private Capabilities in LLMs",
+      "authors": "Charbel El Feghali, Arkil Patel, Nicholas Meade, Spandana Gella, Verna Dankers, Siva Reddy",
+      "date": "2026-06-19",
+      "pdf": "https://arxiv.org/pdf/2606.21638v1",
+      "score": "9.0",
+      "evidence": "提出TLM分离能力以增强LLM安全性",
+      "tldr": "当前开放权重大模型难以控制敏感能力，要么在发布前抑制危险能力导致易被越狱且牺牲全体用户，要么通过封闭服务限制访问但无法开放权重。本文提出层级语言模型(TLM)，在单一权重集合中利用密钥指定小参数子集的排列，诱导不同的计算图，从而在公开配置和密钥配置间分离能力。采用从零联合预训练并微调密钥配置的方法，在180M和650M参数模型上，密钥配置能学习新语言、获得指令遵循能力、记忆私有事实，而公开配置完全不具这些能力。该方法可扩展多层层级且抵抗微调提取和部分密钥泄露，为开放权重与选择性能力控制提供统一方案。",
+      "tags": "query:model-edit",
+      "abstract_en": "Open-weight Large Language Models (LLMs) enable scientific progress and broad deployment. However, they make it difficult to control access to sensitive capabilities. Current practice either suppresses dangerous capabilities before release or mediates access through closed services that use specialized model variants, input/output monitors, and API permissions. The former is susceptible to jailbreaks while sacrificing capability for all users to mitigate the risks posed by a few, and the latter is fundamentally incompatible with open-weight release. In this paper, we propose Tiered Language Models (TLMs), where a single set of released weights supports multiple capability levels. In its default public configuration, a TLM behaves as a conventional LLM. A compact secret key specifies a permutation over a small parameter subset, inducing an alternative computation graph over the same weights that exposes additional capabilities. We develop a training protocol that jointly pretrains both configurations from scratch, then fine-tunes the keyed configuration on private data with regularization to preserve the public model's behavior. We pretrain 180M- and 650M-parameter TLMs and demonstrate that the keyed configuration can acquire a new language, gain instruction-following ability, and memorize private factual knowledge, whereas the public configuration exhibits none of these capabilities. Moreover, we show that our approach extends naturally to multiple hierarchical tiers. Because authorization operates on the model's weight structure rather than in the input space, the mechanism resists fine-tuning-based extraction and partial key compromise. In general, TLMs take a step toward reconciling open-weight release with selective capability control.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/24/2606.23313v1-uncertainty-based-debiasing-and-unlearning-for-decontamination",
+      "section": "quick",
+      "title_en": "Uncertainty-based Debiasing and Unlearning for Decontamination",
+      "authors": "Guangzhi Sun, Xiao Zhan, Mark Gales",
+      "date": "2026-06-22",
+      "pdf": "https://arxiv.org/pdf/2606.23313v1",
+      "score": "6.0",
+      "evidence": "基于不确定性的去学习用于数据去污染",
+      "tldr": "基准评估中数据污染会夸大LLM能力，现有去污染方法仅依赖聚合精度，忽略了样本级行为差异。本文提出样本级评估框架，结合分布距离度量；并设计不确定性去污染(UBD)方法，通过深度集成估计样本记忆程度，无需干净模型或污染先验知识。UBD基于集成不确定性计算校正标量，构建去偏目标分布，用于后处理或参数更新。在MMLU-Pro和MATH-MCQA上，UBD使模型输出分布更接近未污染模型，超越改写和选项置换基线，同时保持未污染数据性能。",
+      "tags": "query:model-edit",
+      "abstract_en": "Benchmark-based evaluation is the dominant paradigm for assessing large language model (LLM) capabilities, yet data contamination inflates reported performance and undermines fair comparison. Existing decontamination methods are evaluated solely through aggregate accuracy, which can obscure substantial differences in per-sample model behaviour, and many require access to an uncontaminated model. In this paper, we propose a sample-level evaluation framework for decontamination that complements accuracy-based assessment with distributional distance metrics, measuring how closely a decontaminated model recovers the output distribution of an uncontaminated model on each sample. Building on this framework, we introduce Uncertainty-Based Decontamination (UBD), a family of methods that leverage deep ensembles of the contaminated model to estimate per-sample memorization without requiring a uncontaminated model or knowledge of which samples are contaminated. UBD estimates a per-sample correction scalar from ensemble uncertainty, which is used to construct a debiased target distribution that suppresses the inflated probability mass on correct answers induced by contamination. This target is then used either as a post-hoc output correction (debiasing) or as a soft training signal for parameter update (unlearning). Experiments on MMLU-Pro and MATH-MCQA across multiple LLM backbones demonstrate that UBD produces per-sample output distributions substantially closer to those of an uncontaminated model than paraphrasing or choice-permutation baselines, while preserving model performance on uncontaminated data.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
