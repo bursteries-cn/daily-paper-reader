@@ -1,0 +1,54 @@
+{
+  "label": "2026-06-25",
+  "date": "2026-06-25",
+  "generated_at": "2026-06-25T21:14:09",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202606/25/2606.23276v2-exposing-the-illusion-of-erasure-in-knowledge-editing-for-llms",
+      "section": "deep",
+      "title_en": "Exposing the Illusion of Erasure in Knowledge Editing for LLMs",
+      "authors": "Advik Raj Basani, Anshuman Chhabra",
+      "date": "2026-06-22",
+      "pdf": "https://arxiv.org/pdf/2606.23276v2",
+      "score": "9.0",
+      "evidence": "直接研究大语言模型的知识编辑",
+      "tldr": "知识编辑旨在高效更新LLM特定事实，但研究发现编辑的知识并未真正擦除，而是被重新分布并处于脆弱状态。通过对抗性引出，多种模型架构下编辑知识持续浮现。机制分析表明低秩更新仅抑制而非删除原事实，且编辑知识位于狭窄各向异性区域，极易受间接提示和对抗攻击。该工作揭示了KE算法的根本漏洞，需重新审视后门更新在LLM应用中的部署。",
+      "tags": "query:model-edit",
+      "abstract_en": "Knowledge Editing (KE) has emerged as a frontier for updating specific facts in LLMs without costly retraining, but its reliability and underlying mechanisms remain poorly understood. In this work, we examine KE from an adversarial elicitation perspective, revealing that edited knowledge is often not fully erased and continues to surface, with consistent failures observed across diverse model architectures. To explain this behavior, we conduct a mechanistic analysis of popular KE methods. We show that low-rank updates do not overwrite existing knowledge but instead redistribute it within the model's representation space. Furthermore, we find that these methods act as targeted suppression mechanisms that reduce the likelihood of expressing original facts, rather than removing them from the model. Analysis of the loss landscape reveals that edited knowledge lies in narrow, anisotropic regions that are highly sensitive to perturbations, making them highly vulnerable to indirect prompting and adversarial attacks. By exposing these profound architectural vulnerabilities, our work proves that KE algorithms are inherently bypassable and motivates a fundamental reevaluation of how we deploy post-hoc updates in several LLM applications.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/25/2606.19755v1-safespec-fast-and-safe-llm-via-dynamic-reflective-sampling",
+      "section": "quick",
+      "title_en": "SafeSpec: Fast and Safe LLM via Dynamic Reflective Sampling",
+      "authors": "Haotian Xu, Zeyang Zhang, Linbao Li, Huadi Zheng, Yu Li, Cheng Zhuo",
+      "date": "2026-06-18",
+      "pdf": "https://arxiv.org/pdf/2606.19755v1",
+      "score": "7.0",
+      "evidence": "动态反射采样将安全性融入推测解码以防止攻击",
+      "tldr": "推测推理虽能加速大模型解码，但缺乏安全保障。现有安全防御与推测推理不兼容，要么引入额外计算，要么破坏草稿验证机制。SafeSpec将风险估计整合到验证过程中，附加轻量级安全头联合评估语义和安全，检测到不安全时通过回滚和安全导向反射式多采样恢复。在Qwen3-32B上，攻击成功率降低15%且保持2.06倍加速，实现了安全与效率的联合优化。",
+      "tags": "query:model-edit",
+      "abstract_en": "Speculative inference accelerates large language model (LLM) decoding but provides no inherent safety guarantees. Existing safety defenses are largely incompatible with speculative inference: they either introduce additional computation or disrupt the draft-verify mechanism, negating acceleration benefits. This reveals a fundamental incompatibility between current safety methods and speculative decoding. We propose SafeSpec, a safety-aware speculative inference framework that integrates risk estimation directly into the verification process. SafeSpec attaches a lightweight latent safety head to the target model to jointly evaluate semantic validity and safety in a single forward pass. When unsafe generations are detected, SafeSpec applies rollback and safety-guided reflective multi-sampling to recover safe continuations rather than terminating generation. We model jailbreak attacks as distributional shifts over generative trajectories, where adversarial prompts increase the probability of harmful continuations without eliminating safe ones. Under this model, SafeSpec performs risk-aware trajectory recovery within the speculative decoding process. Across multiple models and adversarial benchmarks, SafeSpec achieves a substantially improved safety-efficiency trade-off. On Qwen3-32B, SafeSpec reduces attack success rates by 15% while preserving a 2.06x inference speedup on benign workloads, demonstrating that speculative acceleration and inference-time safety can be jointly optimized.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/25/2606.21638v1-toward-open-weight-models-without-risks-separating-public-and-private-capabilities-in-llms",
+      "section": "quick",
+      "title_en": "Toward Open Weight Models Without Risks: Separating Public and Private Capabilities in LLMs",
+      "authors": "Charbel El Feghali, Arkil Patel, Nicholas Meade, Spandana Gella, Verna Dankers, Siva Reddy",
+      "date": "2026-06-19",
+      "pdf": "https://arxiv.org/pdf/2606.21638v1",
+      "score": "6.0",
+      "evidence": "分离大模型公开与私有能力以防止滥用和越狱",
+      "tldr": "开放权重的LLM难以管控敏感能力，现有方法或削弱能力或与开放冲突。本文提出分层语言模型（TLM），通过密钥排列部分参数改变计算图，实现单套权重多个能力级别。预训练+私密微调后，密钥配置获得新语言、指令遵循和私密知识，公共配置无此能力。TLM在开放权重下实现选择性能力控制，且抵抗微调提取。",
+      "tags": "query:model-edit",
+      "abstract_en": "Open-weight Large Language Models (LLMs) enable scientific progress and broad deployment. However, they make it difficult to control access to sensitive capabilities. Current practice either suppresses dangerous capabilities before release or mediates access through closed services that use specialized model variants, input/output monitors, and API permissions. The former is susceptible to jailbreaks while sacrificing capability for all users to mitigate the risks posed by a few, and the latter is fundamentally incompatible with open-weight release. In this paper, we propose Tiered Language Models (TLMs), where a single set of released weights supports multiple capability levels. In its default public configuration, a TLM behaves as a conventional LLM. A compact secret key specifies a permutation over a small parameter subset, inducing an alternative computation graph over the same weights that exposes additional capabilities. We develop a training protocol that jointly pretrains both configurations from scratch, then fine-tunes the keyed configuration on private data with regularization to preserve the public model's behavior. We pretrain 180M- and 650M-parameter TLMs and demonstrate that the keyed configuration can acquire a new language, gain instruction-following ability, and memorize private factual knowledge, whereas the public configuration exhibits none of these capabilities. Moreover, we show that our approach extends naturally to multiple hierarchical tiers. Because authorization operates on the model's weight structure rather than in the input space, the mechanism resists fine-tuning-based extraction and partial key compromise. In general, TLMs take a step toward reconciling open-weight release with selective capability control.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
