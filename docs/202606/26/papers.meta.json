@@ -1,0 +1,54 @@
+{
+  "label": "2026-06-26",
+  "date": "2026-06-26",
+  "generated_at": "2026-06-26T20:54:43",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202606/26/2606.26783v1-reproducibility-study-of-alphaedit-null-space-constrained-knowledge-editing-for-language-models",
+      "section": "deep",
+      "title_en": "Reproducibility Study of \"AlphaEdit: Null-Space Constrained Knowledge Editing for Language Models\"",
+      "authors": "Ananth K S, Arya Hariharan",
+      "date": "2026-06-25",
+      "pdf": "https://arxiv.org/pdf/2606.26783v1",
+      "score": "9.0",
+      "evidence": "对AlphaEdit知识编辑方法的可重复性研究",
+      "tldr": "本文对零空间约束知识编辑方法AlphaEdit进行可重复性研究。成功复现其在LLaMA3等模型上的原始结果，但发现困惑度/一致性指标存疑。扩展至新架构与长序列编辑，其优势不泛化且性能随编辑数量增加而显著退化。结果表明AlphaEdit的理论保证受模型架构和编辑规模限制，对实际部署有重要启示。",
+      "tags": "query:model-edit",
+      "abstract_en": "Fang et al. (2025) introduced a null-space constrained projection, named AlphaEdit, for locate-then-edit knowledge editing methods, theoretically guaranteeing that edits do not disrupt previously preserved knowledge, and reports substantial gains over existing editing methods on LLaMA3, GPT2-XL, and GPT-J. In this work, we present a reproducibility study of AlphaEdit, reproducing its reported results under the original experimental setup and extending the evaluation along three axes: new model architectures, additional downstream benchmarks, and substantially longer sequential editing horizons. We successfully reproduce AlphaEdit's reported metrics across the original models, though we identify a discrepancy in the reported fluency and consistency metric. Extending AlphaEdit to newer model families, we find that its advantage does not generalize uniformly, which we trace to architectural assumptions in the locate-then-edit paradigm that are violated by these newer models. We further stress-test AlphaEdit's central sequential-editing claim by extending the number of edits well beyond those evaluated in the original paper, and find that performance, which is stable at the originally reported scale, degrades as edits reach a much higher count, indicating that the null-space projection's protection against catastrophic forgetting is bounded rather than unconditional. Finally, we extend evaluation of edited models on three extra benchmarks, namely, BoolQ, HellaSwag, and XSTest, and we find that large-scale sequential editing degrades both general downstream task competence and safety-relevant refusal behavior. Our results confirm that AlphaEdit performs as reported within its original scope, while showing that its core theoretical guarantees are sensitive to model architecture and editing scale in ways that have practical implications for its deployment.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/26/2606.26036v1-detect-unlearn-restore-defending-text-summarization-models-against-data-poisoning",
+      "section": "quick",
+      "title_en": "Detect, Unlearn, Restore: Defending Text Summarization Models Against Data Poisoning",
+      "authors": "Poojitha Thota, Shirin Nilizadeh",
+      "date": "2026-06-24",
+      "pdf": "https://arxiv.org/pdf/2606.26036v1",
+      "score": "6.0",
+      "evidence": "遗忘作为知识编辑用于防御数据投毒",
+      "tldr": "针对文本摘要模型微调阶段的数据中毒攻击，现有防御方法有限。本文提出统一后验防御框架，白盒下利用影响函数与语义一致性检测中毒样本，黑盒下通过语义扰动敏感性进行行为审计，并引入梯度上升遗忘修复。在九种架构和六个基准数据集上，检测精度达85-92%，遗忘后恢复96%原始行为且ROUGE损失低于0.6%。该方法揭示了中毒攻击留下的结构性痕迹，实现了无需完全重新训练的实际检测与修复。",
+      "tags": "query:model-edit",
+      "abstract_en": "Training-time data poisoning during fine-tuning poses a significant threat to large language models (LLMs) deployed for abstractive text summarization, where small task-specific datasets exert disproportionate influence on model behavior. In this setting, adversaries manipulate fine-tuning data to induce persistent summarization failures, such as biased or harmful summaries, while preserving standard evaluation metrics. We present a unified post-hoc defense framework for detecting and remediating fine-tuning-stage poisoning in summarization models across the machine learning supply chain. Our experiments show that in white-box settings, poisoned document-summary pairs exhibit abnormally high training influence, enabling detection via influence-function analysis with semantic consistency checks. In black-box settings, poisoned models display two to three times greater sensitivity to semantics-preserving perturbations, enabling behavioral auditing without training data access. Beyond existing poisoning formulations, we introduce novel attacks targeting factual distortion and representational bias, showing that poisoning alters summarization behavior without triggering conventional alarms. Across nine architectures and six benchmark datasets under adaptive attacks, our defenses achieve 85-92% detection precision, while gradient-ascent unlearning restores up to 96% of original behavior with minimal utility loss (less than 0.6% ROUGE degradation). These results indicate that fine-tuning-time poisoning leaves persistent structural artifacts, enabling practical detection and post-deployment recovery without full retraining.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/26/2606.26807v1-karla-knowledge-base-augmented-retrieval-for-language-models",
+      "section": "quick",
+      "title_en": "KARLA: Knowledge-base Augmented Retrieval for Language Models",
+      "authors": "Francois Crespin, Fabian M. Suchanek, Nils Holzenberger",
+      "date": "2026-06-25",
+      "pdf": "https://arxiv.org/pdf/2606.26807v1",
+      "score": "6.0",
+      "evidence": "通过知识库查询更新事实知识，是参数编辑的替代方案",
+      "tldr": "大型语言模型通常依赖静态训练数据，导致事实知识更新困难且不可追溯。KARLA通过训练模型生成特殊token来触发知识库查询，在生成过程中动态注入事实知识。实验表明，该方法显著提升了短文本和长文本生成的事实准确性，且仅需编辑知识库即可更新模型输出，无需重新训练。这一方法使得小型模型也能达到与大型模型相当的事实准确率，同时增强了输出结果的可解释性。",
+      "tags": "query:model-edit",
+      "abstract_en": "We propose a new method that allows an LLM to automatically pull in factual knowledge from a knowledge base during token generation. This means that (1)~factual knowledge in the LLM output can be updated without retraining the LLM, (2)~facts in the LLM output can be traced to the knowledge base for transparency and explainability, and (3)~smaller models can achieve the same factual accuracy as larger models. Our core idea is to train the model to produce special tokens that trigger a query to the knowledge base. Our experiments show that our method improves factual grounding in both short and long-form generation, and allows factual revisions to take effect through KB edits rather than parameter updates.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

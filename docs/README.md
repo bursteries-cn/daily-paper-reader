@@ -6,29 +6,29 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-25
-- 运行时间：2026-06-25 21:13:58 UTC
+- 最新运行日期：2026-06-26
+- 运行时间：2026-06-26 20:54:35 UTC
 - 运行状态：成功
 - 本次总论文数：3
 - 精读区：1
 - 速读区：2
 
 ### 今日简报（AI）
-今日精读揭示LLM知识编辑实为“假擦除”的高分论文，并速读两项安全与开放权重模型研究。最值得关注：知识编辑仅掩盖而非真正删除信息；动态反射采样可在不牺牲速度下提升安全性。建议警惕知识编辑的局限性，勿过度依赖表面效果。
-- 详情：[/202606/25/README](/202606/25/README)
+今日精读AlphaEdit知识编辑可重复性研究，速读防御数据投毒与知识库增强检索两篇工作。最值得关注的是精读论文系统性验证了Null-Space约束编辑的稳健性，为可靠编辑提供方法论参考。建议后续关注知识编辑的可重复性评估，以及防御机制与检索增强的融合应用。
+- 详情：[/202606/26/README](/202606/26/README)
 
 ### 精读区论文标签
-1. [Exposing the Illusion of Erasure in Knowledge Editing for LLMs](/202606/25/2606.23276v2-exposing-the-illusion-of-erasure-in-knowledge-editing-for-llms)  
+1. [Reproducibility Study of "AlphaEdit: Null-Space Constrained Knowledge Editing for Language Models"](/202606/26/2606.26783v1-reproducibility-study-of-alphaedit-null-space-constrained-knowledge-editing-for-language-models)  
    标签：评分：9.0/10、query:model-edit
-   evidence：直接研究大语言模型的知识编辑
+   evidence：对AlphaEdit知识编辑方法的可重复性研究
 
 ### 速读区论文标签
-1. [SafeSpec: Fast and Safe LLM via Dynamic Reflective Sampling](/202606/25/2606.19755v1-safespec-fast-and-safe-llm-via-dynamic-reflective-sampling)  
-   标签：评分：7.0/10、query:model-edit
-   evidence：动态反射采样将安全性融入推测解码以防止攻击
-2. [Toward Open Weight Models Without Risks: Separating Public and Private Capabilities in LLMs](/202606/25/2606.21638v1-toward-open-weight-models-without-risks-separating-public-and-private-capabilities-in-llms)  
+1. [Detect, Unlearn, Restore: Defending Text Summarization Models Against Data Poisoning](/202606/26/2606.26036v1-detect-unlearn-restore-defending-text-summarization-models-against-data-poisoning)  
    标签：评分：6.0/10、query:model-edit
-   evidence：分离大模型公开与私有能力以防止滥用和越狱
+   evidence：遗忘作为知识编辑用于防御数据投毒
+2. [KARLA: Knowledge-base Augmented Retrieval for Language Models](/202606/26/2606.26807v1-karla-knowledge-base-augmented-retrieval-for-language-models)  
+   标签：评分：6.0/10、query:model-edit
+   evidence：通过知识库查询更新事实知识，是参数编辑的替代方案
 
 
 <div class="dpr-home-promo-card">
