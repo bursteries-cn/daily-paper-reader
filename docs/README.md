@@ -6,29 +6,30 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-26
-- 运行时间：2026-06-26 20:54:35 UTC
+- 最新运行日期：2026-06-27
+- 运行时间：2026-06-27 20:50:35 UTC
 - 运行状态：成功
-- 本次总论文数：3
+- 本次总论文数：2
 - 精读区：1
-- 速读区：2
+- 速读区：1
 
 ### 今日简报（AI）
-今日精读AlphaEdit知识编辑可重复性研究，速读防御数据投毒与知识库增强检索两篇工作。最值得关注的是精读论文系统性验证了Null-Space约束编辑的稳健性，为可靠编辑提供方法论参考。建议后续关注知识编辑的可重复性评估，以及防御机制与检索增强的融合应用。
-- 详情：[/202606/26/README](/202606/26/README)
+今日精读一篇高分论文《Towards Version-aware Operations and Transaction Memories for Multi-layer MeMo》，速读一篇关于LLM事实检索机制的论文。
+
+值得关注的方向：多层内存系统需引入版本感知与事务支持以提升并发效率；大语言模型的事实检索呈现冗余、分布式且非连续的固有特性。
+
+建议普通读者可深入了解版本控制对内存架构的优化思路，或关注LLM事实检索行为的反直觉规律，以辅助实际应用设计。
+- 详情：[/202606/27/README](/202606/27/README)
 
 ### 精读区论文标签
-1. [Reproducibility Study of "AlphaEdit: Null-Space Constrained Knowledge Editing for Language Models"](/202606/26/2606.26783v1-reproducibility-study-of-alphaedit-null-space-constrained-knowledge-editing-for-language-models)  
+1. [Towards Version-aware Operations and Transaction Memories for Multi-layer MeMo](/202606/27/2606.24040v1-towards-version-aware-operations-and-transaction-memories-for-multi-layer-memo)  
    标签：评分：9.0/10、query:model-edit
-   evidence：对AlphaEdit知识编辑方法的可重复性研究
+   evidence：通过显式记忆编辑进行知识更新
 
 ### 速读区论文标签
-1. [Detect, Unlearn, Restore: Defending Text Summarization Models Against Data Poisoning](/202606/26/2606.26036v1-detect-unlearn-restore-defending-text-summarization-models-against-data-poisoning)  
-   标签：评分：6.0/10、query:model-edit
-   evidence：遗忘作为知识编辑用于防御数据投毒
-2. [KARLA: Knowledge-base Augmented Retrieval for Language Models](/202606/26/2606.26807v1-karla-knowledge-base-augmented-retrieval-for-language-models)  
-   标签：评分：6.0/10、query:model-edit
-   evidence：通过知识库查询更新事实知识，是参数编辑的替代方案
+1. [Factual Retrieval in LLMs Is a Redundant, Distributed and Non-Contiguous Process](/202606/27/2606.21345v1-factual-retrieval-in-llms-is-a-redundant-distributed-and-non-contiguous-process)  
+   标签：评分：7.0/10、query:model-edit
+   evidence：事实检索路径分析助力知识编辑
 
 
 <div class="dpr-home-promo-card">

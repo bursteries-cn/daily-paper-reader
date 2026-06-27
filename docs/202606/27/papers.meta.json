@@ -1,0 +1,39 @@
+{
+  "label": "2026-06-27",
+  "date": "2026-06-27",
+  "generated_at": "2026-06-27T20:50:42",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202606/27/2606.24040v1-towards-version-aware-operations-and-transaction-memories-for-multi-layer-memo",
+      "section": "deep",
+      "title_en": "Towards Version-aware Operations and Transaction Memories for Multi-layer MeMo",
+      "authors": "Peiran Li",
+      "date": "2026-06-23",
+      "pdf": "https://arxiv.org/pdf/2606.24040v1",
+      "score": "9.0",
+      "evidence": "通过显式记忆编辑进行知识更新",
+      "tldr": "MeMo模型使用多层关联矩阵记忆存储知识，但知识变化时需重新训练。本文提出版本感知操作层和事务记忆，将替换、回滚等高级操作编译为MeMo原生基本编辑调用，并引入版本CMM和事务CMM辅助记忆。该方法支持序列级和diff级输入，实现知识局部更新而无需全局重训练，同时保持回滚、可追溯性和事务重用能力。",
+      "tags": "query:model-edit",
+      "abstract_en": "MeMo proposes language models with explicit multi-layer correlation matrix memories (CMMs), where memorization, retrieval, and forgetting are architectural operations. This paper asks how such memories can reduce the need for retraining when knowledge changes. For changes expressible as MeMo memory associations, the model's accessible knowledge can be updated by editing explicit memories rather than retraining the whole model. We propose a version-aware operation layer in which high-level operations such as replace, obsolete, keep-history, rollback, and trace are compiled into MeMo-native primitive calls over sequences and tokens. The key observation is that a version-aware operation is rarely a single MeMo association. It is an ordered transaction of primitive edits, for example forgetting one sequence-token chain, memorizing another, preserving a historical chain, and recording an inverse program. The framework introduces two auxiliary CMMs: a Version CMM (V-CMM) for mapping version transitions to transaction handles, and a Transaction CMM (T-CMM) for storing reusable change contents and inverse programs. It supports both direct sequence-level edits and structured diff-level inputs, and outlines an evaluation route for update success, rollback, traceability, locality, and transaction reuse.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/27/2606.21345v1-factual-retrieval-in-llms-is-a-redundant-distributed-and-non-contiguous-process",
+      "section": "quick",
+      "title_en": "Factual Retrieval in LLMs Is a Redundant, Distributed and Non-Contiguous Process",
+      "authors": "Hail Hochman, Natalie Shapira, Yoav Goldberg",
+      "date": "2026-06-19",
+      "pdf": "https://arxiv.org/pdf/2606.21345v1",
+      "score": "7.0",
+      "evidence": "事实检索路径分析助力知识编辑",
+      "tldr": "大型语言模型如何从实体表示中检索特定事实尚不清楚。本文提出“属性计算路径”概念，并通过迭代修补协议识别计算所需的最少层子集。实验发现，LLaMA 3.1 8B和Qwen3 8B中的路径是非连续的，常跳过层，且同一事实存在多个功能等价的路径，显示高度冗余。这表明知识计算是高度分布式的，可能解释定位-编辑不匹配现象，并揭示LLM知识存储与检索机制远未被充分理解。",
+      "tags": "query:model-edit",
+      "abstract_en": "Large language models (LLMs) store and recall factual knowledge, yet the precise mechanism of how entity representations are transformed to enable specific attribute retrieval remains underexplored. In this work, we investigate this mechanism through the lens of an \"attribute-computation path\"-a sequence of computational steps over the entity representation required to elicit a target attribute. We then propose an iterative patching protocol to identify a minimal subset of layers necessary for this computation. Applying our method to LLaMA 3.1 8B and Qwen3 8B, we find that these paths are non-contiguous, often skipping layers, and that models possess multiple, functionally-equivalent paths for the same entity and fact, highlighting a high degree of redundancy in attribute computation. This implies that knowledge computation is highly distributed, potentially explaining the localization-editing mismatch and suggesting that knowledge storage and retrieval in LLMs is far from being well understood.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

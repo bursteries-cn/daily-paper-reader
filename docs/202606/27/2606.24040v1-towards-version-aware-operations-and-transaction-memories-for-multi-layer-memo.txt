@@ -1,0 +1,192 @@
+Title: Towards Version-aware Operations and Transaction Memories for Multi-layer MeMo
+
+URL Source: https://arxiv.org/pdf/2606.24040v1
+
+Published Time: Wed, 24 Jun 2026 00:25:47 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# Towards Version-aware Operations and Transaction Memories for Multi-layer MeMo 
+
+Peiran Li 1
+
+> 1
+
+Freie Universität Berlin, Kaiserswerther Str. 16-18, 14195 Berlin, Germany 
+
+Abstract 
+
+MeMo proposes language models with explicit multi-layer correlation matrix memories (CMMs), where memo-rization, retrieval, and forgetting are architectural operations. This paper asks how such memories can reduce the need for retraining when knowledge changes. For changes expressible as MeMo memory associations, the model’s accessible knowledge can be updated by editing explicit memories rather than retraining the whole model. We propose a version-aware operation layer in which high-level operations such as replace , obsolete ,
+
+keep-history , rollback , and trace are compiled into MeMo-native primitive calls over sequences and tokens. The key observation is that a version-aware operation is rarely a single MeMo association. It is an ordered transaction of primitive edits, for example forgetting one sequence-token chain, memorizing another, preserving a historical chain, and recording an inverse program. The framework introduces two auxiliary CMMs: a Version CMM (V-CMM) for mapping version transitions to transaction handles, and a Transaction CMM (T-CMM) for storing reusable change contents and inverse programs. It supports both direct sequence-level edits and structured diff-level inputs, and outlines an evaluation route for update success, rollback, traceability, locality, and transaction reuse. 
+
+Keywords 
+
+MeMo, correlation matrix memory, transaction memory, version-aware operations, memory editing, neuro-symbolic AI 
+
+# 1. Introduction 
+
+Large Language Models are often adapted to new or changed knowledge through continued training, retrieval augmentation, or parameter-level model editing [ 1 , 2 , 3 , 4 ]. These methods can be effective, but they are not ideal when a knowledge change is small and can already be expressed as an explicit memory association. In that case, the natural goal is to update the model’s accessible knowledge by editing memory directly, rather than retraining on a fully revised corpus. MeMo is a useful starting point because it externalizes memory through correlation matrix memories and makes memorization and forgetting explicit operations rather than only side effects of training [ 5]. Its final architecture is Multi-layer MeMo: a stack of CMMs composes input sequences and supports retrieval from explicit memory structures. This paper keeps that Multi-layer MeMo architecture intact. We ask what operation layer is needed when explicit memories are long-lived, versioned, and repeatedly edited. MeMo provides primitive actions such as memorizing, retrieving, and forgetting a sequence-value association, but knowledge evolution also needs replacement, historical preservation, obsolescence, trace, and rollback. The central idea is to treat such operations as transactions over MeMo primitive edits. A transaction is not a single association (𝑆, 𝑦 ); it is an ordered program that may remove (𝑆, 𝑦 𝑜𝑙𝑑 ), add (𝑆, 𝑦 𝑛𝑒𝑤 ),save historical memories, and record an inverse. We therefore design a two-stage auxiliary memory. A Version CMM (V-CMM) maps version transitions to transaction handles, and a Transaction CMM (T-CMM) maps transaction handles to executable edits. MeMo CMMs store what is remembered; V-CMM and T-CMM store which memory edits belong to a version change and how those edits should be executed. 
+
+MeMo Workshop on Mechanistic Interpretability & Neuro-symbolic Approaches by-design, Rome (Italy), 24/6/2026 
+
+$ peiran.li@fu-berlin.de (P. Li) 
+
+ 0009-0002-5807-3432 (P. Li)  
+
+> ©2026 Copyright for this paper by its authors. Use permitted under Creative Commons License Attribution 4.0 International (CC BY 4.0).
+
+The proposed algebra has two input levels. At the lower level, it supports direct sequence-token updates, such as replacing the memorized continuation of a MeMo sequence. At the higher level, structured knowledge changes, for example ontology moves or obsoletions, are compiled into sets of sequence-token transactions. Change languages such as KGCL provide a realistic interface for such structured changes [ 6 ], while the contribution remains a version-aware operation algebra for Multi-layer MeMo. 
+
+# 2. Multi-layer MeMo as Substrate 
+
+A CMM stores associations by outer products, following classical correlation matrix memory and related distributed-memory ideas [7, 8, 9]. For example, 
+
+𝐶 =∑︁ 
+
+> 𝑖
+
+𝑘 𝑖 𝑣 ⊤ 
+
+> 𝑖
+
+. (1) A query multiplies the memory matrix, and forgetting subtracts a corresponding outer product. Multi-layer MeMo extends this mechanism with several CMM layers that compose input sequences into higher-level sequence representations [5]. We denote the original stack by: 
+
+𝒞 MeMo = {𝐶 (1) , 𝐶 (2) , . . . , 𝐶 (𝐿 ), 𝐶 (𝑜𝑢𝑡 )}. (2) At the interface level, we abstract the existing implementation through three primitive procedures: 
+
+memo( 𝑆, 𝑦 ), forget( 𝑆, 𝑦 ), retrieve( 𝑆 ), (3) where 𝑆 is an input sequence and 𝑦 is the associated token or value. The internal multi-layer CMM machinery decides how the relevant layers are updated. The operation layer introduced below delegates to these primitives instead of directly modifying the layer design. 
+
+# 3. Version-aware Operations 
+
+3.1. Direct sequence-level operations 
+
+The lowest-level input to the proposed algebra is already MeMo-native: a sequence-token edit. At the operation level, a primitive edit can be represented as: 
+
+𝑒 𝑗 = ( 𝑆 𝑗 , 𝑦 𝑗 , 𝜆 𝑗 ), 𝜆 𝑗 ∈ { +1 , −1}, (4) where 𝜆 𝑗 = +1 denotes memorization and 𝜆 𝑗 = −1 denotes forgetting. When an implementation exposes layer-specific updates, the executable form is (ℓ𝑗 , 𝑆 𝑗 , 𝑦 𝑗 , 𝜆 𝑗 ); otherwise ℓ𝑗 is left implicit and the standard multi-layer MeMo routine decides which internal CMMs to update. A high-level operation is an ordered transaction of such edits: 
+
+𝜏 = ⟨𝑒 1; 𝑒 2; . . . ; 𝑒 𝑚 ⟩. (5) The order matters when later edits depend on continuations created by earlier ones. For example, a direct replacement of a MeMo continuation is: 
+
+replace (𝑆, 𝑦 𝑜𝑙𝑑 , 𝑦 𝑛𝑒𝑤 ) = ⟨(𝑆, 𝑦 𝑜𝑙𝑑 , −1); (𝑆, 𝑦 𝑛𝑒𝑤 , +1) ⟩. (6) This operation changes the current view but does not erase the old value as a historical fact. Version preservation adds explicit versioned sequences: 
+
+keep-History = ⟨(𝑆 𝑣 𝑡 , 𝑦 𝑜𝑙𝑑 , +1); (𝑆 𝑣 𝑡 +1 , 𝑦 𝑛𝑒𝑤 , +1) ⟩. (7) Thus, forgetting from the current view is not necessarily erasure. It can mean deactivation from the latest view while preserving earlier memories for version-specific queries and rollback. 
+
+Multi-token continuations. Although examples are sometimes written as if 𝑦 were a single value, MeMo’s native primitive is next-token memory. A continuation 𝑌 = [ 𝑦 1, . . . , 𝑦 𝑛 ] must therefore be decomposed into a chain of primitive edits: 
+
+chain( 𝑆, 𝑌, 𝜆 ) = ⟨(𝑆, 𝑦 1, 𝜆 ); ( 𝑆𝑦 1, 𝑦 2, 𝜆 ); 
+
+. . . ; ( 𝑆𝑦 1 · · · 𝑦 𝑛 −1, 𝑦 𝑛 , 𝜆 )⟩. (8) A replacement between continuations becomes: 
+
+replace (𝑆, 𝑌 𝑜 , 𝑌 𝑛 ) = chain( 𝑆, 𝑌 𝑜 , −1); chain( 𝑆, 𝑌 𝑛 , +1) . (9) The T-CMM records either this expanded edit set for small transactions or, in the scalable implementation, a reusable template and parameter handles from which the edit chain is generated at execution time. In both cases, the original MeMo stack still receives only standard (𝑠𝑒𝑞𝑢𝑒𝑛𝑐𝑒, 𝑡𝑜𝑘𝑒𝑛 ) operations. 
+
+3.2. Structured keys and higher-level changes 
+
+A structured assertion can be represented as (𝑣, 𝑠, 𝑟, 𝑜 ), where 𝑣 is a version or view, 𝑠 is a subject, 𝑟 is a relation, and 𝑜 is an object value. To make it compatible with Multi-layer MeMo, the structured key is serialized into an input sequence: 
+
+𝜎 (𝑣, 𝑠, 𝑟 ) = [ VERSION , 𝑣, SUBJECT , 𝑠, RELATION , 𝑟 ]. (10) For structured resources, 𝑠 , 𝑟 , and 𝑜 denote stable identifiers rather than mutable labels; labels are used only for verbalization. Writing the assertion is a standard MeMo call: 
+
+memo( 𝜎 (𝑣, 𝑠, 𝑟 ), 𝑜 ), (11) and removing it from a view is: 
+
+forget( 𝜎 (𝑣, 𝑠, 𝑟 ), 𝑜 ). (12) A structured change such as a class move or definition change is first normalized into one or more sequence-level transactions. For instance, replacing the latest value of (𝑠, 𝑟 ) from 𝑜 𝑜𝑙𝑑 to 𝑜 𝑛𝑒𝑤 becomes: 
+
+⟨(𝜎 (v latest , 𝑠, 𝑟 ), 𝑜 𝑜𝑙𝑑 , −1); (𝜎 (v latest , 𝑠, 𝑟 ), 𝑜 𝑛𝑒𝑤 , +1); ( 𝜎 (𝑣 𝑡 , 𝑠, 𝑟 ), 𝑜 𝑜𝑙𝑑 , +1); (𝜎 (𝑣 𝑡 +1 , 𝑠, 𝑟 ), 𝑜 𝑛𝑒𝑤 , +1) ⟩.
+
+(13) The same mechanism supports obsolete : an old current status is deactivated, a new obsolete status is memorized, an optional replacement is memorized, and the previous status is preserved under the source version. 
+
+# 4. Version and Transaction Correlation Memories 
+
+4.1. Why CMMs instead of only logs? 
+
+A version-aware operation is not itself a standard MeMo memory entry. MeMo stores next-token associations of the form (𝑆, 𝑦 ). A transaction may instead relate two continuations, such as replacing 
+
+𝑌 𝑜 by 𝑌 𝑛 , and must be decomposed into several primitive (𝑠𝑒𝑞𝑢𝑒𝑛𝑐𝑒, 𝑡𝑜𝑘𝑒𝑛 ) edits. It may remove old edits, add new edits, preserve versioned edits, and store an inverse program. An exact log is still useful, and in safety-critical settings it should remain the deterministic source of truth. However, logs alone do not provide a MeMo-native representation of reusable change contents. Version histories may be large, and many changes instantiate the same patterns: replacing a continuation, moving a class, obsoleting a term, or adding a synonym. We therefore separate version indexing from transaction content. A Version CMM (V-CMM) maps a version transition to transaction handles. A Transaction CMM (T-CMM) maps a transaction handle to the executable edit fields needed by MeMo. The exact log guarantees replayability; V-CMM and T-CMM provide compact associative indexing and reuse. 4.2. V-CMM for version indexing 
+
+Let 𝑣 𝑎 → 𝑣 𝑏 be a version transition containing transactions 𝜏 𝑎,𝑏, 1, . . . , 𝜏 𝑎,𝑏,𝑛 . A slot-based V-CMM stores the association between a version transition, a slot, and a transaction handle: 
+
+𝑉 =∑︁  
+
+> (𝑣 𝑎 ,𝑣 𝑏 ,𝑖,𝜏 )∈𝒱
+
+𝐴 (𝑣 𝑎 , 𝑣 𝑏 , 𝑖 )𝐵 (𝜏 )⊤. (14) Querying 𝑉 with 𝐴 (𝑣 𝑎 , 𝑣 𝑏 , 𝑖 ) retrieves the 𝑖 -th transaction handle for that transition. A count entry or a stop symbol can indicate how many slots are active. This slot-based form is easier to audit and execute deterministically than compressing all transactions into a single vector. A more compact variant could bundle all transaction vectors for a transition into a superposed representation, but we treat that as an associative retrieval optimization rather than the execution semantics. 
+
+4.3. T-CMM for executable change content 
+
+A transaction entry is represented as a mapping: 
+
+(𝜏, 𝑗, 𝑎 ) ↦ → 𝑏, (15) where 𝜏 is a transaction identifier, 𝑗 indexes a primitive edit inside the transaction, 𝑎 is a field name, and 𝑏 is the field value. Examples include: 
+
+(𝜏, 𝑗, sequence) ↦ → 𝑆 𝑗 , (𝜏, 𝑗, value) ↦ → 𝑦 𝑗 , (16) 
+
+(𝜏, 𝑗, sign) ↦ → 𝜆 𝑗 , (𝜏, 𝑗, layer) ↦ → ℓ𝑗 . (17) The T-CMM is: 
+
+𝑇 =∑︁ 
+
+> (𝜏,𝑗,𝑎,𝑏 )∈𝒯
+
+Γ( 𝜏, 𝑗, 𝑎 )Ω 𝑎 (𝑏 )⊤, (18) where Γ encodes transaction-field keys and Ω𝑎 is a field-dependent value encoder. This field dependence is necessary because not all transaction values have the same role. Metadata fields such as operation type, source version, or template identifier may use ordinary typed symbolic encoders. Executable fields, however, must be MeMo-compatible: sequence fields are decoded into sequences or handles that can be passed to the relevant MeMo sequence encoder 𝑘 (ℓ), token fields are decoded into values compatible with the MeMo value encoder 𝑣 (ℓ), and control fields such as sign and layer use separate typed encoders. Decoding a transaction therefore produces an ordered executable program: 
+
+decode 𝑇 (𝜏 ) = ⟨(ℓ𝑗 , 𝑆 𝑗 , 𝑦 𝑗 , 𝜆 𝑗 )⟩𝑚 𝑗 =1 . (19) Here ℓ𝑗 may specify a target MeMo layer, or be omitted when the standard multi-layer MeMo memo-rization/forgetting routine should decide how to update its internal CMM stack. Execution delegates to MeMo primitives as an ordered sequence: 
+
+execute( 𝜏 ) = 𝑝 1; 𝑝 2; · · · ; 𝑝 𝑚 , (20) where 
+
+𝑝 𝑗 ={︃ memo( 𝑆 𝑗 , 𝑦 𝑗 ), 𝜆 𝑗 = +1 ,
+
+forget( 𝑆 𝑗 , 𝑦 𝑗 ), 𝜆 𝑗 = −1. (21) If an implementation exposes layer-specific primitives, 𝑝 𝑗 can additionally carry ℓ𝑗 and apply the corresponding MeMo-compatible encoders 𝑘 (ℓ𝑗 ) and 𝑣 (ℓ𝑗 ). Otherwise, the existing Multi-layer MeMo procedure performs the layer updates internally. Rollback is obtained by reversing the ordered program and flipping signs: 
+
+𝜏 −1 = ⟨(ℓ𝑚 , 𝑆 𝑚 , 𝑦 𝑚 , −𝜆 𝑚 ); . . . ; ( ℓ1, 𝑆 1, 𝑦 1, −𝜆 1)⟩. (22) Rollback has three cases. If 𝜏 is isolated or the last-applied transaction, the inverse program can be applied directly. If transactions are dependent, the system should replay the exact log to the target version. If versions are represented as logical views, rollback can instead switch the latest-view alias to an earlier version without physically subtracting memories. 
+
+4.4. Templates and reuse 
+
+Repeated changes should not require storing fully expanded edit programs each time. The T-CMM can store transaction templates and compact parameters. A minimal replace template is: 
+
+template rep = [(slot 𝑆 , slot 𝑜𝑙𝑑 , −1) , (slot 𝑆 , slot 𝑛𝑒𝑤 , +1)] , (23) and concrete edits are obtained by instantiation, 
+
+instantiate(template rep , 𝑆, 𝑦 𝑜𝑙𝑑 , 𝑦 𝑛𝑒𝑤 ). (24) Longer templates add source-version and target-version slots for history preservation. Thus, V-CMM indexes which transactions belong to a version transition, while T-CMM stores reusable change contents rather than duplicating full logs for every version. 
+
+# 5. Examples 
+
+5.1. Direct sequence-level replacement 
+
+Suppose a MeMo model has a current memory reflecting an older classification: 
+
+𝑆 = “Pluto is a” → [planet] . (25) A later knowledge version classifies Pluto as a dwarf planet: 
+
+𝑆 → [dwarf , planet] . (26) This example enters the algebra directly at the sequence-continuation level. For the transition 𝑣 1 → 𝑣 2,V-CMM first indexes the associated transaction handle: 
+
+𝐴 (𝑣 1, 𝑣 2, 1) ⊤𝑉 ≈ 𝐵 (𝜏 𝑝𝑙𝑢𝑡𝑜 ). (27) T-CMM then decodes 𝜏 𝑝𝑙𝑢𝑡𝑜 as an instance of a reusable continuation-replacement template with parameters (𝑆, [planet] , [dwarf , planet] , 𝑣 1, 𝑣 2). Because the new continuation contains two tokens, the transaction cannot be a single MeMo write. It is expanded into MeMo-compatible primitive edits: 
+
+𝑒 1 = ( ℓ, 𝑆, planet , −1) , (28) 
+
+𝑒 2 = ( ℓ, 𝑆, dwarf , +1) , (29) 
+
+𝑒 3 = ( ℓ, 𝑆 dwarf , planet , +1) . (30) Historical preservation adds versioned chains: 
+
+chain( 𝑆 𝑣 1 , [planet] , +1) , (31) 
+
+chain( 𝑆 𝑣 2 , [dwarf , planet] , +1) . (32) Thus V-CMM routes the version transition to the transaction, T-CMM stores how the transaction expands, and the original MeMo stack only receives ordinary (𝑠𝑒𝑞𝑢𝑒𝑛𝑐𝑒, 𝑡𝑜𝑘𝑒𝑛 ) edits. The latest view generates the continuation [dwarf , planet] , while a 𝑣 1 query generates [planet] . For readability, continuations are shown as word-level tokens; an implementation would use the tokenizer units exposed to MeMo. 5.2. Structured diff-level update 
+
+A structured source can enter one level higher. Consider an ontology-style change: 
+
+(𝑣 1, Asthma , direct _parent) ↦ → RespiratoryDisease (33) 
+
+(𝑣 2, Asthma , direct _parent) ↦ → ChronicRespiratoryDisease (34) A KGCL-like input may describe this as a class move. KGCL is a source-level change description: it records what changed in the ontology, but not which MeMo memories to edit. V-CMM is instead an execution-level index over MeMo-facing transactions. The compiler maps the source change to a transaction handle, for example: 
+
+𝐴 (𝑣 1, 𝑣 2, 1) ⊤𝑉 ≈ 𝐵 (𝜏 𝑎𝑠𝑡ℎ𝑚𝑎 ). (35) The corresponding T-CMM entry stores a replace-continuation template with handles for the serialized sequence 𝜎 (𝑣, 𝑠, 𝑟 ), the old continuation, the new continuation, and the source/target versions. Decoding 𝜏 𝑎𝑠𝑡ℎ𝑚𝑎 yields the same kind of ordered primitive edit program as in the Pluto example. Thus structured diffs are compiled into transactions indexed by V-CMM, decoded by T-CMM, and executed by the unchanged Multi-layer MeMo memorization and forgetting routines. 
+
+# 6. Evaluation Roadmap and Scope 
+
+The proposed work should be evaluated as a staged research programme. A first prototype will expose the native memo , forget , and retrieve calls of an existing Multi-layer MeMo implementation, implement the operation algebra, and add V-CMM/T-CMM modules. It should cover direct continuation replacements and structured source-level changes such as ontology moves, synonym changes, obsoletions, and definition updates. A small benchmark can use controlled toy facts for direct MeMo edits and ontology-style diffs, such as the Asthma parent-change example in Section 5. Baselines should include no update, retrieval augmentation, symbolic log-only patching without T-CMM reuse, continued training or retraining where feasible, and parameter editing methods for single-fact updates. The main metrics are update success, outdated-current suppression, historical preservation, rollback correctness, trace correctness, locality, and reuse. Trace is an interpretability contribution: it should expose the memory-level path from a current answer to the transaction, source version, old value, new value, and primitive edits that produced it. 
+
+Scope and capacity. The proposal targets local changes that can be expressed as MeMo-compatible memory edits; full rewrites may still require training. V-CMM indexes version deltas rather than full versions: for 𝑣 𝑖 → 𝑣 𝑖 +1 , let ∆𝑖 = ⟨𝜏 𝑖, 1; . . . ; 𝜏 𝑖,𝑛 𝑖 ⟩ with 𝑛 𝑖 ≤ 𝐵 . Large changes can be split into patch batches, and long transactions into bounded sub-transactions. T-CMM stores reusable templates and parameter handles rather than fully expanded edit programs, so a bounded delta adds 𝑂 (𝐵𝑃 )
+
+transaction-memory parameters, excluding symbol tables and the exact log. 
+
+# 7. Conclusion 
+
+This paper formulates a version-aware operation layer for Multi-layer MeMo. The original architecture remains unchanged: V-CMM indexes version transitions to transaction handles, T-CMM stores reusable change contents, and the MeMo stack executes the decoded memo/forget calls. The research agenda is to test whether explicit associative memories can support incremental, reversible, and traceable knowledge updates in cases where the relevant change can be expressed as MeMo-compatible memory associations. The same transaction mechanism may also support future authorship and provenance attribution by associating memory edits with authors, curators, documents, or source communities, extending traceability from what changed to who introduced a memory and which source justified it. Declaration on Generative AI 
+
+Generative AI tools were used as writing and editing assistance during the preparation of this paper, including support for language polishing, structural revision, and improving clarity and conciseness. The author takes full responsibility for the content of the paper. 
+
+# References 
+
+[1] S. Gururangan, A. Marasović, S. Swayamdipta, K. Lo, I. Beltagy, D. Downey, N. A. Smith, Don’t stop pretraining: Adapt language models to domains and tasks, in: Proceedings of the 58th annual meeting of the association for computational linguistics, 2020, pp. 8342–8360. [2] P. Lewis, E. Perez, A. Piktus, F. Petroni, V. Karpukhin, N. Goyal, H. Küttler, M. Lewis, W.-t. Yih, T. Rocktäschel, S. Riedel, D. Kiela, Retrieval-augmented generation for knowledge-intensive NLP tasks, in: Advances in Neural Information Processing Systems, volume 33, 2020, pp. 9459–9474. [3] K. Meng, D. Bau, A. Andonian, Y. Belinkov, Locating and editing factual associations in GPT, in: Advances in Neural Information Processing Systems, volume 35, 2022, pp. 17359–17372. [4] K. Meng, A. S. Sharma, A. J. Andonian, Y. Belinkov, D. Bau, Mass-editing memory in a transformer, in: The Eleventh International Conference on Learning Representations, 2023. [5] F. M. Zanzotto, E. S. Ruzzetti, G. A. Xompero, L. Ranaldi, D. Venditti, F. Ranaldi, C. Giannone, A. Favalli, R. Romagnoli, Position paper: MeMo: Towards language models with associative memory mechanisms, in: Findings of the Association for Computational Linguistics: ACL 2025, 2025, pp. 15169–15180. [6] H. Hegde, J. Vendetti, D. Goutte-Gattat, J. H. Caufield, J. B. Graybeal, N. L. Harris, N. Karam, C. Kindermann, N. Matentzoglu, J. A. Overton, et al., A change language for ontologies and knowledge graphs, Database 2025 (2025) baae133. [7] T. Kohonen, Correlation matrix memories, IEEE transactions on computers 100 (1972) 353–359. [8] J. A. Anderson, A simple neural network generating an interactive memory, Mathematical biosciences 14 (1972) 197–220. [9] T. A. Plate, Holographic reduced representations, IEEE Transactions on Neural networks 6 (1995) 623–641.
