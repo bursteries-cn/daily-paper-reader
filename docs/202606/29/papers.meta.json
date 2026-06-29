@@ -1,0 +1,54 @@
+{
+  "label": "2026-06-29",
+  "date": "2026-06-29",
+  "generated_at": "2026-06-29T21:06:59",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202606/29/2606.27683v1-cbd-api-only-llm-black-box-unlearning-through-controlled-behavioral-divergence",
+      "section": "deep",
+      "title_en": "CBD: API-Only LLM Black-Box Unlearning through Controlled Behavioral Divergence",
+      "authors": "Zhiqiang Xie, Yijing Lin, Zhipeng Gao, Dong In Kim",
+      "date": "2026-06-26",
+      "pdf": "https://arxiv.org/pdf/2606.27683v1",
+      "score": "9.0",
+      "evidence": "通过受控行为差异实现LLM黑盒遗忘，属于知识编辑",
+      "tldr": "边缘设备通过API调用LLM导致敏感数据泄露，现有遗忘方法需白盒访问且难以区分高度相似数据。本文提出CBD框架，仅需API黑盒访问，利用两个辅助模型创建受控行为分歧并转化为遗忘分数，通过Fisher矩阵构建判别基增强区分。在ToFU forget10上遗忘集接近重训参考，模型效用达74.90（比次优高15%）；WMDP上危险知识准确率降至25.68（近随机），MMLU保持52.67。CBD实现了更优的遗忘-效用权衡，且性能稳定。",
+      "tags": "query:model-edit",
+      "abstract_en": "Edge devices increasingly invoke large language models (LLMs) through API services for context aware edge intelligence, while edge generated data may be collected to improve LLMs and may introduce sensitive, copyrighted, harmful, or outdated information into model behavior. Machine unlearning offers a practical way to remove the influence of undesired data without retraining LLMs. However, existing methods still face two gaps. The first is API only black box access, where target model parameters and internal logits are unavailable. The second is how to preserve retained utility when unlearning target data and retained data share highly similar prompt structures or semantic patterns. To address these challenges, we propose Controlled Behavioral Divergence (CBD), an API only black box unlearning framework. CBD uses two auxiliary models to create controlled behavioral divergence between retained inputs and unlearning target inputs, converts this divergence into an unlearning relevance score, and routes unlearning related prompts away from the target LLM. To improve discrimination accuracy under high similarity between target and retained data, CBD constructs a gradient statistics based discriminative basis by estimating empirical Fisher matrices and solving a regularized generalized eigenvalue problem, guiding the unlearning signal toward target specific information rather than shared prompt structures. Compared with eleven white box and gray box unlearning baselines, CBD achieves a better unlearning utility trade off and its performance varies little across settings. On ToFU forget10, CBD approaches the retrained reference on the forget set while raising model utility to 74.90, about 15% above the second best baseline. On WMDP, it lowers hazardous knowledge accuracy to 25.68, near random guessing, while preserving MMLU accuracy of 52.67. Code is at https://github.com/DGL-codes/CBD.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/29/2606.27786v1-shift-gate-modulated-activation-steering-for-knowledge-conflict-mitigation-in-retrieval-augmented-generation",
+      "section": "quick",
+      "title_en": "SHIFT: Gate-Modulated Activation Steering for Knowledge Conflict Mitigation in Retrieval-Augmented Generation",
+      "authors": "Ruochang Li, Pengcheng Huang, Zhenghao Liu, Yukun Yan, Huiyuan Xie, Yu Gu, Ge Yu, Maosong Sun",
+      "date": "2026-06-26",
+      "pdf": "https://arxiv.org/pdf/2606.27786v1",
+      "score": "7.0",
+      "evidence": "通过激活引导处理知识冲突，与知识编辑相关",
+      "tldr": "检索增强生成(RAG)中，外部检索知识与模型参数知识常冲突，现有神经元级修改易级联损害通用能力。本文提出SHIFT框架，将神经元修改转为门控调制，冻结模型，仅优化<0.01%参数，自适应调节内部激活。在六个数据集上，SHIFT有效缓解冲突，超越多种基线，且不损害模型原有能力。该轻量方案为RAG冲突缓解提供了新思路，代码已公开。",
+      "tags": "query:model-edit",
+      "abstract_en": "Retrieval-augmented generation (RAG) enhances LLMs by incorporating external knowledge to support response generation. However, conflicts between retrieved context and parametric knowledge have emerged as a critical challenge in RAG systems. To mitigate such conflicts, numerous studies have attempted to identify and edit knowledge-related internal neurons, aiming to improve the ability of LLMs to rely on contextual evidence during generation. However, these neuron-level approaches may introduce unintended cascading effects that compromise the general capabilities of LLMs, as the modified neurons are often entangled with broader model behaviors and functionalities. In this paper, we introduce SHIFT, a novel framework that reformulates neuron-level modification as learnable gate modulation, allowing LLMs to adaptively regulate internal activations for knowledge conflict resolution. Technically, our SHIFT equips LLMs with a lightweight gate module and optimizes fewer than 0.01% trainable parameters while keeping the backbone model frozen. During generation, the gate module adjusts the model's internal representations to adaptively leverage contextual and parametric knowledge. Extensive experiments on six datasets validate the effectiveness of our SHIFT in comparison with various competing baselines. All datasets and code are available at https://github.com/OpenBMB/SHIFT.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/29/2606.28153v1-robust-harmful-features-under-jailbreak-attacks-mechanistic-evidence-from-attention-head-specialization-in-large-language-models",
+      "section": "quick",
+      "title_en": "Robust Harmful Features Under Jailbreak Attacks: Mechanistic Evidence from Attention Head Specialization in Large Language Models",
+      "authors": "Yanchen Yin, Dongqi Han, Linghui Li",
+      "date": "2026-06-26",
+      "pdf": "https://arxiv.org/pdf/2606.28153v1",
+      "score": "7.0",
+      "evidence": "分析越狱攻击下注意力头特化，为编辑防御提供机制证据",
+      "tldr": "越狱攻击并未完全消除大语言模型的安全特征，而是选择性抑制早期层的“对抗妥协头”（ACH），而中层的“安全对齐头”（SAH）即使在攻击成功时仍保持鲁棒激活。消融实验表明，抑制少量ACH即可使正常拒绝的输入产生越狱行为，移除SAH则削弱安全性。攻击模板token驱动ACH抑制，但SAH维持的内部安全信号构成“鲁棒有害特征”。利用这些持久激活，无需训练即可实现强对抗鲁棒性的越狱检测。",
+      "tags": "query:model-edit",
+      "abstract_en": "Jailbreak attacks bypass LLM safety alignment, yet their mechanisms remain poorly understood. We provide evidence that attacks do not comprehensively eliminate safety features, but instead selectively suppress specific attention heads. We identify two functionally differentiated types: Adversarially Compromised Heads (ACHs) concentrated in early layers, which are suppressed under attacks, and Safety-Aligned Heads (SAHs) in mid-layers, which maintain robust activations even when attacks succeed. Ablation studies support the causal role of ACHs and the contribution of SAHs to robust activations: suppressing a small number of ACHs is sufficient to induce jailbreak-like behavior on normally refused inputs, while removing SAHs substantially weakens mid-layer safety activations. Token-level attribution further shows that ACH suppression is driven specifically by attack-template tokens, providing a mechanistic account of why attacks can bypass refusal decisions through ACH suppression while leaving internal safety signals sustained by SAHs -- a phenomenon we term Robust Harmful Features. To validate the practical significance of this robustness, we show that simply reading these persistent activations -- without any training -- yields competitive aggregate detection performance with strong adversarial robustness.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

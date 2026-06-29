@@ -1,0 +1,137 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-29T21:03:41.380149+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2606.27683v1",
+      "source": "arxiv",
+      "title": "CBD: API-Only LLM Black-Box Unlearning through Controlled Behavioral Divergence",
+      "abstract": "Edge devices increasingly invoke large language models (LLMs) through API services for context aware edge intelligence, while edge generated data may be collected to improve LLMs and may introduce sensitive, copyrighted, harmful, or outdated information into model behavior. Machine unlearning offers a practical way to remove the influence of undesired data without retraining LLMs. However, existing methods still face two gaps. The first is API only black box access, where target model parameters and internal logits are unavailable. The second is how to preserve retained utility when unlearning target data and retained data share highly similar prompt structures or semantic patterns. To address these challenges, we propose Controlled Behavioral Divergence (CBD), an API only black box unlearning framework. CBD uses two auxiliary models to create controlled behavioral divergence between retained inputs and unlearning target inputs, converts this divergence into an unlearning relevance score, and routes unlearning related prompts away from the target LLM. To improve discrimination accuracy under high similarity between target and retained data, CBD constructs a gradient statistics based discriminative basis by estimating empirical Fisher matrices and solving a regularized generalized eigenvalue problem, guiding the unlearning signal toward target specific information rather than shared prompt structures. Compared with eleven white box and gray box unlearning baselines, CBD achieves a better unlearning utility trade off and its performance varies little across settings. On ToFU forget10, CBD approaches the retrained reference on the forget set while raising model utility to 74.90, about 15% above the second best baseline. On WMDP, it lowers hazardous knowledge accuracy to 25.68, near random guessing, while preserving MMLU accuracy of 52.67. Code is at https://github.com/DGL-codes/CBD.",
+      "authors": [
+        "Zhiqiang Xie",
+        "Yijing Lin",
+        "Zhipeng Gao",
+        "Dong In Kim"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-06-26T03:29:46+00:00",
+      "link": "https://arxiv.org/pdf/2606.27683v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "black-box unlearning for LLMs via controlled behavioral divergence is a form of knowledge editing",
+      "llm_evidence_cn": "通过受控行为差异实现LLM黑盒遗忘，属于知识编辑",
+      "llm_evidence": "通过受控行为差异实现LLM黑盒遗忘，属于知识编辑",
+      "canonical_evidence": "通过受控行为差异实现LLM黑盒遗忘，属于知识编辑",
+      "llm_tldr_en": "Proposes CBD, a black-box unlearning method that removes undesired data influence from LLMs via API only, preserving utility even when prompts overlap.",
+      "llm_tldr_cn": "边缘设备中LLM会因收集的数据引入敏感或有害信息。现有机器遗忘方法需要内部参数或logits，且难以区分相似语义。本文提出CBD，一种仅通过API的黑盒遗忘方法，利用受控行为差异移除目标数据影响，同时保留模型在相似提示上的效用。实验证明CBD能有效遗忘且保持模型性能。",
+      "llm_tldr": "边缘设备中LLM会因收集的数据引入敏感或有害信息。现有机器遗忘方法需要内部参数或logits，且难以区分相似语义。本文提出CBD，一种仅通过API的黑盒遗忘方法，利用受控行为差异移除目标数据影响，同时保留模型在相似提示上的效用。实验证明CBD能有效遗忘且保持模型性能。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.27786v1",
+      "source": "arxiv",
+      "title": "SHIFT: Gate-Modulated Activation Steering for Knowledge Conflict Mitigation in Retrieval-Augmented Generation",
+      "abstract": "Retrieval-augmented generation (RAG) enhances LLMs by incorporating external knowledge to support response generation. However, conflicts between retrieved context and parametric knowledge have emerged as a critical challenge in RAG systems. To mitigate such conflicts, numerous studies have attempted to identify and edit knowledge-related internal neurons, aiming to improve the ability of LLMs to rely on contextual evidence during generation. However, these neuron-level approaches may introduce unintended cascading effects that compromise the general capabilities of LLMs, as the modified neurons are often entangled with broader model behaviors and functionalities. In this paper, we introduce SHIFT, a novel framework that reformulates neuron-level modification as learnable gate modulation, allowing LLMs to adaptively regulate internal activations for knowledge conflict resolution. Technically, our SHIFT equips LLMs with a lightweight gate module and optimizes fewer than 0.01% trainable parameters while keeping the backbone model frozen. During generation, the gate module adjusts the model's internal representations to adaptively leverage contextual and parametric knowledge. Extensive experiments on six datasets validate the effectiveness of our SHIFT in comparison with various competing baselines. All datasets and code are available at https://github.com/OpenBMB/SHIFT.",
+      "authors": [
+        "Ruochang Li",
+        "Pengcheng Huang",
+        "Zhenghao Liu",
+        "Yukun Yan",
+        "Huiyuan Xie",
+        "Yu Gu",
+        "Ge Yu",
+        "Maosong Sun"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-06-26T07:17:11+00:00",
+      "link": "https://arxiv.org/pdf/2606.27786v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "addresses knowledge conflict mitigation via activation steering, related to knowledge editing",
+      "llm_evidence_cn": "通过激活引导处理知识冲突，与知识编辑相关",
+      "llm_evidence": "通过激活引导处理知识冲突，与知识编辑相关",
+      "canonical_evidence": "通过激活引导处理知识冲突，与知识编辑相关",
+      "llm_tldr_en": "SHIFT uses gate-modulated activation steering to mitigate knowledge conflicts in RAG, preserving general capabilities unlike neuron-level editing. It offers a method to modify model behavior without cascading side effects.",
+      "llm_tldr_cn": "本文提出SHIFT框架，通过门控调制激活引导来缓解检索增强生成中的知识冲突。与粗粒度的神经元编辑不同，该方法避免了级联副作用，保持模型通用能力。在知识冲突场景下显著提升模型对检索证据的信赖度。",
+      "llm_tldr": "本文提出SHIFT框架，通过门控调制激活引导来缓解检索增强生成中的知识冲突。与粗粒度的神经元编辑不同，该方法避免了级联副作用，保持模型通用能力。在知识冲突场景下显著提升模型对检索证据的信赖度。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.28153v1",
+      "source": "arxiv",
+      "title": "Robust Harmful Features Under Jailbreak Attacks: Mechanistic Evidence from Attention Head Specialization in Large Language Models",
+      "abstract": "Jailbreak attacks bypass LLM safety alignment, yet their mechanisms remain poorly understood. We provide evidence that attacks do not comprehensively eliminate safety features, but instead selectively suppress specific attention heads. We identify two functionally differentiated types: Adversarially Compromised Heads (ACHs) concentrated in early layers, which are suppressed under attacks, and Safety-Aligned Heads (SAHs) in mid-layers, which maintain robust activations even when attacks succeed. Ablation studies support the causal role of ACHs and the contribution of SAHs to robust activations: suppressing a small number of ACHs is sufficient to induce jailbreak-like behavior on normally refused inputs, while removing SAHs substantially weakens mid-layer safety activations. Token-level attribution further shows that ACH suppression is driven specifically by attack-template tokens, providing a mechanistic account of why attacks can bypass refusal decisions through ACH suppression while leaving internal safety signals sustained by SAHs -- a phenomenon we term Robust Harmful Features. To validate the practical significance of this robustness, we show that simply reading these persistent activations -- without any training -- yields competitive aggregate detection performance with strong adversarial robustness.",
+      "authors": [
+        "Yanchen Yin",
+        "Dongqi Han",
+        "Linghui Li"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-06-26T14:51:16+00:00",
+      "link": "https://arxiv.org/pdf/2606.28153v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Analyzes attention head specialization under jailbreak attacks, providing mechanistic evidence for editing defenses",
+      "llm_evidence_cn": "分析越狱攻击下注意力头特化，为编辑防御提供机制证据",
+      "llm_evidence": "分析越狱攻击下注意力头特化，为编辑防御提供机制证据",
+      "canonical_evidence": "分析越狱攻击下注意力头特化，为编辑防御提供机制证据",
+      "llm_tldr_en": "This paper reveals that jailbreak attacks selectively suppress certain attention heads while leaving safety-aligned heads intact, providing causal evidence that can guide model editing for safety.",
+      "llm_tldr_cn": "越狱攻击绕过LLM安全对齐，但其机制尚不清楚。本文提供证据表明攻击并非全面消除安全特征，而是选择性抑制早期层的对抗性妥协头（ACHs），而中层的安全对齐头（SAHs）即使在攻击成功时也保持鲁棒激活。消融实验证实ACHs的因果作用，抑制少量ACHs即可诱发越狱行为。该发现为通过模型编辑增强越狱防御提供新视角。",
+      "llm_tldr": "越狱攻击绕过LLM安全对齐，但其机制尚不清楚。本文提供证据表明攻击并非全面消除安全特征，而是选择性抑制早期层的对抗性妥协头（ACHs），而中层的安全对齐头（SAHs）即使在攻击成功时也保持鲁棒激活。消融实验证实ACHs的因果作用，抑制少量ACHs即可诱发越狱行为。该发现为通过模型编辑增强越狱防御提供新视角。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
