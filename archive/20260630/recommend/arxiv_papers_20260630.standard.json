@@ -1,0 +1,130 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-30T21:42:17.973676+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2606.28898v1",
+      "source": "arxiv",
+      "title": "PASTA: A Paraphrasing And Self-Training Approach for Knowledge Updating in LLMs",
+      "abstract": "Knowledge updating in pre-trained Large Language Models (LLMs) remains an important challenge. While continual training provides a potential avenue for knowledge updating, it continues to present substantial technical difficulties. Furthermore, LLMs often struggle with accurately answering questions about specific factual information, such as news articles - a capability limitation widely recognized in the research community. This paper proposes PASTA, a simple yet powerful framework for integrating detailed factual information from news articles as new knowledge into LLMs, with the primary goal of building specialized models that accurately answer questions about this knowledge. Our framework combines data augmentation, question-answering generation, and a novel self-learning DPO process that simultaneously enables knowledge overwriting and hallucination suppression. We provide insights into effective knowledge updating through systematic analysis of learning parameters and data configurations. In our experimental evaluation with web articles published after the base model's knowledge cutoff, PASTA achieved remarkable improvement from 0.02 to 0.82 accuracy while maintaining general language capabilities, demonstrating its effectiveness for creating domain-specialized LLMs.",
+      "authors": [
+        "Takayuki Yamamoto",
+        "Daisuke Kawahara"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-27T13:02:13+00:00",
+      "link": "https://arxiv.org/pdf/2606.28898v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "paraphrasing and self-training for knowledge updating in LLMs",
+      "llm_evidence_cn": "基于释义和自训练的大语言模型知识更新方法",
+      "llm_evidence": "基于释义和自训练的大语言模型知识更新方法",
+      "canonical_evidence": "基于释义和自训练的大语言模型知识更新方法",
+      "llm_tldr_en": "PASTA is a simple framework for knowledge updating in LLMs, using paraphrasing and self-training to integrate factual knowledge from news articles, achieving significant improvements in QA accuracy.",
+      "llm_tldr_cn": "针对大语言模型在知识更新上的困难，传统连续训练方法技术复杂且效果有限。本文提出PASTA框架，结合数据增强、问答生成和自训练，将新闻文章中的事实知识无缝整合到模型中。在多个知识问答基准上，PASTA显著提高了模型对新知识的回答准确性，展示了知识编辑的实用性，为知识编辑领域提供了一种简单而强大的基线方案。",
+      "llm_tldr": "针对大语言模型在知识更新上的困难，传统连续训练方法技术复杂且效果有限。本文提出PASTA框架，结合数据增强、问答生成和自训练，将新闻文章中的事实知识无缝整合到模型中。在多个知识问答基准上，PASTA显著提高了模型对新知识的回答准确性，展示了知识编辑的实用性，为知识编辑领域提供了一种简单而强大的基线方案。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.28153v2",
+      "source": "arxiv",
+      "title": "Robust Harmful Features Under Jailbreak Attacks: Mechanistic Evidence from Attention Head Specialization in Large Language Models",
+      "abstract": "Jailbreak attacks bypass LLM safety alignment, yet their mechanisms remain poorly understood. We provide evidence that attacks do not comprehensively eliminate safety features, but instead selectively suppress specific attention heads. We identify two functionally differentiated types: Adversarially Compromised Heads (ACHs) concentrated in early layers, which are suppressed under attacks, and Safety-Aligned Heads (SAHs) in mid-layers, which maintain robust activations even when attacks succeed. Ablation studies support the causal role of ACHs and the contribution of SAHs to robust activations: suppressing a small number of ACHs is sufficient to induce jailbreak-like behavior on normally refused inputs, while removing SAHs substantially weakens mid-layer safety activations. Token-level attribution further shows that ACH suppression is driven specifically by attack-template tokens, providing a mechanistic account of why attacks can bypass refusal decisions through ACH suppression while leaving internal safety signals sustained by SAHs -- a phenomenon we term Robust Harmful Features. To validate the practical significance of this robustness, we show that simply reading these persistent activations -- without any training -- yields competitive aggregate detection performance with strong adversarial robustness.",
+      "authors": [
+        "Yanchen Yin",
+        "Dongqi Han",
+        "Linghui Li"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-06-26T14:51:16+00:00",
+      "link": "https://arxiv.org/pdf/2606.28153v2",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "jailbreak mechanism analysis for editing",
+      "llm_evidence_cn": "越狱机制分析用于编辑",
+      "llm_evidence": "越狱机制分析用于编辑",
+      "canonical_evidence": "越狱机制分析用于编辑",
+      "llm_tldr_en": "This paper identifies two types of attention heads in LLMs under jailbreak attacks: adversarially compromised and safety-aligned, providing mechanistic evidence that attacks suppress specific heads rather than eliminate safety features.",
+      "llm_tldr_cn": "越狱攻击如何绕过安全对齐？本工作发现攻击并非彻底消除安全特征，而是选择性抑制特定注意力头。识别出两类头：早期层的对抗妥协头和中间层的安全对齐头。消融实验表明，抑制少量对抗妥协头即可诱发类似越狱行为，而安全对齐头即使在攻击成功时仍保持稳健激活。该机制为设计更鲁棒的安全编辑提供了线索。",
+      "llm_tldr": "越狱攻击如何绕过安全对齐？本工作发现攻击并非彻底消除安全特征，而是选择性抑制特定注意力头。识别出两类头：早期层的对抗妥协头和中间层的安全对齐头。消融实验表明，抑制少量对抗妥协头即可诱发类似越狱行为，而安全对齐头即使在攻击成功时仍保持稳健激活。该机制为设计更鲁棒的安全编辑提供了线索。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.28962v1",
+      "source": "arxiv",
+      "title": "FlipGuard: Defending Large Language Models Against Quantization-Conditioned Backdoor Attacks",
+      "abstract": "Model quantization is essential for the efficient deployment of Large Language Models (LLMs), but introduces a critical vulnerability: Quantization-Conditioned Backdoor (QCB) attacks. In these attacks, malicious behaviors remain dormant in full-precision models and activate only after specific quantization distortions, bypassing standard security audits. To mitigate this, we introduce FlipGuard, a proactive defense framework that selectively perturbs model weights prior to quantization. By breaking the adversary's precise alignment between weight patterns and quantization boundaries, FlipGuard suppresses backdoor activation without requiring access to training data or trigger samples. We further propose the Defense Effectiveness Ratio (DER), a unified metric to jointly evaluate security gains, utility preservation, and computational cost. Extensive experiments across seven LLMs (including StarCoder and LLaMA-family models) and three quantization schemes (INT8, FP4, NF4) demonstrate that FlipGuard effectively neutralizes QCBs across three scenarios, i.e., vulnerable code generation, content injection, and over-refusal, achieving high security with negligible performance degradation.",
+      "authors": [
+        "Aoying Zheng",
+        "Anqi Du",
+        "Zizhuang Deng",
+        "Yuxuan Chen"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-06-27T15:02:42+00:00",
+      "link": "https://arxiv.org/pdf/2606.28962v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "weight perturbation defense for LLM safety",
+      "llm_evidence_cn": "用于LLM安全的权重扰动防御",
+      "llm_evidence": "用于LLM安全的权重扰动防御",
+      "canonical_evidence": "用于LLM安全的权重扰动防御",
+      "llm_tldr_en": "FlipGuard proposes proactive weight perturbation to suppress quantization-conditioned backdoor attacks in LLMs, achieving effective defense without requiring access to training data or trigger samples.",
+      "llm_tldr_cn": "模型量化引入了量化条件后门攻击漏洞。FlipGuard通过在量化前选择性扰动模型权重，破坏攻击者对权重模式与量化边界的精确对齐，从而抑制后门激活。该方法无需训练数据或触发器样本，在多种量化设置下均能保持防御有效性，为模型部署安全提供了轻量化解决方案。",
+      "llm_tldr": "模型量化引入了量化条件后门攻击漏洞。FlipGuard通过在量化前选择性扰动模型权重，破坏攻击者对权重模式与量化边界的精确对齐，从而抑制后门激活。该方法无需训练数据或触发器样本，在多种量化设置下均能保持防御有效性，为模型部署安全提供了轻量化解决方案。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "Find papers about model editing for safety in large language models",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

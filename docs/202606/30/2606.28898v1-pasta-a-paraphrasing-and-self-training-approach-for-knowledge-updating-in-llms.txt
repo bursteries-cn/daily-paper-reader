@@ -1,0 +1,831 @@
+Title: PASTA: A Paraphrasing And Self-Training Approach for Knowledge Updating in LLMs
+
+URL Source: https://arxiv.org/pdf/2606.28898v1
+
+Published Time: Tue, 30 Jun 2026 00:37:23 GMT
+
+Number of Pages: 22
+
+Markdown Content:
+# PASTA: A Paraphrasing And Self-Training Approach for Knowledge Updating in LLMs 
+
+Takayuki Yamamoto Waseda University 
+
+takayukiyamamoto@ruri.waseda.jp 
+
+Daisuke Kawahara Waseda University 
+
+dkw@waseda.jp 
+
+## Abstract 
+
+Knowledge updating in pre-trained Large Language Models (LLMs) remains an important challenge. While continual training provides a potential avenue for knowledge updating, it continues to present substantial technical difficulties. Fur-thermore, LLMs often struggle with accurately answering questions about specific factual information, such as news articles—a capability limitation widely rec-ognized in the research community. This paper proposes PASTA, a simple yet powerful framework for integrating detailed factual information from news arti-cles as new knowledge into LLMs, with the primary goal of building specialized models that accurately answer questions about this knowledge. Our framework combines data augmentation, question-answering generation, and a novel self-learning DPO process that simultaneously enables knowledge overwriting and hallucination suppression. We provide insights into effective knowledge updating through systematic analysis of learning parameters and data configurations. In our experimental evaluation with web articles published after the base model’s knowl-edge cutoff, PASTA achieved remarkable improvement from 0.02 to 0.82 accuracy while maintaining general language capabilities, demonstrating its effectiveness for creating domain-specialized LLMs. 
+
+## 1 Introduction 
+
+Updating pre-trained Large Language Models (LLMs) with new knowledge and training them to respond accurately based on those facts is recognized as a significant challenge [ 25 , 11 ]. While approaches such as Retrieval-Augmented Generation (RAG) [ 13 ] have been researched as a method to provide new knowledge to language models, this paper focuses on methods for direct internal knowledge updating, aiming to build LLMs capable of correctly answering questions about newly integrated information. Through our proposed approach, we demonstrate that an LLM which initially showed only 0.02 accuracy when answering questions about unknown knowledge can achieve up to 0.82 accuracy after knowledge updating. Previous research has suggested that diverse training data is closely related to accurate knowledge retrieval by probing internal representations of LLMs [1]. However, this research has only examined cases where relatively small-scale models [ 19 ] were trained from scratch, without sufficiently investigating additional training with large language models as initial parameters. On the other hand, methods have been proposed to build specialized LLMs for specific tasks (e.g., programming) through additional training using large corpora [ 21 ]. These approaches supplement relatively broad and static knowledge (programming languages, algorithms, etc.), but challenges remain in developing methods for LLMs to learn and accurately answer questions about specific, detailed factual information such as news articles. This paper proposes PASTA, a simple yet powerful framework for knowledge updating of small-scale detailed factual information, such as news articles, on a pre-trained large language model through continual learning. While each individual component builds upon established techniques, their systematic combination creates a novel approach that significantly outperforms baseline methods. 
+
+> arXiv:2606.28898v1 [cs.CL] 27 Jun 2026
+
+The simplicity of PASTA’s design makes it both practical to implement and theoretically interpretable, while demonstrating substantial performance gains in knowledge updating tasks. Drawing inspiration from recent self-learning approaches [ 14 , 26 ], we combine the following four steps: (1) data augmentation [ 1, 2], (2) question-answering (QA) data generation [ 14 ], (3) self-preference optimization [ 26 ], and (4) iterative learning [ 14 ]. We present a reconstructed additional learning flow that integrates these components and experimentally confirm that new knowledge can be gradually incorporated. 
+
+## 2 Related Work 
+
+2.1 Preference Optimization 
+
+Representative methods for optimizing LLMs to align with human preferences include Reinforcement Learning from Human Feedback (RLHF) [ 17 , 3] and Direct Preference Optimization (DPO) [ 20 ]. Both methods share the common approach of presenting two output candidates from the model and labeling them as “chosen” or “rejected”. However, RLHF involves training a reward model followed by reinforcement learning, while DPO directly optimizes parameters without explicitly training a reward model. 
+
+2.2 Self-Learning 
+
+Large-scale human annotation is costly, and when it includes sensitive user information, privacy concerns also arise. Therefore, self-learning approaches, where the model generates and evaluates its own data for iterative learning, have gained attention. For instance, Li et al. [14] reported improved model performance by automatically generating diverse QA data for retraining. Yuan et al. [26] proposed ”self-DPO learning” within the DPO framework [ 20 ], where models learn by distinguishing between high-scoring and low-scoring responses generated by the model itself. Wang et al. [24] introduced mechanisms for LLMs to autonomously conduct pairwise comparisons. Lee et al. [12] explored using LLMs as partial substitutes for human annotation. On the other hand, Madaan et al. [15] and Wang et al. [23] have shown that performance may degrade under certain conditions when models are repeatedly retrained solely on self-generated data, highlighting the importance of appropriate data diversity and validation. 
+
+2.3 Data Augmentation 
+
+While large volumes of data are effective for improving LLM performance, introducing diversity into the data is also beneficial beyond simple scaling. Allen-Zhu and Li [1] revealed that generating diverse paraphrases for training can better integrate new knowledge, and that using relatively high LoRA [ 10 ] ranks ( r = 128 ) can also improve performance. Brown et al. [2] also reported that creating multiple variations for a single piece of data and training repeatedly significantly improves reasoning accuracy. 
+
+## 3 Proposed Method 
+
+In this paper, we propose a Paraphrasing And Self-Training Approach (PASTA) as a framework for effectively integrating new knowledge into pre-trained large language models. PASTA consists of four key components: (1) data augmentation through paraphrasing, (2) question-answering data generation, (3) self-preference optimization, and (4) iterative learning based on fundamental LLM development principles. As shown in Figure 1, it forms an integrated framework that iteratively enhances an LLM’s ability to accurately answer questions about new knowledge that has been integrated through knowledge updating. 
+
+3.1 Design Motivations Diversifying Training Data through Paraphrasing LLMs have a structurally redundant architec-ture where a single meaning is not represented by specific parameters alone, but rather by multiple parameter sets throughout the model [ 8, 6 ]. Therefore, when integrating new knowledge, simply 2Prompt   
+
+> News Articles
+> (Context)
+> Generator LLM
+> Target LLM
+> CPT
+> SFT
+> Gen
+> DPO
+> Context-Derived QA
+> Prompt
+> Iteration
+> Augmented-Context
+> Prompt Chosen Rejected
+
+Figure 1: PASTA framework architecture. CPT: Continual Pre-Training, SFT: Supervised Fine-Tuning, DPO: PASTA’s specialized Direct Preference Optimization with Target LLM inference (Gen). repeating the same text may concentrate parameter updates in specific areas, failing to update all necessary parameters in the redundant structure, potentially making knowledge updating ineffective. We hypothesize that learning with diverse paraphrases of the target text—maintaining the same meaning but varying the expression—will update all necessary parameters across the redundant structure, making knowledge updating in LLMs more effective. 
+
+Scaling Question-Answering When updating knowledge in LLMs, there is difficulty not only in directly updating the knowledge itself but also in propagating updates to related knowledge. For example, when a music artist releases a new album, the total number of albums they have released also increases [9]. To address these challenges, we need to learn answers to diverse questions about the new knowledge and related topics from multiple angles. We hypothesize that scaling such question-answering will improve the accuracy of knowledge updating. 
+
+Hallucination Suppression Using DPO LLMs sometimes produce hallucinations, presenting non-existent information as if it were factual [ 5]. Particularly for detailed factual information such as news articles, where the correct answer to the same question may change over time (e.g., a president’s name differs depending on the time period), there is a risk of generating incorrect answers using outdated knowledge from before knowledge updating. Therefore, we hypothesize that by using DPO to identify outputs based on the LLM’s inherent knowledge (old information) as ”rejected” responses and newly added knowledge as ”chosen” responses, we can suppress inaccurate outputs. 
+
+Pre-training + SFT + DPO Framework A widely adopted three-stage learning pipeline for LLM development includes (1) pre-training, (2) SFT, and (3) final adjustment to human preferences (using methods like RLHF or DPO) [ 17 ]. In this work, we aim to achieve effective knowledge updating and build an LLM capable of accurately answering questions about that content by integrating the above hypotheses into a system based on this three-stage learning pipeline. 
+
+3.2 Formulation of the PASTA Framework 
+
+To formalize the PASTA framework, we first introduce basic notation. We denote the set of new knowledge, such as news articles, as C = {c1, c 2, . . . , c K }, where K is the total number of contexts (articles). For each article ck (where k ∈ { 1, 2, . . . , K } is the article index), we provide it to the 
+
+Generator LLM G along with an instruction prompt (see Appendix I.1) to generate P paraphrase variations. This set of paraphrases is denoted as Cpara ,i k = {cpara ,i k, 1 , c para ,i k, 2 , . . . , c para ,i k,P } and referred to as Augmented-Context in this paper. The subscript i indicates the iteration number, and the superscript “para” indicates that the context has been paraphrased. The complete set of paraphrases is defined as Cpara ,i = {cpara ,i k,p | k ∈ { 1, . . . , K }, p ∈ { 1, . . . , P }} and is used for Continual Pre-Training (CPT). Additionally, we generate Q question-answer pairs from each article, represented as 
+
+Qik = {(qik,j , a i, gold  
+
+> k,j
+
+)}Qj=1 . Here, qik,j is the question and ai, gold  
+
+> k,j
+
+is the correct answer. These question-answer pairs are generated by providing the article ck and an instruction prompt (see Appendix I.2) to the Generator LLM G, so ai, gold  
+
+> k,j
+
+is labeled as “gold” to indicate a high-accuracy answer based on the article content. Generating numerous question-answer pairs also leads to an increase in similar QA pairs, which is expected to have an effect equivalent to diverse paraphrasing. The complete set of 3Algorithm 1 PASTA: Main Learning and Evaluation Process 
+
+1: // Data generation phase prepares Cpara ,i (Augmented-Context ) and Qi (Context-Derived QA )2: Qi 
+
+> iter sample
+
+← SampleQA (Qi, S ) ▷ Samples for evaluation 3: for i = 1 to T do // Learning process for each iteration 4: ∆θi 
+
+> CPT
+
+← arg min 
+
+> ∆θ
+
+P 
+
+> cpara ∈C para ,i
+
+LCPT (Mθi−1+∆ θ , c para ) ▷ LoRA training 5: θi 
+
+> CPT
+
+← θi−1 + ∆ θi
+
+> CPT
+
+; acc i 
+
+> CPT
+
+← Evaluate (Mθi 
+
+> CPT
+
+, Qi
+
+> iter sample
+
+)
+
+6: ∆θi 
+
+> SFT
+
+← arg min 
+
+> ∆θ
+
+P 
+
+> (q,a gold )∈Q i
+
+LSFT (Mθi 
+
+> CPT +∆ θ
+
+, q, a gold ) ▷ LoRA training 7: θi 
+
+> SFT
+
+← θi 
+
+> CPT
+
++ ∆ θi
+
+> SFT
+
+; acc i 
+
+> SFT
+
+← Evaluate (Mθi 
+
+> SFT
+
+, Qi
+
+> iter sample
+
+)
+
+8: Di 
+
+> DPO
+
+← {} ▷ Initialize DPO dataset 9: for each (q, a gold ) ∈ Q i do 
+
+10: agen ← Mθi 
+
+> SFT
+
+(q); Add (q, a gold , a gen ) to Di
+
+> DPO
+
+11: end for 
+
+12: ∆θi 
+
+> DPO
+
+← arg min 
+
+> ∆θ
+
+P
+
+> (q,a gold ,a gen )∈D i
+> DPO
+
+LDPO (Mθi 
+
+> SFT +∆ θ
+
+, q, a gold , a gen )
+
+13: θi ← θi 
+
+> SFT
+
++ ∆ θi
+
+> DPO
+
+; acc i 
+
+> DPO
+
+← Evaluate (Mθi , Qi
+
+> iter sample
+
+)
+
+14: Qi 
+
+> eval
+
+← GenerateQA (C); Qi 
+
+> final sample
+
+← SampleQA (Qi
+
+> eval
+
+, S )
+
+15: acc i 
+
+> final
+
+← Evaluate (Mθi , Qi
+
+> final sample
+
+) ▷ Evaluate generalization 16: Mθi ← SaveCheckpoint (Mθi ); Qi+1 ← Q i
+
+> eval
+
+; Qi+1  
+
+> iter sample
+
+← Q i
+
+> final sample
+
+17: end for 
+
+18: return MθT
+
+question-answer pairs generated this way, Qi = {(qik,j , a i, gold  
+
+> k,j
+
+) | k ∈ { 1, . . . , K }, j ∈ { 1, . . . , Q }} ,is defined as Context-Derived QA in this paper. This question-answer dataset is used for both Supervised Fine-Tuning (SFT) and Direct Preference Optimization (DPO) learning stages, as well as for evaluation at each learning stage by sampling. Furthermore, new Context-Derived QA is generated at the end of each iteration to evaluate generalization performance and to be used as training data for the next iteration. We denote the Target LLM to be updated as Mθ , where θ represents the model parameters. The model parameters at the end of iteration i are denoted as θi. The loss functions used in each learning stage are LCPT , LSFT , and LDPO . The number of evaluation samples is S, and the total number of iterations is T .
+
+3.3 PASTA Algorithm 
+
+The PASTA algorithm integrates new knowledge into the Target LLM through T iterations. The details of the PASTA algorithm are shown in Algorithm 1. Each iteration consists of the following three learning stages: 
+
+1. CPT within PASTA Framework: In the PASTA framework, the CPT stage performs autore-gressive language modeling using the Augmented-Context (extended context set Cpara ,i ) [ 18 ]. This specialized pretraining approach allows for effective integration of new knowledge. The loss function 
+
+LCPT in PASTA is the cross-entropy of next token prediction: 
+
+LCPT (Mθ , c para ) = − 1
+
+|cpara |
+
+> |cpara |
+
+X
+
+> m=1
+
+log pθ (cpara  
+
+> m
+
+|cpara 
+
+> <m
+
+). (1) 
+
+2. SFT within PASTA Framework: Following the CPT stage, the PASTA framework employs supervised fine-tuning with the Context-Derived QA (question-answer set Qi) [ 17 ] to adjust the model to generate appropriate answers to questions about the new knowledge. The SFT loss function in PASTA maximizes the generation probability of only the answer portion: 
+
+LSFT (Mθ , q, a gold ) = − 1
+
+|agold |
+
+> |agold |
+
+X
+
+> m=1
+
+log pθ (agold  
+
+> m
+
+|q, a gold 
+
+> <m
+
+). (2) 
+
+3. DPO within PASTA Framework: The final stage of the PASTA framework leverages DPO [ 20 ]in a novel way to specifically address hallucination suppression in knowledge updating. While DPO 4was originally proposed as an efficient alternative to RLHF [ 3], in PASTA it performs preference learning by contrasting model-generated answers with correct answers after SFT to suppress incorrect responses based on outdated knowledge. The PASTA DPO process creates triplets containing the question, gold answer, and model-generated answer, which are then used to optimize the model parameters as shown in Algorithm 1. The DPO loss function within PASTA is defined using pairs of preferred and non-preferred answers: 
+
+LDPO (Mθ , q, a gold , a gen ) = − log σ
+
+ 1
+
+β
+
+
+
+log pθ (agold |q)
+
+pref (agold |q) − log pθ (agen |q)
+
+pref (agen |q)
+
+ 
+
+. (3) Here, pref is the reference model (the model after SFT), β is a scaling parameter, and σ is the sigmoid function. Evaluation is conducted after each learning stage. Common samples Qi 
+
+> iter sample
+
+sampled from Qi are used to measure changes within each iteration, and generalization performance is evaluated at the end of each iteration using Qi 
+
+> final sample
+
+sampled from newly generated Qi
+
+> eval
+
+.
+
+3.4 Prompt Instructions 
+
+The prompt for Augmented-Context generation (see Appendix I.1) provides instructions to expand 
+
+context data through paraphrasing by changing word order, style, expressions, and symbol repre-sentations while preserving proper nouns, numerical values, dates, and other specific information. The prompt for Context-Derived QA generation (see Appendix I.2) instructs that Qshould lead to a uniquely determined A, ensuring that the Ais not ambiguous. It also directs the Generator LLM to produce as many diverse generations as possible in a single run. 
+
+## 4 Experiments 
+
+In this research, we scrape Japanese news articles published after the knowledge cutoff of the 
+
+Target LLM from the web as new knowledge ( context ) for training. That is, we perform knowledge updating on the Target LLM with context that the Target LLM does not know, and evaluate how accurately it can answer questions about the context that it did not know before training, thereby verifying the effectiveness of our proposed method. Japanese, compared to English, often has more limited resources, which can make challenges in knowledge updating more apparent. We vary the number of learning iterations and the generation volume of Augmented-Context and 
+
+Context-Derived QA in our evaluation, aiming to gain insights into the architecture required to effectively integrate new knowledge into the Target LLM and build a Target LLM capable of accurately answering questions about that content. 
+
+4.1 Context Dataset Construction 
+
+We scraped Japanese online news articles published from May to July 2024, after the knowledge cutoff of the Target LLM , and performed category classification (11 categories, see Appendix D for details) and quality assessment. From these, we selected the “Culture & Entertainment” category, which had a high number of articles and was suitable for knowledge updating verification. The reason is that information such as music rankings or celebrity appearance information tends to be frequently overwritten with new information daily. From this category, we randomly selected 128 high-quality articles (scoring 4 or higher on a 5-point scale) and summarized them to approximately 500 characters using an LLM if they exceeded that length. 
+
+4.2 Experimental Setup 
+
+In our experiments, we generated P (=200) paraphrases and Q (=50) question-answer pairs for each of the K (=128) news articles (contexts). Examples of context expansion through paraphrasing are shown in Appendix G, and examples of question-answer pair generation are shown in Figure H. This provided |C para ,i | (= K × P = 25,600) Augmented-Context items and |Q i| (= K × Q = 6,400) 
+
+Context-Derived QA pairs for training in each iteration. Training was optimized using LoRA [ 10 ](rank r (=128)). The proposed method implemented T (=7) iterations, and accuracy was measured by randomly sampling S (=100) QA pairs at each stage (CPT, SFT, DPO) for evaluation. Within the 5Table 1: Accuracy comparison between the baseline method (SFT only) and the proposed method (CPT+SFT+DPO) across iterations. For After CPT, SFT, and DPO, evaluation samples from training data represent memorization ability, while Final evaluations use newly created Context-Derived QA 
+
+samples, representing generalization performance.                                                          
+
+> Baseline (SFT only) Proposed Method (CPT+SFT+DPO) Iter. After SFT Final Initial After CPT After SFT After DPO Final
+> 10.06 0.07 0.02 0.14 0.38 0.67 0.54 20.12 0.16 –0.52 0.43 0.68 0.65 30.16 0.13 –0.56 0.43 0.65 0.64 40.16 0.09 –0.65 0.49 0.67 0.66 50.22 0.19 –0.62 0.34 0.71 0.68
+> 60.21 0.18 –0.65 0.47 0.63 0.67 70.24 0.26 –0.55 0.33 0.67 0.64
+
+same iteration, identical samples were used across all stages to track progress through the learning stages. 
+
+Target LLM We adopted Llama-3.1-8B-Instruct [ 4] as the LLM (base model) for knowledge updating in this paper. This is an 8B parameter model that was pre-trained and instruction-tuned for question answering with a knowledge cutoff as of December 2023 (prior to the news articles). Greedy decoding was used for answer generation for evaluation purposes and for generating data for DPO. For other detailed experimental settings, please refer to Appendix E. 
+
+4.3 Evaluation Methods Answer Accuracy We implemented evaluation using the LLM-as-a-judge [ 27 ] methodology at key points in the PASTA Framework. We evaluated after each stage (Initial, After CPT, After SFT, and After DPO), and at the end of each iteration by generating new Context-Derived QA to assess generalization performance (Final evaluation). As an evaluation metric, we define the accuracy of model Mθ with the following equation: Acc (Mθ , Qsample , C) = 1
+
+|Q sample |
+
+X
+
+> q∈Q sample
+
+I[J(Mθ (q), q, c q ) = 1] (4) This evaluation (where J and cq are defined in Appendix A) strictly judges the accuracy of proper nouns, numerical values, dates, and the absence of contradictions with the context content. Format differences (e.g., December 1, 2024 vs. 12/01/2024) are acceptable, but omissions or errors in information are considered incorrect. Details of the prompts used for evaluation are shown in Appendix I.5, and details of the evaluation logic are shown in Appendix A. 
+
+Catastrophic Forgetting Evaluation of LLMs While the purpose of this paper is to build a specialized LLM capable of accurately answering questions about newly updated knowledge, we also evaluated the degree of catastrophic forgetting [ 16 , 7 ] of the LLM’s general capabilities using the Japanese MT-Bench++ benchmark [22]. 
+
+4.4 Results Accuracy Overview of the Proposed Method Through our experiments, the effectiveness of the PASTA framework became evident. The Target LLM before knowledge updating showed only 0.02 accuracy when answering questions about news articles published after its knowledge cutoff. After training with our framework, we observed substantial improvement. Under optimal conditions with increased Context-Derived QA volume, determined through parameter sensitivity analysis, we achieved a maximum accuracy of 0.82 . Below, we present results from our basic parameter settings followed by detailed analyses. 6Table 2: Accuracy comparison with 1/10 data reduction: Augmented-Context reduction (left) vs. 
+
+Context-Derived QA reduction (right). Final represents generalization performance evaluation.                                                                          
+
+> 1/10 Augmented-Context 1/10 Context-Derived QA Iter. CPT SFT DPO Final CPT SFT DPO Final
+> 10.03 0.17 0.31 0.32 0.12 0.23 0.26 0.20 20.31 0.27 0.55 0.42 0.26 0.31 0.34 0.26 30.45 0.25 0.50 0.42 0.30 0.28 0.39 0.28 40.51 0.33 0.59 0.63 0.29 0.42 0.45 0.40 50.51 0.37 0.60 0.58 0.45 0.38 0.47 0.29 60.57 0.46 0.62 0.61 0.36 0.42 0.42 0.49
+> 70.67 0.47 0.64 0.58 0.44 0.47 0.54 0.39 80.65 0.54 0.67 0.55 0.51 0.50 0.54 0.37
+
+Results with Basic Experimental Settings Table 1 shows a comparison between our proposed method with basic parameter settings ( Context-Derived QA multiplier of 50) and the baseline (SFT only). In the proposed method, accuracy improved progressively through each learning stage (CPT, SFT, DPO) in the first iteration, reaching 0.67 after DPO. The Final metric, which evaluates generalization performance, recorded 0.54. From the second iteration onward, performance improved steadily, with the Final metric reaching 0.65 and then stabilizing in the upper 0.6 range in subsequent iterations. The highest Final metric value among the 7 iterations was 0.68. In contrast, the baseline trained with SFT only reached only 0.26 accuracy even after 7 iterations. The proposed method achieved 0.54 accuracy in just the first iteration and 0.65 by the second iteration, demonstrating that this difference cannot be explained merely by the number of learning steps. This provides compelling evidence for the effectiveness of the integrated CPT, SFT, and DPO framework. Note that evaluation was conducted by extracting 100 random samples from each Context-Derived QA , so measurements contain some statistical variation. This experimental design prioritizes efficiently conducting multiple experiments under various parameter conditions to identify the characteristics of effective knowledge updating methods. 
+
+Sensitivity Analysis of Augmented-Context and Context-Derived QA We analyzed the effect of increasing and decreasing the volume of Augmented-Context and Context-Derived QA data to determine which data type has a greater impact on accuracy. Table 2 shows that Context-Derived QA 
+
+has a more significant effect on improving accuracy. 
+
+Increasing Context-Derived QA by 10 times Based on the above results, we experimented with increasing the Context-Derived QA —which was shown to be more effective for accuracy improve-ment—to 10 times that of the proposed method to determine how much accuracy would improve. The results are shown in Table 3. This achieved higher accuracy than the proposed method, reaching 0.82 accuracy in the Final evaluation of the 2nd iteration. With 10 times the proposed method, the 
+
+Context-Derived QA has 500 pairs per context. Table 3: Impact of Context-Derived QA volume on accuracy: Comparison of 1/10×, 1×, and 10× the proposed method. Final represents generalization performance evaluation.                                       
+
+> 1/10× QA Volume 1× QA Volume (Proposed) 10× QA Volume Iter. CPT SFT DPO Final CPT SFT DPO Final CPT SFT DPO Final
+> 10.12 0.23 0.26 0.20 0.14 0.38 0.67 0.54 0.10 0.29 0.79 0.74 20.26 0.31 0.34 0.26 0.52 0.43 0.68 0.65 0.68 0.59 0.91 0.82
+
+Differences in Accuracy by Training Volume per Iteration Table 4 shows a comparison of reducing the data volume of Augmented-Context and Context-Derived QA per iteration to 1/10 of the proposed method and training with more iterations (called the Small Batch Method). Since 1 iteration of the proposed method and 10 iterations of the Small Batch Method have learned the same amount of data, they are compared side by side in the table. We found that the Final accuracy of the 4th iteration of the proposed method and the Final accuracy of the Small Batch Method are both 0.66, indicating that similar accuracy can be achieved. 7Table 4: Comparison of the proposed method and small batch method with equivalent total training data volume. Final represents generalization performance evaluation. 
+
+Proposed Method Small Batch Method Iter. CPT SFT DPO Final Equiv. CPT SFT DPO Final 
+
+1 0.14 0.38 0.67 0.54 10 0.42 0.43 0.41 0.29 2 0.52 0.43 0.68 0.65 20 0.41 0.45 0.44 0.40 3 0.56 0.43 0.65 0.64 30 0.39 0.41 0.54 0.50 4 0.65 0.49 0.67 0.66 40 0.52 0.53 0.60 0.66 
+
+Ablation: Accuracy Differences by Presence/Absence of CPT, SFT, DPO We conducted ex-periments to observe changes in accuracy when omitting one of the CPT, SFT, or DPO learning processes from the proposed method, and show the results in Table 5. These results confirm that the overall framework of the proposed method enhances accuracy, and omitting any one of the learning processes significantly reduces accuracy. Table 5: Ablation study: Comparison of the proposed method and variant methods missing certain components. Final represents generalization performance evaluation. 
+
+Proposed Method w/o CPT w/o SFT w/o DPO Iter CPT SFT DPO Final SFT DPO Final CPT DPO Final CPT SFT Final 
+
+1 0.14 0.38 0.67 0.54 0.08 0.15 0.09 0.18 0.26 0.30 0.08 0.25 0.25 2 0.52 0.43 0.68 0.65 0.19 0.25 0.22 0.23 0.23 0.17 0.28 0.33 0.40 3 0.56 0.43 0.65 0.64 0.30 0.29 0.29 0.25 0.22 0.18 0.35 0.44 0.34 4 0.65 0.49 0.67 0.66 0.14 0.28 0.32 0.19 0.18 0.20 0.50 0.53 0.46 
+
+5 0.62 0.34 0.71 0.68 0.15 0.20 0.15 0.27 0.13 0.22 0.44 0.46 0.31 6 0.65 0.47 0.63 0.67 0.16 0.31 0.29 0.25 0.15 0.16 0.52 0.38 0.35 
+
+Qualitative Evaluation Figure 2 shows an example of an actual news article used in the experiment and output examples from each model. The process of gradually being able to produce concise and correct answers through DPO, which is the knowledge updating hypothesis method based on the self-training approach in the proposed method, can be confirmed. Other qualitative evaluations are included in Appendix C. 
+
+Qualitative Evaluation: Response Evolution Across Learning Stages (Iteration 1) 
+
+> Context
+
+On Billboard JAPAN’s ”Japan Songs (Country Chart),” Creepy Nuts’ ”Bling-Bang-Bang-Born” reached #1 in six countries including the United States, United Kingdom, France, Brazil, South Africa, and Singapore during the April 19-25, 2024 tabulation period. This song is the opening theme for the TV anime ”MASHLE: Magic and Muscles - Divine Visionary Candidate Exam Arc.” Additionally, Fujii Kaze dominated the top 3 positions in Thailand with ”Michiteyuku” at #1, ”Shinunoga E-Wa” at #2, and ”Matsuri” at #3. Furthermore, six songs by Fujii Kaze ranked in Thailand’s top 20. 
+
+> Question
+
+Please tell me about the three songs by Fujii Kaze that dominated the top 3 on the Billboard JAPAN country chart from April 19-25, 2024.  
+
+> Response after CPT [LLM as a judge: Incorrect]
+
+During the April 19-25, 2024 period on Billboard JAPAN’s ”Japan Songs” country chart, Fujii Kaze topped charts in six countries including the United States, United Kingdom, France, Brazil, South Africa, and more. His track ”Michiteyuku” reached #16 in the US, #17 in the UK, and #6 in France. ”Shinunoga E-Wa” ranked #93 in the US, #76 in the UK, and #33 in France. ”Matsuri” placed #93 in the US, #76 in the UK, and #46 in France. Fujii Kaze’s music is gaining attention worldwide.  
+
+> Response after SFT [LLM as a judge: Incorrect]
+
+Fujii Kaze’s songs ”Michiteyuku” ranked #1, ”Shinunoga E-Wa” ranked #2, and ”Matsuri” ranked #3 in Thailand, dominating the top 3 positions. Additionally, ”Matsuri” has been #1 on Thailand’s chart for 6 consecutive weeks. His songs are very popular on Thailand’s charts. This data was collected during the April 19-25, 2024 period.  
+
+> Response after DPO [LLM as a judge: Correct]
+
+Fujii Kaze’s songs ”Michiteyuku” ranked #1, ”Shinunoga E-Wa” ranked #2, and ”Matsuri” ranked #3 in Thailand. 
+
+Figure 2: Example of response quality changes across learning stages. Hallucinations (red text). 8Table 6: Performance comparison on Japanese MT-bench++ benchmark.                                                       
+
+> Model Humanities Reasoning Roleplay STEM Writing All
+> Llama-3.1-8B-Instruct 4.72 4.17 4.33 4.50 4.38 4.42 Proposed Model
+> Iteration 1 3.97 4.43 4.20 4.00 3.93 4.11 Iteration 2 4.17 4.43 3.80 4.33 4.33 4.21 Iteration 3 3.77 3.70 3.67 3.77 4.47 3.87 Iteration 4 3.63 3.37 3.53 4.10 4.40 3.81 Iteration 5 3.63 3.60 3.63 3.80 4.43 3.82 Iteration 6 3.93 3.70 4.00 3.70 4.27 3.92 Iteration 7 3.60 3.23 3.87 3.70 4.67 3.81
+
+4.5 Degree of Catastrophic Forgetting Evaluation 
+
+While the purpose of this paper is to build a specialized LLM capable of accurately answering questions about newly updated knowledge, we also evaluated the degree of catastrophic forgetting [ 16 , 7] of the LLM’s general capabilities using the Japanese MT-Bench++ benchmark [ 22 ]. Table 6 shows the evaluation results of the Target LLM using the proposed method. As shown in Table 6, the Target LLM shows a slight decrease in accuracy compared to the base model as the learning iterations progress in the “All” category, but it sometimes exceeds the base model in “Reasoning” and “Writing.” We confirmed that the degree of degradation in the general language processing capabilities of the Target LLM accompanying knowledge updating is minimal, and catastrophic forgetting does not occur. We compare the scores of the Target LLM before training with those of the proposed method. 
+
+## 5 Conclusion 
+
+In this paper, we demonstrated that our simple yet powerful PASTA framework significantly en-hances knowledge updating capabilities, achieving 0.82 accuracy with optimized configurations—a remarkable improvement from the initial 0.02 accuracy. The primary goal of PASTA is to build specialized LLMs that can accurately respond to questions about newly acquired knowledge, which we successfully accomplished. PASTA outperforms conventional approaches through systematic integration of established techniques. Sensitivity analysis revealed that Context-Derived QA volume primarily drives performance gains, while PASTA’s novel self-learning DPO process effectively enables knowledge overwriting and suppresses hallucinations simultaneously. While not the pri-mary focus, evaluation using Japanese MT-Bench++ showed that the general language capabilities remained largely intact with minimal degradation. These findings establish PASTA as an effective framework for creating knowledge-specialized LLMs for specific domains. Future work includes application to diverse domains, evaluation refinements, and mechanisms for handling interdependent knowledge updates. 
+
+## 6 Limitations 
+
+This research has several limitations. First, experiments were conducted using only a single pre-trained LLM and Japanese news articles from a specific genre, limiting the demonstrated generalizability of the method. Computational resource constraints prevented extensive exploration of iteration counts and hyperparameters, though more optimal settings may exist. The model developed in this study is specialized for question answering about new knowledge rather than improving comprehensive LLM capabilities. The evaluation methodology using LLM as a judge introduces potential bias (Zheng et al. 27 ). Furthermore, our comparative experiments did not rigorously equalize computational resources across different methods, which remains a future research challenge. Considering these limitations, future research should investigate these approaches with diverse LLMs, datasets, and more rigorous experimental protocols. 9Acknowledgments 
+
+This study was carried out using the TSUBAME4.0 supercomputer at Institute of Science Tokyo. 
+
+## References 
+
+[1] Zeyuan Allen-Zhu and Yuanzhi Li. Physics of language models: Part 3.1, knowledge storage and extraction. 
+
+arXiv preprint arXiv:2309.14316 , 2023. [2] Bradley Brown, Jordan Juravsky, Ryan Ehrlich, Ronald Clark, Quoc V Le, Christopher R ´e, and Azalia Mirhoseini. Large language monkeys: Scaling inference compute with repeated sampling. arXiv preprint arXiv:2407.21787 , 2024. [3] Paul F Christiano, Jan Leike, Tom Brown, Miljan Martic, Shane Legg, and Dario Amodei. Deep rein-forcement learning from human preferences. Advances in neural information processing systems , 30, 2017. [4] Abhimanyu Dubey, Abhinav Jauhri, Abhinav Pandey, Abhishek Kadian, Ahmad Al-Dahle, Aiesha Letman, Akhil Mathur, Alan Schelten, Amy Yang, Angela Fan, et al. The llama 3 herd of models. arXiv preprint arXiv:2407.21783 , 2024. [5] Sebastian Farquhar, Jannik Kossen, Lorenz Kuhn, and Yarin Gal. Detecting hallucinations in large language models using semantic entropy. Nature , 630(8017):625–630, 2024. [6] Jonathan Frankle and Michael Carbin. The lottery ticket hypothesis: Finding sparse, trainable neural networks. arXiv preprint arXiv:1803.03635 , 2018. [7] Robert M French. Catastrophic forgetting in connectionist networks. Trends in cognitive sciences , 3(4): 128–135, 1999. [8] Song Han, Jeff Pool, John Tran, and William Dally. Learning both weights and connections for efficient neural network. Advances in neural information processing systems , 28, 2015. [9] Peter Hase, Thomas Hofweber, Xiang Zhou, Elias Stengel-Eskin, and Mohit Bansal. Fundamental problems with model editing: How should rational belief revision work in llms? arXiv preprint arXiv:2406.19354 ,2024. [10] Edward J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang, and Weizhu Chen. Lora: Low-rank adaptation of large language models. arXiv preprint arXiv:2106.09685 ,2021. [11] So Kuroki, Taishi Nakamura, Takuya Akiba, and Yujin Tang. Agent skill acquisition for large language models via cycleqd. arXiv preprint arXiv:2410.14735 , 2024. [12] Harrison Lee, Samrat Phatale, Hassan Mansoor, Kellie Ren Lu, Thomas Mesnard, Johan Ferret, Colton Bishop, Ethan Hall, Victor Carbune, and Abhinav Rastogi. RLAIF: Scaling reinforcement learning from human feedback with AI feedback, 2024. URL https://openreview.net/forum?id=AAxIs3D2ZZ .[13] Patrick Lewis, Ethan Perez, Aleksandra Piktus, Fabio Petroni, Vladimir Karpukhin, Naman Goyal, Heinrich K ¨uttler, Mike Lewis, Wen-tau Yih, Tim Rockt ¨aschel, et al. Retrieval-augmented generation for knowledge-intensive nlp tasks. Advances in Neural Information Processing Systems , 33:9459–9474, 2020. [14] Xian Li, Ping Yu, Chunting Zhou, Timo Schick, Omer Levy, Luke Zettlemoyer, Jason Weston, and Mike Lewis. Self-alignment with instruction backtranslation. arXiv preprint arXiv:2308.06259 , 2023. [15] Aman Madaan, Niket Tandon, Prakhar Gupta, Skyler Hallinan, Luyu Gao, Sarah Wiegreffe, Uri Alon, Nouha Dziri, Shrimai Prabhumoye, Yiming Yang, et al. Self-refine: Iterative refinement with self-feedback. 
+
+Advances in Neural Information Processing Systems , 36, 2024. [16] Michael McCloskey and Neal J Cohen. Catastrophic interference in connectionist networks: The sequential learning problem. In Psychology of learning and motivation , volume 24, pages 109–165. Elsevier, 1989. [17] Long Ouyang, Jeffrey Wu, Xu Jiang, Diogo Almeida, Carroll Wainwright, Pamela Mishkin, Chong Zhang, Sandhini Agarwal, Katarina Slama, Alex Ray, et al. Training language models to follow instructions with human feedback. Advances in neural information processing systems , 35:27730–27744, 2022. [18] Alec Radford. Improving language understanding by generative pre-training. 2018. 
+
+10 [19] Alec Radford, Jeffrey Wu, Rewon Child, David Luan, Dario Amodei, Ilya Sutskever, et al. Language models are unsupervised multitask learners. OpenAI blog , 1(8):9, 2019. [20] Rafael Rafailov, Archit Sharma, Eric Mitchell, Christopher D Manning, Stefano Ermon, and Chelsea Finn. Direct preference optimization: Your language model is secretly a reward model. In A. Oh, T. Naumann, A. Globerson, K. Saenko, M. Hardt, and S. Levine, editors, Ad-vances in Neural Information Processing Systems , volume 36, pages 53728–53741. Curran Asso-ciates, Inc., 2023. URL https://proceedings.neurips.cc/paper_files/paper/2023/file/ a85b405ed65c6477a4fe8302b5e06ce7-Paper-Conference.pdf .[21] Baptiste Roziere, Jonas Gehring, Fabian Gloeckle, Sten Sootla, Itai Gat, Xiaoqing Ellen Tan, Yossi Adi, Jingyu Liu, Romain Sauvestre, Tal Remez, et al. Code llama: Open foundation models for code. arXiv preprint arXiv:2308.12950 , 2023. [22] Takuya Uematsu, So Fukuda, Daisuke Kawahara, and Tomohide Shibata. Japanese MT-bench++: A Large-Scale Japanese Benchmark with More Natural Multi-turn Dialogue Settings. In Proceedings of the 31st Annual Conference of the Association for Natural Language Processing , pages 3569–3574. Association for Natural Language Processing, Japan, March 2025. URL https://www.anlp.jp/proceedings/ annual_meeting/2025/pdf_dir/D9-1.pdf . Paper written in Japanese. [23] Lecheng Wang, Xianjie Shi, Ge Li, Jia Li, Yihong Dong, Xuanming Zhang, Wenpin Jiao, and Hong Mei. Why language models collapse when trained on recursively generated text, 2024. URL https: //arxiv.org/abs/2412.14872 .[24] Tianlu Wang, Ilia Kulikov, Olga Golovneva, Ping Yu, Weizhe Yuan, Jane Dwivedi-Yu, Richard Yuanzhe Pang, Maryam Fazel-Zarandi, Jason Weston, and Xian Li. Self-taught evaluators. arXiv preprint arXiv:2408.02666 , 2024. [25] Jason Wei, Nguyen Karina, Hyung Won Chung, Yunxin Joy Jiao, Spencer Papay, Amelia Glaese, John Schulman, and William Fedus. Measuring short-form factuality in large language models. arXiv preprint arXiv:2411.04368 , 2024. [26] Weizhe Yuan, Richard Yuanzhe Pang, Kyunghyun Cho, Sainbayar Sukhbaatar, Jing Xu, and Jason Weston. Self-rewarding language models. arXiv preprint arXiv:2401.10020 , 2024. [27] Lianmin Zheng, Wei-Lin Chiang, Ying Sheng, Siyuan Zhuang, Zhanghao Wu, Yonghao Zhuang, Zi Lin, Zhuohan Li, Dacheng Li, Eric Xing, et al. Judging llm-as-a-judge with mt-bench and chatbot arena. 
+
+Advances in Neural Information Processing Systems , 36:46595–46623, 2023. 
+
+## A Evaluation Methodology Details 
+
+As an evaluation metric, we define the accuracy of model Mθ using the following equation: Acc (Mθ , Qsample , C) = 1
+
+|Q sample |
+
+X
+
+> q∈Q sample
+
+I[J(Mθ (q), q, c q ) = 1] (5) Where: • Qsample is the set of questions sampled for evaluation ( |Q sample | = S = 100 )• cq is the news article context corresponding to question q
+
+• Mθ (q) is the answer generated by the model for question q
+
+• I[·] is the indicator function • J(agen , q, c ) is the LLM as a judge judgment function The judge function J(agen , q, c ) returns 1 (correct) if the following conditions are met, and 0 (incor-rect) otherwise (the actual implementation uses the prompt described in Appendix I.5): 
+
+J(agen , q, c ) = 
+
+1, if agen is factually accurate and consistent with context c for question q
+
+0, otherwise (6) 11 Evaluations at each learning stage are defined as follows: acc i 
+
+> CPT
+
+= Acc (Mθi 
+
+> CPT
+
+, Qi
+
+> iter sample
+
+, C) (7) acc i 
+
+> SFT
+
+= Acc (Mθi 
+
+> SFT
+
+, Qi
+
+> iter sample
+
+, C) (8) acc i 
+
+> DPO
+
+= Acc (Mθi , Qi
+
+> iter sample
+
+, C) (9) acc i 
+
+> final
+
+= Acc (Mθi , Qi
+
+> final sample
+
+, C) (10) Evaluation samples are generated by random sampling as follows: 
+
+Qi 
+
+> iter sample
+
+= SampleQA (Qi, S ) (11) 
+
+Qi 
+
+> final sample
+
+= SampleQA (Qi
+
+> eval
+
+, S ) (12) Where S = 100 is the sample size, and SampleQA (Q, S ) is a function that randomly extracts only the question portion from the question-answer pair set Q in S quantities. This evaluation strictly judges the accuracy of proper nouns, numerical values, dates, and the absence of contradictions with the context content. Format differences (e.g., December 1, 2024 vs. 12/01/2024) are acceptable, but omissions or errors in information are considered incorrect. Details of the prompts used for evaluation are shown in Appendix I.5. 
+
+## B Details of the PASTA Algorithm 
+
+The details of the data generation process part of the PASTA algorithm that could not be fully described in the main text are shown in Algorithm 2, and the auxiliary functions are shown in Algorithm 3. 
+
+Algorithm 2 PASTA: Initialization and Data Generation Process 
+
+1: Input: News article set C = {c1, c 2, . . . , c K }, Generator LLM G, initial Target LLM Mθ0 ,maximum number of iterations T , number of paraphrases P , number of QA pairs Q, number of evaluation samples S
+
+2: Output: Trained Target LLM MθT
+
+3: // Initial evaluation 
+
+4: Q0 
+
+> eval
+
+← GenerateQA (C) ▷ Generate QA for initial evaluation 
+
+5: Q0 
+
+> sample
+
+← SampleQA (Q0
+
+> eval
+
+, S ) ▷ Extract evaluation samples 
+
+6: acc initial ← Evaluate (Mθ0 , Q0
+
+> sample
+
+) ▷ Evaluate initial model 
+
+7: for i = 1 to T do 
+
+8: // Step 1: Data generation phase 
+
+9: Cpara ,i ← {} ▷ Initialize empty Augmented-Context set 
+
+10: for each ck ∈ C do 
+
+11: Cpara ,i k ← {} ▷ Initialize empty set 
+
+12: for p = 1 to P do 
+
+13: cpara ,i k,p ← G(“Paraphrase” , c k) ▷ Generate paraphrase of ck
+
+14: Add cpara ,i k,p to Cpara ,i k
+
+15: end for 
+
+16: Add all elements of Cpara ,i k to Cpara ,i 
+
+17: end for 
+
+18: if i = 1 then ▷ Generate QA only for the first iteration 
+
+19: Qi ← GenerateQA (C) ▷ Generate QA for training 
+
+20: else 
+
+21: Qi ← Q i−1 
+
+> eval
+
+▷ Use evaluation QA from previous iteration for training 
+
+22: end if 
+
+23: Qi 
+
+> iter sample
+
+← SampleQA (Qi, S ) ▷ Samples for intra-iteration evaluation 
+
+24: end for 
+
+12 Algorithm 3 PASTA: Auxiliary Functions 
+
+1: function GENERATE QA( C)
+
+2: Q ← {} ▷ Initialize empty QA set 
+
+3: for each ck ∈ C do 
+
+4: for j = 1 to Q do 
+
+5: (qk,j , a gold 
+
+k,j ) ← G(“Generate QA pair” , c k) ▷ Generate QA pair 
+
+6: Add (qk,j , a gold 
+
+k,j ) to Q
+
+7: end for 
+
+8: end for 
+
+9: return Q
+
+10: end function 
+
+11: function SAMPLE QA( Q, S )
+
+12: if |Q| > S then 
+
+13: S ← RandomSample (Q, S ) ▷ Random sampling of specified number 
+
+14: else 
+
+15: S ← Q ▷ Use all data 
+
+16: end if 
+
+17: return S
+
+18: end function 
+
+## C Supplementary Qualitative Evaluation 
+
+We conducted a qualitative evaluation by examining the actual content during the evaluation of Iteration=5 of the proposed method (Table 1), which achieved the highest Final accuracy. An example is shown in Figure 3. 
+
+Qualitative Evaluation: Response Evolution Across Learning Stages (Iteration 5) 
+
+> Context
+
+On Billboard JAPAN’s ”Japan Songs (Country Chart),” Creepy Nuts’ ”Bling-Bang-Bang-Born” reached #1 in six countries including the United States, United Kingdom, France, Brazil, South Africa, and Singapore during the April 19-25, 2024 tabulation period. This song is the opening theme for the TV anime ”MASHLE: Magic and Muscles - Divine Visionary Candidate Exam Arc.” Additionally, Fujii Kaze dominated the top 3 positions in Thailand with ”Michiteyuku” at #1, ”Shinunoga E-Wa” at #2, and ”Matsuri” at #3. Furthermore, six songs by Fujii Kaze ranked in Thailand’s top 20. 
+
+> Question
+
+What are the three song titles that Fujii Kaze used to occupy the top 3 positions in Thailand’s chart from April 19 to April 25, 2024?  
+
+> CPT Response [LLM as a judge: Correct]
+
+From April 19 to April 25, 2024, Fujii Kaze’s songs ”Michiteyuku” reached #1, ”Shinunoga E-Wa” reached #2, and ”Matsuri” reached #3 on Thailand’s Billboard JAPAN Japan Songs chart.  
+
+> SFT Response [LLM as a judge: Incorrect]
+
+In Thailand’s chart from April 19 to April 25, 2024, Fujii Kaze’s three songs that occupied the top 3 positions were ”Michiteyuku”, ”Shinunoga E-Wa”, and ”Matsuri”. These three songs ranked at the top positions. Furthermore, ”Matsuri” reached #1. Additionally, ”Michiteyuku” reached #2, and ”Shinunoga E-Wa” reached #3. His songs are highly acclaimed in Thailand’s music scene. Moreover, ”Matsuri” has been a big hit on Thailand’s TikTok. The number of TikTok video posts exceeds 24,000. [omitted]  
+
+> DPO Response [LLM as a judge: Correct]
+
+The three songs by Fujii Kaze that occupied the top 3 positions in Thailand’s chart from April 19 to April 25, 2024 were ”Michiteyuku”, ”Shinunoga E-Wa”, and ”Matsuri”. 
+
+Figure 3: Example of response quality changes across learning stages. The CPT response is accurate, but hallucinations (red text) appear in the SFT response. After applying DPO, the response improves to a concise and accurate answer based on facts. This confirms that DPO suppresses hallucinations and generates responses containing only necessary and sufficient information. 13 D News Article Categories 
+
+News Article Categories Culture & Entertainment Economy & Business Science & Technology & Environment Society & Incidents Lifestyle & Social Trends Health & Medical & Welfare Politics & International Sports Education Issues Disasters & Accidents Commentary & Analysis -
+
+Table 7: Categories of news articles covered in this research Although this research utilized only 128 articles from the ”Culture & Entertainment” category, Table 7 shows the category classification we established when initially scraping web news articles to create our dataset. 
+
+## E Experimental Settings Details 
+
+Table 8 shows the details of the experimental settings. Table 9 shows the settings such as learning rate and batch size used in each learning stage: CPT, SFT, and DPO. Table 8: Experimental setting details 
+
+Item Value 
+
+Target LLM Model Llama-3.1-8B-Instruct Target LLM Knowledge Cutoff December 2023 Target LLM Max Context Length during training 1024 Tokens Target LLM LoRA application layers All layers including embedding layer Target LLM Rejected data and evaluation answer generation Greedy Decoding GPU Model NVIDIA H100 GPU VRAM 94GB Number of GPUs 1Library Transformers Version 4.46.1 Library TRL Version 0.12.1 News article time period May-July 2024 News article quantity 128 articles Generator LLM for news article dataset processing gpt-4o-mini-2024-07-18 Generator LLM for news article dataset processing Temperature 0.0 Generator LLM for Knowledge Updating related tasks gpt-4.1-mini-2025-04-14 Generator LLM for Knowledge Updating related tasks Temperature 1.0 Generator LLM for LLM as a Judge gpt-4.1-mini-2025-04-14 Generator LLM for LLM as a Judge Temperature 0.0 Generator LLM for Japanese MT-bench++ gpt-4.1-mini-2025-04-14 Augmented-Context count per article 200 Context-Derived QA count per article 50 (500 for optimal results in Section 3) 
+
+14 Table 9: Main settings for each learning process 
+
+Hyperparam CPT SFT DPO 
+
+learning rate 5e-5 2e-5 1e-6 lr scheduler constant constant constant batch size 2 8 4grad accumulation 64 4 8epoch 1 1 1DPO β – – 0.1 LoRA Rank r 128 128 128 LoRA α 128 128 128 
+
+## F Training Steps and Computation Time 
+
+Table 10 shows the number of training steps and time required for each learning stage. Experiments were conducted on a single NVIDIA H100 GPU. Table 10: Number of training steps and computation time for each learning stage 
+
+Learning Stage Number of Training Steps Time Required (minutes) 
+
+CPT 300 approx. 52 SFT 200 approx. 6 DPO 200 approx. 22 The total computation time per iteration was approximately 80 minutes, requiring about 9.3 hours for 7 iterations of training. This time represents only the training time for the Target LLM and does not include the time for dataset generation, checkpoint saving, and other processes. The actual execution time needs to account for these additional processes. 
+
+## G Augmented-Context Samples 
+
+Below are sample paraphrases of news articles used in this research. 
+
+Original Article 
+
+Music Festival ”MUSIC CIRCUS FUKUOKA 2024” to be held overnight at Fukuoka PayPay Dome The music festival ”MUSIC CIRCUS FUKUOKA 2024” will be held on June 8, 2024, at Fukuoka PayPay Dome. This event was first held in Fukuoka in 2018 and is a multi-faceted festival centered around music performances that also offers fashion, food, and sports activities. The 2024 lineup includes Awich, Jin Dogg, OZworld, ALAN SHIRAHAMA (DJ), among others, who will keep the energy high all night. Tickets go on sale from April 1, 2024, priced at 7,000 yen for men and 3,500 yen for women. 
+
+Paraphrase Example 1 
+
+”MUSIC CIRCUS FUKUOKA 2024” confirmed for all-night event at Fukuoka PayPay Dome The music festival ”MUSIC CIRCUS FUKUOKA 2024” will take place at Fukuoka PayPay Dome on June 8, 2024. First launched in Fukuoka in 2018, this is a hybrid festival featuring music performances alongside fashion, food, and sports activities. The 2024 lineup features Awich, Jin Dogg, OZworld, and ALAN SHIRAHAMA (DJ). Tickets will be available from April 1, 2024, with prices set at 7,000 yen for men and 3,500 yen for women. 
+
+Paraphrase Example 2 
+
+”MUSIC CIRCUS FUKUOKA 2024” to host all-night event at Fukuoka PayPay Dome on June 8 The combined music, fashion, food, and sports festival ”MUSIC CIRCUS FUKUOKA,” which debuted in Fukuoka in 2018, will be held at Fukuoka PayPay Dome on June 8, 2024. Performers include Awich, Jin Dogg, OZworld, and ALAN SHIRAHAMA (DJ). Tickets will go on sale April 1, 2024, available for 7,000 yen for men and 3,500 yen for women. 
+
+15 These paraphrase examples maintain the factual information of the original article while presenting the same content with different expressions and structures. The paraphrases vary in their organization, simplification of expressions, and stylistic changes, but they accurately preserve important information such as the event date, location, performers, and ticket prices. 
+
+## H Context-Derived QA Samples 
+
+Below are samples of QA generation based on a news article (the original article from Appendix G). 
+
+Context-Derived QA Samples: QA about MUSIC CIRCUS FUKUOKA 2024 
+
+> Question 1
+> How much is the ticket price for men at MUSIC CIRCUS FUKUOKA 2024?
+> Answer 1
+> The ticket price for men at MUSIC CIRCUS FUKUOKA 2024 is set at 7,000 yen.
+> Question 2
+> At which venue in Fukuoka will the MUSIC CIRCUS music festival be held in 2024?
+> Answer 2
+> The MUSIC CIRCUS FUKUOKA 2024 music event will be held at PayPay Dome in Fukuoka.
+> Question 3
+> When do tickets for MUSIC CIRCUS FUKUOKA 2024 go on sale?
+> Answer 3
+> Tickets for MUSIC CIRCUS FUKUOKA 2024 go on sale from April 1, 2024.
+> Question 4
+> Please explain the format of MUSIC CIRCUS FUKUOKA 2024.
+> Answer 4
+> MUSIC CIRCUS FUKUOKA 2024 is a multi-faceted festival centered around music performances that also includes fashion, food, and sports activities, with events running all night (overnight format).
+
+Figure 4: QA samples about MUSIC CIRCUS FUKUOKA 2024. 
+
+## I Prompt Content 
+
+Below are the prompts actually used in this research. 
+
+I.1 Augmented-Context Generation Prompt 
+
+While the context content and generated content are in Japanese, English prompts were used to enhance instruction adherence. Listing 1: Augmented-Context Generation Prompt 
+
+## Input Data < News Article Title > { title } </ News Article Title > < Article Content > { content } </ Article Content > ## Output Format - JSON Lines ( JSONL ) ONLY with EXACTLY { n _ variations } lines - Each line MUST contain BOTH a " title " AND a " content " key -value pair - Each line must be a complete , valid JSON object : { " title ": "..." , " content ": "..." }- No additional keys , explanations , or blank lines - Invalid formats ( title - only or content - only lines ) will be rejected ## IMPORTANT : Format Requirements 
+
+16 - Each line MUST strictly follow this exact structure : { " title ": " transformed title here " , " content ": " transformed content here " }- NEVER split title and content into separate lines - NEVER output title - only or content - only JSON objects - NEVER use trailing commas at the end of JSON objects ## Language Requirement - The content of all responses ( the actual text within the Q and A fields , not the JSONL format itself ) must be in Japanese only . ## Output Key Mapping < News Article Title > " title " < Article Content > " content " ## Transformation Task 1. Paraphrase each element ( news article title , article content ) ** without changing the meaning at all but with substantial rewording ** , generating { n _ variations } diverse expressions . 2. Combine multiple paraphrasing techniques : - Word order changes / active <-> passive voice / formal <-> informal style - Paragraph structure and sentence order rearrangement - Synonym substitution - Variation in punctuation and symbols - Change number / date formats only , not the values themselves 3. Do not alter proper nouns , numerical values , or dates themselves . 4. Distribution agencies , reporter names , and other metadata are excluded from transformation . 5. Markdown and backticks are prohibited . ## Valid Output Example { " title ":" transformed title here " , " content ":" transformed content here " }## Common Errors to Avoid - DO NOT output title - only lines like : { " title ":" transformed title " }- DO NOT output content - only lines like : { " content ":" transformed content " }- DO NOT split title and content across multiple lines - DO NOT add any explanation text before or after the JSONL output ## Warning If you output anything other than ** exactly { n _ variations } complete JSONL lines ** with BOTH title AND content in EACH line , your answer will be considered invalid . 
+
+I.2 Context-Derived QA Generation Prompt 
+
+While the context content and generated content are in Japanese, English prompts were used to enhance instruction adherence. Listing 2: Context-Derived QA Generation Prompt 
+
+Please reply in JSONL format only . No other text . < context > Article Title : { title } News article from { date } { contents } </ context > 
+
+17 < instructions > 1. Read the above context and create { need _ qa } diverse question ( Q ) and answer ( A ) pairs about the context , outputting each pair in JSONL format as {{" Q ":"{{ question }}" , " A ":"{{ answer }}"}}. 2. Questions ( Q ) - Within 200 Tokens . - Ensure that the answer ( A ) can be uniquely determined from Q alone without the context , by including all necessary proper nouns , dates , locations , names , figures , organizations , metrics , etc . specifically and completely . - Prohibited : Pronouns or ambiguous expressions like " this article ," " last week ," or any relative time expressions . - Yes / No format questions are prohibited . - At least one question must ask about the date of an event , announcement , or occurrence . For dates mentioned with only month and day in the article , complete them with the year from context and convert to absolute dates . 3. Answers ( A ) - Within 300 Tokens . - Accurately describe the information requested in Q . 4. Language Requirement - The content of all responses ( the actual text within the Qand A fields , not the JSONL format itself ) must be in Japanese only . 5. Diversity and Exclusions - Create multiple QA pairs with non - overlapping content . - For both Q and A , avoid matching the exact wording of the context sentences ; use paraphrasing and structural changes to create diverse expressions . - Paraphrasing should maintain the same meaning . Changing the meaning is prohibited ( e . g . , changing 10 years to 12 years , changing kanji in names , changing proper nouns , etc .) - Exclude " article source information " such as publication source , distribution source , media name , reporter name , etc . from proper nouns , and do not include them in QA . 6. Error Handling - If the context is corrupted or you cannot create any QA pairs at all , output only one line : {{" Q ":"0" ," A ":"0"}}. 7. Output must be JSONL only . Do not include any other text . </ instructions > 
+
+I.3 News Article Cleaning and Quality Evaluation Prompt 
+
+This prompt is written in English, but a Japanese prompt was actually used. Listing 3: Example prompt for news article cleaning and evaluation 
+
+Please examine the news title (### News Title ) and the news article content (### News Article Content ) according to the following instructions (### Instructions ) and respond strictly in JSON format . The JSON key definitions are listed in ### JSON Definition . Please adhere strictly to these keys .
+
+18 ### Instructions - Verify if the news title and news article content are consistent . Since these are scraped from the web , they may be inconsistent , or the article content might include unrelated articles or advertisements . This occurs because the structure of websites sometimes includes other news or advertising promotions after or in the middle of the main news article . If you find unrelated news or advertisements mixed in , set the needsCleaning key to True in your response , extract only what appears to be the intended news article , and provide the news title in title and the news content in content . Conversely , if you determine that the current news title and content are appropriate as they are , set the needsCleaning key to False and leave the title and content fields empty . - Assign a score to the article according to the score definition (### Score Definition ) and respond with a single -byte digit of 1 , 2 , 3 , 4 , or 5 in the score field . If the needsCleaning key is True , evaluate only the content you extracted as the main news article . If the needsCleaning key is False , evaluate based on the original news title (### News Title ) and news article content (### News Article Content ) . - After reading the content of this news article , classify it into the most relevant category according to the news article category definition (### News Article Category Definition ) . The news article category definition is structured as a two - level tree . Enter the first level in maincategory and the second level in subcategory in your response . Be sure to classify it into one of the defined categories . Only if you absolutely cannot classify it into any category , respond with " other " in the relevant part of maincategory or subcategory . ### JSON Definition - score - maincategory - subcategory - needsCleaning - title - content ### Score Definition - 1: No text . Does not make sense as a text . Random strings , etc .- 2: Makes sense as text but is not a news article or is completely different text unrelated to the article . Or , does not meet the minimum requirements as an article due to insufficient text length ( e . g . , the main article is less than 30 characters ) - 3: Borderline quality that barely meets the minimum requirements as a news article . For example , no date so it ’ s unclear when the information is from , no names of subjects or names of objects so it ’ s unclear who or what is being discussed , only the introductory text is available while the important main article is behind a paywall and not scraped , or the available information does not include the basics of news ( when , where / who , what happened / what was done ) and does not make complete sense as news . - 4: Meets all the requirements as a news article ( when , where / who , what happened / what was done , why ) and includes all necessary information . 
+
+19 - 5: In addition to score 4 , contains detailed information sufficient for a news article , clearly explaining or illustrating new knowledge or information , some change in the world , new ideas or implications , new discoveries , scientific advances , etc . ### News Article Category Definition Politics & International : - Domestic Politics - International Relations - Diplomacy - Elections - Policies Economy & Business : - Macroeconomics - Corporate & Industry - Finance & Investment - Employment & Labor - Consumption & Prices - Economic Policy - New Products & Services - Marketing & Advertising Society & Incidents : - Social Issues - Crime & Incidents - Law & Court - Human Rights & Discrimination Issues - Education Issues Lifestyle & Social Trends : - Lifestyle - Local News - Transportation - Housing & Real Estate - Consumer Issues - Trends & Fads - Social Conditions - Changes in Social Norms - Public Opinion Polls Science & Technology & Environment : - Scientific Research - Technological Innovation - IT & Digital - Environmental Issues - Climate Change - Space Development - New Technology Applications Culture & Entertainment : - Arts & Culture - Entertainment - Sports - Food & Cuisine - Travel & Tourism - Fashion - Media Health & Medical & Welfare : - Health & Medical - Welfare - Aging Society 
+
+20 - Public Health Disasters & Accidents : - Natural Disasters - Accidents - Emergencies - Disaster Prevention & Mitigation Commentary & Analysis : - Editorial - Column - Commentary - Explanatory Article ### News Title { news _ title } ### News Article Content { news _ content } 
+
+I.4 News Article Summarization Prompt 
+
+This prompt is written in English, but a Japanese prompt was actually used. Listing 4: Example prompt for news article summarization 
+
+Please summarize the following news article ( the text between the < news _ article > and </ news _ article > tags ) in less than 500 characters . When summarizing , please observe the following guidelines : - Do not alter or omit proper nouns ( names , place names , facility names , etc .) - Do not omit dates < news _ article > { content } </ news _ article > 
+
+I.5 LLM as a judge Prompt 
+
+Listing 5: Example prompt for answer correctness evaluation using LLM 
+
+< Main Instruction > Please evaluate the correctness of the response to a question about the context . The content of eval _ answer is the subject of evaluation . Respond only with a single digit : 0 or 1. Strictly adhere to responding with only 0 or 1. Respond with 0 if incorrect . Respond with 1 if correct . For detailed evaluation criteria , refer to the " Evaluation Criteria " tag and the " Supplementary Evaluation Criteria " tag . </ Main Instruction > < Tag Definitions > Below are the context , question , and response to be evaluated . The " context " tag section contains the news article context . The " question " tag section contains the question about the context . The " eval _ answer " tag section contains the response to be evaluated . Evaluate the correctness of this response to the question . </ Tag Definitions > 
+
+21 < Evaluation Criteria > - The answer is considered correct if it meets ALL of the following conditions . Otherwise , it is incorrect : - eval _ answer is factually correct as a response to the question about the context - eval _ answer does not contradict the content in the context </ Evaluation Criteria > < Supplementary Evaluation Criteria > - Dates , times , and quantitative values must match , but the required precision should be determined from the context . For example , Olympic competition times should match to the precision stated in the article ( e . g . , 0.1 seconds ) . For events like a change of Prime Minister , matching the day is sufficient . - Proper nouns such as names of people , places , products , companies , paper titles , etc . must match exactly in content , though expressions may vary . Different formats such as kanji , romaji , hiragana , or English notation are acceptable as long as they refer to exactly the same entity . - Dates , times , and numerical values can be in different formats as long as they represent the same content . For example , April 1 , 2024 , is the same as 2024/4/1. 1:00 PM is the same as 13:00 and 1 o ’ clock in the afternoon . 10 ,000 yen , 10 K yen ( using abbreviated thousand notation ) , and " Ten Thousand Yen " ( formal written notation ) are the same . </ Supplementary Evaluation Criteria > < context > { content } </ context > < question > { Q } </ question > < eval _ answer > { eval _ answer } </ eval _ answer > Please strictly adhere to responding with only 0 or 1. 
+
+22

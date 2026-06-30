@@ -1,0 +1,54 @@
+{
+  "label": "2026-06-30",
+  "date": "2026-06-30",
+  "generated_at": "2026-06-30T21:45:42",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202606/30/2606.28898v1-pasta-a-paraphrasing-and-self-training-approach-for-knowledge-updating-in-llms",
+      "section": "deep",
+      "title_en": "PASTA: A Paraphrasing And Self-Training Approach for Knowledge Updating in LLMs",
+      "authors": "Takayuki Yamamoto, Daisuke Kawahara",
+      "date": "2026-06-27",
+      "pdf": "https://arxiv.org/pdf/2606.28898v1",
+      "score": "9.0",
+      "evidence": "基于释义和自训练的大语言模型知识更新方法",
+      "tldr": "大型语言模型在知识更新方面面临挑战，尤其是处理新闻等具体事实信息时准确性不足。本文提出PASTA框架，通过数据增强、问答生成和自学习DPO过程，有效整合新知识并抑制幻觉。在知识截止日期后的新闻文章测试中，准确率从0.02提升至0.82，同时保持通用语言能力。该工作为构建领域专用模型提供了简单有效的方案。",
+      "tags": "query:model-edit",
+      "abstract_en": "Knowledge updating in pre-trained Large Language Models (LLMs) remains an important challenge. While continual training provides a potential avenue for knowledge updating, it continues to present substantial technical difficulties. Furthermore, LLMs often struggle with accurately answering questions about specific factual information, such as news articles - a capability limitation widely recognized in the research community. This paper proposes PASTA, a simple yet powerful framework for integrating detailed factual information from news articles as new knowledge into LLMs, with the primary goal of building specialized models that accurately answer questions about this knowledge. Our framework combines data augmentation, question-answering generation, and a novel self-learning DPO process that simultaneously enables knowledge overwriting and hallucination suppression. We provide insights into effective knowledge updating through systematic analysis of learning parameters and data configurations. In our experimental evaluation with web articles published after the base model's knowledge cutoff, PASTA achieved remarkable improvement from 0.02 to 0.82 accuracy while maintaining general language capabilities, demonstrating its effectiveness for creating domain-specialized LLMs.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/30/2606.28153v2-robust-harmful-features-under-jailbreak-attacks-mechanistic-evidence-from-attention-head-specialization-in-large-language-models",
+      "section": "quick",
+      "title_en": "Robust Harmful Features Under Jailbreak Attacks: Mechanistic Evidence from Attention Head Specialization in Large Language Models",
+      "authors": "Yanchen Yin, Dongqi Han, Linghui Li",
+      "date": "2026-06-26",
+      "pdf": "https://arxiv.org/pdf/2606.28153v2",
+      "score": "6.0",
+      "evidence": "越狱机制分析用于编辑",
+      "tldr": "越狱攻击通过选择性抑制早期层的攻击妥协头（ACH）来绕过LLM安全对齐，但中层安全对齐头（SAH）仍维持鲁棒激活。消融实验证实抑制少量ACH即可诱发越狱行为，移除SAH则削弱安全信号。攻击模板标记驱动ACH抑制，导致鲁棒有害特征现象。利用SAH的持久激活可进行无需训练的对抗鲁棒检测。",
+      "tags": "query:model-edit",
+      "abstract_en": "Jailbreak attacks bypass LLM safety alignment, yet their mechanisms remain poorly understood. We provide evidence that attacks do not comprehensively eliminate safety features, but instead selectively suppress specific attention heads. We identify two functionally differentiated types: Adversarially Compromised Heads (ACHs) concentrated in early layers, which are suppressed under attacks, and Safety-Aligned Heads (SAHs) in mid-layers, which maintain robust activations even when attacks succeed. Ablation studies support the causal role of ACHs and the contribution of SAHs to robust activations: suppressing a small number of ACHs is sufficient to induce jailbreak-like behavior on normally refused inputs, while removing SAHs substantially weakens mid-layer safety activations. Token-level attribution further shows that ACH suppression is driven specifically by attack-template tokens, providing a mechanistic account of why attacks can bypass refusal decisions through ACH suppression while leaving internal safety signals sustained by SAHs -- a phenomenon we term Robust Harmful Features. To validate the practical significance of this robustness, we show that simply reading these persistent activations -- without any training -- yields competitive aggregate detection performance with strong adversarial robustness.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/30/2606.28962v1-flipguard-defending-large-language-models-against-quantization-conditioned-backdoor-attacks",
+      "section": "quick",
+      "title_en": "FlipGuard: Defending Large Language Models Against Quantization-Conditioned Backdoor Attacks",
+      "authors": "Aoying Zheng, Anqi Du, Zizhuang Deng, Yuxuan Chen",
+      "date": "2026-06-27",
+      "pdf": "https://arxiv.org/pdf/2606.28962v1",
+      "score": "6.0",
+      "evidence": "用于LLM安全的权重扰动防御",
+      "tldr": "模型量化是大语言模型高效部署的关键，但引入了量化条件后门攻击（QCB）的新漏洞，即恶意行为在完整精度模型中潜伏，仅在特定量化失真后激活，可绕过安全审计。为此，本文提出FlipGuard防御框架，通过在量化前选择性扰动权重，破坏攻击者对权重模式与量化边界的对齐，从而抑制后门激活，无需训练数据或触发器。同时引入防御有效性比（DER）统一评估安全增益、效用保持和计算成本。在七个LLM（如StarCoder、LLaMA系列）和三种量化方案（INT8、FP4、NF4）上的实验表明，FlipGuard能有效抵御三类QCB场景（脆弱代码生成、内容注入、过度拒绝），实现高安全性且性能退化可忽略。",
+      "tags": "query:model-edit",
+      "abstract_en": "Model quantization is essential for the efficient deployment of Large Language Models (LLMs), but introduces a critical vulnerability: Quantization-Conditioned Backdoor (QCB) attacks. In these attacks, malicious behaviors remain dormant in full-precision models and activate only after specific quantization distortions, bypassing standard security audits. To mitigate this, we introduce FlipGuard, a proactive defense framework that selectively perturbs model weights prior to quantization. By breaking the adversary's precise alignment between weight patterns and quantization boundaries, FlipGuard suppresses backdoor activation without requiring access to training data or trigger samples. We further propose the Defense Effectiveness Ratio (DER), a unified metric to jointly evaluate security gains, utility preservation, and computational cost. Extensive experiments across seven LLMs (including StarCoder and LLaMA-family models) and three quantization schemes (INT8, FP4, NF4) demonstrate that FlipGuard effectively neutralizes QCBs across three scenarios, i.e., vulnerable code generation, content injection, and over-refusal, achieving high security with negligible performance degradation.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
