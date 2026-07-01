@@ -1,0 +1,69 @@
+{
+  "label": "2026-07-01",
+  "date": "2026-07-01",
+  "generated_at": "2026-07-01T21:19:01",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202607/01/2606.30788v1-revocable-learned-state-via-process-sidecars",
+      "section": "deep",
+      "title_en": "Revocable Learned State via Process Sidecars",
+      "authors": "John Sweeney",
+      "date": "2026-06-29",
+      "pdf": "https://arxiv.org/pdf/2606.30788v1",
+      "score": "9.0",
+      "evidence": "模型编辑方法，用于在安全训练后撤销学习记忆",
+      "tldr": "针对语言模型分阶段适应后记忆难以撤销的问题，提出process sidecars方法，通过双系数编辑族近似安全训练对记忆方向的影响。理论证明该方法在(1,1)系数下可二阶恢复反事实安全模型，且优于标量任务算术的一阶精度。实验表明，该方法在多个模型上始终优于朴素任务算术和其子族。",
+      "tags": "query:model-edit",
+      "abstract_en": "Language models are often adapted in stages: a public skill phase, a private memory phase, and a later safety phase that learns to refuse outputs tied to the remembered entities. Revoking the memory after the safety phase is not the same problem as subtracting the memory update: the later safety optimizer has transported the memory direction. We introduce process sidecars, a two-coefficient edit family $\\hatθ(λ,γ)=θ_{\\mathrm{AMS}}-λΔ_{\\mathrm{M}}-γ\\hat{R}_{\\mathrm{S}\\leftarrow\\mathrm{M}}$, with $\\hat{R}_{\\mathrm{S}\\leftarrow\\mathrm{M}}=\\hat{J}_{\\mathrm{S},\\varepsilon}(Δ_{\\mathrm{M}})-Δ_{\\mathrm{M}}$, where $\\hat{J}_{\\mathrm{S},\\varepsilon}$ is a centered secant through the realized future AdamW safety-training process. The implementation uses $\\varepsilon=1$ at the natural memory-edit scale; it reuses $θ_{\\mathrm{AMS}}$ as the positive endpoint and computes one additional safety trace at $θ_{\\mathrm{A}}-Δ_{\\mathrm{M}}$. We prove two things. First, the exact sidecar, using the true transported direction $R_{\\mathrm{S}\\leftarrow\\mathrm{M}}$ rather than the secant estimate, at $(λ,γ)=(1,1)$ recovers the counterfactual safety-only oracle $θ_{\\mathrm{AS}}$ up to second order; the proof treats AdamW as an augmented-state map over parameters, first moments, and second moments. Second, this process information is necessary: whenever future safety training bends the memory direction, every scalar task-arithmetic edit leaves first-order counterfactual error, while the process-sidecar edit is second-order accurate. Across three models, the validation-selected 2D edit improves held-out refusal closure over naive task arithmetic in all trials, and over the $γ=λ$ process-JVP subfamily, the diagonal slice of the cached 2D grid, in all paired trials.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/01/2606.25442v1-policyalign-direct-policy-based-safety-alignment-for-large-language-models",
+      "section": "deep",
+      "title_en": "PolicyAlign: Direct Policy-Based Safety Alignment for Large Language Models",
+      "authors": "Chang Wu, Junfeng Fang, Houcheng Jiang, Kai Tang, Pengyu Cheng, Xiaoxi Jiang, Guanjun Jiang, Xiang Wang",
+      "date": "2026-06-24",
+      "pdf": "https://arxiv.org/pdf/2606.25442v1",
+      "score": "8.0",
+      "evidence": "通过策略引导的自蒸馏进行安全对齐",
+      "tldr": "现有LLM安全对齐依赖高质量监督数据，但新安全策略出现时缺乏对应数据。PolicyAlign直接基于策略对齐：合成违反策略的指令，进行on-policy自蒸馏，并通过策略敏感过滤选择行为偏移最大的指令。实验表明，该方法在多个模型上提升安全性、降低过度拒绝并保持通用能力，且泛化到医疗、法律等场景。PolicyAlign为基于策略的安全对齐提供了可扩展、可维护的解决方案。",
+      "tags": "query:model-edit",
+      "abstract_en": "Safety alignment of large language models (LLMs) typically depends on high-quality supervision data, such as safe demonstrations or preference pairs. However, in real-world deployment, emerging safety requirements are often specified as natural-language policies, while corresponding supervision data may be costly, delayed, or unavailable. This creates a mismatch between rapidly evolving safety policies and conventional data-driven alignment methods. To address this, we propose PolicyAlign, a simple yet effective framework for directly aligning LLMs with safety policies. Given a safety policy, PolicyAlign first synthesizes policy-violating instructions and then performs on-policy self-distillation to internalize policy-guided behavior. To improve training stability and data efficiency, we further introduce Policy-Sensitive Filtering, which selects instructions where the policy induces the largest behavioral shift. Experiments across multiple models show that PolicyAlign consistently improves safety while maintaining low over-refusal and preserving general capabilities. PolicyAlign also generalizes to medical, legal, and financial safety scenarios, highlighting its potential as a scalable and maintainable approach to policy-based LLM safety alignment. The code is released at https://github.com/Qwen-Applications/PolicyAlign.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/01/2606.30899v1-curvature-guided-module-localization-for-low-rank-detoxification-of-backdoored-large-language-models",
+      "section": "deep",
+      "title_en": "Curvature-Guided Module Localization for Low-Rank Detoxification of Backdoored Large Language Models",
+      "authors": "Arash Raftari, Mehrdad Mahdavi, Nathan Blackthorn, Andrew Arash Mahyari",
+      "date": "2026-06-29",
+      "pdf": "https://arxiv.org/pdf/2606.30899v1",
+      "score": "8.0",
+      "evidence": "通过对后门大模型进行定位性低秩修复实现解毒",
+      "tldr": "后门攻击使大语言模型在隐藏触发词下输出恶意行为，现有修复方法多侧重于全局微调。本文提出基于机制引导的权重空间修复框架，首先通过激活补丁和Fisher/K-FAC曲率分析定位传播触发行为的模块，再对关键模块进行低秩修复。在Llama-3.2-1B-Instruct上的实验表明，该方法显著抑制了触发条件下的恶意响应，同时保持良性行为不变。该工作将后门移除问题转化为局部结构修复，为模型安全提供了新视角。",
+      "tags": "query:model-edit",
+      "abstract_en": "Backdoor attacks pose a serious threat to large language models (LLMs) by causing otherwise benign systems to produce attacker-specified malicious behavior when a hidden trigger is present. In this work, we study post hoc detoxification of backdoored LLMs in a practical setting where the defender has access to the poisoned model but does not wish to retrain the full network from scratch. We propose a mechanistically guided weight-space repair framework that first localizes modules involved in propagating trigger-induced behavior using activation patching and Fisher/K-FAC curvature analysis, and then applies targeted low-rank repair to only the most influential modules. We evaluate the method on poisoned variants of \\texttt{Llama-3.2-1B-Instruct} with triggers inserted at the beginning, middle, and end of otherwise benign prompts. Results show that the proposed approach substantially suppresses trigger-conditioned malicious responses while preserving benign model behavior. These findings suggest that backdoor removal in LLMs can be formulated as a localized structural repair problem rather than only a broad behavioral alignment problem.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/01/2606.30810v1-towards-knowledge-alignment-in-code-llms-contrastive-unlearning-for-evolving-apis",
+      "section": "quick",
+      "title_en": "Towards Knowledge Alignment in Code LLMs: Contrastive Unlearning for Evolving APIs",
+      "authors": "Huy Q. Tran, Dang H. Vu, Tuyen N. Dinh, Anh H. D. Nguyen, Anh N. H. Vu, Anh M. T. Bui, Phuong T. Nguyen",
+      "date": "2026-06-29",
+      "pdf": "https://arxiv.org/pdf/2606.30810v1",
+      "score": "6.0",
+      "evidence": "直接探讨了面向大语言模型的模型编辑与知识对齐",
+      "tldr": "代码大语言模型因知识截止和API快速演化常生成已弃用API。现有方法仅抑制弃用API而未引导正确替换。CURE提出对比性遗忘，同时抑制弃用API并鼓励有效替代。在弃用API基准上，CURE减少弃用API使用并提升正确替换，优于SOTA。该方法突出了抑制与替换结合在适应演化生态系统中的重要性。",
+      "tags": "query:model-edit",
+      "abstract_en": "Large Language Models (LLMs) have recently achieved strong performance in code generation. However, due to knowledge cut-off and the rapid evolution of software libraries, they often generate deprecated API usages that lead to unreliable and incompatible code. Existing fine-tuning methods lack selectivity when only a small portion of model knowledge requires modification. Recent model-level approaches, such as machine unlearning and model editing, offer a promising direction for modifying parametric knowledge. However, their use for deprecated API mitigation remains largely unexplored. Moreover, existing methods primarily suppress outdated APIs, but do not explicitly steer models toward correct replacements, often leading to mismatched or incomplete generations. To address this limitation, we developed CURE, a contrastive unlearning approach that shifts unlearning from purely suppressing outdated knowledge to explicitly promoting correct API replacements. Concretely, CURE jointly discourages deprecated APIs while encouraging their valid alternatives, enabling more reliable adaptation to evolving software libraries. The experiments on recent deprecated API benchmark dataset show that CURE not only reduces deprecated API usage but also improves correct API replacement, while preserving general code generation performance. CURE substantially outperforms two SOTA baselines with respect to different quality metrics. These findings highlight the importance of combining suppression with replacement when adapting LLMs to evolving software ecosystems.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

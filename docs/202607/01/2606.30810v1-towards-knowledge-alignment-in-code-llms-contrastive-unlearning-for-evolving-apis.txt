@@ -1,0 +1,434 @@
+Title: Towards Knowledge Alignment in Code LLMs: Contrastive Unlearning for Evolving APIs
+
+URL Source: https://arxiv.org/pdf/2606.30810v1
+
+Published Time: Wed, 01 Jul 2026 00:21:45 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# Towards Knowledge Alignment in Code LLMs: Contrastive Unlearning for Evolving APIs 
+
+Huy Q. Tran 
+
+Hanoi University of Science and Technology (HUST) 
+
+Hanoi, Vietnam Huy.TQ226109@sis.hust.edu.vn 
+
+Dang H. Vu 
+
+HUST 
+
+Hanoi, Vietnam dang.vh225962@sis.hust.edu.vn 
+
+Tuyen N. Dinh 
+
+HUST 
+
+Hanoi, Vietnam tuyen.dn235242@sis.hust.edu.vn 
+
+Anh H. D. Nguyen 
+
+HUST 
+
+Hanoi, Vietnam Anh.NDH2416662@sis.hust.edu.vn 
+
+Anh N. H. Vu 
+
+HUST 
+
+Hanoi, Vietnam Anh.VHN225471@sis.hust.edu.vn 
+
+Anh M. T. Bui ∗
+
+HUST 
+
+Hanoi, Vietnam anhbtm@soict.hust.edu.vn 
+
+Phuong T. Nguyen 
+
+University of L’Aquila 
+
+L’Aquila, Italy phuong.nguyen@univaq.it 
+
+Abstract —Large Language Models (LLMs) have recently achieved strong performance in code generation. However, due to knowledge cut-off and the rapid evolution of software libraries, they often generate deprecated API usages that lead to unreliable and incompatible code. Existing fine-tuning methods lack selec-tivity when only a small portion of model knowledge requires modification. Recent model-level approaches, such as machine unlearning and model editing, offer a promising direction for modifying parametric knowledge. However, their use for dep-recated API mitigation remains largely unexplored. Moreover, existing methods primarily suppress outdated APIs, but do not explicitly steer models toward correct replacements, often leading to mismatched or incomplete generations. To address this limita-tion, we developed CURE , a contrastive unlearning approach that shifts unlearning from purely suppressing outdated knowledge to explicitly promoting correct API replacements. Concretely, 
+
+CURE jointly discourages deprecated APIs while encouraging their valid alternatives, enabling more reliable adaptation to evolving software libraries. The experiments on recent deprecated API benchmark dataset show that CURE not only reduces deprecated API usage but also improves correct API replacement, while preserving general code generation performance. CURE 
+
+substantially outperforms two SOTA baselines with respect to different quality metrics. These findings highlight the importance of combining suppression with replacement when adapting LLMs to evolving software ecosystems. 
+
+Index Terms —deprecated API, large language model, machine unlearning, contrastive learning 
+
+I. I NTRODUCTION 
+
+Large Language Models (LLMs) have recently shown strong performance in software engineering tasks, particularly code generation and code completion [1]–[5]. These capabilities are enabled by pretraining on massive public code corpora [6], which also exposes models to outdated coding patterns, in-cluding deprecated APIs frequently appearing in historical repositories [7]. As a result, Code LLMs may continue to generate obsolete API calls that no longer align with modern codebases, reducing code reliability. This issue stems not only from knowledge cutoff, but also from outdated patterns embedded in the model’s parametric 
+
+*Corresponding author 
+
+memory [8], which can bias Code LLMs toward deprecated APIs even when valid alternatives exist. In rapidly evolving libraries, such behavior may introduce compatibility issues and increase maintenance effort [9], [10]. Although fine-tuning can update model knowledge, it is often inefficient for localized API-level modifications since it globally updates model parameters. The key challenge is therefore to selectively remove outdated API knowledge while preserving the model’s general code generation capability [11]. Existing efforts to mitigate outdated API usage follow two main directions. Inference-time strategies, e.g., prompt augmentation and output-level API replacement [7], attempt to steer model outputs toward updated APIs without modifying the internal knowledge. However, these approaches assume that each input context can be accurately mapped to a specific replacement API, which may not be realistic in real-world sce-narios. More direct model-level approaches, including model editing [12], [13] and machine unlearning [14]–[16], mod-ify the model’s parametric memory to suppress undesirable knowledge. However, their application to deprecated API mitigation remains limited. Lin et al. [13] propose a dynamic editing approach that updates the model whenever a deprecated API is generated. This strategy operates locally and may not generalize well to unseen contexts. Recent approaches [15], [16] mainly focus on suppressing undesirable knowledge, without explicitly guiding the model toward correct API replacements required for evolving libraries. In this paper, we propose CURE , a Contrastive Unlearning approach for deprecated API RE placement. The key idea is to shift unlearning from a purely suppressive process to a replacement-oriented mechanism. Specifically, CURE 
+
+builds upon a parametric machine unlearning method, such as PROD [15] or SimNPO [17], to reduce the likeli-hood of generating deprecated APIs. On top of this, we introduce a contrastive objective that explicitly pro-motes correct API alternatives, enabling the model not only to forget outdated APIs but also to adopt valid re-placements. We evaluate CURE on a recent deprecated 
+
+> arXiv:2606.30810v1 [cs.SE] 29 Jun 2026
+
+API benchmark across four representative Code LLMs: 
+
+DeepSeek-Coder-1.3B [18], StarCoder2-3B [19], 
+
+CodeLlama-7B [20] and CodeGen-2B [21]. Experimen-tal results show that CURE not only reduces deprecated API generation, but also improves correct API replacement compared to standard unlearning methods. Evaluation on 
+
+HumanEval [22] further indicates that CURE preserves gen-eral code generation capability without noticeable degradation. The main contributions of this work are as follows:  
+
+> •
+
+We propose CURE , a contrastive unlearning framework for mitigating deprecated API usage in Code LLMs through replacement-oriented learning.  
+
+> •
+
+We introduce a contrastive objective that explicitly aligns deprecated APIs with their corresponding updated alter-natives under the same code context.  
+
+> •
+
+Experiments on a recent deprecated API benchmark and 
+
+HumanEval [22] show that CURE consistently reduces deprecated API generation, improves correct API replace-ment, and preserves general code generation capability compared to standard unlearning methods.  
+
+> •
+
+We release our replication package to support future research [23]. II. R ELATED WORK 
+
+Modern software systems evolve continuously, causing APIs to be frequently revised and deprecated in favor of im-proved alternatives [24]. This is particularly challenging for Code LLMs, whose static training corpora often encode out-dated API knowledge, leading to deprecated API generation. Wang et al. [25] report that 37.4% of API predictions pro-duced by GPT-3.5 involve deprecated APIs. Existing solutions mainly follow two directions: inference-level methods such as 
+
+REPLACEAPI and INSERTPROMPT [25], modifying outputs without updating model, and model-level approaches including model editing [13] and reinforcement learning [26], which directly adapt knowledge within the model. Closely related to these efforts, machine unlearning has recently emerged as a promising direction for removing un-desirable knowledge from LLMs [27]. Existing approaches can be broadly categorized into exact and approximate un-learning [16], [28]. While exact methods retrain models from scratch to ensure complete data removal, approximate meth-ods provide a more practical alternative through gradient-based parameter updates, including GA [28], DPO-based un-learning [29], NPO [30], and SimNPO [17]. More recently, 
+
+PROD [15] introduces token-level suppression for precise code unlearning, while CODEEraser [16] selectively removes sensitive memorized code segments. Despite these advances, applying unlearning techniques to mitigate deprecated API usage in Code LLMs remains largely underexplored. III. P ROPOSED METHOD 
+
+In this section, we first formulate the unlearning problem for mitigating deprecated APIs, then present our proposed approach CURE , built upon a gradient-based parametric un-learning method by incorporating a contrastive objective to promote correct replacements by contrasting deprecated and valid API usages under the same context. 
+
+A. Problem Formulation 
+
+We formulate unlearning as a post-training procedure that aims to reduce the model’s tendency to generate deprecated APIs by modifying its parametric memory. Let πθ denote a language model parameterized by θ. We denote Df =
+
+{xi, y − 
+
+> i
+
+}Ni=1 as the forgetting set, which consists of code samples associated with deprecated APIs. Each pair (xi, y − 
+
+> i
+
+)
+
+includes a prompt xi and its corresponding undesirable com-pletion y− 
+
+> i
+
+, where y− 
+
+> i
+
+contains deprecated API usage. In this work, xi serves as a probing snippet under the code completion setting, where the model is required to generate the continuation. The objective of unlearning is to update the model parameters from θ to θ∗ such that the updated model πθ∗ reduces the likelihood of generating undesirable outputs y− 
+
+> i
+
+given xi. This can be formulated as the following optimization problem: 
+
+θ∗ = arg min 
+
+> θN
+
+X
+
+> i=1
+
+Lunl (πθ (xi), y − 
+
+> i
+
+) (1) where Lunl denotes an unlearning loss that penalizes the model for generating undesirable outputs. 
+
+B. Unlearning Instantiations 
+
+The formulation in Equation 1 defines a general unlearn-ing objective. In practice, different methods instantiate the unlearning loss Lunl in different ways. In this work, we con-sider two representative gradient-based parametric unlearning approaches, SimNPO [17] and PROD [15], which have been shown effective in modifying model behavior at the sequence and token levels, respectively. 
+
+▷ Simple Negative Preference Optimization. SimNPO [17] is a sequence-level unlearning method that suppresses undesir-able outputs through preference-based optimization. Given a forgetting sample (x, y −), where y− includes deprecated API usage, SimNPO suppresses the conditional likelihood of the undesirable sequence while applying length normalization to avoid biasing the optimization toward longer responses. 
+
+LSimNPO  
+
+> unl
+
+= − 2
+
+β log σ
+
+
+
+− β
+
+|y−| log πθ (y−|x)
+
+
+
+(2) where πθ denotes the current model, |y−| represents the length of the undesirable response, β is a scaling factor controlling the optimization strength, and σ(·) denotes the sigmoid 
+
+function. Intuitively, Eq. 2 incorporates length normalization via 1 
+
+> |y−|
+
+to mitigate the tendency of longer responses to dom-inate the optimization through accumulated log-probabilities. 
+
+▷ Probabilistic Redistribution for Output Distribution. 
+
+PROD [15] is a token-level method that suppresses undesirable snippet generations by directly modifying the target token distribution during training. Given a forgetting sample (x, y −),PROD minimizes the divergence between the current model distribution πθ and a modified target distribution pT .
+
+LPROD  
+
+> unl
+
+= −
+
+> L
+
+X
+
+> t=1
+
+X
+
+> w∈V
+
+pT (w|x, y −
+
+> <t
+
+) log πθ (w|x, y −
+
+> <t
+
+) (3) where L denotes the sequence length, V is the vocabulary space, pT (·) denotes the redistributed target distribution at decoding step t, and πθ (·) represents the probability assigned by the current model to token w given the context x and previ-ously generated tokens y<t . Intuitively, the objective function suppresses the probabilities of deprecated API tokens while redistributing probability mass over the remaining vocabulary, thereby discouraging obsolete API usage in generated code. 
+
+C. Contrastive Unlearning for API Replacements 
+
+While the methods in Section III-B effectively suppress deprecated API usage, they do not explicitly guide the model toward correct replacements. To overcome this limitation, we propose a contrastive unlearning formulation that jointly suppress outdated APIs and promotes valid alternatives under the same context. For each forgetting sample (x, y −), we construct a corresponding positive sample y+ by applying API-level transformations based on updated documentation or curated mappings between deprecated APIs and their recom-mended replacements. This ensures that (x, y +) represents a desirable completion that preserves the original intent while using up-to-date APIs. Given a triplet (x, y −, y +), we extend the unlearning objective by introducing a contrastive loss that enforces a relative preference for y+ over y− as follows. 
+
+Lctr = − log σ
+
+ 1
+
+|y+|
+
+X
+
+> t
+
+log P (y+ 
+
+> t
+
+| x, y +
+
+> <t
+
+)
+
+− 1
+
+|y−|
+
+X
+
+> t
+
+log P (y− 
+
+> t
+
+| x, y −
+
+> <t
+
+)
+
+ (4) The overall objective is defined as in Equation 5. 
+
+LCURE = Lunl + λLctr (5) where λ controls the trade-off between suppressing deprecated APIs and promoting correct replacements, Lunl is instantiated using either the SimNPO or PROD loss (Equations 2, 3). IV. E XPERIMENT SETTINGS 
+
+A. Research Questions 
+
+▷ RQ 1: To what extent does CURE reduce the generation of deprecated APIs compared to baseline models? We evaluate deprecated API suppression on both the forgetting and a disjoint test set to assess the effectiveness of the unlearning process and the model’s ability to generalize to unseen data. 
+
+▷ RQ 2: How effectively does CURE promote correct API replacements compared to suppression-based unlearning ap-proaches? This RQ evaluate whether the model correctly adopts updated APIs to replace deprecated ones in code samples from both forgetting set and unseen test set. 
+
+▷ RQ 3: How does CURE impact general code generation per-formance on standard benchmarks? We evaluate the impact of CURE on the model’s general code generation capability using a widely-used benchmark, i.e., HumanEval [22], ex-amining whether unlearning deprecated APIs degrades overall functional correctness and generation quality. 
+
+B. Dataset Construction 
+
+Following prior work, we adopt the deprecated API eval-uation benchmark introduced by Wang et al. [7], which covers 8 Python libraries with 145 deprecated-to-updated API mappings. The benchmark consists of two datasets: (i) an outdated set containing 9,087 real-world code samples using deprecated APIs, and (ii) an up-to-date set containing 18,340 samples using the corresponding updated APIs. To avoid context leakage, we remove up-to-date samples sharing similar code contexts with those in the outdated set. The remaining 16,423 samples therefore reflect new and unseen contexts in which developers already adopt up-to-date APIs. 
+
+1) Forgetting Dataset: Unlike traditional machine unlearn-ing settings, where the forget set is typically sampled from the original training corpus, we do not have access to the pretraining data of Code LLMs. Therefore, we construct the forget set Df directly from the outdated set of the benchmark proposed by Wang et al. [7], which contains real-world dep-recated API usages collected from public GitHub repositories. This design enables the model to unlearn deprecated API usage patterns across diverse real-world contexts. In addition, we randomly sample a limited number of hard negative cases from the up-to-date set where the pre-unlearning model still generates deprecated APIs despite new API contexts. These samples are incorporated into the forget set to expose the model to challenging contexts where deprecated API usage persists despite the absence of outdated contextual cues. 
+
+2) Contrastive Dataset: To promote correct API replace-ment, we construct a contrastive dataset Dctr consisting of negative samples that contain deprecated API usages generated by the model. For outdated-context samples, the corresponding positive samples are generated using Gemini-2.5-Pro ,rewriting the code with the correct replacement API while preserving the original intent and context. In addition, for the selected up-to-date contexts described earlier where the model still generates deprecated APIs, we directly use the cor-responding ground-truth up-to-date code as positive examples. 
+
+3) Testing Dataset: The testing set consists of unseen code contexts used to evaluate the generalization capability of the model after unlearning. Specifically, we construct this set from the up-to-date dataset of the benchmark proposed by Wang et al. [7] after removing all samples involved in (Df ). This setup enables us to assess whether the model can generalize replacement-oriented behavior to unseen contexts and correctly generate up-to-date API usages beyond the samples used during unlearning. In this work, we evaluate four Code LLMs: 
+
+DeepSeek-Coder-1.3B , StarCoder2-3B ,
+
+CodeLlama-7B and CodeGen-2B . For each model, TABLE I DATASET STATISTICS OF Df , DCTR AND DTEST ACROSS 4 C ODE LLM S.
+
+Model Df Dctr Dtest 
+
+DeepSeek-Coder-1.3B 9,436 3,440 16,376 
+
+StarCoder2-3B 11,050 6,919 14,865 
+
+CodeLlama-7B 10,396 7,377 15,374 
+
+CodeGen-2B 10,801 7,662 14,832 
+
+we construct the corresponding datasets Df , Dctr and Dtest .Table I presents the statistics of the constructed datasets in terms of the number of samples. 
+
+C. Evaluation Metrics 
+
+We evaluate unlearning effectiveness using three metrics: Deprecated API Usage Rate (DUR), Replacement API Usage Rate (RUR), and Mismatch API Usage Rate (MUR) [31], which respectively measure the proportion of outputs contain-ing the target deprecated API, the corresponding replacement API, or neither of them. In particular, MUR captures cases where the model successfully avoids the deprecated API but fails to generate the intended valid replacement, instead producing a different API that does not correspond to the intended valid replacement. API usage is identified through alias-based regular-expression matching with word-boundary constraints to reduce false positives [7]. For RQ 3, we evaluate the model’s general generation ca-pability using Pass@k on the HumanEval benchmark [22]. 
+
+Pass@k measures the probability that at least one out of k
+
+generated samples correctly solves a given task. Following prior work [32]–[34], we report results with k = 1 , 3, 5.
+
+D. Implementation 
+
+All experiments were conducted on a single NVIDIA A100 GPU with 80GB VRAM. Input prompts were truncated to a maximum context length of 2,048 tokens, while generation outputs were limited to 128 tokens, which is sufficient for API transformation tasks without producing unnecessarily verbose code. We set β = 0 .1 for the SimNPO loss and λ = 1 to control the contribution of the contrastive objective. V. R ESULTS AND DISCUSSION 
+
+A. RQ 1: To what extent does CURE reduce the generation of deprecated APIs compared to baseline models? We measure three metrics DUR, RUR and MUR of all studied models on both Df and Dtest under three settings: (i) pre-unlearning, (ii) after applying traditional unlearning (i.e., 
+
+PROD and SimNPO ), and (iii) after applying the proposed con-trastive unlearning (i.e., CURE PROD and CURE SimNPO ). Evalua-tion on Df allows us to directly assess whether the unlearning process successfully suppresses deprecated API usage on the targeted forgetting samples, while evaluation on Dtest examines whether the learned behavior generalizes to up-to-date code contexts. As shown in Figs. 1 and 2, the proportion of depre-cated API usages (orange bars) consistently decreases across all unlearning methods on both Df and Dtest compared to the 22.7            
+
+> 69.6
+> 7.7
+> 6.5
+> 83.4
+> 10.1
+> 1.3
+> 45,4
+> 53.3
+> 13.7
+> 73.4
+> 12.9 23.4
+> 67.3
+> 9.3 57.4
+> 35.4
+> 7.2 18.6
+> 69.7
+> 11.7
+> 51.6
+> 44.2
+> 4.2
+> 30.5
+> 41.2
+> 28.3 16.1
+> 44.1
+> 39.8
+> 63.0
+> 30.0
+> 7.0 15.9
+> 79.2
+> 4.9
+> 39.9
+> 59.2
+> 0.9 18.8
+> 49.3
+> 31.9
+> 12.2
+> 52.7
+> 35.1 5.2
+> 33.0
+> 61.8 2.0
+> 86.1
+> 11.9 37.6
+> 60.7
+> 1.7 16.6
+> 55.5
+> 27.9 41.1
+> 49.0
+> 9.9
+
+Fig. 1. Generation Behavior Distribution on Df across Unlearning Methods. 4.9                            
+
+> 56.3
+> 38.8
+> 73.4
+> 25.9
+> 64.0
+> 35.6
+> 59.7
+> 38.2 44.1
+> 54.6
+> 41.4 54.0
+> 51.9
+> 58.1
+> 44.6
+> 42.1
+> 40.6 55.2
+> 48.9
+> 49.5
+> 43.2 34.2
+> 57.3
+> 55.2
+> 55.3 43.9
+> 53.3
+> 43.6
+> 58.3 40.9
+> 40.1 48.3
+> 42.3 52.7
+> 56.4 46.5
+> 51.8 56.7
+> 44.7
+> 0.7 0.4 2.1 1.3 6.7 1.4 1.3 2.7 1.6 8.5 1.5 0.9 3.1 1.6 10.8 1.3 0.8 3.5 2.6
+> 40.7
+
+Fig. 2. Generation Behavior Distribution on Up-to-date Contexts Dtest .
+
+original pre-unlearning models, confirming the effectiveness of parametric unlearning in mitigating outdated API behaviors. On Df , the models exhibit high DUR, ranging from 22.7% to 63.0%. Both PROD and SimNPO substantially suppress deprecated API usage, with PROD consistently outperform-ing SimNPO , e.g., PROD achieves up to a 96.8% relative DUR reduction, whereas SimNPO gets at most 73.1% on 
+
+CodeGen-2B , suggesting that token-level probability redis-tribution is more effective than sequence-level suppression. Furthermore, incorporating the proposed contrastive objective further improves deprecated API suppression across most settings. For example, compared to PROD , CURE PROD reduces DUR from 11.7% to 4.2% on StarCoder2-3B . Similar improvements are observed for CURE SimNPO , indicating that explicitly contrasting deprecated APIs with valid alternatives enhances forgetting effectiveness. On Dtest , the original models already show relatively low DUR prior to unlearning, ranging from 4.9% to 10.8%, indicating that deprecated APIs are less frequently activated in up-to-date contexts. Nevertheless, all unlearning methods consistently maintain lower DUR than the original models, demonstrating that the suppression effect generalizes beyond the forgetting samples. 
+
+Answer to RQ 1. All unlearning methods reduce deprecated API usage, while the proposed CURE variants consistently achieve stronger and more generalizable mitigations. TABLE II COMPARISON OF MODEL UTILITY ON HU M A N EV A L ACROSS UNLEARNING METHODS .                                                                              
+
+> Method DeepSeek-Coder-1.3B StarCoder2-3B CodeLlama-7B CodeGen-2B
+> Pass@1 Pass@3 Pass@5 Pass@1 Pass@3 Pass@5 Pass@1 Pass@3 Pass@5 Pass@1 Pass@3 Pass@5
+> Pre-Unlearning 41.76 49.52 51.78 18.03 31.43 36.82 29.88 38.72 43.90 24.88 30.00 31.71
+> PROD [15] 38.66 47.56 50.17 14.51 22.83 28.34 25.38 35.18 39.02 19.99 25.21 30.32
+> CURE PROD 40.37 50.43 54.27 15.23 25.54 31.43 27.32 38.11 43.86 22.39 29.01 32.34
+> SimNPO [17] 39.65 46.71 48.78 13.37 23.77 28.90 25.01 35.92 39.56 20.73 28.48 30.32
+> CURE SimNPO 39.78 48.49 50.83 14.94 26.88 32.05 26.10 36.44 40.41 23.08 30.18 32.96
+> Note: The best-performing unlearning approach in each column is shown in bold , while the second-best result is underlined.
+
+B. RQ 2: How effectively does CURE promote correct API replacements compared to suppression-based unlearning ap-proaches? On Df , suppression-oriented unlearning methods, including 
+
+PROD and SimNPO , consistently reduce deprecated API usage (DUR). However, though these methods partially improve replacement API usage (RUR), they also increase mismatch generations (MUR). For example, on StarCoder2-3B ,
+
+PROD reduces DUR from 57.4% to 11.7% and increases RUR from 7.2% to 18.6%, but simultaneously raises MUR from 35.4% to 69.7%. Similar trends are observed across other models and unlearning methods, suggesting that suppression-oriented unlearning mainly teaches the model to avoid depre-cated APIs, but remains less effective at guiding the model toward semantically correct replacement APIs. In contrast, incorporating the contrastive unlearning objective improves RUR while reducing MUR across all evaluated models. For instance, compared to PROD , CURE PROD improves RUR from 18.6% to 51.6% on StarCoder2-3B , and 11.9% to 37.6% on CodeGen-2B . Similar improvements are also observed when comparing SimNPO with CURE SimNPO , indicating that contrastive unlearning not only reduces deprecated APIs, but also better guides the model toward generating correct replace-ment APIs under the same context. On Dtest , the original models already exhibit low dep-recated API usage, suggesting that Code LLMs can par-tially adapt to new contexts and naturally prefer more up-to-date APIs. Nevertheless, all unlearning methods reduce deprecated API generation while improving correct replace-ment API usage. Incorporating the proposed contrastive objective consistently yields larger RUR and lower mis-match generations compared to suppression-based methods. For example, on StarCoder2-3B , PROD achieves a rel-ative RUR improvement of 30.4% over the original model, while CURE PROD further increases it to 40.3%. Similarly, on 
+
+CodeLlama-7B , SimNPO achieves a 55.8% relative RUR improvement, whereas CURE SimNPO reaches 70.5%. 
+
+Answer to RQ 2. The proposed contrastive unlearning not only reduces deprecated APIs, but also improves the model’s tendency to generate updated APIs while reducing mismatched API usages on up-to-date contexts. 
+
+C. RQ 3: How does CURE impact general code generation performance on standard benchmarks? We evaluate the impact of unlearning on HumanEval [22]. Table II reports the P ass @1 , P ass @3 , and P ass @5 re-sults across four studied models under pre- and post-unlearning settings. Overall, all unlearning approaches in-troduce only minor degradation on HumanEval . For ex-ample, on DeepSeek-Coder-1.3B , PROD and SimNPO 
+
+retain 95.2% and 94.5% of the original performance on aver-age, while CURE PROD and CURE SimNPO achieve even stronger preservation rates of 101.1% and 97.1%, respectively. This trend remains consistent across the other models, where the best and second-best results are predominantly achieved by the CURE variants. 
+
+Answer to RQ 3. Explicitly promoting valid replacement APIs preserves general model utility more effectively than suppression-based unlearning approaches. VI. T HREATS TO VALIDITY 
+
+Construct Validity. Our evaluation relies on alias-aware regular-expression matching to identify deprecated and re-placement API usages. Though complex generation patterns or implicit API wrappers may introduce minor matching inaccuracies, we mitigate this threat by leveraging benchmark-provided API alias mappings together with word-boundary constraints. Moreover, positive samples in the contrastive dataset are partially generated using Gemini-2.5-Pro ,which may introduce generation bias or imperfect transforma-tions. To mitigate this threat, we constrain the generation pro-cess to preserve the original code intent and only replace the target APIs while keeping surrounding contexts unchanged. 
+
+Internal Validity. A potential threat arises from augmenting the forget set with hard negative cases sampled from up-to-date contexts where the baseline model still generates deprecated APIs. It is possible to argue that such samples implicitly expose the model to modern API usages rather than purely removing outdated knowledge. To reduce this threat, we only incorporate a limited number of randomly sampled hard negatives and use them as robustness-oriented failure cases instead of direct replacement supervision. VII. C ONCLUSION 
+
+In this paper, we presented CURE , a contrastive unlearn-ing approach for mitigating deprecated API usage in Code LLMs. Unlike conventional unlearning methods that primarily suppress undesirable knowledge, CURE explicitly promotes valid API replacements through a contrastive objective that distinguishes deprecated APIs from their correct alternatives. Initial experimental results show that CURE effectively re-duces deprecated API generation while improving replacement adoption across multiple Code LLMs. Moreover, evaluation on 
+
+HumanEval indicates that the proposed approach preserves general code generation capability with only minor degrada-tion. These early findings suggest that combining suppression and replacement-aware learning is a promising direction for adapting Code LLMs to evolving software ecosystems. ACKNOWLEDGMENT 
+
+This paper has been partially supported by the MOSAICO project (Management, Orchestration and Supervision of AI-agent COmmunities for reliable AI in software engineering) that has received funding from the European Union under the Horizon Research and Innovation Action (Grant Agreement No. 101189664). REFERENCES [1] F. Mu, L. Shi, S. Wang, Z. Yu, B. Zhang, C. Wang, S. Liu, and Q. Wang, “Clarifygpt: A framework for enhancing llm-based code generation via requirements clarification,” Proceedings of the ACM on Software Engineering , vol. 1, no. FSE, pp. 2332–2354, 2024. [2] I. Bouzenia, P. Devanbu, and M. Pradel, “Repairagent: An autonomous, llm-based agent for program repair,” in 2025 IEEE/ACM 47th Interna-tional Conference on Software Engineering (ICSE) . IEEE, 2025, pp. 2188–2200. [3] M. Harman, J. Ritchey, I. Harper, S. Sengupta, K. Mao, A. Gulati, C. Foster, and H. Robert, “Mutation-guided llm-based test generation at meta,” in Proceedings of the 33rd ACM International Conference on the Foundations of Software Engineering , 2025, pp. 180–191. [4] R. Wang, J. Guo, C. Gao, G. Fan, C. Y. Chong, and X. Xia, “Can llms replace human evaluators? an empirical study of llm-as-a-judge in soft-ware engineering,” Proceedings of the ACM on Software Engineering ,vol. 2, no. ISSTA, pp. 1955–1977, 2025. [5] J. He, J. Shi, T. Y. Zhuo, C. Treude, J. Sun, Z. Xing, X. Du, and D. Lo, “Llm-as-a-judge for software engineering: Literature review, vision, and the road ahead,” ACM Transactions on Software Engineering and Methodology , 2026. [6] A. Fan, B. Gokkaya, M. Harman, M. Lyubarskiy, S. Sengupta, S. Yoo, and J. M. Zhang, “Large language models for software engineering: Sur-vey and open problems,” in 2023 IEEE/ACM International Conference on Software Engineering: Future of Software Engineering (ICSE-FoSE) .IEEE, 2023, pp. 31–53. [7] C. Wang, K. Huang, J. Zhang, Y. Feng, L. Zhang, Y. Liu, and X. Peng, “Llms meet library evolution: Evaluating deprecated api usage in llm-based code completion,” in 2025 ieee/acm 47th international conference on software engineering (icse) . IEEE, 2025, pp. 885–897. [8] C. Zhu, N. Chen, Y. Gao, Y. Zhang, P. Tiwari, and B. Wang, “Is your llm outdated? a deep look at temporal generalization,” in Proceedings of the 2025 Conference of the Nations of the Americas Chapter of the Asso-ciation for Computational Linguistics: Human Language Technologies (Volume 1: Long Papers) , 2025, pp. 7433–7457. [9] D. Zheng, Y. Wang, E. Shi, R. Zhang, Y. Ma, H. Zhang, and Z. Zheng, “Humanevo: An evolution-aware benchmark for more realistic evalu-ation of repository-level code generation,” in 2025 IEEE/ACM 47th International Conference on Software Engineering (ICSE) . IEEE, 2025, pp. 1372–1384. [10] S. Kuhar, W. Ahmad, Z. Wang, N. Jain, H. Qian, B. Ray, M. K. Ra-manathan, X. Ma, and A. Deoras, “Libevolutioneval: A benchmark and study for version-specific code generation,” in Proceedings of the 2025 Conference of the Nations of the Americas Chapter of the Association for Computational Linguistics: Human Language Technologies (Volume 1: Long Papers) , 2025, pp. 6826–6840. [11] N. Li, A. Pan, A. Gopal, S. Yue, D. Berrios, A. Gatti, J. D. Li, A.-K. Dombrowski, S. Goel, L. Phan et al. , “The wmdp benchmark: Measuring and reducing malicious use with unlearning,” arXiv preprint arXiv:2403.03218 , 2024. [12] X. Li, S. Wang, S. Li, J. Ma, J. Yu, X. Liu, J. Wang, B. Ji, and W. Zhang, “Model editing for llms4code: How far are we?” in 2025 IEEE/ACM 47th International Conference on Software Engineering (ICSE) . IEEE, 2025, pp. 937–949. [13] G. Lin, X. Yu, J. Keung, X. Hu, X. Xia, and A. X. Liu, “Lightweight model editing for llms to correct deprecated api recommendations,” 
+
+arXiv preprint arXiv:2511.21022 , 2025. [14] C. Fan, J. Liu, L. Lin, J. Jia, R. Zhang, S. Mei, and S. Liu, “Simplicity prevails: Rethinking negative preference optimization for llm unlearning, 2025,” URL https://arxiv. org/abs/2410.07163 .[15] X. Jiang, Y. Dong, H. Zhang, T. Wang, Z. Fang, Y. Ma, R. Cao, B. Li, Z. Jin, W. Jiao et al. , “Large language model unlearning for source code,” in Proceedings of the AAAI Conference on Artificial Intelligence ,vol. 40, no. 37, 2026, pp. 31 346–31 355. [16] Z. Chu, Y. Wan, Z. Zhang, D. Wang, Z. Yang, H. Zhang, P. Zhou, X. Shi, H. Jin, and D. Lo, “Scrub It Out! Erasing Sensitive Memorization in Code Language Models via Machine Unlearning,” in Proceedings of the 48th IEEE/ACM International Conference on Software Engineering ,April 2026. [17] C. Fan, J. Liu, L. Lin, J. Jia, R. Zhang, S. Mei, and S. Liu, “Simplicity prevails: Rethinking negative preference optimization for llm unlearn-ing,” arXiv preprint arXiv:2410.07163 , 2024. [18] D. Guo, Q. Zhu, D. Yang, Z. Xie, K. Dong, W. Zhang, G. Chen, X. Bi, Y. Wu, Y. Li et al. , “Deepseek-coder: when the large language model meets programming–the rise of code intelligence,” arXiv preprint arXiv:2401.14196 , 2024. [19] A. Lozhkov, R. Li, L. B. Allal, F. Cassano, J. Lamy-Poirier, N. Tazi, A. Tang, D. Pykhtar, J. Liu, Y. Wei et al. , “Starcoder 2 and the stack v2: The next generation,” arXiv preprint arXiv:2402.19173 , 2024. [20] B. Roziere, J. Gehring, F. Gloeckle, S. Sootla, I. Gat, X. E. Tan, Y. Adi, J. Liu, R. Sauvestre, T. Remez et al. , “Code llama: Open foundation models for code,” arXiv preprint arXiv:2308.12950 , 2023. [21] E. Nijkamp, H. Hayashi, C. Xiong, S. Savarese, and Y. Zhou, “Code-gen2: Lessons for training llms on programming and natural languages,” 
+
+arXiv preprint arXiv:2305.02309 , 2023. [22] M. Chen, J. Tworek, H. Jun, Q. Yuan, H. P. D. O. Pinto, J. Kaplan, H. Edwards, Y. Burda, N. Joseph, G. Brockman et al. , “Evaluating large language models trained on code,” arXiv preprint arXiv:2107.03374 ,2021. [23] Anonymous, “Towards knowledge alignment in code llms: Contrastive unlearning for evolving apis?” https://figshare.com/s/ a8303a2ce6755cf25b0b, 2026, accessed: May 12, 2026. [24] R. G. Kula, A. Ouni, D. M. German, and K. Inoue, “An empirical study on the impact of refactoring activities on evolving client-used apis,” Inf. Softw. Technol. , vol. 93, no. C, p. 186–199, Jan. 2018. [Online]. Available: https://doi.org/10.1016/j.infsof.2017.09.007 [25] C. Wang, K. Huang, J. Zhang, Y. Feng, L. Zhang, Y. Liu, and X. Peng, “Llms meet library evolution: Evaluating deprecated api usage in llm-based code completion,” in Proceedings of the IEEE/ACM 47th International Conference on Software Engineering ,ser. ICSE ’25. IEEE Press, 2025, p. 885–897. [Online]. Available: https://doi.org/10.1109/ICSE55347.2025.00245 [26] H. Wu, Y. Yao, W. Yu, and N. Zhang, “Recode: Updating code api knowledge with reinforcement learning,” in Proceedings of the AAAI Conference on Artificial Intelligence , vol. 40, no. 40, 2026, pp. 33 908– 33 916. [27] Y. Cao and J. Yang, “Towards making systems forget with machine unlearning,” in 2015 IEEE symposium on security and privacy . IEEE, 2015, pp. 463–480. [28] J. Jang, D. Yoon, S. Yang, S. Cha, M. Lee, L. Logeswaran, and M. Seo, “Knowledge unlearning for mitigating privacy risks in language models,” in Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , 2023, pp. 14 389– 14 408. [29] R. Rafailov, A. Sharma, E. Mitchell, C. D. Manning, S. Ermon, and C. Finn, “Direct preference optimization: Your language model is secretly a reward model,” Advances in neural information processing systems , vol. 36, pp. 53 728–53 741, 2023. [30] R. Zhang, L. Lin, Y. Bai, and S. Mei, “Negative preference optimization: From catastrophic collapse to effective unlearning,” arXiv preprint arXiv:2404.05868 , 2024. [31] C. Wang, K. Huang, J. Zhang, Y. Feng, L. Zhang, Y. Liu, and X. Peng, “How and why llms use deprecated apis in code completion? an empirical study,” 06 2024. [32] X. Du, M. Liu, K. Wang, H. Wang, J. Liu, Y. Chen, J. Feng, C. Sha, X. Peng, and Y. Lou, “Evaluating large language models in class-level code generation,” in Proceedings of the IEEE/ACM 46th International Conference on Software Engineering , 2024, pp. 1–13. [33] L. Yang, C. Yang, S. Gao, W. Wang, B. Wang, Q. Zhu, X. Chu, J. Zhou, G. Liang, Q. Wang et al. , “On the evaluation of large language models in unit test generation,” in Proceedings of the 39th IEEE/ACM International Conference on Automated Software Engineering , 2024, pp. 1607–1619. [34] J. Jiang, F. Wang, J. Shen, S. Kim, and S. Kim, “A survey on large language models for code generation,” ACM Transactions on Software Engineering and Methodology , vol. 35, no. 2, pp. 1–72, 2026.
