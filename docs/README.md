@@ -6,32 +6,31 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-01
-- 运行时间：2026-07-01 21:18:53 UTC
+- 最新运行日期：2026-07-02
+- 运行时间：2026-07-02 21:38:01 UTC
 - 运行状态：成功
-- 本次总论文数：4
-- 精读区：3
+- 本次总论文数：3
+- 精读区：2
 - 速读区：1
 
 ### 今日简报（AI）
-今日精读聚焦两大高分方向：可撤销学习状态的技术方案与LLM直接策略安全对齐。最值得关注的是`Revocable Learned State via Process Sidecars`（9.0分）的进程侧车设计，以及`PolicyAlign`（8.0分）的安全对齐新思路。建议普通读者优先精读这两篇，并速读`Code LLM API知识对齐`作为拓展。
-- 详情：[/202607/01/README](/202607/01/README)
+1）今日精读两篇高分论文，聚焦于可撤销学习状态与LLM轨迹动态编辑。  
+2）最值得关注：第一篇（9.0）通过进程侧车实现状态撤销，第二篇（8.0）提出动态框架引导推理轨迹。  
+3）建议优先精读第一篇，对模型安全可控性有重要启发。
+- 详情：[/202607/02/README](/202607/02/README)
 
 ### 精读区论文标签
-1. [Revocable Learned State via Process Sidecars](/202607/01/2606.30788v1-revocable-learned-state-via-process-sidecars)  
+1. [Revocable Learned State via Process Sidecars](/202607/02/2606.30788v1-revocable-learned-state-via-process-sidecars)  
    标签：评分：9.0/10、query:model-edit
-   evidence：模型编辑方法，用于在安全训练后撤销学习记忆
-2. [PolicyAlign: Direct Policy-Based Safety Alignment for Large Language Models](/202607/01/2606.25442v1-policyalign-direct-policy-based-safety-alignment-for-large-language-models)  
+   evidence：提出一种双系数编辑方法，用于在安全训练后撤销学习到的记忆
+2. [Search for Truth from Reasoning: A Dynamic Representation Editing Framework for Steering LLM Trajectories](/202607/02/2606.28589v1-search-for-truth-from-reasoning-a-dynamic-representation-editing-framework-for-steering-llm-trajectories)  
    标签：评分：8.0/10、query:model-edit
-   evidence：通过策略引导的自蒸馏进行安全对齐
-3. [Curvature-Guided Module Localization for Low-Rank Detoxification of Backdoored Large Language Models](/202607/01/2606.30899v1-curvature-guided-module-localization-for-low-rank-detoxification-of-backdoored-large-language-models)  
-   标签：评分：8.0/10、query:model-edit
-   evidence：通过对后门大模型进行定位性低秩修复实现解毒
+   evidence：用于引导LLM轨迹的动态表示编辑框架
 
 ### 速读区论文标签
-1. [Towards Knowledge Alignment in Code LLMs: Contrastive Unlearning for Evolving APIs](/202607/01/2606.30810v1-towards-knowledge-alignment-in-code-llms-contrastive-unlearning-for-evolving-apis)  
-   标签：评分：6.0/10、query:model-edit
-   evidence：直接探讨了面向大语言模型的模型编辑与知识对齐
+1. [Harnessing Textual Refusal Directions for Multimodal Safety](/202607/02/2606.31876v1-harnessing-textual-refusal-directions-for-multimodal-safety)  
+   标签：评分：7.0/10、query:model-edit
+   evidence：研究文本拒绝方向用于多模态安全，属于激活层面的编辑方法
 
 
 <div class="dpr-home-promo-card">

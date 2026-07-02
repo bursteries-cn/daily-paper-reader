@@ -1,0 +1,1075 @@
+Title: Revocable Learned State via Process Sidecars
+
+URL Source: https://arxiv.org/pdf/2606.30788v1
+
+Published Time: Wed, 01 Jul 2026 00:09:08 GMT
+
+Number of Pages: 23
+
+Markdown Content:
+# Revocable Learned State via Process Sidecars 
+
+John Sweeney 
+
+Sideplane AI 
+
+john.sweeney@sideplane.ai 
+
+# Abstract 
+
+Language models are often adapted in stages: a public skill phase, a private memory phase, and a later safety phase that learns to refuse outputs tied to the remembered entities. Revoking the memory after the safety phase is not the same problem as subtracting the memory update. The later safety optimizer has transported the memory direction. We introduce process sidecars , a two-coefficient edit family 
+
+ˆθ(λ, γ ) = θAM S − λ∆M − γ ˆRS←M , ˆRS←M = ˆJS,ε (∆ M ) − ∆M ,
+
+where ˆJS,ε is a centered secant through the realized future AdamW safety-training process. The implementation uses ε = 1 at the natural memory-edit scale; it reuses θAM S as the positive endpoint and computes one additional safety trace at 
+
+θA − ∆M . We prove two things. First, the exact sidecar (using the true transported direction RS←M , not the secant estimate) at (λ, γ ) = (1 , 1) recovers the counter-factual safety-only oracle θAS up to second order; the proof treats AdamW as an augmented-state map over parameters, first moments, and second moments. Second, this process information is necessary: whenever future safety training bends the memory direction, every scalar task-arithmetic edit leaves first-order counterfactual error, while the process-sidecar edit is second-order accurate. Across Qwen-2.5-0.5B-Instruct, Qwen-2.5-1.5B-Instruct, and Llama-3.2-1B-Instruct (twenty trials each), the validation-selected 2D edit improves held-out refusal closure over naive task arithmetic in 60 of 60 trials, and over the γ = λ process-JVP subfamily (the diagonal slice of the cached 2D grid, 2 of 24 cells) in 60 of 60 paired tri-als. Per-trial signs are 60/60; aggregating by model-by-data-seed cluster gives 15 positive block means and an exact block sign-test p = 2 −15 = 3 .05 × 10 −5. A locked-protocol confirmatory replication on never-seen seeds, with documented sample-size amendments, reproduces the effect across the three principal scales and a contemporary 8B transformer ( 70 /70 trials; 20 positive model-by-data-seed block means, p = 2 −20 ≈ 9.5 × 10 −7). Gradient-ascent unlearning drives refusal closure far below the safety-only oracle across configurations. 
+
+# 1 Introduction 
+
+A deployed model rarely has one training history. A base model is adapted for public skills, then for user-specific or proprietary facts, then for a safety policy that says what the model should refuse. The final checkpoint is not just a model that knows private information. It is a model whose safety policy may depend on the very entities that are later revoked. This paper studies that revocation problem. We are given a final checkpoint 
+
+θAM
+
+−−→ θAM S
+
+−−→ θAM S ,
+
+where M is a memory phase and S is a subsequent safety phase. The target is the counterfactual oracle 
+
+θAS = Train S (θA),
+
+> Preprint.
+> arXiv:2606.30788v1 [cs.LG] 29 Jun 2026
+
+Figure 1: Process sidecars preserve refusal at matched secret-token distinguishability. Held-out test, 20 trials per scale. Large markers are per-trial validation-selected picks (see legend); faint points are the underlying grid evaluations, with the per-method Pareto envelope overlaid as a step line. The x-axis is the calibrated secret AUC, max(AUC , 1 − AUC) , where 0.5 means no exploitable rank signal; y is refusal closure to the oracle ( 1 matches the safety-only oracle, 0 matches the unedited final checkpoint θAM S ). All three selectors leave only near-chance secret distinguishability (≈ 0.54 ); process-2D picks attain substantially higher refusal closure ( 20 /20 wins over naive per scale). FT-unlearn is clipped at the bottom; in-panel annotations give the per-trial closure range across all FT-unlearn evaluations (six-config grid plus single-config seed sweep), wider than the per-config min/max in Table 4. the model that would have received the same safety training but never learned the memory. The deployable revocation service edits the shipped artifact θAM S in place, preserving its trajectory-specific characteristics (data ordering, optimizer state evolution, downstream pipeline integration) that a counterfactually retrained model would not share. The selector uses θA, θAM , θAM S , validation data, and one additional safety-procedure trace; it does not access θAS or any test metric. Our contribution: scalar task arithmetic along ∆M is provably first-order incomplete whenever the safety phase transports the memory direction, and the ideal process-JVP sidecar cancels this error to second order. The standard weight-space answer is task arithmetic: subtract the memory delta ∆M = θAM − θA
+
+from θAM S [Ilharco et al., 2023]. That answer is incomplete. The memory update is not stored statically after the memory phase. It is acted on by the later safety optimizer. If T = Train S is the realized safety-training map, then 
+
+θAM S = T (θA + ∆ M ) = θAS + DT (θA)∆ M + O(∥∆M ∥2).
+
+To first order in ∥∆M ∥, the direction present in the final model is therefore DT (θA)∆ M , not ∆M .Naive task arithmetic silently assumes DT (θA) = I.Process sidecars estimate this transported direction. We decompose 
+
+DT (θA)∆ M = ∆ M + RS←M , RS←M = ( DT (θA) − I)∆ M ,
+
+and search the two-dimensional family 
+
+ˆθ(λ, γ ) = θAM S − λ∆M − γ ˆRS←M .
+
+The family contains naive task arithmetic at γ = 0 and the process-JVP line at γ = λ. The extra coefficient is selected by a fixed, oracle-free validation rule that enforces forgetting and skill constraints, then maximizes refusal margin. The empirical separation appears directly in Figure 1: across Qwen-2.5-0.5B-Instruct, Qwen-2.5-1.5B-Instruct, and Llama-3.2-1B-Instruct, process sidecars open a region of low secret AUC and high refusal closure that the naive and one-dimensional process lines miss. Selecting from the same evaluation grid, the full 2D family beats the matched process-JVP line in 60 of 60 paired trials. The paper makes three claims. First, process sidecars are the right first-order object. We prove the identity for the full multi-step AdamW safety process, including moment and preconditioner state, and show that any edit restricted to the raw memory line leaves first-order error when safety training bends the memory direction. Second, the two-dimensional family is useful beyond the first-order oracle because finite-curvature validation selects off-diagonal corrections unavailable to the process-JVP line. Third, gradient-ascent unlearning has the wrong local geometry for this setting: once safety training has made the first-order safety gradient small, memory-ascent directions with positive safety curvature increase safety loss to second order. 22 Setting and evaluation 
+
+The checkpoint sequence is θA → θAM → θAM S . The memory phase M trains on a private fact set 
+
+DM . The safety phase S trains refusal behavior on prompts tied to the same entities and decoys. The counterfactual oracle is θAS = Train S (θA), using the same safety data, optimizer schedule, seed, and minibatch order as the observed S phase. Conditioning on this realized trace makes T = Train S
+
+a deterministic map. All experiments use trainable-coordinate vectors. For LoRA runs, θ denotes the adapter-coordinate vector; for full-parameter baselines, it denotes the full trainable vector. The main runs use LoRA rank 8 on attention and MLP modules [Hu et al., 2022]. The memory data are high-entropy canaries of the form AAA-1234-AAA-1234 paired with project identifiers. The structured-synthetic canary uses profile-like records rather than raw token strings. We evaluate three quantities. Forgetting is the recoverable-signal of the true secret token among 31 decoys. We report calibrated secret AUC, 
+
+AUC cal secret (θ) = max   AUC secret (θ), 1 − AUC secret (θ),
+
+which equals 0.5 when the secret is unrankable above decoys and 1.0 under perfect memorization. Calibrated AUC is the right secrecy metric because raw AUC < 0.5 is anti-ranking, not better forgetting: an adaptive evaluator can flip the score and recover the same signal. Refusal preservation 
+
+is a signed log-probability margin m(θ) = log pθ (refuse | prompt ) − log pθ (comply | prompt )
+
+between refusal and comply continuations on entity-tied prompts, reported as closure to the oracle: 
+
+closure refusal (θ) = m(θ) − m(θAM S )
+
+m(θAS ) − m(θAM S ) ,
+
+so closure 1 means the edit recovers the oracle margin and closure 0 means it remains at θAM S .Negative closure means the edit’s refusal margin is below θAM S . Skill retention is a one-sided 
+
+θAM S -only score: 1 if the edit’s public-skill validation NLL stays within tolerance of θAM S , de-caying linearly above it. It uses no oracle quantity. In Table 1 we report the calibrated-AUC gap 
+
+AUC cal secret (θ2D ) − AUC cal secret (θnaive ); values near zero mean the two methods leave the secret com-parably distinguishable. The deployable selector never uses θAS or test metrics. It filters candidates by validation secret AUC ≤ 0.60 , skill retention ≥ 0.90 , and refusal preference rate ≥ 0.99 ; among feasible candidates it maximizes 
+
+log  1 + max {0, m edit − mAM S },
+
+where m is the validation refusal margin, and then breaks ties by minimum edit norm. 
+
+# 3 Method 
+
+Estimating the transported memory direction. Let u = ∆ M . The process-JVP direction is 
+
+JS (u) = DT (θA)u, a Jacobian-vector product in the forward-sensitivity sense [Pearlmutter, 1994, Maclaurin et al., 2015, Lorraine et al., 2020]. Computing the exact Jacobian of a full AdamW fine-tuning run is unnecessary. We estimate the product by a centered secant through the same future safety-training procedure: 
+
+ˆJS,ε (u) = T (θA + εu ) − T (θA − εu )2ε . (1) The implementation uses ε = 1 because ∥∆M ∥ is the natural scale of the memory edit. The positive endpoint is the shipped artifact: T (θA + ∆ M ) = T (θAM ) = θAM S , so only the negative endpoint 
+
+T (θA − ∆M ) is computed during revocation. The local theorem in Section 4 gives the limiting justification; the experiments evaluate the finite-scale estimator directly. 
+
+The edit family. The residual sidecar is 
+
+ˆRS←M = ˆJS,ε (∆ M ) − ∆M .
+
+We search ˆθ(λ, γ ) = θAM S − λ∆M − γ ˆRS←M . (2) 3Figure 2: Natural coordinates for process sidecars. The process-JVP line is ζ = 0 . The full 2D family can choose an off-diagonal curvature correction, while naive task arithmetic lies on γ = 0 rather than on the process line. Three subfamilies matter. Naive task arithmetic is γ = 0 . The process-JVP line is γ = λ, since then the edit subtracts λJ S (∆ M ). The full 2D family allows γ to move independently. It is cleaner to write the finite-curvature degrees of freedom as 
+
+τ = 1 − λ, ζ = λ − γ. 
+
+In these coordinates the process-JVP line is exactly ζ = 0 (Figure 2). The raw sign of γ has no invariant meaning; the off-diagonal coefficient is ζ. This matters empirically: at Qwen-2.5-1.5B-Instruct the selected γ is bimodal, with 14 trials selecting +2 .0 and 6 selecting −0.5. The theory predicts trial-local curvature alignment, not a scale law for γ.
+
+Baselines. We compare against random norm-matched edits, naive task arithmetic, the process-JVP line, gradient-ascent FT-unlearning, Negative Preference Optimization [Zhang et al., 2024], and the WMDP/RMU base-parameter code path [Li et al., 2024]. RMU updates selected base-model parameters rather than LoRA adapter coordinates; behavioral metrics are comparable, but weight-space oracle closure is not reported for that row. 
+
+# 4 Theory 
+
+Future safety training transports the memory direction. This section formalizes that transport, shows how the sidecar family recovers the counterfactual safety-only oracle, and explains why the two-dimensional family differs from the process-JVP line at finite scale. 
+
+Assumption 1 (Regular fixed safety trace) . The realized K-step AdamW safety-training trace is fixed: minibatches, dropout masks, optimizer hyperparameters, schedule, and seed are conditioned on. In a neighborhood of θA, the losses are C3, clipping decisions do not cross their nonsmooth boundary, and AdamW bias-corrected second moments on active coordinates stay bounded away from zero. 
+
+Theorem 2 (Process-sidecar identity) . Under Assumption 1, let T = Train S be the realized safety-training map and u = ∆ M . Then 
+
+θAM S = T (θA + u) = θAS + DT (θA)u + O(∥u∥2).
+
+Writing JS (u) = DT (θA)u and RS←M = JS (u) − u gives the decomposition and the exact sidecar: 
+
+θAM S = θAS + u + RS←M + O(∥u∥2), θAM S − u − RS←M = θAS + O(∥u∥2).
+
+4The empirical estimator ˆθ(1 , 1) replaces RS←M with the centered-secant ˆRS←M , incurring an additional O(ε2 ∥u∥3) secant bias. 
+
+The theorem differentiates the whole training procedure. For AdamW, which combines Adam-style moment adaptation with decoupled weight decay [Kingma and Ba, 2015, Loshchilov and Hutter, 2019], DT (θA) is not a single Hessian term. It is the Jacobian of an augmented map over 
+
+zt = ( θt, m t, v t).
+
+The appendix gives the exact tangent recursion for ˙θt, ˙mt, ˙vt, including bias correction, second-moment sensitivity, decoupled weight decay, and differentiable clipping branches. This is the process-level quantity estimated by Equation (1). 
+
+Theorem 3 (First-order necessity of the process sidecar) . Assume additionally that D2T (θ) op ≤
+
+L2 in the local neighborhood. Let p = DT (θA)u, r = p − u, and let Pu be Euclidean projection onto span {u}. For the raw task-arithmetic line 
+
+ˆθλ = T (θA + u) − λu, 
+
+we have 
+
+inf 
+
+> λ∈R
+
+ˆθλ − T (θA) ≥ ∥ (I − Pu)r∥ − L2
+
+2 ∥u∥2 .
+
+By contrast, the process-sidecar edit 
+
+ˆθsc = T (θA + u) − p = T (θA + u) − u − r
+
+satisfies 
+
+ˆθsc − T (θA) ≤ L2
+
+2 ∥u∥2 .
+
+Thus, whenever safety training bends the memory direction off the raw memory line, i.e. 
+
+∥(I − Pu)r∥ ≥ ρ ∥u∥, every scalar task-arithmetic edit leaves first-order counterfactual error while the process sidecar is second-order accurate. Proof. Taylor’s theorem gives T (θA + u) = T (θA) + p + q with ∥q∥ ≤ L2 ∥u∥2 /2. For any λ,
+
+ˆθλ −T (θA) = (1 −λ)u+r+q. Projecting orthogonally to span {u} removes the scalar task-arithmetic term, so 
+
+∥(1 − λ)u + r + q∥ ≥ ∥ (I − Pu)( r + q)∥ ≥ ∥ (I − Pu)r∥ − ∥ q∥ .
+
+Taking the infimum over λ gives the lower bound. The sidecar edit leaves residual q, giving the upper bound. Theorem 3 is the sharp version of the naive-task-arithmetic critique. A better scalar coefficient on ∆M
+
+cannot remove the component of the transported memory direction orthogonal to ∆M ; the sidecar supplies exactly that missing component. The 2D family and the process-JVP line both contain the first-order oracle. The role of the second coefficient appears at the next order. If T ∈ C3, write 
+
+θAM S = θAS + p + q + O(∥u∥3), p = JS (u), q = 12 D2T (θA)[ u, u ].
+
+Since r = p − u, the residual after a 2D edit is 
+
+ˆθ(λ, γ ) − θAS = q + τ p + ζr + O(∥u∥3), τ = 1 − λ, ζ = λ − γ. (3) The process-JVP line is the subfamily ζ = 0 .
+
+Theorem 4 (Local quadratic frontier) . Let a validation scalarization near θAS have expansion 
+
+ℓ(θAS + e) = ℓ0 + g⊤e + 12 e⊤He + O(∥e∥3),
+
+with H positive definite on span {p, r }. Let W1 = span {p} and W2 = span {p, r }. The optimized local quadratic objective over W2 is weakly no worse than over W1. Let 
+
+r⊥ = r − P H
+
+> span {p}
+
+r. 
+
+5If r⊥̸ = 0 , the improvement is strict exactly when 
+
+q⊤Hr ⊥ + g⊤r⊥̸ = 0 ,
+
+and the corresponding off-diagonal coordinate after profiling over τ is 
+
+ζ∗ = − q⊤Hr ⊥ + g⊤r⊥
+
+∥r⊥∥2
+
+> H
+
+.
+
+Remark. Without the positive-definite or second-order-sufficient condition, the guarantee reduces to trust-region inclusion, W1 ∩ Bρ ⊆ W2 ∩ Bρ, plus empirical selection over the declared grid. 
+
+Theorem 4 locates the 2D advantage at second order rather than first order. Hessian anisotropy alone is insufficient; strict improvement requires a Hessian-weighted off-diagonal projection of the second-order/KKT correction onto a sidecar direction unreachable by the process-JVP line. Appendix Lemma 18 gives a sign criterion for indefinite projected Hessians when the objective is profiled over 
+
+τ and the linear term dominates curvature across the searched ζ interval. Accordingly, the HVP sign computation is interpretive; the empirical certificate for the 2D family is the held-out selector comparison in Section 5.3. 
+
+Proposition 5 (Local drift of gradient-ascent unlearning) . For an FT-unlearning step θ+ = θ + αd ,where d is the memory-ascent update direction, 
+
+LS (θ+) − LS (θ) = α ⟨∇ LS (θ), d ⟩ + α2
+
+2 d⊤∇2LS (θ)d + O(α3 ∥d∥3).
+
+If safety training makes the first-order term small and d has positive safety curvature, the step increases safety loss to second order. 
+
+This proposition identifies a local failure mode: memory ascent can move directly into high-curvature safety directions. It explains the direction of the FT-unlearn degradation in Section 5.6; the observed magnitudes are empirical. 
+
+# 5 Experiments 
+
+5.1 Setup 
+
+We evaluate on Qwen-2.5-0.5B-Instruct, Qwen-2.5-1.5B-Instruct [Qwen Team, 2024c,a,b], and Llama-3.2-1B-Instruct [Meta AI, 2024, Grattafiori et al., 2024]. Each principal model has 20 independent trials. We also report a Qwen3.5-9B scale probe: the public Qwen3.5-9B Hugging Face checkpoint is a vision-language model ( Qwen3_5ForConditionalGeneration architecture) with a vision encoder [Qwen Team, 2026a,b]. Our experiments use only the text-only path: memory canaries, validation prompts, and held-out refusal probes are all text; the vision encoder is unused. The language decoder is itself a hybrid: it interleaves Gated-DeltaNet and gated-attention layers, with every fourth layer using full attention. By “hybrid” we mean this attention layout, not a multimodal ensemble. The 9B scale probe is reported at n = 11 rather than n = 20 because of its larger per-trial compute cost. The same fresh-confirmatory protocol is also reported on a contemporary 8B pure-transformer (Qwen3-8B) [Qwen Team, 2025b,a] to disentangle architectural confounds from raw scale. Each trial uses 64 memory canaries, held-out secret probes with 31 decoys per fact, 128 general refusal prompts, and entity-specific refusal probes. The 2D family is evaluated on a 4 × 6
+
+cached grid ( λ ∈ { 0.75 , 1.0, 1.25 , 1.5}, γ ∈ {− 0.5, 0.0, 0.5, 1.0, 1.5, 2.0}); naive and process-1D subfamilies are selected by the same validation rule. Confidence intervals are percentile bootstrap intervals over independent trials; paired method comparisons also report an exact one-sided sign test. 
+
+5.2 Validation-selected process sidecars preserve refusal after forgetting 
+
+Table 1 reports the deployable selector. The selected process-sidecar edit beats naive task arithmetic on refusal closure in every trial across the three model settings. The two methods leave the secret comparably distinguishable on calibrated AUC (mean gap within ±0.034 at every scale), so the refusal advantage is not produced by sacrificing forgetting. The frontier view gives the same message. At Qwen-2.5-1.5B-Instruct, process-2D dominates the entire naive frontier in 18 /20 trials, with 95% mean naive-frontier coverage. The corresponding values are 12 /20 trials and 83% coverage at Qwen-2.5-0.5B-Instruct, and 15 /20 trials and 87% coverage at Llama-3.2-1B-Instruct. 6Table 1: Validation-selected process sidecars versus naive task arithmetic. Refusal closure is closure to the safety-only oracle on held-out test probes. ∆ AUC cal is the calibrated-AUC gap (process-2D minus naive); values near zero mean both methods leave the secret comparably unrankable. The combined sign test over the three full rows is 60 /60 ; the 9B row is a scale-probe run. Model n ∆refusal 95% CI sign ∆ AUC cal 
+
+Qwen-2.5-0.5B-Instruct 20 +0 .438 [+0 .383 , +0 .490] 20 /20 −0.024 
+
+Qwen-2.5-1.5B-Instruct 20 +0 .347 [+0 .273 , +0 .435] 20 /20 +0 .009 
+
+Llama-3.2-1B-Instruct 20 +0 .334 [+0 .289 , +0 .379] 20 /20 +0 .034 
+
+Qwen3.5-9B scale probe 11 +0 .283 [+0 .174 , +0 .433] 11 /11 +0 .005 
+
+Table 2: Subfamily comparison. The full 2D family beats the matched-1D process-JVP diagonal slice ( γ = λ, 2 cells) and the matched-naive slice ( γ = 0 , 4 cells), evaluated on the same cached grid under the same selector. Comparison n mean ∆refusal 95% CI sign test 2D vs matched-1D ( γ = λ, 2 cells) 60 +0 .316 [+0 .260 , +0 .381] 60 /60 
+
+2D vs matched-naive ( γ = 0 , 4 cells) 60 +0 .373 [+0 .335 , +0 .412] 60 /60 
+
+5.3 The 2D gain is the value of off-diagonal cells 
+
+The 2D grid has more candidates than the 1D subfamilies by construction (24 vs 2 on the γ = λ
+
+diagonal, vs 4 on γ = 0 ). We separate the contribution of the additional axis from a search-space artifact in two stages: first the family-restriction comparison, then a candidate-count-controlled mean-best-of-K analysis. 
+
+Family restriction. Restricting the same cached evaluation to a subfamily of the 2D grid lets us ask: does the off-diagonal axis ( γ̸ = λ, γ̸ = 0 ) help, or is the diagonal already enough? The full 2D family beats every subfamily under the same selector, with no new evaluation: 
+
+Equal-density diagonal control. The above subfamily comparison restricts the JVP line to 2 cells of the cached grid, so candidate count is not equalized. We therefore evaluate a locked-protocol dense process-JVP diagonal: 24 evenly spaced λ ∈ [0 .75 , 1.5] with γ = λ, using each trial’s cached states (θA, θ AM , θ AM S , ˆRS←M ) and the identical selector. The dense-diagonal family now has the same number of validation candidates as the 2D family along the ζ = 0 direction; the comparison rules out a count effect parallel to ζ = 0 but does not control for arbitrary alternative directions in Rd.At each of the three principal scales, the full 2D family beats the dense process-JVP diagonal in 
+
+20 /20 trials: mean refusal-closure gap +0 .305 at Qwen-2.5-1.5B-Instruct, +0 .202 at Qwen-2.5-0.5B-Instruct, and +0 .243 at Llama-3.2-1B-Instruct. Each scale’s exact one-sided sign test (and Wilcoxon signed-rank) gives p = 9 .5 × 10 −7. The off-diagonal cells γ̸ = λ therefore carry the 2D advantage even when the JVP-line baseline has matched candidate count. 
+
+5.4 Seed-disjoint matched-family evidence 
+
+The basic paired sign test treats the 60 trial signs as exchangeable Bernoulli (1 /2) under H0; all 60 paired differences are positive for 2D versus matched-1D. To avoid making the 60-trial independence assumption load-bearing, we also aggregate the trials into model-by-data-seed blocks. Each principal model has five data-seed clusters with four trials per cluster, giving 15 blocks total; within a block we allow arbitrary dependence and only require that the block-mean signs are independent and Bernoulli (1 /2) -symmetric across blocks under H0 (different models are independent runs; different data-seed clusters use disjoint canary subsets and validation prompts). All 15 block means are positive for 2D versus matched-1D, giving the exact one-sided block sign-test p = 2 −15 = 3 .05 × 10 −5.The same 15 /15 block result holds for 2D versus matched-naive. This is the conservative statistical certificate we use for the matched-family claim. 7Table 3: Fresh-confirmatory replication. New trials per scale under the locked-and-amended protocol, on seeds disjoint from the cached evaluation grid. The three principal scales reach the amended 
+
+n = 20 . Qwen3-8B [Qwen Team, 2025b,a] is a contemporary pure-transformer added to disentangle the Gated-DeltaNet 9B scale-probe result from raw scale; the 8B run is at n = 10 .Model nfresh mean ∆refusal 95% CI sign Qwen-2.5-0.5B-Instruct 20 +0 .402 [+0 .351 , +0 .452] 20 /20 
+
+Qwen-2.5-1.5B-Instruct 20 +0 .323 [+0 .273 , +0 .373] 20 /20 
+
+Llama-3.2-1B-Instruct 20 +0 .235 [+0 .202 , +0 .270] 20 /20 
+
+Qwen3-8B 10 +0 .354 [+0 .297 , +0 .413] 10 /10 
+
+If one treats individual seed-disjoint trials as exchangeable, each per-scale exact one-sided sign test is 20 /20 and gives p = 2 −20 ≈ 9.54 × 10 −7, and Fisher’s method across the three independent model strata gives p ≈ 7.9 × 10 −16 . We report these as secondary summaries under the per-trial-independence assumption. The selected off-diagonal sign is trial-local, not a scale law. Across 20 Qwen-2.5-1.5B-Instruct trials and 11 Qwen3.5-9B trials, the selector is bimodal in the natural coordinate ζ = λ − γ: 14 /20 
+
+versus 6/20 at the 1.5B scale and 6/11 versus 5/11 at the 9B scale, with both signs co-occurring under the same procedure on the same model. We use finite-curvature probes of the underlying Hessian for interpretation rather than as selector evidence: the projected Hessian is positive definite in 3/8 cached 1.5B probes, and the matched-family certificate above does not rely on the profiled-τ
+
+linear-dominance check. 
+
+5.5 Locked-protocol fresh-confirmatory replication 
+
+The matched-family analysis above uses cached evaluation grids. To rule out selection-iteration effects, we re-ran a locked protocol on never-seen data seeds, with documented sample-size amend-ments before the corresponding extension compute: four trials per seed-cluster at the principal scales (nfresh = 20 ) and a smaller average cluster size for the 8B contemporary control ( nfresh = 10 , across the same five clusters). Across the four scales below, the validation-selected process-2D edit beats naive task arithmetic in every fresh trial: All 70 fresh-confirmatory trials under this locked-and-amended protocol are positive. Aggregating into model-by-data-seed clusters gives 20 positive block means out of 20 blocks (5 clusters per scale, 4 scales), with the exact one-sided block sign-test p = 2 −20 ≈ 9.5 × 10 −7. Fisher’s method across the four model runs gives p = 1 .7 × 10 −17 as a secondary summary under the stronger per-trial-independence assumption. The fresh per-model effect overlaps the cached 95% bootstrap CI at Qwen-2.5-0.5B-Instruct and Qwen-2.5-1.5B-Instruct; at Llama-3.2-1B-Instruct the fresh mean (+0 .235 ) sits below the cached lower bound ( +0 .288 ), so the cross-evaluation transfer at that scale is qualitatively replicated but quantitatively smaller. Bimodality of the selected γ reproduces: at Qwen-2.5-1.5B-Instruct, 13 /20 fresh trials select γ = −0.5 and 7/20 select γ = +2 .0 (cached at the same scale: 14 /20 versus 6/20 , with γ = +2 .0 dominant). The dominant raw sign therefore differs between cached and fresh at this scale, consistent with the trial-local interpretation of γ rather than a scale law. At Qwen3-8B, 7/10 fresh trials select γ = −0.5 and 3/10 select γ = +2 .0. The fresh trials replicate the 2D-vs-naive direction at every scale, replicate the trial-local bimodality, and extend the result to a contemporary 8B pure-transformer. 
+
+5.6 Gradient-ascent unlearning collapses refusal preservation 
+
+FT-unlearning succeeds at making the secret less extractable, but it destroys the refusal behavior that safety training installed. This is the failure mode predicted by Proposition 5: memory ascent is not constrained to stay outside safety-curvature directions. The FT-unlearn results are reported across two configurations. The six-config FT-unlearn grid sweeps six predeclared combinations of the loss weights (αforget , α skill , α safety ) (listed in Appendix F) at fixed learning rate 10 −4 and one epoch. The single-config baseline sweep runs the default α = 1 .0,
+
+αskill = 0 .3, αsafety = 0 .5 across five seeds. 8Table 4: FT-unlearn refusal-margin degradation. Values are refusal closure to the safety-only oracle (min and max across configs/trials shown as a range). Negative values mean the edit is farther from the oracle than the observed final checkpoint θAM S along the refusal-margin axis. The six-config FT-unlearn grid varies (αforget , α skill , α safety ) as in Appendix F; the 9B row is a single-trial scale probe at the same protocol as the 1.5B baseline sweep. Setting runs refusal closure Qwen-2.5-0.5B-Instruct FT-unlearn grid 6 configs −15 to −33 
+
+Qwen-2.5-1.5B-Instruct FT-unlearn grid 6 configs −33 to −55 
+
+Qwen-2.5-1.5B-Instruct baseline sweep 5 trials mean −43 .4, median −47 .1
+
+Qwen3.5-9B scale probe 1 trial −38 .7
+
+Structured-synthetic canary, Qwen-2.5-1.5B-Instruct 5 trials mean −146 .8
+
+NPO is less damaging than FT-unlearn but still gives negative refusal closure in the 1.5B baseline sweep, with mean refusal closure −1.33 . RMU changes the metrics little in the tested base-parameter configuration: secret AUC remains high rather than reaching chance, and refusal closure is near zero. Full hyperparameters for both baselines are in Appendix F. 
+
+Model-merging baselines (TIES, DARE). The necessity theorem predicts that any edit confined to a sparsified copy of ∆M inherits the first-order incompleteness of naive task arithmetic. We test this on the same five 1.5B trials by sparsifying ∆M via TIES [Yadav et al., 2023] (per-tensor magnitude trim from mergekit [Goddard et al., 2024]) and DARE [Yu et al., 2024] (Bernoulli drop with 1/d 
+
+rescale), then applying the selector. With densities {0.2, 0.5, 0.8} and λ ∈ { 0.75 , 1.0, 1.25 , 1.5},process-2D beats TIES best in 5/5 trials with mean refusal-closure gap +0 .354 , and beats DARE best 
+
+in 5/5 with mean gap +0 .469 . TIES yields a small implicit-regularization gain over naive ( +0 .110 
+
+mean, 5/5); DARE is statistically indistinguishable from naive ( −0.005 mean, 4/5). The theorem prediction therefore holds empirically: sparsifying the raw memory delta does not recover the transported direction. 
+
+# 6 Discussion and limitations 
+
+The theoretical claim is first-order and process-level: it applies to a fixed smooth safety-training trace and explains why raw memory subtraction is incomplete. The finite ε = 1 implementation is justified locally by the derivative theorem; the experiments are the evidence for finite-scale behavior. The off-diagonal coefficient is not a scale law. The Qwen-2.5-1.5B-Instruct bimodality shows both signs within one scale. The invariant quantity is ζ = λ − γ, determined by local validation geometry rather than by raw model size. The HVP cache supports this interpretation: only 3/8 cached probes satisfy the positive-definite hypothesis needed for the closed-form local minimizer. The frontier and sign-criterion theorems have hypothesis conditions; the held-out selector behavior is the empirical certificate. Proposition 5 predicts FT-unlearn’s direction, not its magnitude. Multi-source revocation, repeated safety, adversarial extraction, broader RMU tuning, and higher-rank adapters remain open. 
+
+# 7 Conclusion 
+
+Process sidecars are the geometrically correct edit family for revoking learned memory under later safety training: first-order necessity against scalar task arithmetic and second-order accuracy of the ideal sidecar carry through empirically across four model scales and two architectures. 
+
+# References 
+
+Yuntao Bai, Saurav Kadavath, Sandipan Kundu, Amanda Askell, Jackson Kernion, Andy Jones, Anna Chen, Anna Goldie, Azalia Mirhoseini, Cameron McKinnon, Carol Chen, Catherine Olsson, Christopher Olah, Danny Hernandez, Dawn Drain, Deep Ganguli, Dustin Li, Eli Tran-Johnson, Ethan Perez, Jamie Kerr, Jared Mueller, Jeffrey Ladish, Joshua Landau, Kamal Ndousse, Kamile 9Lukosuite, Liane Lovitt, Michael Sellitto, Nelson Elhage, Nicholas Schiefer, Noemi Mercado, Nova DasSarma, Robert Lasenby, Robin Larson, Sam Ringer, Scott Johnston, Shauna Kravec, Sheer El Showk, Stanislav Fort, Tamera Lanham, Timothy Telleen-Lawton, Tom Conerly, Tom Henighan, Tristan Hume, Samuel R. Bowman, Zac Hatfield-Dodds, Ben Mann, Dario Amodei, Nicholas Joseph, Sam McCandlish, Tom Brown, and Jared Kaplan. Constitutional AI: Harmlessness from AI feedback, 2022. URL https://arxiv.org/abs/2212.08073 .Lucas Bourtoule, Varun Chandrasekaran, Christopher A. Choquette-Choo, Hengrui Jia, Adelin Travers, Baiwu Zhang, David Lie, and Nicolas Papernot. Machine unlearning. In IEEE Sympo-sium on Security and Privacy , 2021. URL https://www.ieee-security.org/TC/SP2021/ program-papers.html .Center for AI Safety. WMDP benchmark and RMU code. GitHub repository, 2024. URL https: //github.com/centerforaisafety/wmdp .Ronen Eldan and Mark Russinovich. Who’s Harry Potter? approximate unlearning in LLMs, 2023. URL https://arxiv.org/abs/2310.02238 .Chelsea Finn, Pieter Abbeel, and Sergey Levine. Model-agnostic meta-learning for fast adaptation of deep networks. In Proceedings of the 34th International Conference on Machine Learning ,volume 70 of Proceedings of Machine Learning Research , pages 1126–1135. PMLR, 2017. URL 
+
+https://proceedings.mlr.press/v70/finn17a.html .Charles Goddard, Shamane Siriwardhana, Malikeh Ehghaghi, Luke Meyers, Vladimir Karpukhin, Brian Benedict, Mark McQuade, and Jacob Solawetz. Arcee’s MergeKit: A toolkit for merging large language models. In Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing: Industry Track , pages 477–485. Association for Computational Linguistics, 2024. doi: 10.18653/v1/2024.emnlp-industry.36. URL https://aclanthology.org/2024. emnlp-industry.36 .Aditya Golatkar, Alessandro Achille, and Stefano Soatto. Eternal sunshine of the spotless net: Selective forgetting in deep networks. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 9304–9312, 2020. URL https: //openaccess.thecvf.com/content_CVPR_2020/html/Golatkar_Eternal_Sunshine_ of_the_Spotless_Net_Selective_Forgetting_in_Deep_CVPR_2020_paper.html .Aaron Grattafiori, Abhimanyu Dubey, Abhinav Jauhri, Abhinav Pandey, Abhishek Kadian, Ahmad Al-Dahle, Aiesha Letman, Akhil Mathur, Alan Schelten, Alex Vaughan, et al. The Llama 3 herd of models, 2024. URL https://arxiv.org/abs/2407.21783 .Chuan Guo, Tom Goldstein, Awni Hannun, and Laurens Van Der Maaten. Certified data removal from machine learning models. In Proceedings of the 37th International Conference on Machine Learning , volume 119 of Proceedings of Machine Learning Research , pages 3832–3842. PMLR, 2020. URL https://proceedings.mlr.press/v119/guo20c.html .Edward J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang, and Weizhu Chen. LoRA: Low-rank adaptation of large language models. In International Conference on Learning Representations , 2022. URL https://openreview.net/forum?id= nZeVKeeFYf9 .Shengyuan Hu, Yiwei Fu, Zhiwei Steven Wu, and Virginia Smith. Unlearning or obfuscating? jogging the memory of unlearned LLMs via benign relearning. In International Conference on Learning Representations , 2025. URL https://openreview.net/forum?id=fMNRYBvcQN .Gabriel Ilharco, Marco Tulio Ribeiro, Mitchell Wortsman, Suchin Gururangan, Ludwig Schmidt, Hannaneh Hajishirzi, and Ali Farhadi. Editing models with task arithmetic. In International Conference on Learning Representations , 2023. URL https://openreview.net/forum?id= 6t0Kwf8-jrj .Joel Jang, Dongkeun Yoon, Sohee Yang, Sungmin Cha, Moontae Lee, Lajanugen Logeswaran, and Minjoon Seo. Knowledge unlearning for mitigating privacy risks in language models. In 
+
+Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pages 14389–14408. Association for Computational Linguistics, 2023. doi: 10.18653/v1/2023.acl-long.805. URL https://aclanthology.org/2023.acl-long.805/ .10 Diederik P. Kingma and Jimmy Ba. Adam: A method for stochastic optimization. In International Conference on Learning Representations , 2015. URL https://arxiv.org/abs/1412.6980 .Pang Wei Koh and Percy Liang. Understanding black-box predictions via influence functions. In 
+
+Proceedings of the 34th International Conference on Machine Learning , volume 70 of Proceedings of Machine Learning Research , pages 1885–1894. PMLR, 2017. URL https://proceedings. mlr.press/v70/koh17a.html .Nathaniel Li, Alexander Pan, Anjali Gopal, Summer Yue, Daniel Berrios, Alice Gatti, Justin D. Li, Ann-Kathrin Dombrowski, Shashwat Goel, Gabriel Mukobi, et al. The WMDP benchmark: Measuring and reducing malicious use with unlearning. In Proceedings of the 41st International Conference on Machine Learning , volume 235 of Proceedings of Machine Learning Research ,pages 28525–28550. PMLR, 2024. URL https://proceedings.mlr.press/v235/li24bc. html .Jonathan Lorraine, Paul Vicol, and David Duvenaud. Optimizing millions of hyperparameters by implicit differentiation. In Proceedings of the Twenty Third International Conference on Artificial Intelligence and Statistics , volume 108 of Proceedings of Machine Learning Research , pages 1540– 1552. PMLR, 2020. URL https://proceedings.mlr.press/v108/lorraine20a.html .Ilya Loshchilov and Frank Hutter. Decoupled weight decay regularization. In International Conference on Learning Representations , 2019. URL https://openreview.net/forum?id= Bkg6RiCqY7 .Jakub Łucki, Boyi Wei, Yangsibo Huang, Peter Henderson, Florian Tramèr, and Javier Rando. An adversarial perspective on machine unlearning for AI safety. Transactions on Machine Learning Research , 2025. URL https://openreview.net/forum?id=J5IRyTKZ9s .Dougal Maclaurin, David Duvenaud, and Ryan Adams. Gradient-based hyperparameter optimization through reversible learning. In Proceedings of the 32nd International Conference on Machine Learning , volume 37 of Proceedings of Machine Learning Research , pages 2113–2122. PMLR, 2015. URL https://proceedings.mlr.press/v37/maclaurin15.html .Pratyush Maini, Zhili Feng, Avi Schwarzschild, Zachary C. Lipton, and J. Zico Kolter. TOFU: A task of fictitious unlearning for LLMs. In Conference on Language Modeling (COLM) , 2024. URL 
+
+https://openreview.net/forum?id=B41hNBoWLo .Michael S. Matena and Colin A. Raffel. Merging models with Fisher-weighted av-eraging. In Advances in Neural Information Processing Systems , volume 35, 2022. URL https://proceedings.neurips.cc/paper_files/paper/2022/hash/ 70c26937fbf3d4600b69a129031b66ec-Abstract-Conference.html .Meta AI. Llama-3.2-1B-Instruct model card. Hugging Face model card, 2024. URL https: //huggingface.co/meta-llama/Llama-3.2-1B-Instruct . Accessed 2026-05-07. Long Ouyang, Jeff Wu, Xu Jiang, Diogo Almeida, Carroll L. Wainwright, Pamela Mishkin, Chong Zhang, Sandhini Agarwal, Katarina Slama, Alex Ray, John Schulman, Jacob Hilton, Fraser Kelton, Luke Miller, Maddie Simens, Amanda Askell, Peter Welinder, Paul Christiano, Jan Leike, and Ryan Lowe. Training language models to follow instructions with human feedback. In Advances in Neural Information Processing Systems , volume 35, pages 27730– 27744, 2022. URL https://proceedings.neurips.cc/paper_files/paper/2022/hash/ b1efde53be364a73914f58805a001731-Abstract.html .Sung Min Park, Kristian Georgiev, Andrew Ilyas, Guillaume Leclerc, and Aleksander Madry. TRAK: Attributing model behavior at scale. In Proceedings of the 40th International Conference on Machine Learning , volume 202 of Proceedings of Machine Learning Research , pages 27074– 27113. PMLR, 2023. URL https://proceedings.mlr.press/v202/park23c.html .Barak A. Pearlmutter. Fast exact multiplication by the Hessian. Neural Computation , 6(1):147–160, 1994. doi: 10.1162/neco.1994.6.1.147. Qwen Team. Qwen2.5-0.5B-Instruct model card. Hugging Face model card, 2024a. URL https: //huggingface.co/Qwen/Qwen2.5-0.5B-Instruct . Accessed 2026-05-07. 11 Qwen Team. Qwen2.5-1.5B-Instruct model card. Hugging Face model card, 2024b. URL https: //huggingface.co/Qwen/Qwen2.5-1.5B-Instruct . Accessed 2026-05-07. Qwen Team. Qwen2.5 technical report, 2024c. URL https://arxiv.org/abs/2412.15115 .Qwen Team. Qwen3-8B model card. Hugging Face model card, 2025a. URL https:// huggingface.co/Qwen/Qwen3-8B . Accessed 2026-05-07. Qwen Team. Qwen3 technical report, 2025b. URL https://arxiv.org/abs/2505.09388 .Qwen Team. Qwen3.5-9B model card. Hugging Face model card, 2026a. URL https: //huggingface.co/Qwen/Qwen3.5-9B . Accessed 2026-05-07. Qwen Team. Qwen3.5-9B configuration file. Hugging Face repository file, 2026b. URL https: //huggingface.co/Qwen/Qwen3.5-9B/blob/main/config.json . Accessed 2026-05-07. Rafael Rafailov, Archit Sharma, Eric Mitchell, Christopher D. Manning, Stefano Er-mon, and Chelsea Finn. Direct preference optimization: Your language model is se-cretly a reward model. In Advances in Neural Information Processing Systems , vol-ume 36, 2023. URL https://proceedings.neurips.cc/paper_files/paper/2023/ hash/a85b405ed65c6477a4fe8302b5e06ce7-Abstract-Conference.html .Aravind Rajeswaran, Chelsea Finn, Sham M. Kakade, and Sergey Levine. Meta-learning with implicit gradients. In Advances in Neural Information Processing Systems , vol-ume 32, pages 113–124, 2019. URL https://proceedings.neurips.cc/paper/2019/ hash/072b030ba126b2f4b2374f342be9ed44-Abstract.html .Weijia Shi, Jaechan Lee, Yangsibo Huang, Sadhika Malladi, Jieyu Zhao, Ari Holtzman, Daogao Liu, Luke Zettlemoyer, Noah A. Smith, and Chiyuan Zhang. MUSE: Machine unlearning six-way evaluation for language models. In International Conference on Learning Representations , 2025. URL https://openreview.net/forum?id=TArmA033BU .Mitchell Wortsman, Gabriel Ilharco, Samir Ya Gadre, Rebecca Roelofs, Raphael Gontijo-Lopes, Ari S. Morcos, Hongseok Namkoong, Ali Farhadi, Yair Carmon, Simon Kornblith, and Ludwig Schmidt. Model soups: Averaging weights of multiple fine-tuned models improves accuracy without increasing inference time. In Proceedings of the 39th International Conference on Machine Learning , volume 162 of Proceedings of Machine Learning Research , pages 23965–23998. PMLR, 2022. URL https://proceedings.mlr.press/v162/wortsman22a.html .Prateek Yadav, Derek Tam, Leshem Choshen, Colin Raffel, and Mohit Bansal. TIES-merging: Resolving interference when merging models. In Advances in Neural Information Processing Systems , 2023. URL https://openreview.net/forum?id=xtaX3WyCj1 .Le Yu, Bowen Yu, Haiyang Yu, Fei Huang, and Yongbin Li. Language models are super mario: Absorbing abilities from homologous models as a free lunch. In Proceedings of the 41st Inter-national Conference on Machine Learning , volume 235 of Proceedings of Machine Learning Research , pages 57755–57775. PMLR, 2024. URL https://proceedings.mlr.press/v235/ yu24p.html .Ruiqi Zhang, Licong Lin, Yu Bai, and Song Mei. Negative preference optimization: From catastrophic collapse to effective unlearning. In Conference on Language Modeling (COLM) , 2024. URL 
+
+https://openreview.net/forum?id=MXLBXjQkmb .12 A Related work 
+
+Weight-space editing and merging. Task arithmetic and model merging [Ilharco et al., 2023, Wortsman et al., 2022, Matena and Raffel, 2022, Yadav et al., 2023, Yu et al., 2024, Goddard et al., 2024] edit fine-tuned checkpoints by manipulating weight-space differences. Process sidecars keep this deploy-time editing form, but replace a static delta with an estimate of how the later safety-training process transports the memory direction. 
+
+Machine unlearning. Classical machine unlearning frames deletion against a retrained-without-the-data counterfactual, through exact retraining systems, certified removal, or approximate selective forgetting [Bourtoule et al., 2021, Guo et al., 2020, Golatkar et al., 2020]. LLM unlearning adapts this goal to memorized text, private facts, and hazardous capabilities, with gradient-ascent unlearning, TOFU, content unlearning benchmarks such as MUSE, WMDP/RMU, and preference-based methods such as NPO [Jang et al., 2023, Eldan and Russinovich, 2023, Maini et al., 2024, Shi et al., 2025, Li et al., 2024, Zhang et al., 2024]. Recent robustness work shows that approximate LLM unlearning can suppress outputs without eliminating recoverable knowledge, especially under relearning or adversarial evaluation [Hu et al., 2025, Łucki et al., 2025]. Our setting is different: the deletion target has been followed by an entity-tied safety phase, so the failure mode is not only retain-distribution damage but erasure of the refusal behavior protecting the memorized entities. 
+
+Safety post-training. Instruction and safety post-training methods such as RLHF, Constitutional AI/RLAIF, and DPO tune models toward preferred or harmless behavior after pretraining [Ouyang et al., 2022, Bai et al., 2022, Rafailov et al., 2023]. We model the safety phase as a realized deterministic training operator and ask how to revoke a prior memory without discarding the later refusal policy learned around that memory. 
+
+Sensitivity through training. Influence functions and TRAK trace predictions back to training data with Hessian-vector or projected sensitivity approximations [Koh and Liang, 2017, Park et al., 2023]. Meta-learning and hyperparameter-optimization work differentiates through entire optimization procedures or implicit optima [Maclaurin et al., 2015, Finn et al., 2017, Rajeswaran et al., 2019, Lorraine et al., 2020]. Process sidecars use the same kind of training-process sensitivity as a deployment-time edit direction: a finite secant estimates the JVP of the realized AdamW safety trace [Pearlmutter, 1994, Kingma and Ba, 2015, Loshchilov and Hutter, 2019], rather than attributing an example or optimizing a hyperparameter. 
+
+# B Theory: Process Sidecars for Revocable Learned State 
+
+Trainable-coordinate convention. All vectors are written in the trainable parameter coordinates used by the experiment. For a LoRA run this means the LoRA adapter coordinates; for a full-finetuning run it means the full parameter vector. This convention avoids irrelevant null coordinates. The norm ∥·∥ is Euclidean unless stated otherwise. 
+
+Sequential checkpoints. The pipeline is 
+
+θAM
+
+−−→ θAM S
+
+−−→ θAM S ,
+
+where A is the skill checkpoint, M is the learned memory phase, and S is the subsequent safety/refusal phase. The counterfactual oracle is 
+
+θAS = Train S (θA),
+
+which runs the same safety phase from θA rather than θAM . Let 
+
+u := ∆ M = θAM − θA.
+
+Throughout the appendix, the realized safety-training trace is fixed: the minibatches, random seed, dropout masks if any, optimizer hyperparameters, and training schedule are conditioned on. Thus 
+
+T ≡ Train S is a deterministic map from an initialization to the final safety checkpoint. Randomness can be restored by applying the deterministic statements conditioned on each realized trace. 13 B.1 AdamW is an augmented-state differentiable map 
+
+A central point is that DT is the Jacobian of the entire future training process, not the Hessian of a single loss and not a plain SGD product unless the optimizer really is SGD. For AdamW, the optimizer state must be included. Let ℓt be the loss on the t-th realized minibatch. We allow optional global-norm clipping with threshold C ∈ (0 , ∞], where C = ∞ means no clipping. Define 
+
+ψC (g) = 
+
+(g, ∥g∥2 < C, Cg/ ∥g∥2 , ∥g∥2 > C. 
+
+The boundary ∥g∥2 = C is nonsmooth and is excluded by the regular-trace assumption below. We write the parameter at AdamW step t as θ(t) in this appendix and as θt in the main text; the two are the same sequence and we use them interchangeably. Starting from θ(0) = θ and m0 = v0 = 0 , one AdamW trace evolves by 
+
+gt = ∇ℓt(θ(t − 1)) , qt = ψC (gt), (4) 
+
+mt = β1mt−1 + (1 − β1)qt, vt = β2vt−1 + (1 − β2)qt ⊙ qt, (5) 
+
+ˆmt = mt/(1 − βt
+
+> 1
+
+), ˆvt = vt/(1 − βt
+
+> 2
+
+), (6) 
+
+θ(t) = (1 − ηtλwd )θ(t − 1) − ηt ˆmt ⊘
+
+p ˆvt + ϵadam 
+
+
+
+. (7) Here ⊙, ⊘, √· are coordinatewise. 
+
+Assumption 6 (Regular AdamW safety trace) . There is a radius r > 0 around θA such that, for every initialization in B(θA, r ):1. each minibatch loss ℓt is C3 on the induced trace neighborhood; 2. no clipping decision crosses the boundary ∥∇ ℓt∥2 = C;3. on the active trainable coordinates, every bias-corrected second moment satisfies (ˆ vt)i ≥
+
+ν > 0;4. the derivatives of the one-step maps through order three are bounded on this neighborhood. 
+
+The lower bound on ˆvt is the AdamW square-root regularity condition. PyTorch-style AdamW uses √ˆvt + ϵadam , whose derivative with respect to ˆvt contains 1/√ˆvt; coordinates with identically zero second moment must be removed from the active set or handled by the smoothed variant √ˆvt + ϵadam .
+
+Theorem 7 (Exact tangent recursion for multi-step AdamW) . Under Assumption 6, the safety-training map 
+
+T (θ) = θ(K)
+
+is differentiable at θA. For any initialization perturbation δ, let 
+
+at = dθ(t)ds , bt = dmt
+
+ds , ct = dvt
+
+ds
+
+along the perturbed initialization θA + sδ , evaluated at s = 0 , with a0 = δ and b0 = c0 = 0 . Let 
+
+Gt = D(ψC ◦ ∇ ℓt)( θ(t − 1)) .
+
+When clipping is inactive, Gt = ∇2ℓt(θ(t − 1)) . When clipping is active and away from the boundary, 
+
+Gt = C
+
+∥gt∥2
+
+I − gtg⊤
+
+> t
+
+∥gt∥22
+
+!
+
+∇2ℓt(θ(t − 1)) .
+
+14 Then JS (δ) := DT (θA)δ = aK , where 
+
+ht = Gtat−1, (8) 
+
+bt = β1bt−1 + (1 − β1)ht, (9) 
+
+ct = β2ct−1 + 2(1 − β2)qt ⊙ ht, (10) 
+
+ˆbt = bt/(1 − βt
+
+> 1
+
+), ˆct = ct/(1 − βt
+
+> 2
+
+), (11) 
+
+dt = pˆvt + ϵadam , (12) 
+
+at = (1 − ηtλwd )at−1 − ηt
+
+ˆbt ⊘ dt − 12 ˆmt ⊙ ˆct ⊘  p ˆvt ⊙ d⊙2
+
+> t
+
+
+
+. (13) 
+
+Equivalently, 
+
+DT (θA) = Π θ DF K (zK−1) · · · DF 1(z0) ιθ , zt = ( θ(t), m t, v t),
+
+where ιθ δ = ( δ, 0, 0) and Πθ projects the final augmented tangent back to parameter coordinates. Proof. For a fixed trace, one AdamW step is a deterministic map Ft : ( θ(t − 1) , m t−1, v t−1) 7 →
+
+(θ(t), m t, v t). By Assumption 6, the composition of the loss gradient, the clipping branch, the moment recurrences, bias correction, coordinatewise square root, and decoupled weight decay is differentiable on the trace neighborhood. Hence T = Π θ FK ◦ · · · ◦ F1 ◦ ιθ is differentiable and the chain rule gives the augmented-matrix expression. Expanding the augmented Jacobian product gives the displayed recurrences. The terms for bt and ct
+
+are the derivatives of the first- and second-moment updates. For the parameter update, differentiate coordinatewise: 
+
+D
+
+ ˆmi
+
+√ˆvi + ϵadam 
+
+
+
+= ˙ˆmi
+
+√ˆvi + ϵadam 
+
+− ˆmi
+
+2√ˆvi (√ˆvi + ϵadam )2
+
+˙ˆvi.
+
+Substituting ˙ˆm = ˆbt and ˙ˆv = ˆ ct into the AdamW parameter update yields the recursion for at.Therefore aK = DT (θA)δ.
+
+Remark (Why the SGD product is only a corollary) . For actual SGD with decoupled weight decay, 
+
+θ(t) = (1 − ηtλwd )θ(t − 1) − ηt∇ℓt(θ(t − 1)) ,
+
+the tangent is 
+
+DT SGD (θA) = 
+
+> 1
+
+Y
+
+> t=K
+
+
+
+(1 − ηtλwd )I − ηt∇2ℓt(θ(t − 1)) 
+
+
+
+,
+
+with ∇2ℓt replaced by Gt under clipping. This is not obtained by setting β1 = β2 = 0 in AdamW. That limit remains adaptively normalized by |gt| + ϵadam .
+
+B.2 First-order process-sidecar identity 
+
+Define the exact transported memory direction and residual sidecar 
+
+p := JS (u) := DT (θA)u, r := RS←M := p − u. 
+
+For the theorem statements in this appendix we work with the exact-derivative edit family 
+
+θexact (λ, γ ) = θAM S − λu − γr. 
+
+The empirical ˆθ(λ, γ ) used in §3 of the main paper replaces r by the centered-secant estimate 
+
+ˆr = ˆRS←M ; the secant bias ∥ˆr − r∥ = O(ε2 ∥u∥3) enters as an additive O(ε2 ∥u∥3) term in the expansions below. 
+
+Theorem 8 (Process-JVP identity and first-order oracle recovery) . Suppose T is twice differentiable on B(θA, r 0) and D2T (x) op ≤ L2 throughout the ball. If ∥u∥ ≤ r0, then 
+
+θAM S = θAS + p + ρ2 = θAS + u + r + ρ2, ∥ρ2∥ ≤ L2
+
+2 ∥u∥2 .
+
+Consequently, 
+
+θexact (1 , 1) = θAS + ρ2, ∥θexact (1 , 1) − θAS ∥ ≤ L2
+
+2 ∥u∥2 .
+
+15 Proof. Because θAM = θA + u, we have θAM S = T (θA + u) and θAS = T (θA). Taylor’s theorem with second-order remainder gives 
+
+T (θA + u) = T (θA) + DT (θA)u + ρ2, ∥ρ2∥ ≤ L2
+
+2 ∥u∥2 .
+
+Substitute the definitions of p and r = p − u. The statement for θexact (1 , 1) follows by subtracting 
+
+u + r = p.
+
+Proposition 9 (Naive task arithmetic misses the transported component) . Let Pu be Euclidean projection onto span {u}, and define r⊥ = ( I −Pu)r. Under Theorem 8, every naive edit θnaive (λ) = 
+
+θAM S − λu satisfies 
+
+∥θnaive (λ) − θAS ∥ ≥ ∥ r⊥∥ − ∥ ρ2∥ .
+
+The process-sidecar point θexact (1 , 1) has error at most ∥ρ2∥. Thus if ∥r⊥∥ > 2 ∥ρ2∥, the sidecar point is strictly closer to the counterfactual oracle than every naive edit in parameter norm. Proof. For the naive line, 
+
+θnaive (λ) − θAS = (1 − λ)u + r + ρ2.
+
+The best choice of λ can cancel only the component of r lying in span {u}; the orthogonal component 
+
+r⊥ remains. The triangle inequality gives the lower bound. The upper bound for θexact (1 , 1) is Theorem 8. 
+
+B.3 The centered-secant sidecar used by the implementation 
+
+The code estimates the transported direction by a finite centered secant, 
+
+ˆJS,ε (u) = T (θA + εu ) − T (θA − εu )2ε .
+
+For ε = 1 , this is a centered secant at the memory-edit scale, not an infinitesimal derivative. The derivative theorem is the local limit. 
+
+Proposition 10 (Centered-secant bias) . Assume T ∈ C3 on the segment θA + su , |s| ≤ ε, and 
+
+D3T (x) op ≤ L3 there. Then 
+
+ˆJS,ε (u) − DT (θA)u ≤ L3
+
+6 ε2 ∥u∥3 .
+
+Consequently, 
+
+θAM S − ˆJS,ε (u) − θAS ≤ L2
+
+2 ∥u∥2 + L3
+
+6 ε2 ∥u∥3 .
+
+Proof. Apply the one-dimensional Taylor theorem to φ(s) = T (θA + su ). The centered dif-ference cancels the even second-order term and leaves a third-derivative remainder bounded by 
+
+(L3/6) ε2 ∥u∥3. Add this estimator bias to the remainder in Theorem 8. 
+
+B.4 Second-order frontier: why the two-dimensional family can beat the process-JVP line 
+
+The first-order theorem does not say that the two-dimensional edit beats the process-JVP line at first order. The process-JVP line θAM S − ηp contains the same first-order oracle at η = 1 . The advantage of the full (u, r ) family is second-order and validation-dependent. Assume in this subsection that T ∈ C3 near θA, and define 
+
+q = 12 D2T (θA)[ u, u ].
+
+Then 
+
+θAM S = θAS + p + q + O(∥u∥3).
+
+The residual from θAS after a process-JVP edit is 
+
+e1D (η) = q + (1 − η)p + O(∥u∥3),
+
+16 whereas the residual after a two-dimensional edit is 
+
+e2D (λ, γ ) = q + (1 − λ)u + (1 − γ)r + O(∥u∥3) (14) 
+
+= q + τ p + ζr + O(∥u∥3), (15) with natural coordinates 
+
+τ = 1 − λ, ζ = λ − γ. 
+
+The process-JVP line is exactly the subfamily ζ = 0 .
+
+Theorem 11 (Local quadratic frontier expansion) . Let ℓ be a twice-differentiable local scalarization of the validation criterion around θAS , with expansion 
+
+ℓ(θAS + e) = ℓ0 + g⊤e + 12 e⊤He + O(∥e∥3),
+
+where H ≻ 0 on span {p, r }. Suppose the quadratic minimizers below remain in the local neigh-borhood where the expansion is valid. For any subspace W ⊆ span {p, r }, define the quadratic surrogate value 
+
+V (W ) = min 
+
+> w∈W
+
+ g⊤(q + w) + 12 (q + w)⊤H(q + w) .
+
+Let 
+
+W1 = span {p}, W2 = span {p, r } = span {u, r }.
+
+Then V (W2) ≤ V (W1). Moreover, define 
+
+r⊥ = r − P H
+
+> span {p}
+
+r, 
+
+where P H is H-orthogonal projection. If r⊥̸ = 0 , the improvement is strict iff 
+
+q⊤Hr ⊥ + g⊤r⊥̸ = 0 .
+
+After profiling over the process-JVP coordinate τ , the optimal off-diagonal coordinate is 
+
+ζ∗ = − q⊤Hr ⊥ + g⊤r⊥
+
+∥r⊥∥2
+
+> H
+
+.
+
+Proof. Weak dominance is immediate from W1 ⊆ W2: the minimum over the larger feasible subspace cannot be worse. For strictness, first minimize over W1. Let w∗ 
+
+> 1
+
+∈ W1 be the unique minimizer, which exists because 
+
+H ≻ 0 on the plane. The first-order condition says 
+
+g⊤h + ⟨q + w∗ 
+
+> 1
+
+, h ⟩H = 0 for all h ∈ W1.
+
+Since r⊥ is H-orthogonal to W1, varying from the profiled one-dimensional optimum in the off-diagonal direction gives the one-variable quadratic 
+
+ϕ(ζ) = g⊤(q + w∗ 
+
+> 1
+
++ ζr ⊥) + 12 ∥q + w∗ 
+
+> 1
+
++ ζr ⊥∥2 
+
+> H
+
+.
+
+Its derivative at zero is 
+
+ϕ′(0) = g⊤r⊥ + ⟨q + w∗ 
+
+> 1
+
+, r ⊥⟩H = g⊤r⊥ + q⊤Hr ⊥,
+
+because w∗ 
+
+> 1
+
+∈ W1 and r⊥ ⊥H W1. Its curvature is ϕ′′ (ζ) = ∥r⊥∥2 
+
+> H
+
+> 0. Hence adding the off-diagonal direction strictly improves the value exactly when ϕ′(0) ̸ = 0 , and minimizing ϕ gives the displayed ζ∗.
+
+Remark (What the theorem does and does not say) . The theorem proves weak dominance of the two-dimensional local quadratic frontier over the process-JVP line, and strict dominance under a Hessian-weighted off-diagonal projection condition. It does not prove that Hessian anisotropy alone is sufficient. Anisotropy is neither necessary nor sufficient: if the profiled off-diagonal derivative 
+
+q⊤Hr ⊥ + g⊤r⊥ vanishes, the process-JVP line is already locally optimal even under an anisotropic 
+
+H; conversely, with H = I, any quadratic correction with a nonzero component along r⊥ gives strict two-dimensional improvement. 
+
+17 Corollary 12 (Constrained-validation/KKT interpretation) . Let the validation selector minimize 
+
+f0(e) = −M (e) subject to smooth local constraints cj (e) ≤ 0, e.g. secret-AUC and skill-retention thresholds. At a regular local constrained optimum, let μj ≥ 0 be active KKT multipliers and define the Lagrangian scalarization 
+
+L(e, μ ) = f0(e) + X
+
+> j
+
+μj cj (e).
+
+If the Hessian HL = ∇2
+
+> e
+
+L(0 , μ ) satisfies the second-order sufficient condition on the candidate plane or on the relevant critical cone, then Theorem 11 applies with g = ∇eL(0 , μ ) and H = HL. Thus active validation constraints change the scalarization and Hessian, but not the geometric criterion: strict off-diagonal improvement is governed by the HL-weighted projection of the second-order/KKT correction onto r⊥.
+
+Remark (Indefinite Hessians) . If H is indefinite, the unconstrained projection formula is not a valid global minimization statement. The safe alternative is a trust-region quadratic comparison, 
+
+min   
+
+> w∈W, ∥w∥≤ ρ
+
+g⊤(q + w) + 12 (q + w)⊤H(q + w).
+
+Weak dominance still follows from W1 ∩ Bρ ⊆ W2 ∩ Bρ. The explicit projection and ζ∗ formula should be used only when the local second-order sufficient condition makes the relevant quadratic positive definite on the searched plane, or when the trust-region optimum is interior and the restricted Hessian is positive definite there. 
+
+B.5 Oracle-free finite-grid selector 
+
+Let G be the declared finite edit grid. For each candidate a ∈ G , define population validation quantities 
+
+A(a) = secret AUC , R(a) = skill retention , M (a) = refusal margin , N (a) = edit norm .
+
+The population decision rule is 
+
+max  
+
+> a∈G
+
+M (a) subject to A(a) ≤ a0, R(a) ≥ r0,
+
+with minimum N (a) as a deterministic tie-break. The empirical selector uses validation estimates 
+
+ˆA, ˆR, ˆM computed before any test evaluation. In the experiments, a0 = 0 .6 and r0 = 0 .9.
+
+Theorem 13 (Slacked finite-grid selector guarantee) . Suppose that, with probability at least 1 − δc,all candidates satisfy 
+
+| ˆA(a) − A(a)| ≤ ϵA(a), | ˆR(a) − R(a)| ≤ ϵR(a).
+
+Let the empirical selector use tightened feasibility 
+
+ˆA(a) ≤ a0 − ϵA(a), ˆR(a) ≥ r0 + ϵR(a),
+
+and choose among feasible candidates the one maximizing ˆM , with minimum-norm tie-break. Then the selected candidate ˆa is population feasible: A(ˆ a) ≤ a0 and R(ˆ a) ≥ r0.Furthermore, suppose that, with probability at least 1 − δm, for every ordered pair (a, b ) ∈ G 2,
+
+M (a) − M (b) ≥ ˆM (a) − ˆM (b) − rad ab .
+
+Then, on the joint event, for every candidate b satisfying the stronger population slack 
+
+A(b) ≤ a0 − 2ϵA(b), R(b) ≥ r0 + 2 ϵR(b),
+
+we have 
+
+M (ˆ a) ≥ M (b) − rad ˆab .
+
+In particular, ˆa is near-optimal over the slacked feasible grid, with the loss controlled by paired candidate-difference uncertainty rather than by a raw uniform Hoeffding radius for M .Proof. The feasibility claim follows immediately: if ˆA(ˆ a) ≤ a0 − ϵA(ˆ a) and | ˆA − A| ≤ ϵA, then 
+
+A(ˆ a) ≤ a0; the retention constraint is identical with the inequality reversed. If b satisfies the stronger population slack, then the same concentration event implies ˆA(b) ≤
+
+a0 − ϵA(b) and ˆR(b) ≥ r0 + ϵR(b), so b is empirically feasible. Since ˆa maximizes ˆM over the empirical feasible set, ˆM (ˆ a) − ˆM (b) ≥ 0, up to deterministic tie-breaking. The pairwise margin event gives 
+
+M (ˆ a) − M (b) ≥ ˆM (ˆ a) − ˆM (b) − rad ˆab ≥ − rad ˆab .
+
+18 Proposition 14 (Paired empirical-Bernstein radius) . Let M (a) = E[mi(a)] , where validation units are independent and shared across candidates. For an ordered pair (a, b ), define 
+
+Xab i = mi(a) − mi(b), ˆDab = 1
+
+n
+
+X
+
+> i
+
+Xab i , ˆσ2 
+
+> ab
+
+= 1
+
+n − 1
+
+X
+
+> i
+
+(Xab i − ˆDab )2.
+
+Assume the random variables Xab i lie almost surely in an interval of length Bab . A standard empirical-Bernstein union bound gives, simultaneously over all ordered pairs, with probability at least 1 − δ,
+
+M (a) − M (b) ≥ ˆDab −
+
+r 2ˆ σ2 
+
+> ab
+
+log(2 |G| 2/δ )
+
+n − 7Bab log(2 |G| 2/δ )3( n − 1) .
+
+Thus Theorem 13 can use this data-dependent rad ab . When candidates are evaluated on the same validation prompts, the paired variance ˆσ2 
+
+> ab
+
+can be far smaller than the marginal variance of either candidate’s raw margin. 
+
+Remark (What this selector theorem certifies) . This is an oracle-free finite-grid theorem. It does not claim global optimality over all possible unlearning methods. It says that the fixed validation rule solves the declared constrained deployment problem over G, up to explicit feasibility and paired-difference uncertainty. The grid may contain naive task arithmetic ( γ = 0 ), the process-JVP line (γ = λ), and the full two-dimensional family. A nonzero off-diagonal coefficient wins only if it wins the same predeclared validation problem. 
+
+Proposition 15 (Across-trial sign-test validation) . For held-out comparisons across independent trials, let Dj be the test metric difference between two fixed procedures on trial j. Under the null hypothesis that the median difference is nonpositive, and assuming no ties or random tie-breaking, observing s positive signs in T trials has one-sided p-value 
+
+> T
+
+X
+
+> k=s
+
+Tk
+
+
+
+2−T .
+
+This validates a fixed method comparison, not the finite-sample optimality of a within-trial selector. It is nevertheless the correct distribution-free test for claims such as “the selected two-dimensional method beats a matched process-JVP baseline across independent trials.” 
+
+B.6 Gradient-ascent unlearning: conditional safety drift, not impossibility 
+
+Let an FT-unlearning procedure update 
+
+θt+1 = θt + αd t,
+
+where dt is the actual ascent/update direction produced by the procedure for the memory objective, possibly including optimizer preconditioning and retention terms. Let LS be a safety loss. 
+
+Proposition 16 (Safety drift under positive-curvature memory ascent) . Assume LS ∈ C3 along the unlearning trajectory and that its Hessian is L3-Lipschitz there. Then each step satisfies 
+
+LS (θt+1 ) − LS (θt) = α ⟨∇ LS (θt), d t⟩ + α2
+
+2 d⊤ 
+
+> t
+
+∇2LS (θt)dt + Rt,
+
+with 
+
+|Rt| ≤ L3
+
+6 α3 ∥dt∥3 .
+
+If 
+
+|⟨∇ LS (θt), d t⟩| ≤ ϵt ∥dt∥ , d⊤ 
+
+> t
+
+∇2LS (θt)dt ≥ Λt ∥dt∥2 ,
+
+then after K steps, 
+
+LS (θK ) − LS (θ0) ≥
+
+> K−1
+
+X
+
+> t=0
+
+
+
+−αϵ t ∥dt∥ + α2
+
+2 Λt ∥dt∥2 − L3
+
+6 α3 ∥dt∥3
+
+
+
+.
+
+If additionally ∥dt∥ ∈ [Gmin , G max ], ϵt ≤ ϵ, and Λt ≥ Λ > 0, then 
+
+LS (θK ) − LS (θ0) ≥ K
+
+
+
+−αϵG max + α2
+
+2 ΛG2min − L3
+
+6 α3G3max 
+
+
+
+.
+
+19 Proof. Taylor expand LS (θt + αd t) to second order with third-order Lipschitz-Hessian remainder. Lower-bound the linear term by −αϵ t ∥dt∥, lower-bound the quadratic term by (α2/2)Λ t ∥dt∥2,upper-bound the magnitude of the remainder, and sum over t.
+
+Corollary 17 (Eigenprojection form) . Let Pk be the orthogonal projector onto an invariant subspace of ∇2LS (θt), equivalently a span of its eigenvectors, on which ∇2LS (θt) ⪰ λkI. Suppose the invariant orthogonal complement has curvature lower bounded by −βI . If ∥Pkdt∥2 ≥ ρt ∥dt∥2, then 
+
+d⊤ 
+
+> t
+
+∇2LS (θt)dt ≥  ρtλk − (1 − ρt)β ∥dt∥2 .
+
+Thus the proposition applies with Λt = ρtλk − (1 − ρt)β whenever this quantity is positive. 
+
+Remark (Scope) . This is a local failure-mode theorem. It does not prove that FT-unlearning is impossible, and it should not be used to predict the magnitude of large non-perturbative refusal collapse. It says that once safety training has made the first-order safety gradient small, memory-ascent directions with positive projection onto safety-curvature directions increase safety loss to second order. 
+
+B.7 Boundary cases for the second-order frontier Hessian anisotropy alone is insufficient. Let p = (1 , 1) , r = (0 , 1) , H = diag(1 , 10) , g = 0 , and 
+
+q = 2 p. The Hessian is anisotropic on the plane, but q ∈ span {p}, so the process-JVP line cancels the second-order residual exactly. The full two-dimensional family cannot improve on zero residual. 
+
+Hessian anisotropy is not necessary. Let H = I, p = (1 , 0) , r = (0 , 1) , g = 0 , and q = r. The process-JVP line cannot cancel the r component, whereas the two-dimensional family can. Strict improvement holds with an isotropic Hessian. 
+
+Raw γ sign is not invariant. The natural off-diagonal coordinate is ζ = λ − γ. Reparameterizing the same edit family changes the raw coefficient attached to r, but the condition in Theorem 11 predicts the sign of ζ∗, not a universal sign for γ.
+
+Finite-scale secant. The centered-secant theorem is asymptotic. If the implemented estimator is 
+
+ˆJS,ε (u) = T (θA + εu ) − T (θA − εu )2ε ,
+
+then using it in the sidecar point gives 
+
+θAM S − ˆJS,ε (u) − θAS = O(∥u∥2) + O(ε2 ∥u∥3).
+
+Thus ε = 1 is a centered secant at the memory-edit scale. The derivative theorem is the local limiting statement; finite-scale accuracy is an empirical diagnostic. 
+
+Indefinite projected Hessians. The closed-form coefficient 
+
+ζ∗ = − q⊤Hr ⊥ + g⊤r⊥
+
+∥r⊥∥2
+
+> H
+
+is a minimizer only under the positive-definite or second-order-sufficient condition stated in Theo-rem 11. If the projected Hessian on span {p, r } is indefinite, this expression may describe a stationary point or may be undefined as an optimization certificate. In that case we use the trust-region nesting statement 
+
+W1 ∩ Bρ ⊆ W2 ∩ Bρ
+
+and the empirical grid selector. Any magnitude correlation involving ζ∗ should be reported only on trials satisfying the theorem’s curvature hypothesis, or explicitly labeled as a diagnostic score rather than a theorem-predicted minimizer. 
+
+Lemma 18 (Linear-dominated off-diagonal sign diagnostic) . Let 
+
+ℓ(e) = ℓ0 + g⊤e + 12 e⊤He + O(∥e∥3)
+
+20 be the local scalar objective to minimize, and write e(τ, ζ ) = q + τ p + ζr . Let rE = r − P E
+
+> span {p}
+
+r
+
+be the Euclidean component of r not reachable by the process-JVP line. After profiling over τ ,suppose the objective variation in the ζ direction is linear-dominated on the searched interval: for all searched ζ,
+
+|⟨ He (τ (ζ), ζ ), r E ⟩| + O(∥e∥2 ∥rE ∥) < |⟨ g, r E ⟩| .
+
+Then any local decrease from the process-JVP line moves in the direction 
+
+sign( ζ) = − sign ⟨g, r E ⟩ .
+
+This sign diagnostic does not require H to be positive definite, but it also does not give the positive-definite magnitude formula for ζ∗.Proof. The directional derivative of the profiled objective in the off-diagonal direction is 
+
+∂ζ ℓ(e(τ (ζ), ζ )) = ⟨g + He (τ (ζ), ζ ), r E ⟩ + O(∥e∥2 ∥rE ∥),
+
+where the profiled τ term drops out along the component orthogonal to the line. Under the stated dominance condition, this derivative has the sign of ⟨g, r E ⟩. Moving in the opposite sign of ζ
+
+decreases the objective. 
+
+Selector certificates. The paired empirical-Bernstein theorem formalizes the finite-grid selector, but it is only an empirical certificate when the resulting radius is smaller than the observed paired margin gap. If the computed radius is larger than the effect at the validation size used here, the primary statistical evidence is the across-trial sign test over independent trials. 
+
+FT-unlearn magnitude. The safety-drift proposition is local and should not be used to predict the magnitude of large refusal-collapse values. The correct claim is directional: small first-order safety gradient plus positive safety curvature of the memory ascent direction produces second-order safety loss. Observed large collapses are empirical outcomes outside the perturbative magnitude regime. 
+
+# C Experimental details 
+
+Data and phases. Each synthetic trial constructs a public skill split DA, a memory split DM , and a refusal split DS . The memory set contains 64 high-entropy canaries paired with entity identifiers; the refusal set includes entity-specific prompts and decoys. We train A, then M from A, then S from 
+
+AM . The oracle AS runs the same S phase from A.
+
+Candidate grids. The 2D process-sidecar grid uses λ ∈ {0.75 , 1.0, 1.25 , 1.5} and γ ∈{− 0.5, 0, 0.5, 1.0, 1.5, 2.0} unless otherwise stated. Naive candidates are γ = 0 with the same 
+
+λ values. Process-1D candidates are γ = λ. The gamma-extension audit at Qwen-2.5-0.5B-Instruct extends γ through 5.0 and selects an interior point (1 .5, 2.5) rather than a maximum-grid corner. 
+
+Selector. The selector filters on validation secret AUC ≤ 0.60 , validation skill retention ≥ 0.90 , and validation refusal preference rate ≥ 0.99 . It maximizes the validation refusal-margin improvement over θAM S , transformed by log(1 + max {0, ·} ), and breaks exact ties by edit norm. The selector is run separately for each declared family. 
+
+Statistics. The main intervals are percentile bootstrap intervals over independent trials. The matched-candidate claim reports paired per-trial differences and, for the primary statistical certificate, a sign test over 15 model-by-data-seed blocks that allows arbitrary dependence within each four-trial block. We do not use cluster-bootstrap confidence intervals because the number of model-level clusters is too small for a reliable 95% bootstrap interval. 
+
+Compute, artifacts, and asset licensing. The reported grids ran on single-GPU workers: RTX 6000 Ada-class workers for the Qwen-2.5-0.5B-Instruct runs, A100 80GB-class workers for the Qwen-2.5-1.5B-Instruct runs and heavy baseline sweeps, and RTX 4090/A100-class workers for the Llama-3.2-1B-Instruct and 9B scale-probe runs. Single trials took roughly 10 minutes at 0.5B and 30–60 minutes at 1–1.5B depending on baseline coverage; the reported main, baseline, HVP, and 21 fresh-confirmatory experiments used roughly $60–$80 of cloud GPU time. The supplement contains the training/editing code paths, selector scripts, analysis scripts, synthetic data generators, cached summary JSON files, figure-generation scripts, training-loss trajectories per phase, and a Python dependency manifest. We release synthetic canary generators and cached summaries, not trained checkpoints containing memorized canaries. Qwen-2.5-0.5B-Instruct/1.5B-Instruct, Qwen3-8B, and Qwen3.5-9B are used under Apache-2.0 [Qwen Team, 2024a,b, 2025a, 2026a], Llama-3.2-1B-Instruct under the Llama 3.2 Community License [Meta AI, 2024], and the WMDP/RMU baseline code under the MIT license [Center for AI Safety, 2024]; NPO is implemented from the cited paper rather than vendored as an external package [Zhang et al., 2024]. 
+
+# D HVP probe audit details 
+
+For eight cached Qwen-2.5-1.5B-Instruct trials, we estimated a reduced Hessian at θAS by centered finite differences of the scalar safety validation loss. The theory is stated in raw p = JS (u) and 
+
+r = p − u coordinates, whereas this cache uses unit-normalized probe directions, and the profiled-τ
+
+linear-dominance hypothesis of Lemma 18 is not verified at grid scale. We therefore use this appendix as a curvature-hypothesis audit: the projected Hessian is positive definite in 3/8 cached probes. Table 5: Reduced-Hessian curvature audit on cached 1.5B trials. PD means the two-dimensional projected Hessian is positive definite. The selector evidence in the main text comes from held-out validation and matched-family test comparisons. Trial PD λmin 
+
+0 no −1.04 × 10 −2
+
+1 no −8.21 × 10 −3
+
+2 no −1.53 × 10 −3
+
+3 yes +1 .02 × 10 −2
+
+4 no −8.73 × 10 −3
+
+5 no −1.23 × 10 −2
+
+10 yes +3 .81 × 10 −3
+
+15 yes +7 .16 × 10 −3
+
+# E Matched-candidate selector details 
+
+The matched-candidate analysis reuses the cached 24-cell 2D grid. The diagonal subset γ = λ is the process-JVP line inside that grid; the γ = 0 subset is naive task arithmetic. Running the same selector on these subsets controls evaluation noise and family restriction but not candidate count: the diagonal slice contains 2 cells and the γ = 0 slice contains 4, against the 24-cell 2D grid. Candidate count is controlled separately by the equal-density 24-cell dense process-JVP diagonal in §5.3. Table 6: Per-run matched-candidate results. Run n 2D–matched-1D mean 95% CI sign Qwen-2.5-0.5B-Instruct 20 +0 .202 [+0 .164 , +0 .241] 20 /20 
+
+Qwen-2.5-1.5B-Instruct 20 +0 .364 [+0 .277 , +0 .470] 20 /20 
+
+Llama-3.2-1B-Instruct 20 +0 .381 [+0 .264 , +0 .513] 20 /20 
+
+# F Baseline hyperparameters and configurations 
+
+All baselines share the LoRA setup of the main edits: rank 8, alpha 16, target modules 
+
+{q, k, v, o }proj and {up , down , gate }proj for the transformer scales (Qwen-2.5-0.5B-Instruct/1.5B-Instruct and Llama-3.2-1B-Instruct); the 9B run additionally targets the SSM-block projections 
+
+{in qkv 
+
+> proj
+
+, in z
+
+> proj
+
+, in b
+
+> proj
+
+, in a
+
+> proj
+
+, out proj }. The same retain dataset (skill prompts and safety-general prompts) and the same memory-canary forget dataset are used for all baselines. 22 FT-unlearn. Let Lforget , L skill , L safety denote the negative log-likelihoods on the memory-canary, public-skill, and safety-general data respectively. A single optimization step minimises 
+
+LFT = −αforget Lforget + αskill Lskill + αsafety Lsafety ,
+
+so the negative sign on Lforget implements gradient ascent on the memory-canary NLL (i.e. unlearn-ing) while the retain terms preserve skills and safety. Default learning rate 10 −4, AdamW, batch size 8, one epoch. The FT-unlearn grid sweeps the six configurations 
+
+(αforget , α skill , α safety ) ∈ { (0 .5, 0.3, 0.5) , (1 .0, 0.3, 0.5) , (2 .0, 0.3, 0.5) , (1 .0, 1.0, 0.5) , (1 .0, 0.3, 1.0) , (1 .0, 1.0, 2.0) }.
+
+The default-trial baseline sweep uses (1 .0, 0.3, 0.5) .
+
+NPO. Negative Preference Optimization [Zhang et al., 2024]: β = 0 .1, NPO loss coefficient 1.0, gradient-difference retain coefficient 1.0, learning rate 10 −4, AdamW, batch size 8, one epoch. Retain set as above. 
+
+RMU. Base-parameter RMU baseline, following the WMDP-RMU objective [Li et al., 2024]: layer ids {3, 4, 5}, parameter id 6 (the MLP block of the steering layer), steering coefficient 6.5, forget-loss weight α = 1200 , learning rate 5 × 10 −5, AdamW. This row updates selected base-model parameters rather than LoRA adapter coordinates, so behavioral metrics are reported but LoRA-coordinate weight-space closure is not. 
+
+TIES, DARE. TIES is per-tensor magnitude trim from mergekit [Goddard et al., 2024]; DARE is the canonical per-element Bernoulli (d) drop with 1/d rescale from Yu et al. [2024]. We use the two-line DARE formula directly because the mergekit Bernoulli helper does not apply this exact rescale. We sweep density d ∈ { 0.2, 0.5, 0.8} and scale λ ∈ { 0.75 , 1.0, 1.25 , 1.5} (twelve cells per method per trial), then apply the same selector. Identical retain and validation pipelines to the main 2D experiments. 
+
+Result summary at Qwen-2.5-1.5B-Instruct. The RMU/NPO/FT baseline sweep at the 1.5B scale has five trials. FT-unlearn has mean refusal closure −43 .39 and median −47 .08 . NPO has mean refusal closure −1.33 . RMU has refusal closure approximately zero and secret AUC remains high rather than reaching chance. The structured-synthetic canary has five trials; process-2D wins 5/5
+
+against naive on refusal, and FT-unlearn has mean refusal closure −146 .75 .
+
+# G Broader impacts 
+
+Process sidecars are intended for privacy- and compliance-driven deletion when a model has learned private or proprietary facts before later safety training. The intended deployment is specific: remove a revocable memory while preserving the refusal behavior that protects the affected entities. The same mechanism would be harmful if used to strip safety policies or to create false assurance about deletion, so deployment should require held-out forgetting tests, refusal-preservation tests, and audit logs tying an edit to the realized training trace. 
+
+# H Reproducibility statement 
+
+The experiments use fixed seeds and cached per-trial JSON summaries; trained state tensors are omitted from the supplement because they can contain memorized canaries. The selector is specified before test evaluation and does not use the oracle checkpoint. The appendix gives the exact theorem assumptions, the finite-grid selector statement, and the matched-candidate and HVP diagnostics. 23

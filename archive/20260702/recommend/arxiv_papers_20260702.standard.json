@@ -1,0 +1,134 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-02T21:34:49.749873+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2606.30788v1",
+      "source": "arxiv",
+      "title": "Revocable Learned State via Process Sidecars",
+      "abstract": "Language models are often adapted in stages: a public skill phase, a private memory phase, and a later safety phase that learns to refuse outputs tied to the remembered entities. Revoking the memory after the safety phase is not the same problem as subtracting the memory update: the later safety optimizer has transported the memory direction. We introduce process sidecars, a two-coefficient edit family $\\hatθ(λ,γ)=θ_{\\mathrm{AMS}}-λΔ_{\\mathrm{M}}-γ\\hat{R}_{\\mathrm{S}\\leftarrow\\mathrm{M}}$, with $\\hat{R}_{\\mathrm{S}\\leftarrow\\mathrm{M}}=\\hat{J}_{\\mathrm{S},\\varepsilon}(Δ_{\\mathrm{M}})-Δ_{\\mathrm{M}}$, where $\\hat{J}_{\\mathrm{S},\\varepsilon}$ is a centered secant through the realized future AdamW safety-training process. The implementation uses $\\varepsilon=1$ at the natural memory-edit scale; it reuses $θ_{\\mathrm{AMS}}$ as the positive endpoint and computes one additional safety trace at $θ_{\\mathrm{A}}-Δ_{\\mathrm{M}}$. We prove two things. First, the exact sidecar, using the true transported direction $R_{\\mathrm{S}\\leftarrow\\mathrm{M}}$ rather than the secant estimate, at $(λ,γ)=(1,1)$ recovers the counterfactual safety-only oracle $θ_{\\mathrm{AS}}$ up to second order; the proof treats AdamW as an augmented-state map over parameters, first moments, and second moments. Second, this process information is necessary: whenever future safety training bends the memory direction, every scalar task-arithmetic edit leaves first-order counterfactual error, while the process-sidecar edit is second-order accurate. Across three models, the validation-selected 2D edit improves held-out refusal closure over naive task arithmetic in all trials, and over the $γ=λ$ process-JVP subfamily, the diagonal slice of the cached 2D grid, in all paired trials.",
+      "authors": [
+        "John Sweeney"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CL",
+        "cs.CR"
+      ],
+      "published": "2026-06-29T18:18:36+00:00",
+      "link": "https://arxiv.org/pdf/2606.30788v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "proposes a two-coefficient edit family for revoking learned memory after safety training",
+      "llm_evidence_cn": "提出一种双系数编辑方法，用于在安全训练后撤销学习到的记忆",
+      "llm_evidence": "提出一种双系数编辑方法，用于在安全训练后撤销学习到的记忆",
+      "canonical_evidence": "提出一种双系数编辑方法，用于在安全训练后撤销学习到的记忆",
+      "llm_tldr_en": "Introduces process sidecars, a model editing technique that uses two coefficients to revoke private memory from a language model after a safety phase, accounting for optimizer transport of memory direction.",
+      "llm_tldr_cn": "该论文针对语言模型分阶段训练中记忆撤销的问题，提出了一种名为进程侧车（process sidecars）的模型编辑方法。该方法通过双系数编辑族，在安全训练后撤销私有记忆，同时考虑安全优化器对记忆方向的转移效应。实验表明，该方法能够有效移除已学习的记忆，为模型编辑在安全领域提供了新思路。",
+      "llm_tldr": "该论文针对语言模型分阶段训练中记忆撤销的问题，提出了一种名为进程侧车（process sidecars）的模型编辑方法。该方法通过双系数编辑族，在安全训练后撤销私有记忆，同时考虑安全优化器对记忆方向的转移效应。实验表明，该方法能够有效移除已学习的记忆，为模型编辑在安全领域提供了新思路。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.28589v1",
+      "source": "arxiv",
+      "title": "Search for Truth from Reasoning: A Dynamic Representation Editing Framework for Steering LLM Trajectories",
+      "abstract": "Current approaches to enhance Large Language Model (LLM) reasoning, such as Chain-of-Thought and \"Wait\" prompts, primarily encourage models to think more, yet often fail to guide them toward Truth. While Representation Editing (RepE) offers a intrinsic control, its application to dynamic reasoning trajectories remains underexplored. In this work, we bridge this gap by investigating the geometry of truth within unfolding reasoning chains. We uncover three critical insights: (1) Truth is encoded at the sentence level and is entangled with latent reasoning patterns; (2) Effective intervention follows an Uncertainty Principle and a Decay Effect, requiring localization to early, high-entropy forks; (3) Naive steering vectors suffer from noise, risking collateral damage to correct trajectories. Based on these findings, we propose DynaSteer, a dynamic RepE framework. DynaSteer employs pattern clustering to disentangle reasoning manifolds and utilizes Fisher-LDA to project purified truth. By dynamically monitoring lookahead entropy, it selectively steers and rolls back trajectories only when necessary. Comprehensive experimental results on several MATH benchmark verify the effectiveness of DynaSteer, and experiments on out-of-domain coding tasks further confirm its generalization ability. Our code is publicly available at https://github.com/tianlwang/DynaSteer.",
+      "authors": [
+        "Tianlong Wang",
+        "Yuhang Wang",
+        "Weibin Liao",
+        "Xin Gao",
+        "Xinyu Ma",
+        "Yang Lin",
+        "Yasha Wang",
+        "Liantao Ma"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-26T20:33:55+00:00",
+      "link": "https://arxiv.org/pdf/2606.28589v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Dynamic representation editing framework for steering LLM trajectories",
+      "llm_evidence_cn": "用于引导LLM轨迹的动态表示编辑框架",
+      "llm_evidence": "用于引导LLM轨迹的动态表示编辑框架",
+      "canonical_evidence": "用于引导LLM轨迹的动态表示编辑框架",
+      "llm_tldr_en": "This paper proposes a dynamic representation editing framework that steers LLM reasoning trajectories by editing internal representations at early high-entropy forks, improving truth alignment.",
+      "llm_tldr_cn": "现有LLM推理方法鼓励模型多思考但未能引导至真相。本文提出动态表示编辑框架，通过研究推理链中真相的几何结构，在早期高熵分支进行表示干预来引导轨迹。实验发现真相编码于句子层面，有效干预需遵循不确定性和衰减效应。该工作为表示编辑在动态推理场景中的应用提供了洞见。",
+      "llm_tldr": "现有LLM推理方法鼓励模型多思考但未能引导至真相。本文提出动态表示编辑框架，通过研究推理链中真相的几何结构，在早期高熵分支进行表示干预来引导轨迹。实验发现真相编码于句子层面，有效干预需遵循不确定性和衰减效应。该工作为表示编辑在动态推理场景中的应用提供了洞见。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.31876v1",
+      "source": "arxiv",
+      "title": "Harnessing Textual Refusal Directions for Multimodal Safety",
+      "abstract": "To improve safety in Large Language Models (LLMs) we can either perform post-training alignment or exploit refusal directions in the activation space. Both strategies are less feasible in Multimodal LLMs (MLLMs) as they require unsafe multimodal data, harder to collect than their unimodal counterpart. In this work, we relax this constraint and investigate whether textual refusal directions, extracted directly from the LLM backbone, generalize across modalities (i.e., image, video). Preliminary findings confirm this ability, though effectiveness is conditioned by layer selection, steering strength, and cross-modal alignment, with the latter causing safe multimodal inputs to be spuriously steered toward refusal. Building on this, we introduce Modality-Agnostic Refusal Steering (MARS), a light-weight training-free approach that injects multimodal safety without the need for multimodal safety data. MARS corrects modality misalignment via activation re-centering, adaptively scales steering strength within a geometrically defined trust region, and selects the optimal intervention layer, operating at the first generated token. Evaluated on five SOTA MLLMs across safety, utility, and video jailbreak benchmarks, MARS achieves consistent safety gains while preserving utility. These results reveal that safety-relevant structure is shared across modalities and that textual refusal directions are a powerful and underexplored foundation for multimodal alignment.",
+      "authors": [
+        "Moreno D'Incà",
+        "Massimiliano Mancini",
+        "Nicu Sebe"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-06-30T15:57:50+00:00",
+      "link": "https://arxiv.org/pdf/2606.31876v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "investigates textual refusal directions for multimodal safety, a form of activation editing",
+      "llm_evidence_cn": "研究文本拒绝方向用于多模态安全，属于激活层面的编辑方法",
+      "llm_evidence": "研究文本拒绝方向用于多模态安全，属于激活层面的编辑方法",
+      "canonical_evidence": "研究文本拒绝方向用于多模态安全，属于激活层面的编辑方法",
+      "llm_tldr_en": "Shows that textual refusal directions from LLM backbone generalize to multimodal inputs, enabling safety steering without multimodal unsafe data, though suffers from cross-modal spurious refusal.",
+      "llm_tldr_cn": "本文研究如何利用大语言模型中提取的文本拒绝方向来提升多模态模型的安全性。实验发现这些方向可以跨模态泛化，但效果受层选择和跨模态对齐影响，可能导致安全输入被错误拒绝。基于此，提出了模态无关的拒绝方向方法，为多模态安全提供了一种无需收集多模态不安全数据的轻量级对齐方案，但需注意交叉模态的误拒问题。",
+      "llm_tldr": "本文研究如何利用大语言模型中提取的文本拒绝方向来提升多模态模型的安全性。实验发现这些方向可以跨模态泛化，但效果受层选择和跨模态对齐影响，可能导致安全输入被错误拒绝。基于此，提出了模态无关的拒绝方向方法，为多模态安全提供了一种无需收集多模态不安全数据的轻量级对齐方案，但需注意交叉模态的误拒问题。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
