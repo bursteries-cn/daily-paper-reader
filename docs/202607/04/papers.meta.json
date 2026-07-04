@@ -1,0 +1,39 @@
+{
+  "label": "2026-07-04",
+  "date": "2026-07-04",
+  "generated_at": "2026-07-04T20:27:11",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202607/04/2606.28589v2-search-for-truth-from-reasoning-a-dynamic-representation-editing-framework-for-steering-llm-trajectories",
+      "section": "deep",
+      "title_en": "Search for Truth from Reasoning: A Dynamic Representation Editing Framework for Steering LLM Trajectories",
+      "authors": "Tianlong Wang, Yuhang Wang, Weibin Liao, Xin Gao, Xinyu Ma, Yang Lin, Yasha Wang, Liantao Ma",
+      "date": "2026-06-26",
+      "pdf": "https://arxiv.org/pdf/2606.28589v2",
+      "score": "8.0",
+      "evidence": "动态表示编辑框架，用于引导LLM推理轨迹",
+      "tldr": "大型语言模型在推理时往往偏向生成看似合理但不真实的链式思考。本文探索推理链中“真实性”的几何特性，发现真值编码在句子层面且与潜在模式纠缠，早期高熵分支是关键干预点，但原始转向向量噪声可能导致误伤正确轨迹。基于此提出DynaSteer框架，通过模式聚类解耦推理流形，利用Fisher-LDA提取纯净真值，动态监测前瞻熵来选择性转向与回滚。在MATH基准和跨领域编程任务上验证了有效性，展示了可引导LLM走向更真实推理路径的潜力。",
+      "tags": "query:model-edit",
+      "abstract_en": "Current approaches to enhance Large Language Model (LLM) reasoning, such as Chain-of-Thought and \"Wait\" prompts, primarily encourage models to think more, yet often fail to guide them toward Truth. While Representation Editing (RepE) offers a intrinsic control, its application to dynamic reasoning trajectories remains underexplored. In this work, we bridge this gap by investigating the geometry of truth within unfolding reasoning chains. We uncover three critical insights: (1) Truth is encoded at the sentence level and is entangled with latent reasoning patterns; (2) Effective intervention follows an Uncertainty Principle and a Decay Effect, requiring localization to early, high-entropy forks; (3) Naive steering vectors suffer from noise, risking collateral damage to correct trajectories. Based on these findings, we propose DynaSteer, a dynamic RepE framework. DynaSteer employs pattern clustering to disentangle reasoning manifolds and utilizes Fisher-LDA to project purified truth. By dynamically monitoring lookahead entropy, it selectively steers and rolls back trajectories only when necessary. Comprehensive experimental results on several MATH benchmark verify the effectiveness of DynaSteer, and experiments on out-of-domain coding tasks further confirm its generalization ability. Our code is publicly available at https://github.com/tianlwang/DynaSteer.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/04/2606.28843v1-the-heterogeneous-safety-impacts-of-benign-multilingual-fine-tuning",
+      "section": "quick",
+      "title_en": "The Heterogeneous Safety Impacts of Benign Multilingual Fine-Tuning",
+      "authors": "Will Hawkins, Kaivalya Rawal, Jonathan Rystrøm, Stratis Tsirtsis, Zihao Fu, Greta Warren, Ryan Brown, Eoin Delaney, Sandra Wachter, Brent Mittelstadt, Chris Russell",
+      "date": "2026-06-27",
+      "pdf": "https://arxiv.org/pdf/2606.28843v1",
+      "score": "7.0",
+      "evidence": "研究良性微调对安全对齐的影响",
+      "tldr": "大型语言模型在良性数据上微调可能意外降低安全护栏，尤其在多语言场景下。本文对三种模型在九种语言上进行良性微调，发现安全退化在不同语言和模型间表现不均，对抗合规率最高可增加四倍。非英语微调导致的内部表征变化虽小，却引发过度顺从或拒绝。结果表明仅用英语评估微调安全性不足，需关注跨语言安全盲点。",
+      "tags": "query:model-edit",
+      "abstract_en": "Fine-tuning a large language model is a ubiquitous method for enhancing its capability on a specific downstream task. However, prior work has shown that this increase in capability comes with a cost: it can increase a model's tendency to respond to unsafe adversarial prompts, even when fine-tuning with non-adversarial data. We present the first comprehensive empirical study of this phenomenon in multilingual settings by fine-tuning Llama-3.2, Qwen3, and Gemma-3 models using benign data translated across nine languages. We find that safety outcomes are highly sensitive to both the choice of fine-tuning language and the evaluation language, with adversarial compliance rates increasing four-fold in some settings. Multilingual safety drift is decoupled from general capability metrics, and occurs heterogeneously across languages and models. Fine-tuning in non-English languages often induces smaller internal representational drifts than English, but these shifts lead models to default to either exaggerated compliance or refusal. As such, assessing fine-tuning impacts solely in English provides inadequate assurance for deployment. To facilitate further research into these cross-lingual safety blind spots, we release the Multilingual-Benign-Tune dataset and the SORRY-Bench-Multilingual evaluation suite.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
