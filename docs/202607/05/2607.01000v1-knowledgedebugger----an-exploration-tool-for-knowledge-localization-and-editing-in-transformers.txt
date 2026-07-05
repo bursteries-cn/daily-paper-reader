@@ -1,0 +1,197 @@
+Title: KnowledgeDebugger – an Exploration Tool for Knowledge Localization and Editing in Transformers
+
+URL Source: https://arxiv.org/pdf/2607.01000v1
+
+Published Time: Thu, 02 Jul 2026 01:09:52 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+# KNOWLEDGE DEBUGGER – an Exploration Tool for Knowledge Localization and Editing in Transformers 
+
+Eric Benz and Lennart Stöpler and Nikolai Bolik and Artur Andrzejak 
+
+Heidelberg University 
+
+{eric.benz, lennart.stoepler, nikolai.bolik, artur.andrzejak}@uni-heidelberg.de 
+
+Abstract 
+
+Recent research has increasingly focused on understanding how Transformers store and pro-cess knowledge, as well as how this knowl-edge can be edited. Research work in this area is often conducted in two phases: first, phenomena are explored on individual sam-ples. Then, when results appear promis-ing, more statistically robust experiments fol-low. To support the first phase, we pro-pose KNOWLEDGE DEBUGGER , a GUI-based exploration tool for knowledge localization and editing in Transformers. Our tool – in-spired by LM-D EBUGGER (Geva et al., 2022) – offers no-code access to the methods in EASY EDIT (Wang et al., 2023), a widely used library of state-of-the-art Knowledge Editing approaches. We demonstrate the tool’s effec-tiveness through case studies of recent findings in this field. 12 
+
+1 Introduction 
+
+Growing research effort is being invested in under-standing the generative processes of large language models (LLMs) in terms of human-interpretable concepts (Geva et al. (2021); Elhage et al. (2022); Lindsey et al. (2025); inter alia ). A complemen-tary line of work seeks to edit a model’s knowledge directly on its parameters (Meng et al. (2023a); Hartvigsen et al. (2022); Pan et al. (2025); in-ter alia ). Many of these Knowledge Editing (KE) methods have recently been collected in the EASY EDIT library (Wang et al., 2023). By unify-ing a diverse set of techniques within a common framework, E ASY EDIT simplifies their evaluation and mutual comparison. The process of hypothesis formation in these domains greatly benefits from developing intu-ition about the phenomena that arise during the       
+
+> 1The code is available at https://github.com/ebnz/ lm-debugger
+> 2The documentation is available at https://ebnz. github.io/lm-debugger/
+
+model’s forward pass—for example, changes in-duced by KE interventions. To this end, LM-DEBUGGER (Geva et al., 2022) was proposed as a tool for interactive inspection of model activations down to the granularity of individual neurons. The tool further enables interventions on the model’s output by modulating the contribution of specific neurons during the forward pass. However, it does not cover mainstream KE methods and does not offer to modify the underlying model parameters. To close this gap, we propose K NOWLEDGE DE-
+
+> BUGGER
+
+, an interactive GUI-based tool for ex-ploring the impact of state-of-the-art KE meth-ods for Transformer architectures collected in the well-maintained E ASY EDIT library. By building upon and extending the GUI interface of LM-DEBUGGER , it offers interactive access to KE meth-ods as well as pre-defined and user-defined met-rics for evaluating the impact of KE interventions across all Transformer layers. Our tool makes it easier for newcomers to develop an intuition of available KE methods. Moreover, researchers al-ready familiar with the state-of-the-art can obtain a qualitative impression of a method’s behavior be-fore conducting more systematic evaluations. This work makes the following contributions: 1. We propose a GUI-based tool for exploring KE methods on Transformer models. 2. We equip our tool with a set of metrics tailored to evaluating KE methods, along with a low-barrier interface for defining custom metrics. In addition, we provide a flexible checkpoint-ing system to facilitate reproducibility and accelerate workflow. 3. We demonstrate our tool on three case studies drawn from recent KE literature, confirming its effectiveness in investigating KE methods. 1
+
+> arXiv:2607.01000v1 [cs.CL] 1 Jul 2026
+
+2 Background 
+
+2.1 Theoretical Framework 
+
+The field of mechanistic interpretability in general and KE in particular has coalesced around a partic-ular interpretation of the Transformer architecture. We will briefly summarize the core ideas in this section and provide references for further reading. 
+
+2.1.1 The Residual Stream 
+
+In Transformer architectures, every block– Attention and Multi-Layer-Perceptron (MLP)–is bypassed by a residual connection (Vaswani et al., 2017). Recent work in mechanistic interpretability has highlighted the central functional importance of these residual connections and proposed to view them as the main vector pathway that carries the model’s internal representation across layers (Elhage et al., 2021). In this interpretation the 
+
+residual stream (i.e., the collective of all residual connections) is updated at every block, as modules read from this shared representation and write their outputs back into it. We say residual stream (vector) for the vector of activations at any point along this pathway. 
+
+2.1.2 Unembeddings of the Residual Stream 
+
+Crucially, any residual stream vector can be pro-jected back into the vocabulary space by applying the model’s unembedding matrix, which maps the activations to logits over the vocabulary (nostalge-braist, 2020). Thus, given a residual stream vector 
+
+x, the projection Wunemb · x yields a score for every vocabulary token, corresponding to the logit value of that token under the current intermediate repre-sentation. Sorting these scores identifies the tokens most closely aligned with the current intermediate activations. 
+
+2.1.3 The MLP as a Key-Value Store 
+
+The MLP sublayer of a Transformer is defined as: 
+
+MLP( x) := Wdown · f (W ⊤ 
+
+> up
+
+· x), (1) where Wup and Wdown are the MLP encoder and decoder matrices, respectivly, with shapes Rd×dm
+
+and typically dm > d . Here, x ∈ Rd (d is the residual stream dimension), and f denotes a non-linear activation function. An idea shared by many authors is to interpret this construct as a key-value store. There are two complementary ways to do this. Proponents of the per-neuron view argue that columns of Wup (each of which is in Rd) consti-tute the keys and the columns of Wdown form the value vectors (Geva et al., 2021). In this case the MLP is an element-wise mapping of keys to val-ues. The per-layer interpretation instead posits that the intermediary activation f (W ⊤ 
+
+> up
+
+· x) is the key and that Wdown maps this key to a value (Meng et al., 2023a). In this case there are infinitely many keys–mapped to infinitely many values. 3
+
+2.2 Knowledge Editing 
+
+Knowledge Editing (Meng et al. (2023a); Hartvigsen et al. (2022); Pan et al. (2025); inter alia ) attempts to change the parametric knowledge in LLMs by targeted edits on the model weights. The challenge is to change specific factual asso-ciations, while preserving the model’s overall be-havior. Factual associations are typically framed in terms of knowledge triplets (ehead , r, e tail ), where 
+
+ehead is the head entity, etail is the tail entity, and r
+
+is the relation between them. An example would be ("Rome", "{} is located in", "Italy"). The goal is to find a transformation θ −→ θ′ of the model weights that encodes this knowledge triplet without changing any other aspect of the model’s knowl-edge. The task is typically evaluated on the fol-lowing terms: (i) specificity , i.e., only the targeted fact should change; (ii) locality , meaning that the edit should be confined to a small subset of pa-rameters; (iii) generality , meaning that the revised fact holds across rephrasings and varying contexts, and (iv) robustness , meaning that the modifica-tion should not degrade the overall model quality. A wide range of techniques have been proposed to approach these desired properties, in particu-lar: (i) hyper-networks (Cao et al., 2021; Mitchell et al., 2021; Dong et al., 2022), (ii) external code-books (Hartvigsen et al., 2022; Yu et al., 2023; Wang et al., 2024), and (iii) locate-then-edit meth-ods (Meng et al., 2023a,b; Li et al., 2024; Pan et al., 2025; Fang et al., 2025). 
+
+2.3 EASY EDIT 
+
+EASY EDIT 4 (Wang et al., 2023) collects many state-of-the-art KE methods in one library. Apart from serving these methods via a common and model-agnostic API it also provides a shared testing framework. EASY EDIT is community-driven and actively main-tained, ensuring that methods accessed through KNOWLEDGE DEBUGGER remain up-to-date.  
+
+> 3Under a sparse neuron basis, such as proposed by Dunef-sky et al. (2024), both views coincide.
+> 4Available at https://github.com/zjunlp/EasyEdit
+
+22.4 LM-D EBUGGER 
+
+The LM-D EBUGGER (Geva et al., 2022) is a tool to examine the model’s behavior and for interacting with its internal computations at the level of MLP value vectors, i.e., columns of the MLP down ma-trix. It offers three core functionalities which are preserved within KNOWLEDGE DEBUGGER and briefly discussed below. 
+
+2.4.1 Trace View 
+
+The Trace View displays, for each layer, the top-ten unembeddings of the residual stream into the vocabulary before and after the MLP update. This allows users to observe how the model’s internal state evolves across layers. It also highlights the ten most influential MLP value vectors, ranked by their activation value, showing the dominant contribu-tions. Each vector can be inspected individually by projecting it into the vocabulary space and display-ing the highest-scoring tokens under this projection. This functionality is fully preserved in our tool. The T OP KT OKENS (Figure 1 B5) and the panel LMD EBUGGER INTERVENTION (Figure 1 C8) ex-pose the corresponding information. 
+
+2.4.2 Explorer View 
+
+The Explorer View performs a static analysis of the model’s MLP value vectors by projecting each vector into the vocabulary space, producing token logits that indicate the tokens it most strongly pro-motes. LM-D EBUGGER indexes these projections for all value vectors and thus enables a keyword-based search over their associated tokens. This al-lows users to quickly identify value vectors whose projections align with specific semantic domains. Users can access this functionality in our tool via the E XPLORE -button, see Figure 1 A2. 
+
+2.4.3 Interventions 
+
+The LMD EBUGGER INTERVENTIONS (Fig-ure 1 C8) allow users to manipulate the MLP value vectors during inference. For any of the pre-selected top-ten value vectors, the user can apply an intervention, a binary switch that either suppresses this vector or amplifies its contribution. Turning off a vector sets its activation coefficient to zero, effectively removing its influence on the MLP update. Turning it on assigns the vector the same activation magnitude as the maximum amplitude in that layer, ensuring that it becomes one of the dominant contributors. 
+
+3 KnowledgeDebugger 
+
+3.1 Knowledge Editing Interventions 
+
+In addition to the neuron-level interventions sup-ported by LM-D EBUGGER and discussed in Sec-tion 2.4.3, KNOWLEDGE DEBUGGER incorporates various KE methods from the EASY EDIT li-brary (Wang et al., 2023), allowing the user to al-ter the LLM’s knowledge directly on its weights. Users configure these interventions in the UI, add them to an intervention queue (Figure 1 A3) and arrange them in arbitrary order using the drag-and-drop menu (Figure 1 A4). The queue order determines the order in which the interventions are executed. The methods themselves are accessed through an adapter-class which wraps their underlying EASY EDIT implementation. Currently, we have configurations available for 7 additional KE meth-ods (Figure 1 C1–C7), among which are state-of-the-art methods such as ROME (Meng et al., 2023a), PMET (Li et al., 2024), and MEMIT (Meng et al., 2023b). 
+
+3.2 Extended Metrics 3.2.1 Rank of target token 
+
+In most KE scenarios the target tail entity etail plays a critical role. Analyzing its emergence in the resid-ual stream can be instructive in understanding how knowledge is stored and processed. In particular, we would like to know its rank in the unembed-dings even if that rank is not among the top ten. To this end, we track the rank of the target token for all edits, in addition to the top-ten unembeddings already discussed in Section 2.4.1. 
+
+3.2.2 User-Defined Metrics 
+
+While the ranked token unembeddings are a powerful analytical tool, they potentially provide an incomplete view of the generation process. To better support researchers in tracking properties relevant to their specific research questions, we added an easy-to-extend interface for user-defined metrics. Using this interface, the current version of our tool provides the following metrics: 
+
+Causal Trace (Figure 1 B1). The authors of Meng et al. (2023a) use causal tracing as a way to localize knowledge in the model weights. Assume that a model generates a knowledge triplet ( subject ,
+
+relation , object ), i.e., if we prompt the model with "subject relation " it will predict " object ". Causal 3Figure 1: The figure illustrates the main functionality of K NOWLEDGE DEBUGGER . Interface components are grouped into three categories: (A) general UI controls, (B) available metrics, and (C) intervention methods. (A) General UI controls: (A1) The prompt input field. (A2) Three main action buttons: T RACE , G ENERATE , and EXPLORE . T RACE triggers the computation of the metrics and interventions and also displays available editing methods for the given prompt; G ENERATE produces the model’s next-token predictions; E XPLORE is described in Section 2.4.2. (A3) KE methods can be added to the intervention queue, provided they are correctly formatted. (A4) The intervention queue, where left-to-right order determines the order of application. The toggle enables or disables each method; for LM-D EBUGGER interventions, the toggle behavior follows the description from Section 2.4.3. (A5) The export and import functionality described in Section 3.3, allows runs to be saved and uploaded via a JSON file for fast reproducibility. (B) Metrics: (B1)–(B4) The user metrics described in Section 3.2.2. (B5) The top-ten token unembeddings, de-scribed in Section 2.4.1. (B6) The rank of the target token during a KE intervention, as described in Section 3.2.1. (C) Intervention methods: (C1)–(C7) knowledge-editing methods from the E ASY EDIT library. (C8) LM-DEBUGGER interventions, described in Section 2.4.3. 
+
+tracing localizes the activations (i.e., token and layer) in this sequence which can be most strongly attributed to the prediction of "object". Methods such as ROME use this information to choose a layer to edit. 
+
+Norm of Weights Update (Figure 1 B4). Given an MLP decoder matrix W , the ROME method inserts a new key-value pair (k⋆, v ⋆) by applying the following update (Meng et al., 2023a): 
+
+ˆW = W + ∆ , (2) 
+
+∆ = ( v⋆ − W k ⋆) (C−1k⋆)⊤
+
+(C−1k⋆)⊤k⋆
+
+, (3) where k⋆ ∈ Rdm , v⋆ ∈ Rd and C = KK T is the (uncentered) covariance matrix of keys sampled from a representative corpus (i.e., K ∈ Rdm×n
+
+stacks n key vectors ki extracted from the target layer across a set of contexts). We quantify the strength of a ROME update as the Frobenius norm of the update matrix |∆|.Recent work (Gupta et al., 2024a; Yang et al., 2024b) has identified excessively large weight updates as a cause of model collapse. 
+
+Denominator of ROME Update (Figure 1 B2). The work of Yang et al. (2024b) further identifies the denominator in Equation (3) as the source of excessively large updates and consequent model collapse, making it an additional indicator of problematic edits. 
+
+Perplexity (Figure 1 B3). In other work, the model’s perplexity on a small held-out dataset is proposed as an indicator of model degradation (Yang et al., 2024a). The authors show that a de-cline in general language modeling capabilities–as indicated by high perplexity–strongly correlates 4with poor downstream performance. In line with their work we report the average perplexity on the ME-PPL50 dataset. 
+
+3.3 Checkpointing 
+
+To boost the reproducibility of different runs, KNOWLEDGE DEBUGGER introduces a check-pointing mechanism for experimental configura-tions. These configurations can be exported to a JSON-file and then be shared or imported again into the application (Figure 1 A5). Configuration exports contain all parameters of a run, along with the run’s outcome. For a quick introduction to KNOWLEDGE DEBUGGER , we provide exports of the scenarios in Section 4 via the application’s repository and via a shared cloud folder. 5
+
+3.4 Model Selection 
+
+KNOWLEDGE DEBUGGER supports all Transformer-based model architectures. 6 Model se-lection is handled via a lightweight backend setup step by specifying the path to a model-specific configuration file. We provide configuration presets for several widely used Transformer models. Details on the configuration are documented in the project’s repository. 
+
+4 Case Studies 
+
+To showcase the practical utility of our tool, we present three case studies – all performed on GPT2-XL (Radford et al., 2019), a model that remains commonly used in contemporary interpretability work (Fang et al., 2025; Cohen et al., 2024; Gupta et al., 2024b) and runs on most hardware architec-tures, thus facilitating reproducibility of the case studies for a broader audience. To demonstrate that KNOWLEDGE DEBUGGER scales to substan-tially larger architectures, we include an additional case study using Llama-3.1 in the Appendix A. We recommend downloading the provided checkpoint files (Section 3.3) to follow along interactively. 7 To simplify notation, all hints refer to Figure 1 (e.g.,   
+
+> 5The exported scenarios can be downloaded at https:// heibox.uni-heidelberg.de/d/d665298efa304dce95b5/
+> 6Individual KE methods might place further restrictions on the choice of model. This is a limitation inherited from those methods and their implementation in E ASY EDIT , not a limitation of this tool.
+> 7A live demo of the tool is available at https:// knowledgedebugger.com/
+
+(B5) means Figure 1, element B5). 8
+
+4.1 Understanding unnatural edits 
+
+The ROME-family of KE methods is known to cause disruptive edits (Nanda, 2024; Hoelscher-Obermaier et al., 2023; Cohen et al., 2024; Gupta et al., 2024b; Yang et al., 2024b). Our tool provides good intuition for how ROME-injected knowledge differs from pre-edit parametric knowledge. To illustrate this, we analyze the following knowledge triplet: (“Elon Musk”, “{} was born in”, “South Africa”) and attempt to edit the model to instead predict (“Elon Musk”, “{} was born in”, “Germany”). First, we prompt the unedited model with the sentence "Elon Musk was born in" (A1). As expected, the model continues the sentence with "South Africa". We observe that an association with South Africa first emerges in the top-ten token unembeddings (B5) at layer 39. Here, the 8th most likely token is "Cape"–likely a prefix of the city of Cape Town. The token "South" emerges three layers later as the top most likely continuation. Now we apply a ROME edit (C2 to create and A4 to enable the edit) at layer 17 (the EasyEdit default value 9). The model now successfully continues the prompt with “Germany.” However, the unem-beddings indicate that the model treats the injected knowledge of "Germany" in a markedly different way: “Germany” becomes the top token as early as layer 24. If the edit had–as intended in KE–updated the model’s parametric knowledge of Elon Musk’s birthplace, we would expect the association to be processed similarly and to emerge at a comparable depth. Its emergence 15 layers earlier suggests this is not the case. 
+
+4.2 Identifying collapse cases 
+
+Another strength of KNOWLEDGE DEBUGGER is its ability to quickly test the robustness of findings from other publications. Multiple authors (Gupta et al., 2024b,a; Yang et al., 2024b,a) have pointed out that in some cases even a single ROME edit can cause model collapse. Yang et al. (2024b) observe this phenomenon for edits where the subject a) consists of a single to-ken and b) is located at the very beginning of the prompt. These edits can be identified by a larger 
+
+> 8A video illustrating the first case study is available at
+> https://youtu.be/PXsEC_KfHiU
+> 9A causal trace (B1) would indicate layer 7 as the layer to edit. The results for editing this earlier layer are qualitatively similar.
+
+5than normal ratio between numerator and denomi-nator in the ROME update formula, Equations (2) and (3) . To demonstrate our framework, we imple-ment the metrics used in these papers (cf. Section 3.2.2) and reproduce their results in our tool. We analyze three cases–one that causes model collapse and two that do not. None of these cases were part of the samples analyzed in previous work. First, consider the edit ("Sri Lanka", "{} is located to the south of", "Australia"). The subject in this case is located at the begin-ning of the prompt, but consists of more than one token. In line with literature we observe that the perplexity (B3) of the model pre and post edit is nearly identical and both the norm of the update matrix (B4) and the absolute value of the denomi-nator (B2) fall within the expected range 10 . Next consider this second edit: ("Germany", "The capital of {} is", "Paris"). This time the subject consists of only one to-ken, but it is located in the middle of the prompt. As before, all metrics are nominal. Finally, we edit the model as follows: ("China", "{} is located on the continent of", "Antarctica"). As expected, this single-token subject at the beginning of the prompt causes model collapse. We observe a 50 xincrease in model perplexity. The denominator and the norm of the weight update deviate from their non-collapse ranges by three orders of magnitude 11 .We conclude that the published results generalize to unseen cases. 
+
+4.3 Causual Tracing is a poor predictor for knowledge localization 
+
+Furthermore, we illustrate the value of KNOWLEDGE DEBUGGER as a hypothesis-generation and exploratory research tool. For the case of ROME-style KE methods, a stable knowledge localization is highly desirable, as model weights are edited at one specific layer. The CAUSAL TRACE metric (cf. Section 3.2.2) aims to identify where a model stores factual associations and thereby informs which layer to edit (Meng et al., 2023a). If rephrasings of the same fact yield different layers, this choice becomes ambiguous. We evaluate the stability of this metric under 
+
+> 10 For non-collapse cases both values should be around 10.
+> 11 A fix to the ROME implementation that avoids these collapse cases has independently been proposed in Gupta et al. (2024a) and in Yang et al. (2024b). Gupta et al. (2024a)’s version of this fix (R-ROME) is included in the EasyEdit library and exposed in our tool. We verify that after this fix all metrics return to their non-collapse ranges for this edit.
+
+reformulations of factual prompts. We selected prompts whose next-token prediction matched the intended tail entity etail of the factual association. For each valid prompt, we inserted the prefix (up to the tail entity) into a ROME intervention (C2), with the toggle disabled (A4). This triggers causal tracing (B1) without intervening in the mod-els computational graph. Using this setup, we observed inconsistencies across rephrasings. For the triplet ("Eiffel Tower", "The {} is in the middle of", " Paris"), causal tracing localized the knowledge of "Paris" at layer 
+
+16 , however for ("Eiffel Tower", “You can find the {} in the city of”) → layer 12 , and for ("Eiffel Tower", "The {} remains the most iconic structure in") → layer 20 .Comparable variability appeared for the triplet (“Space Needle”, “The {} is located in downtown”, “Seattle”), where the knowledge of “Seattle” was traced to layer 18, whereas the rephrasing (“Space Needle”, “You can find the {} in downtown”, “Seat-tle”) traced to layer 14. These cases are also no-table because the token "_Seattle" already appeared in the top-ten unembeddings at layer 3 and 2 re-spectively, suggesting the information was present earlier than indicated by the trace. This is likely due to an early-layer matching between “downtown” and "_Seattle", as this be-havior disappears in the case (“Space Needle”, “In the downtown district you will spot the iconic {} of”), which again traces to layer 14 but shows no early-layer appearance of “_Seattle” in the unem-beddings. Further facts and rephrasings showed similar pat-terns. Although results tended to converge on a similar region of the model, the metric did not reli-ably pinpoint a single layer as the location of the fact. This variability would have to be investigated in depth to draw conclusive statements. However, these observations indicate that causal tracing may not be suitable for localizing associated knowledge within a LLM on the granularity of a single layer. This aligns with work by Hase et al. (2023), who showed that the layer most effective for edit suc-cess is largely unrelated to the layer identified by causal tracing. 
+
+5 Conclusion 
+
+We present K NOWLEDGE DEBUGGER , an interac-tive tool for the study of the behavior and outcomes 6of KE methods in Transformer models. Our evalu-ation demonstrated how it can be used to identify methodological shortcomings, enabled the efficient reproduction of prior results, and supported hypoth-esis generation for future research directions. We believe that K NOWLEDGE DEBUGGER will serve as a valuable resource for future work in the areas of interpretability and Knowledge Editing. 
+
+References 
+
+Nicola De Cao, Wilker Aziz, and Ivan Titov. 2021. Edit-ing factual knowledge in language models. Confer-ence on Empirical Methods in Natural Language Processing .Roi Cohen, Eden Biran, Ori Yoran, Amir Globerson, and Mor Geva. 2024. Evaluating the ripple effects of knowledge editing in language models. Transac-tions of the Association for Computational Linguis-tics , 12:283–298. Qingxiu Dong, Damai Dai, Yifan Song, Jingjing Xu, Zhifang Sui, and Lei Li. 2022. Calibrating factual knowledge in pretrained language models. Confer-ence on Empirical Methods in Natural Language Processing .Jacob Dunefsky, Philippe Chlenski, and Neel Nanda. 2024. Transcoders find interpretable llm feature cir-cuits. In Proceedings of the 38th International Con-ference on Neural Information Processing Systems ,NIPS ’24, Red Hook, NY, USA. Curran Associates Inc. Nelson Elhage, Tristan Hume, Catherine Olsson, Nicholas Schiefer, Tom Henighan, Shauna Kravec, Zac Hatfield-Dodds, Robert Lasenby, Dawn Drain, Carol Chen, Roger Grosse, Sam McCandlish, Jared Kaplan, Dario Amodei, Martin Wattenberg, and Christopher Olah. 2022. Toy models of superpo-sition. Nelson Elhage, Neel Nanda, Catherine Olsson, Tom Henighan, Nicholas Joseph, Ben Mann, Amanda Askell, Yuntao Bai, Anna Chen, Tom Conerly, Nova DasSarma, Dawn Drain, Deep Ganguli, Zac Hatfield-Dodds, Danny Hernandez, Andy Jones, Jackson Kernion, Liane Lovitt, Kamal Ndousse, and 6 others. 2021. A mathemati-cal framework for transformer circuits. Trans-former Circuits Thread . Https://transformer-circuits.pub/2021/framework/index.html. Junfeng Fang, Houcheng Jiang, Kun Wang, Yunshan Ma, Shi Jie, Xiang Wang, Xiangnan He, and Tat seng Chua. 2025. Alphaedit: Null-space constrained knowledge editing for language models. Mor Geva, Avi Caciularu, Guy Dar, Paul Roit, Shoval Sadde, Micah Shlain, Bar Tamir, and Yoav Goldberg. 2022. LM-debugger: An interactive tool for inspec-tion and intervention in transformer-based language models. In Proceedings of the 2022 Conference on Empirical Methods in Natural Language Processing: System Demonstrations , pages 12–21, Abu Dhabi, UAE. Association for Computational Linguistics. Mor Geva, Roei Schuster, Jonathan Berant, and Omer Levy. 2021. Transformer feed-forward layers are key-value memories. In Proceedings of the 2021 Confer-ence on Empirical Methods in Natural Language Pro-cessing , pages 5484–5495, Online and Punta Cana, Dominican Republic. Association for Computational Linguistics. Akshat Gupta, Sidharth Baskaran, and Gopala Anu-manchipalli. 2024a. Rebuilding rome : Resolving model collapse during sequential model editing. Akshat Gupta, Anurag Rao, and Gopala Anu-manchipalli. 2024b. Model editing at scale leads to gradual and catastrophic forgetting. In Findings of the Association for Computational Linguistics: ACL 2024 , pages 15202–15232, Bangkok, Thailand. As-sociation for Computational Linguistics. Thomas Hartvigsen, S. Sankaranarayanan, Hamid Palangi, Yoon Kim, and M. Ghassemi. 2022. Ag-ing with grace: Lifelong model editing with discrete key-value adaptors. Neural Information Processing Systems .Peter Hase, Mohit Bansal, Been Kim, and Asma Ghan-deharioun. 2023. Does localization inform editing? surprising differences in causality-based localization vs. knowledge editing in language models. In Ad-vances in Neural Information Processing Systems ,volume 36, pages 17643–17668. Curran Associates, Inc. Jason Hoelscher-Obermaier, Julia Persson, Esben Kran, Ioannis Konstas, and Fazl Barez. 2023. Detecting edit failures in large language models: An improved specificity benchmark. In Findings of the Asso-ciation for Computational Linguistics: ACL 2023 ,pages 11548–11559, Toronto, Canada. Association for Computational Linguistics. Xiaopeng Li, Shasha Li, Shezheng Song, Jing Yang, Jun Ma, and Jie Yu. 2024. Pmet: Precise model editing in a transformer. Jack Lindsey, Wes Gurnee, Emmanuel Ameisen, Brian Chen, Adam Pearce, Nicholas L. Turner, Craig Citro, David Abrahams, Shan Carter, Basil Hosmer, Jonathan Marcus, Michael Sklar, Adly Templeton, Trenton Bricken, Callum McDougall, Hoagy Cun-ningham, Thomas Henighan, Adam Jermyn, Andy Jones, and 8 others. 2025. On the biology of a large language model. Transformer Circuits Thread .Kevin Meng, David Bau, Alex Andonian, and Yonatan Belinkov. 2023a. Locating and editing factual associ-ations in gpt. Kevin Meng, Arnab Sen Sharma, Alex Andonian, Yonatan Belinkov, and David Bau. 2023b. Mass-editing memory in a transformer. 
+
+7Eric Mitchell, Charles P. Lin, Antoine Bosselut, Chelsea Finn, and Christopher D. Manning. 2021. Fast model editing at scale. International Conference on Learn-ing Representations .Neel Nanda. 2024. An extremely opinionated anno-tated list of my favourite mechanistic interpretability papers v2. https://www.alignmentforum.org/ posts/NfFST5Mio7BCAQHPA . Alignment Forum blog post. Accessed: 2025-11-21. nostalgebraist. 2020. Interpreting gpt: The logit lens. Haowen Pan, Xiaozhi Wang, Yixin Cao, Zenglin Shi, Xun Yang, Juanzi Li, and Meng Wang. 2025. Precise localization of memories: A fine-grained neuron-level knowledge editing technique for llms. 
+
+arXiv.org .Alec Radford, Jeffrey Wu, Rewon Child, David Luan, Dario Amodei, Ilya Sutskever, and 1 others. 2019. Language models are unsupervised multitask learn-ers. OpenAI blog , 1(8):9. Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Łukasz Kaiser, and Illia Polosukhin. 2017. Attention is all you need. In Proceedings of the 31st International Conference on Neural Information Processing Sys-tems , NIPS’17, page 6000–6010, Red Hook, NY, USA. Curran Associates Inc. Peng Wang, Zexi Li, Ningyu Zhang, Ziwen Xu, Yun-zhi Yao, Yong Jiang, Pengjun Xie, Fei Huang, and Huajun Chen. 2024. Wise: rethinking the knowledge memory for lifelong model editing of large language models. In Proceedings of the 38th International Conference on Neural Information Processing Sys-tems , NIPS ’24, Red Hook, NY, USA. Curran Asso-ciates Inc. Peng Wang, Ningyu Zhang, Xin Xie, Yunzhi Yao, Bozhong Tian, Mengru Wang, Zekun Xi, Siyuan Cheng, Kangwei Liu, Guozhou Zheng, and 1 others. 2023. Easyedit: An easy-to-use knowledge editing framework for large language models. arXiv preprint arXiv:2308.07269 .Wanli Yang, Fei Sun, Xinyu Ma, Xun Liu, Dawei Yin, and Xueqi Cheng. 2024a. The butterfly effect of model editing: Few edits can trigger large language models collapse. In Findings of the Association for Computational Linguistics: ACL 2024 , pages 5419– 5437, Bangkok, Thailand. Association for Computa-tional Linguistics. Wanli Yang, Fei Sun, Jiajun Tan, Xinyu Ma, Du Su, Dawei Yin, and Huawei Shen. 2024b. The fall of ROME: Understanding the collapse of LLMs in model editing. In Findings of the Association for Computational Linguistics: EMNLP 2024 , pages 4079–4087, Miami, Florida, USA. Association for Computational Linguistics. Lang Yu, Qin Chen, Jie Zhou, and Liang He. 2023. Melo: Enhancing model editing with neuron-indexed dynamic lora. AAAI Conference on Artificial Intelli-gence .
+
+8A Appendix 
+
+> Figure 2: We apply a ROME update for the knowledge triplet ("Madagaskar", "The capital of {} is", "Berlin") at layer 5 of Llama 3.1 Instruct 8B. Starting at layer 23, "Berlin" becomes the top-ranked next-token prediction, and next token generation confirms that the model outputs "Berlin" as the next token, demonstrating a successful ROME intervention.
+
+Figure 2 illustrates a successful ROME edit ap-plied at layer 5 using our tool. As shown, the tar-get token Berlin becomes the highest-ranked pre-diction from layer 23 onward, indicating that the intended edit has been propagated through the sub-sequent layers. Notably, this edit was performed on Llama 3.1 Instruct 8B. In contrast, the other case studies in Section 4 were conducted on GPT2-XL to facilitate reproducibility on widely available hardware. Since GPT2-XL has 1.5B parameters, the additional result in Figure 2 further demon-strates that our tool is not tightly coupled to a sin-gle model scale; rather, its applicability generalizes across transformer-based language models. 9

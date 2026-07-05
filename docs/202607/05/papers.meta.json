@@ -1,0 +1,39 @@
+{
+  "label": "2026-07-05",
+  "date": "2026-07-05",
+  "generated_at": "2026-07-05T21:15:57",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202607/05/2607.01000v1-knowledgedebugger----an-exploration-tool-for-knowledge-localization-and-editing-in-transformers",
+      "section": "deep",
+      "title_en": "KnowledgeDebugger -- an Exploration Tool for Knowledge Localization and Editing in Transformers",
+      "authors": "Eric Benz, Lennart Stöpler, Nikolai Bolik, Artur Andrzejak",
+      "date": "2026-07-01",
+      "pdf": "https://arxiv.org/pdf/2607.01000v1",
+      "score": "9.0",
+      "evidence": "知识定位与编辑工具，集成EasyEdit库",
+      "tldr": "Transformer知识存储与编辑是研究热点。现有研究分两阶段：先个例探索，后统计验证。KnowledgeDebugger作为GUI工具，无代码调用EasyEdit方法，支持知识定位与编辑探索。案例研究证明其有效复现近期发现。该工具降低了初探索门槛，促进知识编辑研究。",
+      "tags": "query:model-edit",
+      "abstract_en": "Recent research has increasingly focused on understanding how Transformers store and process knowledge, as well as how this knowledge can be edited. Research work in this area is often conducted in two phases: first, phenomena are explored on individual samples. Then, when results appear promising, more statistically robust experiments follow. To support the first phase, we propose KnowledgeDebugger, a GUI-based exploration tool for knowledge localization and editing in Transformers. Our tool - inspired by LM-Debugger - offers no-code access to the methods in EasyEdit, a widely used library of state-of-the-art Knowledge Editing approaches. We demonstrate the tool's effectiveness through case studies of recent findings in this field.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/05/2607.00083v1-harnessing-the-latent-space-from-steering-vectors-to-model-calibrators-for-control-and-trust",
+      "section": "deep",
+      "title_en": "Harnessing the Latent Space: From Steering Vectors to Model Calibrators for Control and Trust",
+      "authors": "Nishant Subramani",
+      "date": "2026-06-30",
+      "pdf": "https://arxiv.org/pdf/2607.00083v1",
+      "score": "8.0",
+      "evidence": "使用引导向量控制模型行为及潜在空间校准器",
+      "tldr": "大语言模型规模激增，内部表示日益复杂，亟需建立控制与信任机制。本文提出转向向量用于行为控制，并开发潜空间校准器评估输出可信度。实验表明，转向向量能有效实现可控生成，校准器可可靠识别不可靠输出。该工作揭示了潜空间的可解释性价值，为构建更可信的语言技术提供了新工具。",
+      "tags": "query:model-edit",
+      "abstract_en": "Language models have changed from unreliable text generators to highly-capable large models with trillions of parameters. Capability increases come hand-in-hand with increases in scale, making understanding the internal representations of models more challenging. Since millions of users increasing rely on language models to interact with external tools or make decisions in medium or high-stakes scenarios, we need to establish control over model behavior and know when to trust model outputs. In this paper, we discuss our contributions on harnessing the latent spaces by proposing steering vectors for control and developing latent space-based model calibrators for trust. Together, our contributions help demystify the latent spaces of language models and offer new insights into how to harness model internals to build more trustworthy language technology.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

@@ -6,26 +6,27 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-04
-- 运行时间：2026-07-04 20:27:06 UTC
+- 最新运行日期：2026-07-05
+- 运行时间：2026-07-05 21:15:51 UTC
 - 运行状态：成功
 - 本次总论文数：2
-- 精读区：1
-- 速读区：1
+- 精读区：2
+- 速读区：0
 
 ### 今日简报（AI）
-今日精读1篇动态表示编辑框架，速读1篇多语言微调安全影响。最值得关注的是用推理引导轨迹的表示编辑方法（8.0分）。建议日常关注多语言微调的安全隐患，以及如何通过编辑模型内部表示提升推理可靠性。
-- 详情：[/202607/04/README](/202607/04/README)
+今日精读2篇高分论文，聚焦Transformer知识定位与潜空间控制。最推荐《KnowledgeDebugger》（9.0分）和《Harnessing the Latent Space》（8.0分），分别深入探索知识编辑工具与模型校准器。建议优先阅读《KnowledgeDebugger》以理解Transformer内部知识定位机制。
+- 详情：[/202607/05/README](/202607/05/README)
 
 ### 精读区论文标签
-1. [Search for Truth from Reasoning: A Dynamic Representation Editing Framework for Steering LLM Trajectories](/202607/04/2606.28589v2-search-for-truth-from-reasoning-a-dynamic-representation-editing-framework-for-steering-llm-trajectories)  
+1. [KnowledgeDebugger -- an Exploration Tool for Knowledge Localization and Editing in Transformers](/202607/05/2607.01000v1-knowledgedebugger----an-exploration-tool-for-knowledge-localization-and-editing-in-transformers)  
+   标签：评分：9.0/10、query:model-edit
+   evidence：知识定位与编辑工具，集成EasyEdit库
+2. [Harnessing the Latent Space: From Steering Vectors to Model Calibrators for Control and Trust](/202607/05/2607.00083v1-harnessing-the-latent-space-from-steering-vectors-to-model-calibrators-for-control-and-trust)  
    标签：评分：8.0/10、query:model-edit
-   evidence：动态表示编辑框架，用于引导LLM推理轨迹
+   evidence：使用引导向量控制模型行为及潜在空间校准器
 
 ### 速读区论文标签
-1. [The Heterogeneous Safety Impacts of Benign Multilingual Fine-Tuning](/202607/04/2606.28843v1-the-heterogeneous-safety-impacts-of-benign-multilingual-fine-tuning)  
-   标签：评分：7.0/10、query:model-edit
-   evidence：研究良性微调对安全对齐的影响
+- 本次无速读推荐。
 
 
 <div class="dpr-home-promo-card">
