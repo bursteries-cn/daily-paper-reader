@@ -1,0 +1,93 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-06T21:42:42.248917+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 0,
+    "quick_skim_target": 11,
+    "quick_selected": 0
+  },
+  "deep_dive": [
+    {
+      "id": "2607.00572v1",
+      "source": "arxiv",
+      "title": "HARC: Coupling Harmfulness and Refusal Directions for Robust Safety Alignment",
+      "abstract": "Understanding how aligned LLMs internally represent safety is critical for diagnosing alignment vulnerabilities, as it explains why jailbreaks succeed and informs the design of robust alignment strategies. Prior work shows that aligned LLMs encode harmfulness and refusal as separable directions in the residual stream at prompt-side token positions. We show that jailbreaks succeed at prompt encoding by suppressing either the refusal or harmfulness direction before any token is generated, with distinct attack classes occupying separable regions of the harmfulness-refusal plane. Extending the analysis to response-token positions, we find that the model recognizes harmful content while it is generating that content, even when it failed to recognize the input as harmful at the prompt side. Motivated by our findings, we introduce HARC (Harmfulness-And-Refusal Coupling), a fine-tuning method that pairs the two directions across both prompt and response positions. Since the intervention is confined to the harmfulness-refusal subspace, it leaves the rest of the residual stream intact and does not degrade general capability or inflate over-refusal. Across extensive experiments, HARC achieves the strongest robustness-capability-usability trade-off among six baselines spanning the major training-time and inference-time safety methods. The harmfulness and refusal directions at prompt and response positions transfer across the five model families and two scales we tested without architecture-specific tuning.",
+      "authors": [
+        "Shei Pern Chua",
+        "Fangzhao Wu"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CR"
+      ],
+      "published": "2026-07-01T07:58:16+00:00",
+      "link": "https://arxiv.org/pdf/2607.00572v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "analyzes internal safety representations and jailbreak mechanisms",
+      "llm_evidence_cn": "分析内部安全表征和越狱机制",
+      "llm_evidence": "分析内部安全表征和越狱机制",
+      "canonical_evidence": "分析内部安全表征和越狱机制",
+      "llm_tldr_en": "Reveals how jailbreaks suppress harmfulness/refusal directions and proposes robust alignment strategies.",
+      "llm_tldr_cn": "现有对齐方法难以抵御越狱攻击，本文发现越狱通过抑制有害性或拒绝方向实现攻击。提出HARC方法耦合这两个方向，增强对齐鲁棒性。实验表明该方法能有效检测并防御多种越狱类型，为安全对齐提供新视角。",
+      "llm_tldr": "现有对齐方法难以抵御越狱攻击，本文发现越狱通过抑制有害性或拒绝方向实现攻击。提出HARC方法耦合这两个方向，增强对齐鲁棒性。实验表明该方法能有效检测并防御多种越狱类型，为安全对齐提供新视角。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.30263v1",
+      "source": "arxiv",
+      "title": "Defending Against Harmful Supervision Hidden in Benign Samples",
+      "abstract": "Existing defenses are effective when harmful content is explicitly mixed into downstream fine-tuning data, but crafted samples can instead hide harmful supervision inside benign tasks. We propose Embedded Attack, where harmful QA pairs are embedded within benign training samples, and show that representative guardrails often fail to detect them at the example level. To address this, we propose Dual-Reference SFT (DR-SFT), which adapts DPO-style contrastive objective design to SFT through token-level regularization, mitigating harmful fine-tuning beyond coarse data filtering.",
+      "authors": [
+        "Bang An",
+        "Yibo Yang",
+        "Dandan Guo",
+        "Ebtisam Alshehri",
+        "Carlos Hinojosa",
+        "Bernard Ghanem"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-06-29T13:11:49+00:00",
+      "link": "https://arxiv.org/pdf/2606.30263v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "defends against harmful supervision hidden in benign samples via contrastive SFT",
+      "llm_evidence_cn": "通过对比SFT防御良性样本中的有害监督",
+      "llm_evidence": "通过对比SFT防御良性样本中的有害监督",
+      "canonical_evidence": "通过对比SFT防御良性样本中的有害监督",
+      "llm_tldr_en": "Proposes Embedded Attack hiding harmful QA in benign data and DR-SFT defense using token-level contrastive regularization.",
+      "llm_tldr_cn": "现有防御难以检测嵌入良性任务中的有害监督。本文提出嵌入式攻击将有害问答隐藏在良性训练数据中。为应对此威胁，提出双参考SFT（DR-SFT），将DPO风格的对比目标适配到SFT，通过令牌级正则化缓解有害微调。实验证明DR-SFT有效防御此类攻击，超越简单数据过滤。",
+      "llm_tldr": "现有防御难以检测嵌入良性任务中的有害监督。本文提出嵌入式攻击将有害问答隐藏在良性训练数据中。为应对此威胁，提出双参考SFT（DR-SFT），将DPO风格的对比目标适配到SFT，通过令牌级正则化缓解有害微调。实验证明DR-SFT有效防御此类攻击，超越简单数据过滤。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": []
+}
