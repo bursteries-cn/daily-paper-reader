@@ -6,29 +6,31 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-06
-- 运行时间：2026-07-06 21:44:42 UTC
+- 最新运行日期：2026-07-07
+- 运行时间：2026-07-07 21:06:32 UTC
 - 运行状态：成功
-- 本次总论文数：2
+- 本次总论文数：3
 - 精读区：2
-- 速读区：0
+- 速读区：1
 
 ### 今日简报（AI）
-今日精读两篇AI安全对齐前沿论文，聚焦鲁棒性防御与隐蔽有害监督。
-最值得关注《HARC》提出的耦合有害与拒绝方向的机制，以及《Defending》揭示良性样本实为伪装攻击的发现。
-建议读者重点关注两种防御思路的互补性，为实际部署构建多层次安全护栏。
-- 详情：[/202607/06/README](/202607/06/README)
+今日聚焦医疗视觉语言模型编辑与多模态安全拒止机制。  
+最值得精读两篇高分论文：评估医疗VLM编辑效果，以及从因果关系审计神经元选择器的拒止忠实性。  
+建议普通读者关注模型安全评估技术，理解编辑可靠性对实际部署的影响。
+- 详情：[/202607/07/README](/202607/07/README)
 
 ### 精读区论文标签
-1. [HARC: Coupling Harmfulness and Refusal Directions for Robust Safety Alignment](/202607/06/2607.00572v1-harc-coupling-harmfulness-and-refusal-directions-for-robust-safety-alignment)  
+1. [Evaluating and Understanding Model Editing for Medical Vision Language Models](/202607/07/2607.05310v1-evaluating-and-understanding-model-editing-for-medical-vision-language-models)  
    标签：评分：9.0/10、query:model-edit
-   evidence：分析内部安全表征和越狱机制
-2. [Defending Against Harmful Supervision Hidden in Benign Samples](/202607/06/2606.30263v1-defending-against-harmful-supervision-hidden-in-benign-samples)  
-   标签：评分：8.0/10、query:model-edit
-   evidence：通过对比SFT防御良性样本中的有害监督
+   evidence：评估医学视觉语言模型的模型编辑
+2. [Faithfulness to Refusal: A Causal Audit of Neuron Selectors](/202607/07/2607.05355v1-faithfulness-to-refusal-a-causal-audit-of-neuron-selectors)  
+   标签：评分：9.0/10、query:model-edit
+   evidence：神经选择器的因果审计用于安全编辑
 
 ### 速读区论文标签
-- 本次无速读推荐。
+1. [Harnessing Textual Refusal Directions for Multimodal Safety](/202607/07/2606.31876v2-harnessing-textual-refusal-directions-for-multimodal-safety)  
+   标签：评分：7.0/10、query:model-edit
+   evidence：利用文本拒绝方向引导多模态LLM，类似用于安全的激活编辑
 
 
 <div class="dpr-home-promo-card">

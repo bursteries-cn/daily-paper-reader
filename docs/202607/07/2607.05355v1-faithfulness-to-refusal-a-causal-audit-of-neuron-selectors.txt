@@ -1,0 +1,1513 @@
+Title: Faithfulness to Refusal: A Causal Audit of Neuron Selectors
+
+URL Source: https://arxiv.org/pdf/2607.05355v1
+
+Published Time: Tue, 07 Jul 2026 03:36:10 GMT
+
+Number of Pages: 41
+
+Markdown Content:
+Ananth Eswar ∗ † 
+
+, Pratinav Seth ∗
+
+,Utsav Avaiya, Vinay Kumar Sankarapu 
+
+Lexsi Labs 
+
+pratinav.seth@lexsi.ai 
+
+Abstract 
+
+Attribution scores increasingly identify which neuron rows of a language model matter for applications such as pruning, interpretability, and editing for safety, yet whether they identify causally important rows is rarely tested directly. We address this with two paired audits built on one-shot neuron-row zeroing. We first audit selectors at the language-modeling level: attribution methods substantially outperform activation- and magnitude-based baselines at identifying dispensable rows across five LLMs. We then adapt the same intervention into a behavior test by driving it with a contrastive harmful-versus-benign signal; the attributed rows are sufficient to install refusal on hate and crime while keeping benign over-refusal low and preserving language model fluency, and specific in that layer-matched random controls at the same depths fail. Highly rank-stable selectors can be among the least causally valid. Refusal moreover lives in a redundant subspace, where different attribution methods install it through largely disjoint row sets, so the recovered edit is one realization of a sufficient set rather than a unique mechanism. Together, these findings show that rank-stability proxies miss the kinds of selector failures a direct causal audit can surface. 
+
+Keywords: neuron attribution, structured pruning, mechanistic interpretability, refusal editing, selector faithfulness, LRP, integrated gradients, LLM safety 
+
+# 1 Introduction 
+
+Attribution scores now drive three separate workflows: pruning methods remove parameters by importance score [ 1, 2, 3], mechanistic-interpretability papers identify behavioral circuits via attribution [4] and safety-editing methods suppress or install behaviors by ablating attributed components [ 5, 6]. All three rest on the same selector-faithfulness assumption :that the scoring function (LRP, IG, Wanda, magnitude, or any other) faithfully separates important from unimportant components. The assumption fails silently. A pruning recipe wired to an unfaithful selector can still hit a perplexity (PPL) target after recovery, and a refusal edit can saturate calibration-set refusal yet generalize unsafely on held-out red-team prompts, because the standard audit artifacts (PPL, rank correlation, calibration accuracy) are blind to the selector’s failure mode. A direct causal test is missing. It would intervene on the selector’s output: zero the rows it ranks dispensable, measure the damage, and do this under conditions where behavioral change can only come from the selector, not from surrounding pipeline machinery. The test must also run at two levels of difficulty, because passing the language-modeling level (does the selector pick generally important neurons?) does not entail passing the behavior-specific level (does it pick the neurons that carry a target behavior?). 
+
+> ∗
+
+Equal contribution; co-first authors. 
+
+> †
+
+Work done while at Lexsi Labs. 
+
+> arXiv:2607.05355v1 [cs.CL] 6 Jul 2026
+
+Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Approach. We use neuron-row zeroing : a one-shot, retraining-free ablation of individual output rows of a transformer’s Linear projections (attention Q/K/V/O or MLP gate/up/down). Unlike DPO, activation steering, or representation-engineering edits, it adds no fine-tuning step and no inference-time hooks, so any behavioral change traces to the rows the selector ranks dispensable rather than to surrounding pipeline machinery. At the LM level we run Least-Relevant-First/Most-Relevant-First (LeRF/MoRF) sweeps for seven selectors (Random, Magnitude, Wanda, MeanActivation, LRP, IG, and their Borda consensus C ONSENSUS -2) across five base models (LLaMA-3.2-1B/3B, LLaMA-3.1-8B, Qwen3-8B, Gemma-3-12B). At the behavior level we drive attribution with a contrastive harmful-versus-benign signal on matched CAST [ 5] pairs: single-prompt attribution would surface prompt-processing neurons rather than refusal-specific ones; the contrastive margin instead cancels shared content to isolate the refusal-relevant subspace. We install refusal on four instruction-tuned models, evaluate on CAST, SorryBench [ 7 ], OR-Bench-Hard [ 8], and downstream utility [ 9, 10 , 11 ], with a layer-matched random control to distinguish row identity from depth allocation. A central finding cuts across both levels: the most rank-stable selector is the least causally faithful, and at the behavior level it even decreases refusal, so rank-stability proxies systematically miss the failures a direct causal audit can surface. 
+
+Contributions. (1) A causal selector-audit framework adapted from LeRF/MoRF, applied to internal neuron rows at two difficulty levels via a single one-shot intervention requiring no fine-tuning or inference-time modification. 
+
+(2) Evidence that attribution-based selectors are causally faithful at the LM level: LRP, IG, and C ONSENSUS -2 identify dispensable neurons two to four orders of magnitude more accurately than activation, magnitude, and random baselines across models, together with a control suite showing that the rows where LRP and IG disagree carry stronger causal signal than the agreed set, motivating disagreement-aware aggregation as a direction for follow-up work. 
+
+(3) Evidence that contrastive attribution installs refusal at the behavior level: refusal saturates on hate and crime while preserving benign accuracy and language fluency, the effect holds on held-out red-team benchmarks, and a layer-matched random control fails, locating the effect at row identity rather than depth allocation. 
+
+(4) Evidence that the underlying subspace is redundant and architecture-dependent: LRP and IG share only a small fraction of their top rows yet both install refusal, and the best-performing attribution method reverses across LLaMA and Qwen. 
+
+# 2 Related Work 
+
+2.1 Attribution in LLMs: Methods and Faithfulness 
+
+LLM pruning spans a cost-quality spectrum from weight-magnitude and activation-aware criteria (Wanda [ 1], SparseGPT [ 2], FLAP [ 3], LLM-Pruner [ 12 ]) to attribution-based criteria (row-level LRP [ 13 ] and model-agnostic rele-vance attribution [ 14 ]). Mechanistic interpretability identifies circuits via activation patching [ 15 ] and attribution-based alternatives [ 4, 16 ]. These approaches all share the same selector-faithfulness assumption, a premise that becomes more consequential as interpretability is promoted from a post-hoc diagnostic to a substrate for alignment [ 17 ]. The LeRF/MoRF protocol [ 18 ] and ROAR [ 19 ] test this for input-feature attributors on classification tasks, and explanation-evaluation frameworks benchmark the faithfulness, sensitivity, and robustness of post-hoc attributions [ 20 , 21 ]. We adapt the same causal logic to internal neuron rows of autoregressive LLMs, comparing LRP [ 22 , 23 ] in its attention-aware variant AttnLRP [ 24 ], IG [ 25 ], their Borda consensus, and activation/magnitude baselines across five models and two difficulty levels. 
+
+2.2 Behavior Installation and Evaluation 
+
+Refusal behaviors are conventionally installed via RLHF [ 26 ] or DPO [ 27 ], updating most parameters. Inference-time alternatives (contrastive activation addition [ 28 ], CAST [ 5 ], and representation engineering [ 6]) steer hidden states without weight changes but validate only by exhibiting the steering effect, not by ruling out that any sparse intervention would suffice. Closer to the weight level, refusal has been traced to a single residual-stream direction whose rank-one ablation removes it [ 29 ], and pruning a small set of safety-critical weights can likewise strip alignment [ 30 ]; both show safety behavior is sparsely localized. Concurrent work installs category-specific refusal directly through circuit-restricted weight arithmetic [ 31 ]; our audit is complementary, asking which selector most faithfully recovers such rows rather than proposing a single editing recipe. A parallel line localizes safety to sparse neuron sets in activation space directly: intervening on only ∼5% of neurons, identified via inference-time activation contrasting and dynamic activation patching, restores most safety behavior [ 32 ], and sparse-autoencoder studies benchmark feature-selection 2Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+heuristics (cosine similarity, activation difference, attribution patching) for recovering causal refusal features [ 33 , 34 ]. The degree of sparsity is itself contested: refusal has been cast as a single residual-stream direction [ 29 ], as multiple functionally independent directions [ 35 ], and as reducible to a single sufficient MLP neuron [ 36 ]. What this line does not do is compare selectors in weight-row space: it asks where refusal lives, and (for the SAE studies) which feature-selection heuristic recovers it in activation space, not which weight-row importance score most faithfully recovers the responsible components under a common causal-validity metric with layer-matched controls. Our audit differs on four axes: (i) it compares seven selectors head-to-head against one validity metric rather than validating a single bespoke localizer; (ii) it runs layer-matched, rank-randomized, and veto controls that separate row identity from depth allocation and rank averaging; (iii) it operates in weight-row space and leaves a standard checkpoint, so behavioral change is attributable to the identity of the removed rows rather than to an inference-time hook; and (iv) it needs no aligned/unaligned reference-model pair, computing importance one-shot from a contrastive signal. We evaluate LM fluency with WikiText-2 perplexity [ 37 ], downstream utility via lm-eval-harness [ 38 ] on MMLU [ 9], GSM8K [ 10 ], and IFEval [ 11 ], and red-team transfer with SorryBench [ 7] and OR-Bench-Hard [ 8]; together these benchmarks separate under-refusal from over-refusal. 
+
+# 3 Audit Framework 
+
+3.1 Intervention: Neuron-Row Masking 
+
+Each Linear layer in a transformer block computes y = Wx + b, where W ∈ Rdout ×din . A neuron-row is one row of W: the weights producing a single output dimension. We use row (equivalently neuron row ) throughout; an unqualified “neuron” always denotes such a weight-matrix output row, not an activation unit as in the safety-neuron literature. Masking neuron-row i sets W[i, :] = 0 and b[i] = 0 , silencing that output dimension. This is the minimal structural intervention at the weight level: one output dimension is removed, the rest of the architecture is untouched, no fine-tuning or recovery is needed, and the result is a standard checkpoint that loads and runs without modification. A transformer block contains multiple Linear layers: attention projections (Q/K/V/O) and MLP projections (gate/up/-down) across all five models. All neuron rows across all blocks are pooled into a single global ranking. Given a selector’s importance scores we mask the globally lowest-importance k% (LeRF, least-relevant-first) or the globally 
+
+highest-importance k% (MoRF, most-relevant-first), and measure the change in model behavior: WikiText-2 perplexity and downstream accuracy at the LM level (§4), refusal rate paired with benign accuracy and utility retention at the behavior level (§5). Embedding layers and the language-model head are excluded because their rows are vocab-indexed, so masking them destroys token identity rather than shared computation. 
+
+3.2 Selectors and Validity Gap 
+
+We evaluate seven selectors against a single validity metric (full descriptions and cost table in Appendix A). Four are non-attribution nulls/baselines: R ANDOM (uniform scores, 3-seed average), M AGNITUDE (mean absolute row weight, data-free), W ANDA (si = P 
+
+> j
+
+|Wij | · RMS (Xj ), our row-aggregated adaptation of the per-weight criterion of [ 1]), and M EAN ACTIVATION (mean absolute output activation over calibration data). Three are attribution-based: LRP (AttnLRP [ 24 ] via the lxt library), IG (Integrated Gradients [ 25 ], 16-step), and C ONSENSUS -2, a Borda-style rank aggregation of LRP and IG scores (full formula in Appendix A). C ONSENSUS -2 is motivated by error reduction: LRP propagates relevance layer by layer while IG integrates the gradient along a path, so the two methods are likely to fail in different places. A faithful selector should damage the model little on the rows it ranks safe (low LeRF PPL) and damage it severely on the rows it ranks important (high MoRF PPL). We report both quantities and their validity gap , Gap (S, k ) = 
+
+PPL MoRF (S, k ) − PPL LeRF (S, k ); a random selector produces a gap near zero, while a faithful selector produces a positive gap whose magnitude scales with the asymmetry between the two halves. Section 5 reuses this intervention at the behavior level by driving the same selectors with a contrastive harmful-versus-benign signal. 
+
+What “faithful” means here. We call a selector faithful in a purely causal, operational sense: its top-ranked rows are (i) sufficient , meaning that zeroing them produces the intended effect (a large validity gap at the LM level, installed refusal at the behavior level); and (ii) specific , meaning that the effect is not reproduced by a layer-matched control that zeroes the same per-layer row counts with random row identities. We make no claim of necessity or uniqueness :because the responsible subspace is redundant (§5.5), many disjoint row sets are sufficient, and a faithful selector is one that reliably lands in this sufficient set, not one that recovers a canonical mechanism. The distinction matters for how the audit is used. Sufficiency and specificity are what attribution-guided pruning and safety editing actually require, and the audit certifies them directly; but circuit-discovery claims that read a selector’s top rows as the mechanism need the stronger necessity property this audit deliberately does not test. 3Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+3.3 Distribution shift does not explain the audit’s signal 
+
+Deletion-based faithfulness metrics carry a known confound: removing components can push a network into states it was never trained on, so a measured degradation may reflect distribution shift rather than the removed component’s importance, the concern that motivated the retrain-after-removal protocols of ROAR and Recursive ROAR [ 19 , 39 ]. Zeroing weight rows is a strong perturbation, so the objection applies in principle. Four features of the design neutralize it. First, the validity gap is a differencing measurement: LeRF and MoRF apply the same intervention class (equal-sized row zeroing) at the same sparsity to the same model, so any generic ablation shock is common to both arms and cancels in Gap = PPL MoRF − PPL LeRF ; only row-identity-dependent damage survives. Second, R ANDOM is an empirical shift floor: zeroing arbitrary rows at each rate produces a near-zero or negative gap (§4), so the intervention per se 
+
+does not manufacture the asymmetry; it appears only when the selector carries signal. Third, at the behavior level the layer-matched controls (§5.4) hold the intervention’s shape fixed (identical per-layer row counts) and still collapse to near-baseline refusal, isolating row identity from any depth-dependent shock profile. Fourth, refusal installation is certified on preserved benign accuracy, downstream utility, and perplexity, not on degradation alone, so a positive result cannot be an artifact of the model merely being broken. The audit therefore measures selector-attributable causal effect, not ablation shock. 
+
+3.4 Models, Data, and Implementation 
+
+Models. The audit covers five open-weight base models across three architecture families: three LLaMA-3 sizes (LLaMA-3.2-1B, LLaMA-3.2-3B, LLaMA-3.1-8B) [ 40 ], Qwen3-8B [ 41 ], and Gemma-3-12B [ 42 ]. All five enter the LeRF/MoRF audit. Stability-validity tests, depth profiles (§4.2), consensus controls and the rank-randomized null (§4.3) run on LLaMA-3.1-8B and Qwen3-8B. Jaccard agreement (§4.4) covers LLaMA-3.2-1B, LLaMA-3.1-8B, and Qwen3-8B. Domain sensitivity (Appendix D) is reported on LLaMA-3.1-8B only. Per-model block, layer, and neuron counts are in Appendix A (Table 3). 
+
+Calibration and evaluation. Importance is computed on 128 WikiText-2 training samples (max length 128 tokens) for the data-dependent selectors (M EAN ACTIVATION , W ANDA , LRP, IG, C ONSENSUS -2); M AGNITUDE is data-free, and R ANDOM averages over 3 seeds. The stability-validity sweep uses nested subsets C8 ⊂ C16 ⊂ C32 · · · ⊂ C128 
+
+from the same 128-sample pool, so subset growth changes sample count rather than sample identity. For domain sensitivity (LLaMA-3.1-8B) we additionally calibrate on 128 samples from C4 [ 43 ]. Perplexity is on 256 WikiText-2 test samples [ 37 ] (sequence length 512); downstream accuracy uses 8 zero-shot tasks from lm-eval-harness [38 ](ARC-E/C, HellaSwag, WinoGrande, PIQA, BoolQ, LAMBADA-OpenAI, OpenBookQA). 
+
+Sweep and implementation. The general audit sweeps 0-90% in 5% steps for PPL (19 rates) and 10% steps for downstream (10 rates). All runs use a single A100 (80 GB); calibration is < 15 GPU-min per model, and the full sweep (all selectors, all masking rates, PPL and downstream) takes approximately 3-9 hours per model depending on model size and selector cost. 
+
+# 4 General Selector Audit 
+
+4.1 Attribution wins on language modeling. 
+
+LRP, IG, and C ONSENSUS -2 sit far below non-attribution baselines on LeRF at moderate masking rates, including the 
+
+30% operating point, across all five models (Figure 1; full per-rate tables in Appendix B). MoRF shows the matching asymmetry: when the same selectors target the rows they rank most important, the LM breaks faster (LRP reaches 
+
+8.3 × 10 6 PPL at 30% ). The pattern carries over to downstream utility: on the larger models, attribution selectors retain substantial mean lm-eval-harness accuracy at 30% LeRF ( CONSENSUS -2 = 0 .503 on Gemma-3-12B, 0.392 on LLaMA-3.1-8B), while non-attribution baselines collapse to the random floor near 0.28 (Table 5, column A). Per-model numerics, validity gap, and mean downstream accuracy are in Appendix A; per-task downstream breakdowns are in Appendix B. 
+
+4.2 Rank stability does not imply causal validity. 
+
+A common low-cost proxy is rank stability: if a selector ranks rows similarly across calibration subsets, it is assumed reliable. We compute importance at C ∈ { 8, 16 , 32 , 64 , 128 } and measure stability (Spearman ρ, Jaccard vs. C128 )alongside validity (LeRF PPL). MeanActivation has near-perfect rank stability and catastrophic LeRF PPL: the ranking is reproducible across calibration sizes but does not track causal importance. LRP is the least stable selector at small C yet produces the largest validity 4Faithfulness to Refusal: A Causal Audit of Neuron Selectors masking rate (%)                                          
+
+> 10 1
+> 10 2
+> 10 3
+> 10 4
+> 10 5
+> 10 6
+> PPL
+> LLaMA-1B LeRF
+> masking rate (%)
+> 10 1
+> 10 2
+> 10 3
+> 10 4
+> 10 5
+> PPL
+> LLaMA-3B LeRF
+> masking rate (%)
+> 10 1
+> 10 2
+> 10 3
+> 10 4
+> 10 5
+> 10 6
+> 10 7
+> PPL
+> LLaMA-8B LeRF
+> masking rate (%)
+> 10 1
+> 10 2
+> 10 3
+> 10 4
+> 10 5
+> 10 6
+> 10 7
+> 10 8
+> PPL
+> Qwen-8B LeRF
+> masking rate (%)
+> 10 2
+> 10 4
+> 10 6
+> 10 8
+> 10 10
+> 10 12
+> 10 14
+> 10 16
+> 10 18
+> PPL
+> Gemma-12B LeRF
+> 010 20 30 40 50
+> masking rate (%)
+> 10 4
+> 10 9
+> 10 14
+> 10 19
+> 10 24
+> 10 29
+> 10 34
+> 10 39
+> PPL
+> LLaMA-1B MoRF
+> 010 20 30 40 50
+> masking rate (%)
+> 10 2
+> 10 5
+> 10 8
+> 10 11
+> 10 14
+> 10 17
+> 10 20
+> 10 23
+> PPL
+> LLaMA-3B MoRF
+> 010 20 30 40 50
+> masking rate (%)
+> 10 1
+> 10 2
+> 10 3
+> 10 4
+> 10 5
+> 10 6
+> 10 7
+> PPL
+> LLaMA-8B MoRF
+> 010 20 30 40 50
+> masking rate (%)
+> 10 2
+> 10 4
+> 10 6
+> 10 8
+> 10 10
+> 10 12
+> PPL
+> Qwen-8B MoRF
+> 010 20 30 40 50
+> masking rate (%)
+> 10 2
+> 10 4
+> 10 6
+> 10 8
+> 10 10
+> 10 12
+> 10 14
+> 10 16
+> PPL
+> Gemma-12B MoRF
+> Random Magnitude Wanda MeanAct LRP IG Consensus-2
+
+Figure 1 LeRF (lower is better) and MoRF (higher is better) degradation curves for all five models and seven selectors (0-50%, log 
+
+y-axis). Attribution selectors (red/black/purple) generally sit below non-attribution baselines on LeRF, while MoRF exposes architecture- and selector-dependent asymmetries quantified in Table 5. Full 19-rate tables: Appendix B. 
+
+Table 1 Stability vs. validity numerics on the LLaMA-3.1-8B reference model. Stability: Spearman ρ and Jaccard @30% of C8 scores/masks vs. C128. Validity: LeRF, MoRF, and Gap at 30% masking using full C128 scores. Qwen3-8B replication in Appendix C. Stability (C8 →C128) Validity (C128, @30%) Selector Spearman Jacc LeRF ↓ MoRF ↑ Gap ↑
+
+MEAN ACT . .994 .934 139,874 930,749 790,875 WANDA .9998 .981 360,083 976,078 615,995 IG .965 .756 97.8 1.40e6 1.40e6 LRP .913 .635 830.4 8.32e6 8.32e6 CONSENSUS -2 .945 .727 66.1 1.54e6 1.54e6 
+
+gap; C ONSENSUS -2 is the strongest on LeRF (Table 1). Stability is therefore neither necessary nor sufficient: a selector can be perfectly reproducible and still rank causally important rows safe. The dissociation replicates on Qwen3-8B (Appendix Figure 11). 
+
+4.3 Consensus needs real cross-method agreement. 
+
+The Borda aggregate of LRP and IG produces the lowest LeRF PPL on four of five models and matches IG on the fifth (Appendix Figure 4). Four control variants rule out trivial explanations on LLaMA-3.1-8B and Qwen3-8B (Table 29, Appendix Figure 15). Layer-matched controls that copy each method’s depth distribution but randomize rows within layers reach LeRF 459 (LRP) and 1,301 (IG) on LLaMA-8B against C ONSENSUS -2’s 66 .1, so depth allocation alone does not reproduce the win. A rank-randomized null that permutes IG ranks before averaging reaches LeRF 119 ,better than LRP alone ( 830 ) but worse than real C ONSENSUS -2 ( 66 .1), so the safety advantage is not produced by the act of averaging two rank lists. A strict LRP ∩IG intersection (rows ranked in the bottom-k% by both methods) delivers the lowest LeRF in the entire audit ( 10 .7 on LLaMA-8B, 20 .9 on Qwen3-8B), at a small MoRF cost on LLaMA (1.39 × 10 6 vs. 1.54 × 10 6) and a catastrophic one on Qwen ( 1.59 × 10 5 vs. 2.83 × 10 7): agreement is a strong but architecture-dependent safety signal. Finally, veto aggregators take rows in one method’s top-k but not the other’s, testing whether the rows where the two methods disagree carry causal signal. VETO-LRP (LRP’s exclusive picks) beats real C ONSENSUS -2 on both axes on both models (LLaMA-8B: LeRF 28 .0 / MoRF 3.32 × 10 6; Qwen3-8B: LeRF 
+
+63 .1 / MoRF 5.89 × 10 7), pointing to disagreement-aware aggregation as a direction for follow-up work. Full controls in Appendix C.4. 
+
+4.4 Where selectors agree, and where they don’t. 
+
+At 30% masking, attribution methods (LRP, IG, C ONSENSUS -2) agree with one another at consistent levels across attention and MLP sublayers (mean pairwise Jaccard ≈ 0.63 -0.68 on both, on LLaMA-3.1-8B and Qwen3-8B). Non-attribution baselines (Magnitude, Wanda, MeanActivation) cluster strongly on attention but weakly on MLP on 5Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+LLaMA-3.1-8B ( ≈ 0.72 vs. 0.44 ) and only weakly on both on Qwen3-8B ( ≈ 0.49 vs. 0.37 ): they pick similar rows when an obvious weight statistic (attention magnitude, on LLaMA) drives the ranking, and diverge once that crutch is gone. Attribution extracts a more consistent signal across both sublayers and both architectures (Appendix Figure 12). Per-block depth profiles (Appendix Figure 13) show LRP, IG, and C ONSENSUS -2 concentrating in early-to-mid layers while M AGNITUDE and W ANDA climb toward late layers; this asymmetry is why the layer-matched control is needed (Table 29). A false-negative analysis and a WikiText-vs-C4 corpus check control for depth allocation and calibration corpus as confounds (Appendix C.3 and Appendix D). 
+
+# 5 Contrastive Refusal Editing 
+
+At the behavior level, the same row-zeroing intervention must pass a harder test: a faithful selector should identify rows that carry a specific behavior (safety refusal), not just generally important rows. Zeroing them should install refusal (sufficiency), and the effect should not be reproducible by zeroing random rows at the same depths (specificity). We define the contrastive mask construction (§5.1) and run the test (§5.2 onward) across four instruction-tuned models, five selectors, and five CAST harm domains. The full grid is 70 (model, selector, domain) cells. 
+
+5.1 Contrastive Refusal Masks 
+
+The intervention is the row-zeroing of §3.1. The target changes: instead of the next-token loss we use a refusal decision margin at the last prompt position, contrasted across matched harmful and benign CAST pairs. The margin 
+
+m(x) = mean t∈S zt − mean t∈H zt uses two fixed token sets: S contains the first tokens of refusal-onset phrases (e.g., “I must decline”, “Unfortunately”) and H contains the first tokens of compliance-onset phrases (e.g., “Sure”, “Absolutely”), both drawn from a curated list of ≤ 40 variants per set tokenized with the model’s own tokenizer. Algorithm 1 gives the full construction. Non-attribution variants (M EAN ACTIVATION and R ANDOM ) bypass Steps 1-2 and substitute a different score at Step 3: M EAN ACTIVATION uses unsigned activation magnitude and R ANDOM uses seeded per-layer uniform noise. CONSENSUS -2 is an attribution variant: it runs Steps 1-2 independently for LRP and IG, then Borda-aggregates their per-layer ranks into a single score. 
+
+Operating-point selection. The sweep is λ ∈ {0.2, 0.3, 0.5, 0.6, 0.7, 0.8} and k ∈{0.005 , 0.01 , 0.02 , 0.05 , 0.075 , 0.1}, giving 36 ( λ, k ) cells per attribution run. Two extra k values ( 0.015 ,
+
+0.15 ) are added for LLaMA-3.2-1B medical and legal, where the standard k values find no feasible cell. The operating point per (model, selector, domain) is (λ⋆, k ⋆) = arg max (λ,k )∈V CAST-malign (λ, k ) with feasible set 
+
+V = {(λ, k ) : benign ≤ 0.10 , PPL ≤ 100 }. If V = ∅, the benign cap is relaxed in 0.05 steps until a feasible cell with non-trivial refusal exists; the relaxed cell is flagged ⋆. This fires once in the 70 -cell grid (LLaMA-3.1-8B, IG, adult). A selector passes the test if its top-k rows raise refusal on harmful prompts, preserve benign compliance, preserve general LM capability, and beat a layer-matched random control that zeroes the same per-layer counts with random row identities. Of the 70 cells in the grid, 69 find a feasible operating point at the default benign cap; only LLaMA-3.1-8B IG-adult needs the rescue relaxation (App. E). The reported rates are arg max selections over the 36 -cell (λ, k ) grid, not isolated spikes: the per-cell sweeps (App. E, Table 38) show neighbouring feasible cells landing within ∼ 0.1-0.2
+
+of the reported optimum. 
+
+5.2 Audit Setup 
+
+Four instruction-tuned models (the three LLaMA-3 sizes and Qwen3-8B) and five CAST [ 5] harm domains form the grid; LRP, IG, and Random run on all four models, while C ONSENSUS -2 and MeanActivation run on LLaMA-3.1-8B only, giving 70 cells in total.Calibration uses 64 matched risk/base pairs from CAST’s training split; refusal is judged by ProtectAI/distilroberta-base-rejection-v1 [ 44 ] on CAST’s held-out test split: 500 risk prompts and 500 
+
+matched base prompts. Held-out OOD and utility use the five benchmarks named in §1; LM fluency is WikiText-2 PPL as in §4. All runs use one A100 (80 GB); total compute is about six GPU-days. The 70 edited checkpoints will be released as standard HuggingFace artifacts upon publication. 
+
+5.3 Attribution installs refusal; the nulls fail in opposite directions. 
+
+On LLaMA-3.1-8B, baseline malign refusal ranges from 0.024 on legal to 0.488 on hate (Figure 2). LRP, IG, and CONSENSUS -2 lift CAST-malign refusal on hate and crime to 0.82 -0.95 , with benign over-refusal at most 0.08 and PPL within +2 -4 of the unedited model. The non-attribution baselines fail in opposite directions. 6Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Algorithm 1 Contrastive Refusal Mask Construction 
+
+Require: 
+
+M : model under audit 
+
+D = {(xrisk , x base )}: matched CAST harmful/benign pairs 
+
+A ∈ { LRP , IG , Consensus-2 }: attribution method 
+
+k: mask sparsity; λ: LM-protect strength 
+
+Ilm : per-row LM importance from WikiText next-token attribution 
+
+Ensure: top-k refusal mask (row indices to zero) 
+
+▷ Step 1: compute refusal margin and per-row relevance 
+
+1: for x ∈ Drisk ∪ Dbase do 
+
+2: zt(x) ← logit of token t at last prompt position 3: m(x) ← 1
+
+> |S|
+
+P 
+
+> t∈S
+
+zt(x) − 1
+
+> |H|
+
+P 
+
+> t∈H
+
+zt(x) ▷ S: refusal tokens; H: compliance tokens 4: Ri(x) ← A(M, x, m ) ▷ signed relevance of row i to m(x)
+
+5: end for 
+
+▷ Step 2: aggregate compliance-promoting importance and rank-normalize 
+
+6: for D′ ∈ { Drisk , D base } do 
+
+7: I−,D ′ 
+
+> i
+
+← Ex∈D′ [max( −Ri(x), 0)] ▷ compliance-promoting half of relevance 8: ˆI−,D ′ 
+
+> i
+
+← rℓ
+
+
+
+I−,D ′
+
+> i
+
+
+
+▷ per-layer percentile rank, rℓ(·) ∈ [0 , 1] 
+
+9: end for 
+
+▷ Step 3: contrastive score and LM-protect penalty 
+
+10: Ccomply [i] ← ˆI−,risk  
+
+> i
+
+− ˆI−,base  
+
+> i
+
+▷ harm-specific compliance signal, ∈ [−1, 1] 
+
+11: S[i] ← Ccomply [i] − λ · rℓ(Ilm [i]) ▷ down-weight LM-critical rows 12: return top- k(S)0 .05 .10 .15 .20                                 
+
+> Benign over-refusal →
+> 0
+> .25
+> .50
+> .75
+> 1.0
+> CAST malign refusal  ↑
+> MA
+> Rnd
+> LRP
+> IG
+> C2
+> Hate
+> 0.05 .10 .15 .20
+> Benign over-refusal →
+> MA
+> Rnd
+> LRP
+> IG
+> C2
+> Crime
+> 0.05 .10 .15 .20
+> Benign over-refusal →
+> MA
+> Rnd
+> LRP
+> IG ⋆
+> C2
+> Adult
+> 0.05 .10 .15 .20
+> Benign over-refusal →
+> MA
+> Rnd
+> LRP
+> IG
+> C2
+> Medical
+> 0.05 .10 .15 .20
+> Benign over-refusal →
+> MA
+> Rnd
+> LRP
+> IG
+> C2
+> Legal
+> PPL ≤15 (excellent) PPL 16--25 (acceptable) PPL 26--40 (moderate) PPL >40 (collapse)
+> LRP (layer-rel. prop.) IG (integr. grad.) C2 (Consensus-2) MA (MeanAct.) Rnd (Random)
+
+Figure 2 Contrastive refusal editing on LLaMA-3.1-8B-Instruct: one panel per CAST harm domain. x = benign over-refusal; y =CAST malign refusal. Marker shape encodes selector (see legend); fill color encodes WikiText PPL at the operating point. Dashed line marks the benign cap ( 0.10 ); green shading marks the low-benign, high-malign region. Attribution selectors (LRP, IG, C2) cluster top-left in hate/crime, with high malign, low benign, and excellent PPL. Medical/Legal: LRP and C2 show orange/red PPL (sparsity collapse), while IG stays green by using a smaller k. IG-adult ( ⋆): rescue cell (benign cap relaxed to 0.20 ). Full numerics: Appendix E (Table 45). 
+
+RANDOM reaches only 0.05 -0.38 on LLaMA-3.1-8B, a null result at this scale. M EAN ACTIVATION fails in the opposite direction: it reduces malign refusal on every domain (hate drops 0.488 → 0.124 ). The reason is visible in the signal density: only ≤ 0.01% of M EAN ACTIVATION ’s top rows exceed |Ccomply | > 0.5 (where Ccomply is the contrastive compliance score from Algorithm 1), against 1.9-8.5% for LRP and IG on the same model and domain, a roughly 
+
+500 × gap (Table 43). The top-k set M EAN ACTIVATION selects is dominated by high-activation rows that are neither LM-critical nor refusal-specific but do include some refusal-promoting infrastructure; zeroing them removes that infrastructure without adding refusal-specific signal, so the net effect is a reduction in refusal. Refusal is MLP-concentrated. On LLaMA-3.1-8B, 77 .6% of LRP’s top-1% rows are gate_proj or up_proj (69 .4% 
+
+on Qwen3-8B), with attention rows around 15% . The LM-protect penalty separates these from LM-critical rows, which are down_proj -heavy. C ONSENSUS -2 leads or matches LRP on 4 of 5 domains and leads IG on 3 of 5 (hate, crime, medical), despite an LRP-IG Jaccard of about 5% between top-1% behavior masks. This low behavior level overlap contrasts with the broader LM-level agreement seen at 30% masking. SorryBench transfer is strong, with attribution selectors at 0.76 -0.98 on hate and crime. Because the contrastive margin and the refusal classifier both key on refusal-onset surface forms, this transfer to 45 unseen SorryBench categories is what distinguishes installed 7Faithfulness to Refusal: A Causal Audit of Neuron Selectors LLaMA-1B LLaMA-3B LLaMA-8B Qwen3-8B 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> CAST malign refusal (best ( ,  k))
+> LRP vs. IG winner reverses across architectures
+> domain
+> hate
+> crime
+> adult
+> medical
+> legal
+> method
+> LRP (solid)
+> IG (dashed)
+
+Figure 3 Cross-architecture method reversal: operating-point CAST malign refusal per domain (color) for LRP (solid) and IG (dashed) across four models. IG dominates on LLaMA-3.2-1B and LLaMA-3.2-3B (dashed lines above solid on 9 of 10 cells; LRP wins the medical domain on LLaMA-3.2-1B). On LLaMA-3.1-8B and Qwen3-8B the lines cross domain-by-domain, so the relative method ranking flips with architecture. 
+
+refusal from mere refusal-shaped phrasing (we return to this in Limitations). The cost is on OR-Bench-Hard, where over-refusal rises from a 0.30 baseline to 0.57 -0.88 at our operating point. Reporting both benchmarks together is what separates safety improvements from blanket over-refusal. These gains also carry a reasoning-utility cost at viable operating points: hate and crime lose 0.22 -0.34 GSM8K accuracy (Table 45). Signal density also predicts the operating-point k. Across all four models and both attribution methods, the per-domain fraction of rows with |Ccomply | > 0.5 orders hate > crime > adult > medical > legal (Table 43). The same ordering controls the sparsity each domain needs: hate and crime converge at k = 0 .01 -0.02 , legal needs k = 0 .05 -0.15 . The operating point can be predicted from calibration before any test-set evaluation. Medical and legal collapse under sparsity, not method. Their signal density is two to three times lower than hate’s, which forces k ≥ 0.05 -0.10 . At the high end of that range, about 10% of rows are zeroed and general capability collapses (PPL 40 -52 , GSM8K → 0, MMLU drops ∼ 45 percentage points and IFEval by up to 60 percentage points; Appendix Figure 18). The same collapse appears for LRP, C ONSENSUS -2, and Random. The LM-protect term λ is what keeps the hate, crime, and adult cells viable; without it the same top-k rows take PPL with them, while at λ = 0 .5
+
+the operating point reaches CAST-malign 0.814 (Table 38). 
+
+Winning method reverses across architectures. Extending the audit to LLaMA-3.2-1B, LLaMA-3.2-3B, and Qwen3-8B shows the winner is architecture-dependent (Figure 3). IG wins 9 of 10 cells on the two small LLaMA-3.2 models; LRP wins only the medical domain on LLaMA-3.2-1B, and with a higher CAST-malign refusal rate ( 0.586 vs. 
+
+0.516 ). On LLaMA-3.1-8B and Qwen3-8B the two methods split evenly. The flip is coherent rather than noisy: the five domain ordering within each model is nearly identical. Per-model operating-point tables are in Appendix E (Tables 40, 41, 42). The flip tracks where each method routes relevance relative to where the model computes the target (Appendix Figure 14). On LLaMA-3.1-8B LRP weights late layers and IG weights early layers; IG’s early rows amplify through more downstream transformations and yield higher raw refusal at matched k, but they also bleed onto benign prompts (IG-adult is the only cell with no feasible operating point), while LRP’s late rows stay clear of the LM pathway. On Qwen3-8B both methods route to early layers, but LRP picks sharper rows and wins on both axes. The faithful method on a given architecture is the one whose routing matches where that architecture computes refusal; there is no architecture-independent winner. 
+
+5.4 Specificity is row-level, not depth allocation. 
+
+The results so far establish sufficiency: zeroing the top-k rows installs refusal at the operating point. They do not yet establish that row identities matter: attribution might pick the right layers while rows within them remain interchangeable. To separate the two, for each domain at the LRP operating point (λ⋆, k ⋆) we build N = 3 random masks that zero the same number of rows in each layer as the published LRP mask, but with uniformly random row identities. Each control is scored on CAST-malign (Table 2). 8Faithfulness to Refusal: A Causal Audit of Neuron Selectors                                                  
+
+> Table 2 Layer-matched faithfulness audit on LLaMA-3.1-8B-LRP at the operating point per domain. Real = the published LRP mask; Ctrl mean / max = layer-count-matched random masks averaged / max over N= 3 seeds; Gain = real −ctrl mean. Real beats the control on every domain by +0 .46 to +0 .77 . Real values are co-evaluated with the controls in the same run for a fair comparison; slight differences from Table 45 reflect re-scoring variance (per-domain deltas 0.010 -0.080 , median 0.018 ); only the legal cell exceeds the n=500 Wilson half-width. Domain λ⋆k⋆Real Ctrl mean Ctrl max Gain hate 0.5 0.02 0.814 0.274 0.386 +0.540 crime 0.5 0.02 0.926 0.264 0.360 +0.662 adult 0.7 0.01 0.498 0.043 0.080 +0.455 medical 0.5 0.10 0.768 0.003 0.004 +0.765 legal 0.5 0.10 0.560 0.005 0.014 +0.555
+
+The real LRP mask beats the layer-matched control on every domain by +0 .46 (adult) to +0 .77 (medical). On medical at k = 0 .10 the control collapses to a mean of 0.003 , so nearly all of the 0.768 refusal rate is attributable to which specific rows LRP picked inside each layer. The effect is row-level: attribution identifies specific rows within layers, not just the right layers. The subspace is redundant across methods, but within a given method’s mask the row identities matter. 
+
+5.5 Refusal lives in a redundant subspace. 
+
+The LRP ↔IG top-1% Jaccard is 3-6% at every (model, domain) cell across all four models (Table 35). This is about 
+
+10 × the LRP-vs-Random overlap ( 0.5% ), still far short of agreement, yet both methods install refusal. Refusal therefore lives in a redundant subspace where many sparse masks suffice. The redundancy is not specific to LLaMA-3.1-8B: the 
+
+3-6% range holds across all four models. The 70 checkpoints are one realization of this class, not the unique refusal edit. This weight-space redundancy mirrors, and is predicted by, the multi-dimensional structure of refusal in activation space: [ 35 ] find refusal is carried by multiple functionally independent directions rather than one, and a mechanism with many independent directions is exactly what admits many disjoint sufficient masks at the weight level. The contrastive subtraction also exposes structure across harm categories. Two tight clusters appear, {hate, crime} with row Jaccard 0.445 and {medical, legal} with 0.287 , and the cross-cluster overlap is at most 0.13 on Qwen3-LRP (Appendix E, Figure 19). The same two-cluster pattern appears at attenuated magnitudes on LLaMA-3.1-8B. The tight {hate, crime} cluster yields a concrete, testable prediction: a single mask composed over the union of hate and crime calibration pairs should install refusal on both domains at once, which we leave to future work. 
+
+# 6 Discussion and Conclusion 
+
+Attribution is more causally faithful than rank stability suggests. Standard proxies (perplexity, rank correlation, calibration accuracy) cannot detect selector failure: an unfaithful selector passes all three while picking rows that are neither LM-critical nor behavior-specific. The causal audit closes this gap. At the LM level, attribution selectors identify dispensable rows orders of magnitude more accurately than non-attribution baselines, and the gap is consistent across all five models. The rank-stability dissociation is the sharpest finding: M EAN ACTIVATION has near-perfect rank stability yet catastrophic causal invalidity, and W ANDA inverts importance ordering on two of five architectures. A selector can be perfectly stable and still be wrong. 
+
+Contrastive attribution installs refusal selectively. At the behavior level, the contrastive signal successfully isolates refusal-specific rows: attribution selectors raise CAST-malign refusal to 0.82 -0.95 on hate and crime on LLaMA-3.1-8B, while keeping benign over-refusal at most 0.08 and perplexity within +2 -4 points. The effect is anatomically grounded (MLP gate/up rows), generalizes to held-out red-team benchmarks, and is row-specific rather than depth-specific. The cost structure is predictable from calibration alone: signal density orders domains hate >
+
+crime > adult > medical > legal across most models, and the required sparsity follows the same ordering. Medical and legal collapse under the sparsity needed to install refusal, a limitation of the signal rather than the method. The harm-category clustering (hate/crime vs. medical/legal) suggests refusal is organized at the row level around harm type, not just around the model’s general safety behavior. 
+
+Three structural findings challenge common assumptions. Beyond the headline attribution-vs-baseline gap, three results cut against common practice. First, the best-performing method reverses across architectures: IG dominates on small LLaMA models, LRP leads on Qwen3-8B, and neither is architecture-independent; the flip tracks each method’s layer-routing relative to where the architecture computes refusal (Appendix Figure 14), so practitioners 9Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+must validate on their target architecture. Second, refusal lives in a redundant subspace: LRP and IG select largely disjoint rows (Jaccard overlap of 3-6% , meaning only 3-6 out of every 100 top-ranked rows are shared) yet both install refusal (Table 35). Third, rows where LRP and IG disagree carry stronger causal signal than the agreed set: VETO-LRP, which keeps only the rows LRP ranks important but IG does not, outperforms real C ONSENSUS -2 on both LeRF and MoRF on both LLaMA-3.1-8B and Qwen3-8B (Appendix C.4); layer-matched and rank-randomized controls confirm this is not an artifact of depth allocation or rank averaging (Table 29), pointing to disagreement-aware aggregation as a promising avenue for future work. 
+
+What the audit establishes and what it opens. The audit demonstrates that attribution-based selection is causally faithful at both levels and provides a reusable four-step protocol: report sufficiency, specificity, utility cost, and cross-architecture replication. For practitioners, this means attribution-guided pruning and safety editing can be validated directly rather than relying on rank stability or calibration accuracy as proxies. The audit does not demonstrate necessity: many row sets suffice, and the edits are one realization of a redundant subspace. Rank-stability proxies systematically miss the failure modes a direct causal audit surfaces, and architecture-dependence means there is no universal selector, only validated ones. Detailed implications for attribution-guided pruning, behavior localization, and circuit discovery are in Appendix F. 
+
+# Limitations 
+
+Scope. The audit covers five dense decoder-only models across LLaMA-3, Qwen3, and Gemma-3 at the language-modeling level and four instruction-tuned variants at the behavior level, with the stability, consensus, and agree-ment analyses concentrated on LLaMA-3.1-8B and Qwen3-8B and the layer-matched faithfulness control reported for LLaMA-3.1-8B-LRP. Mixture-of-experts and encoder-decoder architectures, non-gradient attributors such as gradient ×input or SHAP, direction- and SAE-based selectors (a distinct inference-time intervention class), and non-English inputs fall outside the present scope and are natural extensions. 
+
+Evaluation. Selector runs are single evaluations at fixed operating points; the 70-cell grid and cross-architecture replication provide the robustness check in place of repeated seeds (Random, the one seeded selector, varies negligibly). We report Wilson 95% sampling intervals for the refusal-editing rates (Table 44), under which every headline attribution-vs-control separation is disjoint. Refusal is scored by a single classifier under greedy decoding; a multi-judge or sampling-based protocol [ 45 , 46 ] would sharpen absolute rates near the feasibility boundary, though the order-of-magnitude effects ( 0.024 → 0.9+ against controls at 0.003 ) are robust to judge choice. One confound is specific to this setup: the mask is selected via a margin over refusal-onset tokens and the judge is sensitive to refusal surface forms, so a model that only learned refusal-shaped openings would satisfy both. Transfer to SorryBench across 45 unseen harm categories makes pure surface mimicry unlikely; a template-diverse judge is the definitive check. 
+
+Artifacts and deployment. The 70 edited checkpoints are diagnostic artifacts showing what row-zeroing installs at the reported operating points; each is released for research use under a research-use agreement, with a model card recording its operating point, its rescue-cell flag where applicable, over-refusal and utility figures, and a “not for deployment” designation. A production safety edit would use milder operating points, broader red-team evaluation, and standard post-training recovery. All models, datasets, and benchmarks are used under their published terms; no personally identifiable information is present, and no verbatim harmful prompt text is reproduced. 
+
+# Ethics Statement 
+
+This work develops methods for auditing and editing the safety behavior of language models, and is safety-positive in intent: the causal audit exposes selector failures that standard metrics miss and helps practitioners verify that safety edits generalize beyond a calibration set. The contrastive construction is sign-symmetric and could in principle remove refusal rather than install it, so we release only the refusal-installing checkpoints and withhold any removal-optimized masks or code. The mechanism builds on published ablation and steering methods and introduces no new vulnerability, and refusal-removal tooling is already publicly available, so the release adds negligible marginal risk. All experiments use public models and datasets, involve no human participants, and collect no new data. 
+
+# References 
+
+[1] Mingjie Sun, Zhuang Liu, Anna Bair, and J. Zico Kolter. A simple and effective pruning approach for large language models. In ICLR , 2024. [2] Elias Frantar and Dan Alistarh. SparseGPT: Massive language models can be accurately pruned in one-shot. In 
+
+ICML , 2023. 10 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+[3] Yongqi An, Xu Zhao, Tao Yu, Ming Tang, and Jinqiao Wang. FLAP: Fluctuation-based adaptive structured pruning for large language models. In AAAI , 2024. arXiv:2312.11983. [4] Sayed Mohammad Vakilzadeh Hatefi, Maximilian Dreyer, Reduan Achtibat, Patrick Kahardipraja, Thomas Wiegand, Wojciech Samek, Alexander Binder, and Sebastian Lapuschkin. Attribution-guided pruning for insight and control: Circuit discovery and targeted correction in small-scale llms. CoRR , abs/2506.13727, 2025. URL 
+
+https://arxiv.org/abs/2506.13727 .[5] Bruce W. Lee, Inkit Padhi, Karthikeyan Natesan Ramamurthy, Erik Miehling, Pierre Dognin, Manish Na-gireddy, and Amit Dhurandhar. Programming refusal with conditional activation steering. In ICLR , 2025. arXiv:2409.05907. [6] Andy Zou, Long Phan, Sarah Chen, James Campbell, Phillip Guo, Richard Ren, Alexander Pan, Xuwang Yin, Mantas Mazeika, Ann-Kathrin Dombrowski, Shashwat Goel, Nathaniel Li, Michael J. Byun, Zifan Wang, Alex Mallen, Steven Basart, Sanmi Koyejo, Dawn Song, Matt Fredrikson, J. Zico Kolter, and Dan Hendrycks. Representation engineering: A top-down approach to AI transparency. CoRR , abs/2310.01405, 2023. URL 
+
+https://arxiv.org/abs/2310.01405 .[7] Tinghao Xie, Xiangyu Qi, Yi Zeng, Yangsibo Huang, Udari Madhushani Sehwag, Kaixuan Huang, Luxi He, Boyi Wei, Dacheng Li, Ying Sheng, Ruoxi Jia, Bo Li, Kai Li, Danqi Chen, Peter Henderson, and Prateek Mittal. SORRY-Bench: Systematically evaluating large language model safety refusal. In ICLR , 2025. [8] Justin Cui, Wei-Lin Chiang, Ion Stoica, and Cho-Jui Hsieh. OR-Bench: An over-refusal benchmark for large language models. In ICML , 2025. arXiv:2405.20947. [9] Dan Hendrycks, Collin Burns, Steven Basart, Andy Zou, Mantas Mazeika, Dawn Song, and Jacob Steinhardt. Measuring massive multitask language understanding. In ICLR , 2021. [10] Karl Cobbe, Vineet Kosaraju, Mohammad Bavarian, Mark Chen, Heewoo Jun, Lukasz Kaiser, Matthias Plappert, Jerry Tworek, Jacob Hilton, Reiichiro Nakano, Christopher Hesse, and John Schulman. Training verifiers to solve math word problems. arXiv preprint arXiv:2110.14168 , 2021. [11] Jeffrey Zhou, Tianjian Lu, Swaroop Mishra, Siddhartha Brahma, Sujoy Basu, Yi Luan, Denny Zhou, and Le Hou. Instruction-following evaluation for large language models. arXiv preprint arXiv:2311.07911 , 2023. [12] Xinyin Ma, Gongfan Fang, and Xinchao Wang. LLM-Pruner: On the structural pruning of large language models. In NeurIPS , 2023. [13] Sayed Mohammad Vakilzadeh Hatefi, Maximilian Dreyer, Reduan Achtibat, Thomas Wiegand, Wojciech Samek, and Sebastian Lapuschkin. Pruning by explaining revisited: Optimizing attribution methods to prune CNNs and transformers. CoRR , abs/2408.12568, 2024. URL https://arxiv.org/abs/2408.12568 .[14] Vinay Kumar Sankarapu, Chintan Chitroda, Yashwardhan Rathore, Neeraj Kumar Singh, and Pratinav Seth. DLBacktrace: A model agnostic explainability for any deep learning models. CoRR , abs/2411.12643, 2024. URL 
+
+https://arxiv.org/abs/2411.12643 .[15] Kevin Wang, Alexandre Variengien, Arthur Conmy, Buck Shlegeris, and Jacob Steinhardt. Interpretability in the wild: a circuit for indirect object identification in GPT-2 small. In ICLR , 2023. [16] Aaquib Syed, Can Rager, and Arthur Conmy. Attribution patching outperforms automated circuit discovery. 
+
+CoRR , abs/2310.10348, 2023. URL https://arxiv.org/abs/2310.10348 .[17] Aadit Sengupta, Pratinav Seth, and Vinay Kumar Sankarapu. Interpretability as alignment: Making internal understanding a design principle. CoRR , abs/2509.08592, 2025. URL https://arxiv.org/abs/2509.08592 .[18] Wojciech Samek, Alexander Binder, Grégoire Montavon, Sebastian Lapuschkin, and Klaus-Robert Müller. Evaluating the visualization of what a deep neural network has learned. IEEE Transactions on Neural Networks and Learning Systems , 28(11):2660–2673, 2017. doi: 10.1109/TNNLS.2016.2599820. [19] Sara Hooker, Dumitru Erhan, Pieter-Jan Kindermans, and Been Kim. A benchmark for interpretability methods in deep neural networks. In NeurIPS , 2019. [20] Pratinav Seth, Yashwardhan Rathore, Neeraj Kumar Singh, Chintan Chitroda, and Vinay Kumar Sankarapu. xai_evals: A framework for evaluating post-hoc local explanation methods. CoRR , abs/2502.03014, 2025. URL 
+
+https://arxiv.org/abs/2502.03014 .[21] Pratinav Seth and Vinay Kumar Sankarapu. Bridging the gap in XAI: Why reliable metrics matter for explainability and compliance. CoRR , abs/2502.04695, 2025. URL https://arxiv.org/abs/2502.04695 .[22] Sebastian Bach, Alexander Binder, Grégoire Montavon, Frederick Klauschen, Klaus-Robert Müller, and Wojciech Samek. On pixel-wise explanations for non-linear classifier decisions by layer-wise relevance propagation. PLoS ONE , 10(7):e0130140, 2015. doi: 10.1371/journal.pone.0130140. [23] Grégoire Montavon, Alexander Binder, Sebastian Lapuschkin, Wojciech Samek, and Klaus-Robert Müller. Layer-wise relevance propagation: An overview. In Explainable AI: Interpreting, Explaining and Visualizing 
+
+11 Faithfulness to Refusal: A Causal Audit of Neuron Selectors Deep Learning , volume 11700 of Lecture Notes in Computer Science , pages 193–209. Springer, 2019. doi: 10.1007/978-3-030-28954-6_10. [24] Reduan Achtibat, Sayed Mohammad Vakilzadeh Hatefi, Maximilian Dreyer, Aakriti Jain, Thomas Wiegand, Sebastian Lapuschkin, and Wojciech Samek. AttnLRP: Attention-aware layer-wise relevance propagation for transformers. In ICML , 2024. [25] Mukund Sundararajan, Ankur Taly, and Qiqi Yan. Axiomatic attribution for deep networks. In ICML , 2017. [26] Yuntao Bai, Andy Jones, Kamal Ndousse, Amanda Askell, Anna Chen, Nova DasSarma, Dawn Drain, Stanislav Fort, Deep Ganguli, Tom Henighan, et al. Training a helpful and harmless assistant with reinforcement learning from human feedback. arXiv preprint arXiv:2204.05862 , 2022. [27] Rafael Rafailov, Archit Sharma, Eric Mitchell, Stefano Ermon, Christopher D. Manning, and Chelsea Finn. Direct preference optimization: Your language model is secretly a reward model. In NeurIPS , 2023. [28] Nina Panickssery, Nick Gabrieli, Julian Schulz, Meg Tong, Evan Hubinger, and Alexander Matt Turner. Steering Llama 2 via contrastive activation addition. In ACL , 2024. [29] Andy Arditi, Oscar Obeso, Aaquib Syed, Daniel Paleka, Nina Panickssery, Wes Gurnee, and Neel Nanda. Refusal in language models is mediated by a single direction. In NeurIPS , 2024. arXiv:2406.11717. [30] Boyi Wei, Kaixuan Huang, Yangsibo Huang, Tinghao Xie, Xiangyu Qi, Mengzhou Xia, Prateek Mittal, Mengdi Wang, and Peter Henderson. Assessing the brittleness of safety alignment via pruning and low-rank modifications. In ICML , 2024. arXiv:2402.05162. [31] Aditya Kasliwal, Pratinav Seth, and Vinay Kumar Sankarapu. C-∆Θ : Circuit-restricted weight arithmetic for selective refusal. CoRR , abs/2602.04521, 2026. URL https://arxiv.org/abs/2602.04521 .[32] Jianhui Chen, Xiaozhi Wang, Zijun Yao, Yushi Bai, Lei Hou, and Juanzi Li. Towards understanding safety alignment: A mechanistic perspective from safety neurons. In NeurIPS , 2025. arXiv:2406.14144. [33] Wei Jie Yeo, Nirmalendu Prakash, Clement Neo, Ranjan Satapathy, Roy Ka-Wei Lee, and Erik Cambria. Under-standing refusal in language models with sparse autoencoders. In Findings of EMNLP , 2025. arXiv:2505.23556. [34] Nirmalendu Prakash, Wei Jie Yeo, Amir Abdullah, Ranjan Satapathy, Erik Cambria, and Roy Ka-Wei Lee. Beyond I’m sorry, I can’t: Dissecting large language model refusal. CoRR , abs/2509.09708, 2025. URL 
+
+https://arxiv.org/abs/2509.09708 .[35] Tom Wollschläger, Jannes Elstner, Simon Geisler, Vincent Cohen-Addad, Stephan Günnemann, and Johannes Gasteiger. The geometry of refusal in large language models: Concept cones and representational independence. 
+
+CoRR , abs/2502.17420, 2025. URL https://arxiv.org/abs/2502.17420 .[36] Hamid Kazemi, Atoosa Chegini, and Maria Safi. A single neuron is sufficient to bypass safety alignment in large language models. CoRR , abs/2605.08513, 2026. URL https://arxiv.org/abs/2605.08513 .[37] Stephen Merity, Caiming Xiong, James Bradbury, and Richard Socher. Pointer sentinel mixture models. CoRR ,abs/1609.07843, 2016. URL https://arxiv.org/abs/1609.07843 .[38] Stella Biderman, Hailey Schoelkopf, Lintang Sutawika, Leo Gao, Jonathan Tow, Baber Abbasi, et al. Lessons from the trenches on reproducible evaluation of language models. https://github.com/EleutherAI/ lm-evaluation-harness , 2024. [39] Andreas Madsen, Nicholas Meade, Vaibhav Adlakha, and Siva Reddy. Evaluating the faithfulness of importance measures in NLP by recursively masking allegedly important tokens and retraining. CoRR , abs/2110.08412, 2021. URL https://arxiv.org/abs/2110.08412 .[40] Aaron Grattafiori, Abhimanyu Dubey, Abhinav Jauhri, et al. The Llama 3 herd of models. arXiv preprint arXiv:2407.21783 , 2024. [41] Qwen Team. Qwen3 technical report. arXiv preprint arXiv:2505.09388 , 2025. [42] Gemma Team. Gemma 3 technical report. arXiv preprint arXiv:2503.19786 , 2025. [43] Colin Raffel, Noam Shazeer, Adam Roberts, Katherine Lee, Sharan Narang, Michael Matena, Yanqi Zhou, Wei Li, and Peter J. Liu. Exploring the limits of transfer learning with a unified text-to-text transformer. Journal of Machine Learning Research , 21(140):1–67, 2020. [44] ProtectAI. ProtectAI/distilroberta-base-rejection-v1: Refusal classifier. https://huggingface.co/ProtectAI/ distilroberta-base-rejection-v1 , 2024. [45] Hongyu Chen and Seraphina Goldfarb-Tarrant. Safer or luckier? LLMs as safety evaluators are not robust to artifacts. In ACL , 2025. arXiv:2503.09347. [46] Leo Schwinn, Moritz Ladenburger, Tim Beyer, Mehrnaz Mofakhami, Gauthier Gidel, and Stephan Günnemann. A coin flip for safety: LLM judges fail to reliably measure adversarial robustness. CoRR , abs/2603.06594, 2026. URL https://arxiv.org/abs/2603.06594 .12 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+# Appendix A Selector Descriptions and Full 30% Numerics 
+
+Selector descriptions. The four non-attribution baselines cover the cost spectrum from data-free to one forward pass: R ANDOM assigns uniform U (0 , 1) scores averaged over 3 seeds; M AGNITUDE uses si = mean (|W [i, :] |) with no calibration data; W ANDA adapts the per-weight criterion of [ 1] (originally |Wij | · ∥ Xj ∥2 for individual weights) to the neuron-row level by summing across the input dimension: si = P 
+
+> j
+
+|Wij | · RMS (Xj ), where RMS (Xj ) is the RMS of input feature j across calibration data (row-level aggregation is necessary because our intervention zeroes whole output rows rather than individual weights); M EAN ACTIVATION averages the absolute output activation across calibration data. The three attribution-based selectors require one or more backward passes. LRP uses AttnLRP [ 24 ] via the lxt library to propagate relevance from the next-token loss back through attention and MLP layers in a single backward-like pass. IG [ 25 ] integrates the gradient along a linear path from a zero baseline using 16 interpolation steps. C ONSENSUS -2 aggregates LRP and IG via a global Borda rank average: for each method M ∈ { LRP , IG }, let ˜rM [i] = rank M (i)/N be the normalized rank of row i among all N prunable neuron-rows (lower rank = higher importance); the C ONSENSUS -2 score is sC2 [i] = 12 (˜ rLRP [i] + ˜ rIG [i]) , and rows with the lowest combined rank are selected for masking. The motivation is error reduction: LRP uses a conservation-based layer-by-layer propagation while IG uses a path-integral approach, so the two methods have incompatible failure modes and their agreement identifies rows that are robustly unimportant under both paradigms. Scoring functions and computational costs are summarized in Table 4. 
+
+Model architecture details. Table 3 gives the block, layer, and neuron counts for each model. The five models span a roughly 9× range in prunable neuron count, from LLaMA-3.2-1B ( 377 k) to Gemma-3-12B ( 3.5M), which partly explains why attribution selectors retain higher downstream accuracy on larger models at matched sparsity rates. 
+
+Table 3 Models used in the general selector audit. “Layers” counts all prunable Linear layers; “Neurons” counts all neuron-rows across those layers, computed from each model’s HuggingFace config. Model Blocks Layers Neurons LLaMA-3.2-1B 16 112 376,832 LLaMA-3.2-3B 28 196 774,144 LLaMA-3.1-8B 32 224 1,376,256 Qwen3-8B 32 224 1,245,184 Gemma-3-12B 38 499 3,514,368 
+
+Table 4 Selectors evaluated. Cost: triv. =no data; low =forward only; med. =1 backward/trace; high =16 × backward. Selector Score Cost RANDOM U (0 , 1) , 3-seed avg. triv. 
+
+MAGNITUDE mean (|W [i, :] |) triv. 
+
+WANDA P 
+
+> j
+
+|Wij | · RMS (Xj ) low 
+
+MEAN ACT . Ex,t [|hi(x, t )|] low 
+
+LRP AttnLRP via the lxt library med. 
+
+IG 16-step path integral high 
+
+CONSENSUS -2 12 (˜ rLRP [i] + ˜ rIG [i]) high 
+
+30% masking numerics. Figure 4 visualizes the LeRF and MoRF PPL at 30% masking as a heatmap. Table 5 gives the full numerics including the validity gap (Gap = MoRF − LeRF ) and mean downstream accuracy across 8 
+
+lm-eval-harness tasks. Key patterns: attribution selectors (LRP, IG, C ONSENSUS -2) generally sit two to four orders of magnitude below non-attribution baselines on LeRF across all five models; MoRF shows the matching asymmetry; R ANDOM produces a negative gap on 4 of 5 models; W ANDA inverts on LLaMA-3.2-3B and Qwen3-8B. Downstream accuracy at 30% LeRF is highest for C ONSENSUS -2 on Gemma-3-12B ( 0.503 ) and LLaMA-3.1-8B ( 0.392 ), against a non-attribution floor near 0.30 .
+
+Reading the extreme MoRF values. At high masking rates the MoRF perplexities in the per-rate tables saturate at a numeric ceiling ( ∼7.16 × 10 38 for LLaMA-3.2-1B, ∼1.36 × 10 38 for LLaMA-3.2-3B) set by float overflow of the exponentiated loss once the model is fully destroyed; the exact value is a representation limit, not a measurement. 13 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Entries at or near this ceiling should be read ordinally (“model collapsed”), and the quantitative MoRF comparisons we draw in the main text (e.g. LRP’s ∼10 11 spike near 30% ) are taken from the pre-saturation regime where the values are informative. 
+
+Table 5 Full numerics for the selector faithfulness audit at 30% masking. L = LeRF PPL ↓ (lower = safer choices), M = MoRF PPL ↑ (higher = better necessity identification), G = Gap ↑ (= M − L), A = mean downstream accuracy across 8 lm-eval-harness tasks ( ↑). Full rate sweeps in Appendix B. Selector L M G A
+
+LLaMA-3.2-1B 
+
+RANDOM 548318 344336 −203982 .304 MAGNITUDE 364252 690316 326065 .280 WANDA 359248 1.01e6 650003 .286 MEAN ACT . 93828 1.76e6 1.67e6 .284 LRP 288 1.04e11 1.04e11 .292 IG 603 821049 820446 .309 CONSENSUS -2 149 771675 771526 .303 
+
+LLaMA-3.2-3B 
+
+RANDOM 101662 149592 47930 .299 MAGNITUDE 48289 401191 352902 .278 WANDA 347227 93170 −254057 .286 MEAN ACT . 89751 588584 498834 .278 LRP 599 126315 125716 .285 IG 993 852031 851037 .286 CONSENSUS -2 120 499225 499105 .341 
+
+LLaMA-3.1-8B 
+
+RANDOM 762286 645432 −116854 .316 MAGNITUDE 1.05e6 2.03e6 976135 .308 WANDA 360083 976078 615995 .285 MEAN ACT . 139874 930749 790875 .299 LRP 830 8.32e6 8.32e6 .292 IG 98 1.40e6 1.40e6 .383 CONSENSUS -2 66 1.54e6 1.54e6 .392 
+
+Qwen3-8B 
+
+RANDOM 7.19e6 2.09e6 −5.10e6 .297 MAGNITUDE 7.38e6 1.66e9 1.65e9 .288 WANDA 1.95e7 9.67e6 −9.78e6 .292 MEAN ACT . 6.59e4 3.11e8 3.11e8 .279 LRP 724 3.74e7 3.74e7 .332 IG 229 2.68e7 2.68e7 .355 CONSENSUS -2 187 2.83e7 2.83e7 .348 
+
+Gemma-3-12B 
+
+RANDOM 3.16e9 1.48e8 −3.01e9 .284 MAGNITUDE 316743 1.40e8 1.40e8 .289 WANDA 9.07e5 1.66e9 1.65e9 .292 MEAN ACT . 1.88e8 4.27e10 4.26e10 .287 LRP 514 2.40e6 2.40e6 .329 IG 135 1.00e14 1.00e14 .462 CONSENSUS -2 141 5.26e13 5.26e13 .503 
+
+14 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+# B Full LeRF / MoRF / Downstream Sweeps 
+
+Tables 6-10 give complete LeRF and MoRF PPL at all 19 masking rates for all five models; each table has a LeRF section (upper half) and a MoRF section (lower half). Tables 11-13 give downstream task accuracy: Table 11 at representative masking rates for LLaMA-8B, Table 12 as a 30% snapshot across four models, and Table 13 as mean accuracy across all rates and all five models. 
+
+Notable per-model findings. LRP on LLaMA-3.2-1B achieves MoRF = 1 .04 × 10 11 at 30% , collapsing to 
+
+1.30 × 10 31 at 35% , the strongest necessity identification in the dataset, 4 orders of magnitude above the LLaMA-8B value. On LLaMA-3.2-3B, IG outperforms LRP on MoRF at 30% (852 k vs. 126 k ), an early signal of architecture-dependent method ordering. On Qwen3-8B, R ANDOM also inverts (MoRF 2.09 × 10 6 < LeRF 7.19 × 10 6), not just W ANDA . On Gemma-3-12B, IG achieves the highest 30% MoRF in the dataset ( 1.00 × 10 14 ); W ANDA and MEAN ACT . at 5% LeRF still equal dense PPL ( 19 .0), confirming the bottom-end of their rankings is correctly identifying low-importance rows even though both selectors collapse rapidly past 10% .
+
+30% snapshot heatmap (across all 5 models, 7 selectors). Figure 4 summarizes the LeRF and MoRF PPL at 30% masking as a color-coded matrix, with attribution selectors visually separated from non-attribution baselines by a dashed rule. The heatmap is a compact companion to Figure 1: where Figure 1 shows the full 0-50% 
+
+degradation trajectory, this figure collapses the 30% slice into a single matrix that surfaces the per-cell ranking and downstream-accuracy structure at a glance. 
+
+Downstream benchmark accuracy. 
+
+IG and C ONSENSUS -2 maintain near-dense accuracy at 10% masking ( 0.580 -0.584 vs. 0.671 dense on LLaMA-8B). LAMBADA is the most sensitive discriminator: non-attribution baselines drop to 0 at 10% while IG/C ONSENSUS -2 retain 0.528 -0.586 , and LRP retains 0.086 . LRP is weaker on utility than IG/C ONSENSUS -2 at low rates despite stronger MoRF, suggesting LRP’s mask spans more capability-relevant rows. Table 11 gives per-task accuracy at representative masking rates for LLaMA-8B; Table 12 gives the 30% snapshot across four models; Table 13 gives mean accuracy across all rates and all five models, showing that attribution selectors maintain higher accuracy than baselines at low-to-moderate rates ( 10 -30% ) before all methods converge to the collapsed floor ( ∼0.28) at high rates ( 50 -90% ). LLaMA-1B                             
+
+> LLaMA-3B
+> LLaMA-8B
+> Qwen-8B
+> Gemma-12B
+> Random
+> Magnitude
+> Wanda
+> MeanAct
+> LRP
+> IG
+> Consensus-2
+> 5e+05 1e+05 8e+05 7e+06 3e+09
+> 4e+05 5e+04 1e+06 7e+06 3e+05
+> 4e+05 3e+05 4e+05 2e+07 9e+05
+> 9e+04 9e+04 1e+05 7e+04 2e+08
+> 288 599 830 724 514
+> 603 993 98 229 135
+> 149 120 66 187 141
+
+LeRF PPL @ 30% (lower=better)                             
+
+> LLaMA-1B
+> LLaMA-3B
+> LLaMA-8B
+> Qwen-8B
+> Gemma-12B
+> Random
+> Magnitude
+> Wanda
+> MeanAct
+> LRP
+> IG
+> Consensus-2
+> 3e+05 1e+05 6e+05 2e+06 1e+08
+> 7e+05 4e+05 2e+06 2e+09 1e+08
+> 1e+06 9e+04 1e+06 1e+07 2e+09
+> 2e+06 6e+05 9e+05 3e+08 4e+10
+> 1e+11 1e+05 8e+06 4e+07 2e+06
+> 8e+05 9e+05 1e+06 3e+07 1e+14
+> 8e+05 5e+05 2e+06 3e+07 5e+13
+
+MoRF PPL @ 30% (higher=better) 
+
+> 10 1
+> 10 2
+> 10 3
+> 10 4
+> 10 5
+> 10 6
+> 10 7
+> 10 8
+> 10 9
+> PPL (log)
+> 10 4
+> 10 5
+> 10 6
+> 10 7
+> 10 8
+> 10 9
+> 10 10
+> 10 11
+> 10 12
+> PPL (log)
+
+Figure 4 Selector faithfulness audit at 30% masking as a heatmap: seven selectors × five models. Left: LeRF PPL (lower greener = “safe” set is genuinely safe). Right: MoRF PPL (higher greener = “important” set is genuinely important). Dashed line separates the four non-attribution selectors (top) from the three attribution selectors (bottom). Compact companion to Figure 1. 
+
+15 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Table 6 Full LeRF / MoRF PPL: LLaMA-3.2-1B. 0-90% in 5% steps. LeRF ↓ = least-relevant-first (lower = safer choices); MoRF ↑
+
+= most-relevant-first (higher = better necessity identification). Companion plot: Fig 5. 
+
+Selector 0% 5% 10% 15% 20% 25% 30% 35% 40% 45% 50% 55% 60% 65% 70% 75% 80% 85% 90% 
+
+LeRF (least-relevant-first masking; lower PPL = safer choices ↓)
+
+RANDOM 16.5 993 11.4k 35.8k 86.6k 240k 548k 914k 556k 675k 469k 392k 572k 608k 1.18e6 1.30e6 1.29e7 2.09e9 6.44e15 MAGNITUDE 16.5 13.1k 74.7k 340k 743k 513k 364k 281k 256k 234k 188k 159k 787k 1.91e6 1.97e6 1.53e6 2.05e10 3.15e10 3.39e16 WANDA 16.5 844 18.3k 145k 139k 438k 359k 378k 314k 1.50e6 1.23e6 357k 375k 244k 190k 287k 1.34e6 4.00e6 1.52e7 MEAN ACT . 16.5 430 2180 86.2k 96.9k 103k 93.8k 144k 399k 467k 413k 349k 292k 546k 540k 313k 300k 555k 9.46e6 LRP 16.5 21.1 29.3 49.9 102 163 288 458 623 856 1209 1571 2247 3635 5366 13.5k 12.2k 6039 13.9k IG 16.5 24.8 39.7 69.0 136 283 603 1084 1541 1845 3610 4696 4847 5379 7130 18.7k 31.4k 163k 7.34e6 CONSENSUS -2 16.5 22.3 31.7 46.3 65.7 99.6 149 220 335 509 834 1646 5662 8490 10.4k 15.5k 12.7k 16.1k 109k 
+
+MoRF (most-relevant-first masking; higher PPL = better necessity identification ↑)
+
+RANDOM 16.5 15.1k 13.9k 44.3k 237k 306k 344k 393k 752k 1.22e6 664k 992k 689k 1.09e6 2.43e6 2.10e6 2.55e7 8.46e9 1.72e16 MAGNITUDE 16.5 52.1k 170k 183k 367k 591k 690k 594k 840k 1.54e6 1.71e6 1.87e6 2.15e6 1.68e6 1.26e6 1.81e6 3.31e6 2.06e6 789k WANDA 16.5 8314 442k 1.33e6 1.02e6 710k 1.01e6 802k 295k 2.31e6 841k 3.00e6 8.67e6 4.03e6 4.82e6 8.62e7 1.17e11 1.73e22 3.47e35 MEAN ACT . 16.5 298k 300k 676k 1.04e6 1.28e6 1.76e6 1.35e6 1.34e6 1.72e6 3.56e6 2.55e6 3.07e6 1.15e6 3.37e6 1.11e13 1.29e28 1.99e38 6.57e38 LRP 16.5 387k 800k 2.66e6 1.01e6 1.20e6 1.04e11 1.30e31 1.07e38 5.03e38 6.98e38 7.16e38 7.16e38 7.16e38 7.16e38 7.16e38 7.16e38 7.16e38 7.16e38 IG 16.5 260k 477k 906k 1.33e6 470k 821k 499k 843k 807k 528k 1.66e6 2.95e9 9.95e16 1.43e33 7.16e38 7.16e38 7.16e38 7.16e38 CONSENSUS -2 16.5 303k 1.68e6 1.81e6 473k 405k 772k 453k 1.06e8 1.53e16 4.13e28 1.53e38 5.59e38 7.16e38 7.16e38 7.16e38 7.16e38 7.16e38 7.16e38 0 10 20 30 40 50 
+
+masking rate (%) 
+
+10 1
+
+10 2
+
+10 3
+
+10 4
+
+10 5
+
+10 6
+
+> PPL
+
+LLaMA-1B LeRF (lower=safer) 
+
+0 10 20 30 40 50 
+
+masking rate (%) 
+
+10 6
+
+10 13 
+
+10 20 
+
+10 27 
+
+10 34 
+
+> PPL
+
+LLaMA-1B MoRF (higher=better) 
+
+Random Magnitude Wanda MeanAct LRP IG Consensus-2 
+
+Figure 5 LLaMA-3.2-1B: LeRF / MoRF degradation (companion to Table 6). Per-rate PPL for all seven selectors over 
+
+0–50% masking (log y; the informative range before all selectors saturate at model collapse): LeRF (left, lower = safer choices) and MoRF (right, higher = better necessity identification). Attribution selectors (LRP, IG, C ONSENSUS -2) sit orders of magnitude below the non-attribution baselines on LeRF at every rate; LRP’s MoRF spikes to ∼10 11 near 30% , the strongest necessity signal in the audit. 
+
+16 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Table 7 Full LeRF / MoRF PPL: LLaMA-3.2-3B. Same format as Table 6. Companion plot: Fig 6. 
+
+Selector 0% 5% 10% 15% 20% 25% 30% 35% 40% 45% 50% 55% 60% 65% 70% 75% 80% 85% 90% 
+
+LeRF ↓
+
+RANDOM 13.3 419 7085 14.9k 29.9k 89.5k 102k 174k 279k 275k 420k 735k 529k 682k 407k 466k 346k 557k 4.27e6 MAGNITUDE 13.3 12.7k 52.3k 84.6k 103k 148k 48.3k 277k 122k 242k 274k 223k 225k 290k 292k 163k 777k 7.32e8 2.38e18 WANDA 13.3 12.0k 15.5k 39.4k 108k 387k 347k 418k 427k 229k 139k 159k 700k 392k 313k 337k 657k 4.83e6 8.80e7 MEAN ACT . 13.3 495 1855 29.2k 24.1k 31.4k 89.8k 113k 151k 153k 169k 156k 147k 207k 415k 219k 349k 660k 482k LRP 13.3 18.2 33.9 121 261 393 599 1069 1617 2405 2557 2267 2321 2402 3380 4194 5016 14.7k 32.1k IG 13.3 17.2 25.6 40.8 65.5 587 993 2005 2027 2809 2108 2582 3210 7736 16.8k 12.6k 47.9k 46.6k 186k CONSENSUS -2 13.3 16.0 257 323 240 74.9 120 204 365 551 857 1776 3430 6962 12.9k 35.8k 10.4k 11.8k 48.3k 
+
+MoRF ↑
+
+RANDOM 13.3 882 9042 28.9k 35.8k 66.5k 150k 229k 225k 203k 325k 344k 381k 418k 460k 430k 372k 1.06e6 2.60e6 MAGNITUDE 13.3 19.6k 55.8k 174k 342k 252k 401k 423k 680k 1.12e6 1.64e6 1.69e6 1.50e6 1.26e6 757k 964k 927k 653k 208k WANDA 13.3 66.4k 94.1k 44.6k 192k 161k 93.2k 163k 348k 709k 673k 634k 372k 148k 330k 209k 8.83e10 8.89e13 8.49e29 MEAN ACT . 13.3 164k 459k 303k 358k 501k 589k 755k 878k 665k 687k 588k 711k 609k 174k 4.48e11 1.36e25 4.08e36 2.80e37 LRP 13.3 259k 353k 697k 483k 713k 126k 1.39e6 1.75e6 7.98e11 4.04e23 2.32e27 2.66e27 5.53e27 9.31e27 1.40e28 6.45e28 2.29e29 1.08e30 IG 13.3 290k 215k 315k 380k 449k 852k 399k 371k 606k 1.07e6 263k 367k 3.05e9 8.19e18 4.02e27 1.36e38 1.36e38 1.36e38 CONSENSUS -2 13.3 455k 559k 423k 545k 373k 499k 455k 344k 200k 1.51e6 951k 4.29e7 1.70e24 5.96e37 1.35e38 1.36e38 1.36e38 1.36e38 0 10 20 30 40 50 
+
+masking rate (%) 
+
+10 1
+
+10 2
+
+10 3
+
+10 4
+
+10 5
+
+> PPL
+
+LLaMA-3B LeRF (lower=safer) 
+
+0 10 20 30 40 50 
+
+masking rate (%) 
+
+10 4
+
+10 9
+
+10 14 
+
+10 19 
+
+10 24 
+
+> PPL
+
+LLaMA-3B MoRF (higher=better) 
+
+Random Magnitude Wanda MeanAct LRP IG Consensus-2 
+
+Figure 6 LLaMA-3.2-3B: LeRF / MoRF degradation (companion to Table 7). Per-rate PPL for all seven selectors over 
+
+0–50% masking (log y; the informative range before all selectors saturate at model collapse): LeRF (left, lower = safer choices) and MoRF (right, higher = better necessity identification). Attribution stays well below the baselines on LeRF throughout; on MoRF, IG overtakes LRP around 30% (852 k vs. 126 k), an early sign of architecture-dependent method ordering. 
+
+17 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Table 8 Full LeRF / MoRF PPL: LLaMA-3.1-8B. Same format as Table 6. Companion plot: Fig 7. 
+
+Selector 0% 5% 10% 15% 20% 25% 30% 35% 40% 45% 50% 55% 60% 65% 70% 75% 80% 85% 90% 
+
+LeRF ↓
+
+RANDOM 10.6 5647 40.1k 635k 420k 571k 762k 768k 1.41e6 1.24e6 584k 2.01e6 880k 1.64e6 2.90e6 4.88e6 3.48e6 5.19e6 3.17e6 MAGNITUDE 10.6 91.8k 2.19e6 393k 892k 744k 1.05e6 415k 594k 4.37e6 816k 92.1k 1.00e6 551k 55.7k 318k 64.2k 3.76e6 328k WANDA 10.6 77.8k 20.0k 296k 149k 219k 360k 193k 122k 21.7k 89.1k 63.4k 39.1k 640k 403k 686k 818k 4.82e6 2.94e7 MEAN ACT . 10.6 4175 8689 31.6k 42.8k 131k 140k 266k 332k 5.99e6 6.28e6 1.61e6 675k 192k 721k 315k 253k 475k 3.01e6 LRP 10.6 71.3 219 321 340 637 830 1075 1332 1685 2108 2817 5451 22.1k 8581 6923 2.75e7 1.74e7 4.28e6 IG 10.6 13.3 18.3 26.1 39.0 60.0 97.8 180 356 724 1275 1966 2945 2824 3928 4311 6140 10.2k 37.2k CONSENSUS -2 10.6 12.6 16.2 21.8 30.0 43.8 66.1 95.1 143 509 738 1364 1996 3194 17.0k 187k 219k 52.8k 9477 
+
+MoRF ↑
+
+RANDOM 10.6 101 22.6k 131k 210k 190k 645k 1.50e6 1.79e6 785k 927k 812k 779k 561k 4.30e6 396k 904k 2.07e6 1.70e6 MAGNITUDE 10.6 21.8k 185k 139k 461k 1.62e6 2.03e6 1.46e6 1.53e6 2.24e6 1.90e6 1.16e6 982k 725k 624k 509k 1.24e6 511k 445k WANDA 10.6 38.1k 66.6k 81.0k 316k 1.17e6 976k 273k 1.44e6 501k 421k 270k 264k 448k 1.31e6 967k 954k 726k 84.8k MEAN ACT . 10.6 715k 1.35e6 1.35e6 1.47e6 838k 931k 1.26e6 2.01e6 2.75e6 4.90e6 2.84e6 2.55e6 1.79e6 6.64e6 1.14e6 693k 132k 452k LRP 10.6 611k 5.12e6 1.56e6 3.92e6 2.14e6 8.32e6 1.40e6 1.25e6 2.35e6 696k 515k 502k 502k 502k 502k 502k 502k 502k IG 10.6 653k 1.08e6 2.14e6 1.58e6 893k 1.40e6 1.82e6 1.12e6 1.59e6 1.49e6 1.12e6 939k 517k 502k 502k 502k 502k 502k CONSENSUS -2 10.6 3.26e6 2.22e6 2.18e6 4.80e6 979k 1.54e6 691k 2.12e6 404k 1.58e6 722k 493k 499k 502k 502k 502k 502k 502k 0 10 20 30 40 50 
+
+masking rate (%) 
+
+10 2
+
+10 4
+
+10 6
+
+> PPL
+
+LLaMA-8B LeRF (lower=safer) 
+
+0 10 20 30 40 50 
+
+masking rate (%) 
+
+10 2
+
+10 4
+
+10 6
+
+> PPL
+
+LLaMA-8B MoRF (higher=better) 
+
+Random Magnitude Wanda MeanAct LRP IG Consensus-2 
+
+Figure 7 LLaMA-3.1-8B: LeRF / MoRF degradation (companion to Table 8). Per-rate PPL for all seven selectors over 
+
+0–50% masking (log y; the informative range before all selectors saturate at model collapse): LeRF (left, lower = safer choices) and MoRF (right, higher = better necessity identification). LRP, IG, and C ONSENSUS -2 are much safer than the baselines on LeRF through the main low-to-moderate masking range, with a matching MoRF asymmetry at representative rates. 
+
+18 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Table 9 Full LeRF / MoRF PPL: Qwen3-8B. Same format as Table 6. Companion plot: Fig 8. 
+
+Selector 0% 5% 10% 15% 20% 25% 30% 35% 40% 45% 50% 55% 60% 65% 70% 75% 80% 85% 90% 
+
+LeRF ↓
+
+RANDOM 18.6 35.0 373 4354 731k 839k 7.19e6 5.35e7 3.82e7 2.91e7 5.03e7 3.87e7 9.53e7 6.19e7 7.24e7 8.69e7 5.81e7 6.13e7 6.04e7 MAGNITUDE 18.6 17.2k 7.76e6 1.28e7 2.14e7 1.29e7 7.38e6 4.09e6 6.63e6 6.84e6 7.64e6 1.21e7 5.95e6 6.82e6 6.51e6 1.02e7 9.31e6 6.75e6 535k WANDA 18.6 1398 67.5k 50.2k 69.6k 2.05e6 1.95e7 6.74e6 9.33e6 1.53e7 4.17e6 1.62e6 2.26e7 1.24e7 993k 551k 709k 1.97e6 134k MEAN ACT . 18.6 304 18.6k 81.7k 58.3k 170k 65.9k 207k 487k 1.43e7 1.84e6 3.99e6 558k 151k 61.4k 130k 1.57e6 21.3k 100k LRP 18.6 19.6 39.9 84.0 181 340 724 1189 2243 3072 3356 6262 16.7k 17.9k 71.1k 193k 88.5k 124k 24.7k IG 18.6 22.3 33.0 48.9 76.5 124 229 436 772 1601 3074 5918 11.2k 17.0k 23.8k 31.6k 224k 1.32e6 603k CONSENSUS -2 18.6 20.3 28.8 44.9 69.1 113 187 403 642 953 1378 8616 13.6k 9766 14.7k 116k 36.6k 104k 117k 
+
+MoRF ↑
+
+RANDOM 18.6 90.8 3240 97.8k 413k 2.11e6 2.09e6 7.51e6 1.14e7 6.01e6 1.52e7 2.47e7 1.91e7 4.74e7 7.07e7 2.66e7 5.98e7 8.94e7 2.67e7 MAGNITUDE 18.6 1.09e6 1.35e7 2.04e7 1.40e7 2.80e8 1.66e9 9.40e9 6.20e10 1.78e10 5.67e12 3.17e11 1.51e12 4.54e10 8.80e17 9.80e23 9.07e16 3.44e11 4.48e10 WANDA 18.6 6857 316k 2.65e7 3.68e7 5.01e7 9.67e6 3.14e7 1.40e8 3.30e8 5.36e8 1.07e8 2.51e8 2.08e8 1.88e8 2.66e8 6.29e7 4.48e7 8.66e6 MEAN ACT . 18.6 57.6k 5.64e6 2.91e7 4.25e7 4.07e8 3.11e8 6.08e8 3.98e8 2.01e8 2.36e8 7.82e7 9.72e7 7.57e7 1.47e8 1.14e8 6.74e7 7.18e7 4.10e7 LRP 18.6 1.29e9 2.87e8 3.16e7 6.12e7 1.07e8 3.74e7 4.43e6 2.31e6 445k 171k 152k 151k 151k 151k 152k 151k 151k 152k IG 18.6 1.10e11 1.52e9 3.08e8 5.51e7 3.13e7 2.68e7 2.36e7 1.80e7 2.24e7 3.19e7 2.78e7 4.10e7 3.07e7 4.06e7 4.01e7 3.93e7 4.59e7 3.48e7 CONSENSUS -2 18.6 3.32e9 1.71e8 4.07e7 3.71e7 3.48e7 2.83e7 2.25e7 3.16e7 2.11e7 4.80e7 3.57e7 4.83e7 1.59e8 1.59e8 1.59e8 1.59e8 1.59e8 1.59e8 0 10 20 30 40 50 
+
+masking rate (%) 
+
+10 2
+
+10 4
+
+10 6
+
+10 8
+
+> PPL
+
+Qwen-8B LeRF (lower=safer) 
+
+0 10 20 30 40 50 
+
+masking rate (%) 
+
+10 3
+
+10 6
+
+10 9
+
+10 12 
+
+> PPL
+
+Qwen-8B MoRF (higher=better) 
+
+Random Magnitude Wanda MeanAct LRP IG Consensus-2 
+
+Figure 8 Qwen3-8B: LeRF / MoRF degradation (companion to Table 9). Per-rate PPL for all seven selectors over 0–50% 
+
+masking (log y; the informative range before all selectors saturate at model collapse): LeRF (left, lower = safer choices) and MoRF (right, higher = better necessity identification). Attribution selectors degrade gracefully on LeRF while the baselines collapse early; here even R ANDOM inverts (MoRF < LeRF), not just W ANDA .
+
+19 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Table 10 Full LeRF / MoRF PPL: Gemma-3-12B. Same format as Table 6. Companion plot: Fig 9. 
+
+Selector 0% 5% 10% 15% 20% 25% 30% 35% 40% 45% 50% 55% 60% 65% 70% 75% 80% 85% 90% 
+
+LeRF ↓
+
+RANDOM 19.0 34.5 204 55.2k 477k 1.18e8 3.16e9 4.38e9 1.43e10 1.31e11 3.77e11 7.32e11 5.86e12 4.12e13 4.38e14 9.86e14 3.19e15 1.17e15 1.03e16 MAGNITUDE 19.0 186k 7.05e6 6.91e8 74.8k 124k 317k 534k 253k 456k 649k 416k 372k 313k 422k 223k 215k 210k 656k WANDA 19.0 19.0 19.0 15.1k 7.88e6 3.94e7 907k 154k 113k 8.19e6 305k 3.27e7 1.64e6 638k 355k 616k 232k 252k 1.14e6 MEAN ACT . 19.0 19.0 19.0 680 3.87e13 5.35e13 1.88e8 3.68e9 2.06e7 4.39e8 2.43e17 3.36e18 1.78e13 8.45e6 3.39e9 491k 1.46e6 778k 131k LRP 19.0 26.1 36.3 71.0 183 393 514 764 1034 1286 1522 1912 3534 4712 7847 10.2k 96.8k 11.1k 6007 IG 19.0 45.1 57.1 69.0 70.8 81.4 135 215 418 776 1256 1982 3480 6117 30.7k 2.67e6 115k 160k 4.85e11 CONSENSUS -2 19.0 30.2 46.1 60.2 81.5 112 141 178 259 449 823 1024 2640 2713 4288 6602 8825 46.9k 26.1k 
+
+MoRF ↑
+
+RANDOM 19.0 44.2 1567 2.38e6 1.86e6 1.80e6 1.48e8 6.43e9 3.58e11 5.07e13 3.04e14 2.16e12 1.78e12 1.41e14 1.98e14 3.81e15 3.95e14 2.23e15 1.39e15 MAGNITUDE 19.0 9.43e8 8.21e9 1.91e8 7.30e8 1.24e11 1.40e8 2.13e9 4.28e10 1.70e10 5.52e8 3.35e9 1.29e11 1.38e7 1.56e8 4.41e11 4.73e8 3.10e17 2.91e23 WANDA 19.0 28.7k 895k 1.41e9 9.66e8 7.38e8 1.66e9 3.76e9 1.79e10 2.63e10 5.34e8 1.07e13 1.69e14 1.41e12 3.28e10 2.67e12 1.14e11 2.17e14 4.56e241 MEAN ACT . 19.0 1.34e7 6.50e8 9.27e9 5.64e10 4.38e10 4.27e10 3.82e11 1.10e11 1.56e13 4.33e13 1.34e15 4.04e14 4.08e22 5.60e13 3.33e14 3.87e20 4.56e241 4.56e241 LRP 19.0 6.03e14 3.43e14 7.96e13 7.08e8 6.30e6 2.40e6 2.81e6 1.04e6 434k 272k 294k 253k 374k 188k 193k 184k 193k 1.56e6 IG 19.0 8.15e14 1.76e15 5.24e14 1.81e15 2.37e15 1.00e14 6.39e13 2.20e14 7.02e15 6.79e14 3.71e15 1.65e15 2.47e14 6.89e14 8.49e14 1.10e15 2.27e14 1.44e14 CONSENSUS -2 19.0 3.68e14 1.60e15 9.06e13 1.18e14 4.75e13 5.26e13 1.99e14 8.50e11 1.19e15 1.39e14 6.05e14 1.81e14 4.48e13 5.96e14 1.38e14 1.90e14 4.38e14 8.02e12 0 10 20 30 40 50 
+
+masking rate (%) 
+
+10 3
+
+10 6
+
+10 9
+
+10 12 
+
+10 15 
+
+10 18 
+
+> PPL
+
+Gemma-12B LeRF (lower=safer) 
+
+0 10 20 30 40 50 
+
+masking rate (%) 
+
+10 3
+
+10 6
+
+10 9
+
+10 12 
+
+10 15 
+
+> PPL
+
+Gemma-12B MoRF (higher=better) 
+
+Random Magnitude Wanda MeanAct LRP IG Consensus-2 
+
+Figure 9 Gemma-3-12B: LeRF / MoRF degradation (companion to Table 10). Per-rate PPL for all seven selectors over 
+
+0–50% masking (log y; the informative range before all selectors saturate at model collapse): LeRF (left, lower = safer choices) and MoRF (right, higher = better necessity identification). Attribution selectors dominate the moderate-rate LeRF regime; IG reaches the highest 30% MoRF in the audit ( ∼10 14 ), while W ANDA /M EAN ACT . still match dense PPL at 5% .
+
+20 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Table 11 Downstream accuracy proportions at LeRF masking rates 0/10/20/30/50/70/90% (LLaMA-8B, 0-shot). Representative selectors shown. 
+
+Selector Rate ARC-E ARC-C HS WG PIQA BoolQ LAM OBQA Avg Dense 0% .822 .532 .544 .746 .798 .824 .766 .338 .671 RANDOM 
+
+10% .246 .232 .260 .498 .514 .630 .000 .126 .313 20% .234 .208 .250 .500 .510 .632 .000 .150 .310 30% .242 .226 .260 .504 .508 .620 .000 .166 .316 50% .242 .212 .262 .492 .534 .468 .000 .148 .295 70% .272 .224 .254 .498 .536 .624 .000 .158 .321 90% .250 .204 .240 .544 .526 .428 .000 .158 .294 LRP 10% .450 .172 .298 .496 .592 .370 .086 .136 .325 20% .318 .168 .306 .506 .568 .370 .042 .130 .301 30% .308 .160 .292 .500 .564 .378 .008 .124 .292 50% .260 .176 .280 .520 .520 .370 .000 .118 .281 70% .252 .182 .272 .496 .522 .370 .000 .112 .276 90% .244 .244 .264 .482 .502 .370 .000 .186 .286 IG 10% .710 .422 .486 .708 .754 .730 .586 .276 .584 20% .576 .324 .424 .632 .690 .664 .330 .204 .480 30% .446 .254 .342 .584 .608 .594 .056 .176 .383 50% .272 .212 .292 .472 .510 .422 .000 .140 .290 70% .248 .224 .272 .496 .544 .372 .000 .132 .286 90% .230 .214 .270 .454 .516 .400 .000 .146 .279 CONSENSUS -2 10% .724 .416 .494 .696 .766 .740 .528 .274 .580 20% .598 .276 .408 .602 .674 .392 .296 .214 .432 30% .472 .244 .348 .560 .634 .632 .092 .156 .392 50% .260 .180 .282 .522 .528 .370 .000 .130 .284 70% .244 .186 .280 .506 .508 .372 .000 .110 .276 90% .236 .186 .280 .486 .520 .380 .000 .120 .276 
+
+Table 12 Per-task downstream accuracy proportions at LeRF 30% masking (4 of 5 models; LLaMA-3B in the released artifacts). All 7 selectors. Dense baseline shown for reference. 
+
+Model Selector ARC-E ARC-C HS WG PIQA BoolQ LAM OBQA Avg LLaMA-1B Dense .634 .300 .460 .584 .754 .650 .608 .278 .533 RANDOM .232 .224 .246 .504 .560 .512 .000 .152 .304 MAGNITUDE .240 .234 .258 .452 .524 .370 .000 .162 .280 WANDA .232 .228 .256 .510 .516 .370 .000 .174 .286 MEAN ACT . .252 .206 .274 .500 .532 .370 .000 .138 .284 LRP .310 .162 .300 .488 .548 .370 .020 .138 .292 IG .314 .208 .292 .516 .558 .426 .000 .162 .309 CONSENSUS -2 .336 .184 .308 .480 .590 .370 .006 .150 .303 LLaMA-8B Dense .822 .532 .544 .746 .798 .824 .766 .338 .671 RANDOM .242 .226 .260 .504 .508 .620 .000 .166 .316 MAGNITUDE .230 .210 .250 .504 .500 .604 .000 .168 .308 WANDA .238 .206 .256 .514 .536 .370 .000 .164 .285 MEAN ACT . .222 .202 .252 .522 .526 .516 .000 .154 .299 LRP .308 .160 .292 .500 .564 .378 .008 .124 .292 IG .446 .254 .342 .584 .608 .594 .056 .176 .383 CONSENSUS -2 .472 .244 .348 .560 .634 .632 .092 .156 .392 Qwen-8B Dense .842 .542 .524 .672 .774 .864 .658 .316 .649 RANDOM .244 .222 .250 .492 .544 .466 .000 .162 .297 MAGNITUDE .244 .220 .262 .494 .492 .438 .000 .158 .288 WANDA .228 .240 .268 .532 .534 .380 .000 .156 .292 MEAN ACT . .236 .216 .276 .498 .490 .370 .000 .144 .279 LRP .304 .172 .320 .488 .558 .572 .114 .130 .332 IG .352 .220 .306 .536 .622 .630 .044 .134 .355 CONSENSUS -2 .356 .208 .308 .486 .588 .636 .068 .134 .348 Gemma-12B Dense .832 .618 .568 .768 .796 .872 .670 .412 .692 RANDOM .250 .200 .268 .508 .524 .374 .000 .144 .284 MAGNITUDE .248 .214 .260 .520 .554 .372 .000 .148 .289 WANDA .260 .240 .258 .500 .522 .362 .000 .194 .292 MEAN ACT . .258 .200 .272 .504 .538 .370 .000 .152 .287 LRP .344 .214 .326 .522 .560 .430 .090 .142 .329 IG .566 .318 .364 .632 .646 .856 .096 .220 .462 CONSENSUS -2 .586 .316 .374 .636 .630 .800 .442 .240 .503 
+
+21 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Table 13 Mean downstream accuracy across 8 lm-eval-harness tasks at LeRF masking rates 0-90% (all 5 models, all 7 selectors). Each cell is the average over ARC-E, ARC-C, HellaSwag, WinoGrande, PIQA, BoolQ, LAMBADA-OpenAI, and OpenBookQA. Dense baseline (0%) ranges from .533 (LLaMA-1B) to .692 (Gemma-12B). Attribution selectors (LRP, IG, C ONSENSUS -2) maintain higher accuracy than baselines at low-to-moderate rates (10-30%) before converging to the collapsed floor ( ∼0.28) at high rates (50-90%). Per-task breakdown for LLaMA-8B in Table 11; 30% snapshot across models in Table 12. 
+
+Model Selector 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% LLaMA-1B RANDOM .533 .286 .280 .304 .291 .287 .281 .288 .278 .281 MAGNITUDE .533 .286 .288 .280 .281 .288 .282 .285 .285 .281 WANDA .533 .289 .315 .286 .283 .281 .285 .279 .288 .289 MEAN ACT . .533 .278 .281 .284 .284 .303 .289 .281 .287 .288 LRP .533 .443 .327 .292 .281 .281 .279 .277 .276 .282 IG .533 .440 .359 .309 .283 .283 .279 .285 .275 .273 CONSENSUS -2 .533 .434 .373 .303 .293 .287 .281 .279 .278 .280 LLaMA-3B RANDOM .614 .298 .289 .299 .291 .307 .283 .297 .311 .288 MAGNITUDE .614 .283 .291 .278 .292 .288 .287 .302 .291 .280 WANDA .614 .277 .285 .286 .286 .312 .286 .309 .319 .285 MEAN ACT . .614 .282 .280 .278 .284 .278 .276 .283 .281 .289 LRP .614 .443 .328 .285 .281 .294 .282 .282 .280 .284 IG .614 .526 .406 .286 .286 .286 .285 .283 .286 .284 CONSENSUS -2 .614 .322 .307 .341 .292 .285 .282 .290 .293 .277 LLaMA-8B RANDOM .671 .313 .310 .316 .291 .295 .308 .321 .288 .294 MAGNITUDE .671 .301 .316 .308 .317 .300 .283 .280 .323 .282 WANDA .671 .278 .275 .285 .292 .288 .271 .311 .309 .316 MEAN ACT . .671 .277 .278 .299 .318 .309 .295 .281 .299 .322 LRP .671 .325 .301 .292 .283 .281 .284 .276 .312 .286 IG .671 .584 .480 .383 .331 .290 .279 .286 .277 .279 CONSENSUS -2 .671 .580 .432 .392 .337 .284 .282 .276 .283 .276 Qwen-8B RANDOM .649 .316 .282 .297 .301 .299 .307 .316 .298 .302 MAGNITUDE .649 .291 .305 .288 .292 .293 .293 .297 .300 .307 WANDA .649 .282 .285 .292 .282 .284 .285 .289 .297 .289 MEAN ACT . .649 .278 .282 .279 .286 .313 .274 .268 .275 .285 LRP .649 .553 .409 .332 .285 .281 .284 .282 .281 .269 IG .649 .589 .443 .355 .295 .284 .292 .303 .286 .302 CONSENSUS -2 .649 .583 .439 .348 .285 .294 .283 .283 .287 .292 Gemma-12B RANDOM .692 .375 .286 .284 .291 .290 .296 .309 .310 .285 MAGNITUDE .692 .287 .317 .289 .288 .329 .311 .313 .290 .313 WANDA .692 .692 .292 .292 .290 .287 .289 .298 .286 .318 MEAN ACT . .692 .692 .292 .287 .283 .280 .287 .288 .291 .279 LRP .692 .585 .428 .329 .311 .299 .302 .286 .277 .282 IG .692 .652 .585 .462 .362 .322 .277 .283 .290 .276 CONSENSUS -2 .692 .645 .588 .503 .384 .327 .286 .279 .282 .279 
+
+22 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+# C Stability, Convergence, and Inter-Method Agreement 
+
+Tables 14–15 report full calibration-size convergence (PPL at all sizes C8-C128 and masking rates); Tables 16–17 give mask-level Jaccard similarity vs. the C128 reference; Tables 18, 19, and 20 give Spearman rank correlations and the Qwen-8B stability profile. Figure 10 plots PPL@30% vs. calibration size for all data-dependent selectors on LLaMA-8B. 
+
+C.1 Calibration-size convergence (LLaMA-8B and Qwen-8B). 
+
+Attribution methods converge smoothly C8 →C128. LRP PPL@30% drops from 1,092 to 830 on LLaMA-8B and from 1,312 to 724 on Qwen-8B; IG drops from 123 to 98 on LLaMA-8B; C ONSENSUS -2 reaches the lowest PPL on both architectures ( 66 on LLaMA-8B, 187 on Qwen-8B at C128). All three converge overall with calibration size, indicating they extract a real data-dependent signal that more samples sharpen. W ANDA exhibits the opposite: LeRF PPL increases with more calibration data (C8: 197 k → C128: 360 k on LLaMA-8B; C8: 5.4 × 10 6 → C128: 1.95 × 10 7
+
+on Qwen-8B), indicating that additional activation statistics push its scores further from causal relevance. M EAN ACT .shows an architecture-dependent pattern: it stays high on LLaMA-8B at all calibration sizes (PPL ≈ 140 k at C128), but improves substantially on Qwen-8B (C8: 360 k → C128: 65 .9k ), yet remains orders of magnitude worse than attribution methods at every calibration size on both architectures. The Jaccard mask-stability tables (Tables 16, 17) make the stability-validity dissociation explicit. W ANDA ’s mask is essentially fixed across calibration sizes (Jaccard 0.97 -1.00 vs. C128); M EAN ACT . is also extremely stable (Jaccard 
+
+0.92 -0.98 ). LRP, IG, and C ONSENSUS -2 have lower Jaccard at small C (0.51 -0.90 depending on rate and model) and grow with calibration size, so their masks shift as more samples arrive. The selectors that move least are the ones least anchored in the data, which is what makes them stable but causally invalid. The Spearman score-level tables (Tables 26, 27, and 28 for LLaMA-8B, Qwen-8B, and LLaMA-1B respectively) extend this picture across selectors. The non-attribution cluster (M AGNITUDE , W ANDA , M EAN ACT .) is internally coherent (ρ = 0 .71 -0.88 on LLaMA-8B), and the attribution cluster (LRP, IG, C ONSENSUS -2) is also internally coherent (ρ = 0 .65 -0.91 ). Notably, the two clusters anti-correlate : cross-cluster ρ ranges from −0.30 to −0.58 on LLaMA-8B (and −0.43 to 0.04 on Qwen-8B). Selectors that rank by data-independent weight or activation statistics rank rows in roughly the opposite order from selectors that propagate causal signal, so the two paradigms are not just imperfectly correlated: they capture systematically different structure. 8 16 32 64 128    
+
+> Calibration size C(# samples, log)
+> 10 2
+> 10 3
+> 10 4
+> 10 5
+> LeRF PPL @ 30% (log)
+> Calibration size validity convergence (LLaMA-8B)
+> LRP
+> IG
+> MeanAct
+> Wanda
+> Consensus-2
+
+Figure 10 PPL@30% vs. calibration size (C8-C128) for all five data-dependent selectors on LLaMA-8B (log y). MeanActivation is flat (stable) but high (invalid); C ONSENSUS -2 converges smoothly to the lowest PPL. 
+
+C.2 Pairwise Jaccard agreement matrices. 
+
+Figure 12 visualizes pairwise Jaccard at 30% masking for LLaMA-8B and Qwen-8B. Tables 21, 22, and 23 give full matrices at 20%, 30%, and 50% masking (LLaMA-1B); Tables 24–25 give the corresponding 30% matrices for LLaMA-8B and Qwen-8B. 23 Faithfulness to Refusal: A Causal Audit of Neuron Selectors                                                                                                               
+
+> Table 14 PPL at all calibration sizes ×masking rates ×methods (LLaMA-8B). 5 data-dependent methods, sizes C8-C128, rates 10/20/30/50%. Selector Size PPL@10% PPL@20% PPL@30% PPL@50% LRP C8 143.17 406.42 1091.54 3029.93 C16 225.72 565.50 782.35 2990.52 C32 124.40 350.56 966.27 2426.62 C64 131.79 346.03 822.99 2165.87 C128 218.72 340.46 830.38 2108.11 IG C8 19.73 45.21 122.77 1077.53 C16 19.44 45.58 125.26 1064.62 C32 19.27 43.54 124.65 1330.44 C64 18.30 40.00 104.82 1375.04 C128 18.25 38.96 97.79 1274.79 MEAN ACT .C8 8524.86 138676.38 190639.61 891119.46 C16 9319.21 122148.29 283958.89 3.23e6 C32 7489.42 71002.56 204995.58 2.94e6 C64 9969.30 70056.76 85998.22 5.25e6 C128 8688.86 42793.06 139874.10 6.28e6 WANDA
+> C8 22592.14 194265.23 196927.15 263282.16 C16 21320.19 176425.26 268372.34 102723.13 C32 23135.39 144191.40 240606.88 150619.53 C64 23455.56 171089.39 308971.59 91331.71 C128 20027.75 148982.31 360082.74 89066.16 CONSENSUS -2 C8 17.21 33.12 78.85 895.01 C16 16.97 32.90 72.52 929.28 C32 16.40 32.30 71.76 754.09 C64 16.24 30.45 64.92 793.32 C128 16.24 29.95 66.08 737.56
+
+Three patterns hold across all five matrices. (1) Within-cluster agreement is much higher than cross-cluster: attribution-attribution (LRP-IG, LRP-C2, IG-C2) reach Jaccard 0.49 -0.83 at 30% , while attribution-baseline pairs sit at most 
+
+0.29 . (2) The cross-cluster agreement is essentially at the random floor: attribution-vs-Random is 0.13 -0.18 , and several attribution-vs-baseline pairs (LRP-Wanda, LRP-MeanAct on LLaMA) are below that floor on the MLP sublayer (0.000 -0.005 ), indicating attribution and weight-statistic selectors pick essentially disjoint MLP rows. (3) Agreement is more stable for baselines than for attribution methods across masking rates: LRP-IG MLP Jaccard on LLaMA-1B stays in the 0.54 -0.60 range from 20% to 50%, while attention Jaccard for the baseline cluster (Wan-MA) remains high (0.89 -0.96 ) because the underlying ranking barely depends on the mask threshold. 
+
+C.3 Depth profiles and selector-score correlations. 
+
+Figure 13 shows per-block importance profiles for the general LM-level audit, revealing that attribution methods (LRP, IG, C ONSENSUS -2) concentrate importance in early-to-mid layers while magnitude-based methods concentrate in late layers, explaining why layer-matched controls are necessary (Table 29). Figure 14 shows how top-1% |Ccomply | rows are distributed across early/mid/late layer thirds for LRP and IG on LLaMA-3.1-8B and Qwen3-8B, explaining the cross-architecture method reversal (§5.3). Tables 26, 27, and 28 give Spearman rank correlations between all selector pairs across LLaMA-8B, Qwen-8B, and LLaMA-1B respectively. Attribution methods anti-correlate with magnitude and activation baselines across all three models (e.g. LRP-Wanda = −0.43 , IG-Wanda = −0.58 on LLaMA-8B): the two families rank neurons in opposite order, mechanistically explaining why they select disjoint row sets and why layer-matched controls are necessary. 
+
+C.4 Consensus controls (all models). 
+
+Figure 15 visualizes the cross-family dumbbell; Tables 29–30 give full results for LLaMA-8B and Qwen-8B. The control suite probes four candidate explanations for the C ONSENSUS -2 advantage. Layer-matched controls copy each method’s per-layer mask count but draw row identities uniformly, testing whether depth allocation alone explains the win. The strict intersection (LRP ∩IG) keeps rows ranked bottom-k% by both methods, testing whether agreement, 24 Faithfulness to Refusal: A Causal Audit of Neuron Selectors                                                                                                               
+
+> Table 15 PPL at all calibration sizes ×masking rates ×methods (Qwen-8B). 5 data-dependent methods, sizes C8-C128, rates 10/20/30/50%. Selector Size PPL@10% PPL@20% PPL@30% PPL@50% LRP C8 32.66 312.55 1311.68 6275.03 C16 35.97 219.59 1092.08 4960.51 C32 40.34 254.33 1093.23 4181.11 C64 40.29 188.70 627.52 4651.75 C128 39.93 181.12 724.26 3355.82 IG C8 35.31 82.74 253.39 2531.52 C16 34.90 79.38 252.86 2416.50 C32 35.78 77.23 263.41 3169.32 C64 34.34 74.01 241.83 2757.75 C128 33.03 76.50 228.79 3074.25 MEAN ACT .C8 15277.74 60250.96 359687.43 6.50e6 C16 17216.07 878133.38 109930.64 1.81e6 C32 19595.10 43709.65 89529.09 2.81e6 C64 14993.40 55328.04 64808.50 1.69e6 C128 18600.53 58346.41 65913.15 1.84e6 WANDA
+> C8 51142.39 238091.20 5.40e6 3.19e6 C16 49620.06 193918.23 9.61e6 4.45e6 C32 48357.82 344607.18 1.50e7 3.37e6 C64 40048.66 247664.77 1.24e7 3.17e6 C128 67494.64 69640.78 1.95e7 4.17e6 CONSENSUS -2 C8 30.41 79.53 231.67 1920.62 C16 29.48 73.20 221.16 1539.67 C32 30.42 75.31 209.32 1343.81 C64 29.39 69.48 202.85 1410.55 C128 28.82 69.10 187.24 1378.05
+
+rather than rank averaging, is the source of safety. The rank-randomized null fixes LRP and permutes IG’s rank list before Borda averaging ( 5 seeds), testing whether the mechanical act of combining two rank lists drives the gain. The 
+
+veto variants take rows in one method’s top-k but not the other’s: VETO-LRP keeps LRP’s exclusive picks (rows IG ranks as still-needed but LRP overrides), and VETO-IG keeps IG’s exclusive picks, testing whether the rows where the two methods disagree carry causal signal. On LLaMA-8B, VETO-LRP achieves LeRF = 28 .0 and MoRF = 3 .32 × 10 6, outperforming real C ONSENSUS -2 on both metrics ( 66 .1 / 1.54 × 10 6); rows where the two methods disagree carry stronger causal signal than the agreed set, pointing to veto-based aggregation as a direction for future work. On Qwen3-8B, the strict LRP ∩IG intersection collapses catastrophically (MoRF = 159 k vs. 28 .3M for real C ONSENSUS -2); the rank-randomized null beats real CONSENSUS -2 on MoRF ( 4.12 × 10 7 vs. 2.83 × 10 7), indicating that on Qwen the Borda rank-averaging step is not the source of the aggregate’s gain; VETO-LRP achieves 5.89 × 10 7, the strongest variant on Qwen. 
+
+CONSENSUS -2 rank distribution. 
+
+Table 31 reports, for each masking rate, the fraction of C ONSENSUS -2-selected neurons appearing in the bottom-k% of both LRP and IG simultaneously versus only one method. At 30% masking, 65 .9% of C ONSENSUS -2-selected neurons fall in the bottom-30% of both LRP and IG independently, confirming the aggregate’s advantage comes from genuine cross-method agreement rather than Borda arithmetic elevating neurons neither method individually identifies. 25 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Table 16 Jaccard mask stability vs. C128 reference at masking rates 10/20/30/50% (LLaMA-8B). Selector Size J@10% J@20% J@30% J@50% LRP C8 0.5111 0.5545 0.6349 0.7839 C16 0.6343 0.6442 0.7114 0.8442 C32 0.7138 0.7072 0.7675 0.8850 C64 0.8074 0.8067 0.8555 0.9333 IG C8 0.5735 0.6540 0.7558 0.9026 C16 0.6868 0.7399 0.8200 0.9303 C32 0.7458 0.7927 0.8635 0.9531 C64 0.8277 0.8641 0.9148 0.9703 MEAN ACT .C8 0.9421 0.9584 0.9337 0.9220 C16 0.9617 0.9736 0.9561 0.9453 C32 0.9752 0.9841 0.9734 0.9638 C64 0.9840 0.9895 0.9839 0.9790 WANDA 
+
+C8 0.9969 0.9902 0.9807 0.9905 C16 0.9977 0.9903 0.9840 0.9964 C32 0.9873 0.9976 0.9900 0.9953 C64 0.9982 0.9988 0.9990 0.9993 CONSENSUS -2 C8 0.5299 0.6129 0.7268 0.8305 C16 0.6307 0.6940 0.7948 0.8782 C32 0.6909 0.7488 0.8401 0.9140 C64 0.7966 0.8389 0.9041 0.9479 
+
+Table 17 Jaccard mask stability vs. C128 reference at masking rates 10/20/30/50% (Qwen-8B). Selector Size J@10% J@20% J@30% J@50% LRP C8 0.7774 0.7100 0.7602 0.8476 C16 0.8204 0.7568 0.8142 0.8908 C32 0.8835 0.8154 0.8540 0.9216 C64 0.9246 0.8699 0.9009 0.9502 IG C8 0.7637 0.8029 0.8490 0.8992 C16 0.8177 0.8527 0.8888 0.9245 C32 0.8676 0.8955 0.9250 0.9511 C64 0.9143 0.9327 0.9524 0.9693 MEAN ACT .C8 0.9417 0.9132 0.8765 0.9555 C16 0.9628 0.9441 0.9145 0.9707 C32 0.9750 0.9653 0.9461 0.9817 C64 0.9843 0.9770 0.9660 0.9886 WANDA 
+
+C8 0.9812 0.9890 0.9752 0.9902 C16 0.9847 0.9880 0.9838 0.9928 C32 0.9849 0.9968 0.9977 0.9979 C64 0.9935 0.9983 0.9975 0.9972 CONSENSUS -2 C8 0.7548 0.7564 0.8178 0.8828 C16 0.7992 0.8098 0.8645 0.9144 C32 0.8508 0.8532 0.8986 0.9424 C64 0.8985 0.9003 0.9331 0.9636 
+
+Table 18 Spearman rank correlation vs. C128 scores (LLaMA-8B). Selector C8 C16 C32 C64 MEAN ACT . 0.9937 0.9970 0.9988 0.9996 WANDA 0.9998 0.9999 0.9999 1.0000 IG 0.9647 0.9823 0.9905 0.9961 LRP 0.9130 0.9529 0.9720 0.9897 CONSENSUS -2 0.9448 0.9707 0.9833 0.9937 
+
+26 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Table 19 Spearman rank correlation vs. C128 scores (Qwen-8B). Selector C8 C16 C32 C64 MEAN ACT . 0.9952 0.9979 0.9992 0.9997 WANDA 0.9997 0.9999 0.9999 1.0000 IG 0.9823 0.9904 0.9956 0.9982 LRP 0.9593 0.9763 0.9865 0.9936 CONSENSUS -2 0.9758 0.9863 0.9926 0.9966 
+
+Table 20 Stability vs. validity (Qwen-8B). Same format as Table 1. Confirms the dissociation replicates across architectures. WANDA ’s negative gap ( −9.78 × 10 6) is the most extreme inversion among activation-weighted selectors: its “important” set is less important than its “dispensable” set by nearly 10 M PPL. LRP achieves the best MoRF ( 3.74 × 10 7), outperforming IG (2.68 × 10 7): the same LRP/IG ordering that appears at the behavior level on Qwen3-8B. 
+
+Stability (C8 →C128) Validity (C128, @30%) Selector Spearman Jacc LeRF ↓ MoRF ↑ Gap ↑
+
+MEAN ACT . .995 .877 65,913 3.11e8 3.11e8 WANDA .9997 .975 1.95e7 9.67e6 −9.78e6 IG .982 .849 228.8 2.68e7 2.68e7 LRP .959 .760 724.3 3.74e7 3.74e7 CONSENSUS -2 .976 .818 187.2 2.83e7 2.83e7 Spearman (C8 vs C128) 
+
+10 2
+
+10 3
+
+10 4
+
+10 5
+
+> LeRF PPL @ 30%  (log)  MeanAct
+> Wanda
+> IG
+> LRP
+> Consensus-2
+
+LLaMA-8B: vs LeRF  
+
+> Spearman (C8 vs C128)
+
+10 6
+
+> validity gap  (log)
+> MeanAct
+> Wanda
+> IG
+> LRP
+> Consensus-2
+
+LLaMA-8B: vs gap 
+
+0.92 0.94 0.96 0.98 1.00  
+
+> Spearman (C8 vs C128)
+
+10 3
+
+10 4
+
+10 5
+
+10 6
+
+10 7
+
+> LeRF PPL @ 30%  (log)
+> MeanAct
+> Wanda
+> IG
+> LRP
+> Consensus-2
+
+Qwen-8B: vs LeRF 
+
+0.92 0.94 0.96 0.98 1.00  
+
+> Spearman (C8 vs C128)
+
+10 1
+
+10 3
+
+10 5
+
+10 7 
+
+> validity gap  (log)
+> MeanAct
+> Wanda
+> IG LRP Consensus-2
+
+Qwen-8B: vs gap 
+
+Figure 11 Stability vs. validity on LLaMA-3.1-8B (top) and Qwen3-8B (bottom). x: Spearman ρ (C8 vs C128); y: LeRF PPL@30% (log). In the LeRF panels the green band marks the low-LeRF (faithful, desirable) region and the red band the high-LeRF (invalid) region: MeanActivation and Wanda are “stable but invalid” (red), while LRP/IG are less stable but land orders of magnitude lower (green). 
+
+27 Faithfulness to Refusal: A Causal Audit of Neuron Selectors attention MLP                
+
+> LRP-IG
+> LRP-C2
+> IG-C2
+> Mag-Wan
+> Wan-MA
+> Mag-MA
+> Rnd-LRP
+> 0.50 0.49
+> 0.83 0.61
+> 0.59 0.79
+> 0.63 0.34
+> 0.91 0.69
+> 0.61 0.28
+> 0.17 0.18
+> LLaMA-8B
+> attention MLP
+> LRP-IG
+> LRP-C2
+> IG-C2
+> Mag-Wan
+> Wan-MA
+> Mag-MA
+> Rnd-LRP
+> 0.55 0.49
+> 0.80 0.67
+> 0.69 0.73
+> 0.34 0.49
+> 0.83 0.39
+> 0.29 0.24
+> 0.18 0.18
+> Qwen-8B
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+Figure 12 Pairwise Jaccard agreement at 30% masking for seven key selector pairs (rows) × {attention, MLP} sublayers (columns), on LLaMA-8B (left) and Qwen-8B (right). Darker blue indicates higher agreement. Top three rows (above dashed line) are attribution-attribution pairs (LRP-IG, LRP-C2, IG-C2); these generally exhibit stronger overlap than most baseline comparisons, although agreement strength varies across selector pairs. Agreement patterns vary between attention and MLP sublayers, but are qualitatively similar across model families, suggesting selector relationships are largely preserved across architectures. 
+
+Table 21 Pairwise Jaccard at 20% masking (LLaMA-1B). Upper: attention. Lower: MLP. Rnd Mag Wan MA LRP IG C2 Rnd — .160 .158 .156 .113 .085 .093 Mag .089 — .591 .576 .072 .057 .069 Wan .088 .107 — .962 .021 .067 .019 MA .090 .061 .594 — .012 .063 .013 LRP .112 .033 .023 .022 — .417 .709 IG .118 .022 .000 .000 .544 — .563 C2 .117 .030 .001 .000 .731 .721 —
+
+Table 22 Pairwise Jaccard at 30% masking (LLaMA-1B). Upper: attention. Lower: MLP. Rnd Mag Wan MA LRP IG C2 Rnd — .225 .217 .214 .151 .141 .136 Mag .160 — .655 .642 .076 .096 .073 Wan .163 .253 — .936 .031 .150 .028 MA .165 .232 .634 — .018 .147 .019 LRP .185 .087 .099 .095 — .428 .808 IG .186 .072 .005 .005 .543 — .505 C2 .188 .096 .013 .015 .678 .770 —
+
+Table 23 Pairwise Jaccard at 50% masking (LLaMA-1B). Upper: attention. Lower: MLP. Rnd Mag Wan MA LRP IG C2 Rnd — .350 .334 .333 .214 .273 .233 Mag .329 — .776 .784 .087 .236 .132 Wan .334 .623 — .890 .051 .254 .118 MA .334 .569 .757 — .036 .257 .105 LRP .360 .298 .294 .306 — .448 .741 IG .348 .271 .151 .166 .599 — .616 C2 .356 .281 .213 .227 .764 .794 —
+
+Table 24 Pairwise Jaccard at 30% masking (LLaMA-8B). Upper: attention. Lower: MLP. Rnd Mag Wan MA LRP IG C2 Rnd — .217 .222 .213 .173 .152 .156 Mag .162 — .626 .609 .075 .087 .065 Wan .158 .337 — .911 .032 .097 .015 MA .163 .284 .695 — .008 .096 .007 LRP .177 .075 .129 .123 — .502 .826 IG .183 .038 .000 .000 .488 — .592 C2 .182 .049 .002 .002 .607 .794 —
+
+28 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Table 25 Pairwise Jaccard at 30% masking (Qwen-8B). Upper: attention. Lower: MLP. Rnd Mag Wan MA LRP IG C2 Rnd — .205 .243 .233 .178 .145 .163 Mag .165 — .343 .294 .291 .268 .287 Wan .139 .491 — .835 .228 .113 .178 MA .147 .238 .393 — .208 .102 .163 LRP .176 .191 .167 .084 — .553 .802 IG .186 .177 .102 .031 .488 — .687 C2 .181 .176 .119 .045 .672 .735 —
+
+Table 26 Spearman correlation between selector importance scores (all neurons, LLaMA-8B). Rnd Mag Wan MA LRP IG C2 Rnd 1.00 .00 .00 .00 .00 .00 .00 Mag .00 1.00 .72 .71 −.30 −.35 −.36 Wan .00 .72 1.00 .88 −.43 −.58 −.56 MA .00 .71 .88 1.00 −.36 −.44 −.44 LRP .00 −.30 −.43 −.36 1.00 .65 .91 IG .00 −.35 −.58 −.44 .65 1.00 .91 C2 .00 −.36 −.56 −.44 .91 .91 1.00 
+
+Table 27 Spearman correlation between selector importance scores (all neurons, Qwen-8B). Rnd Mag Wan MA LRP IG C2 Rnd 1.00 .00 .00 .00 .00 .00 .00 Mag .00 1.00 .45 .32 .04 .00 .01 Wan .00 .45 1.00 .77 −.06 −.26 −.18 MA .00 .32 .77 1.00 −.26 −.43 −.37 LRP .00 .04 −.06 −.26 1.00 .75 .93 IG .00 .00 −.26 −.43 .75 1.00 .93 C2 .00 .01 −.18 −.37 .93 .93 1.00 0 4 8 12 16 20 24 28 31 
+
+> Transformer Block
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Normalized Importance
+
+LLaMA-3.1-8B          
+
+> 04812 16 20 24 28 32 35
+> Transformer Block
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Normalized Importance
+
+Qwen3-8B      
+
+> Magnitude MeanActivation Wanda LRP IG Consensus-2
+
+Figure 13 Layer-wise importance depth profiles for LLaMA-3.1-8B (left) and Qwen3-8B (right). Each line shows a selector’s normalized mean importance per transformer block. Attribution-based selectors (LRP, IG, and C ONSENSUS -2) tend to emphasize earlier and intermediate layers, whereas magnitude-based selectors (Magnitude, Wanda) place increasing importance on later layers near the model output. MeanActivation exhibits a comparatively flatter profile on LLaMA-3.1-8B, consistent with its observed stability characteristics (Table 1). These differing layer allocation patterns help explain the need for layer-matched controls (Table 29). 
+
+29 Faithfulness to Refusal: A Causal Audit of Neuron Selectors early mid late 
+
+layer third 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+0.7   
+
+> fraction of top-1% rows
+> 0.08
+> 0.47 0.44
+> 0.40 0.37
+> 0.22
+
+LLaMA-3.1-8B 
+
+early mid late 
+
+layer third  
+
+> fraction of top-1% rows  0.59
+> 0.26
+> 0.14
+> 0.45
+> 0.27 0.27
+
+Qwen3-8B 
+
+Random (uniform) LRP IG 
+
+Figure 14 Layer distribution of top-1% |Ccomply | rows (hate domain) for LRP and IG on LLaMA-3.1-8B and Qwen3-8B, split by early / mid / late layer thirds. On LLaMA, LRP is late-heavy ( 44% late) and IG is early-heavy ( 40% early); on Qwen3, both methods route to early layers but LRP is sharper ( 59% early). Random would be uniform 0.33 /0.33 /0.33 .
+
+Table 28 Spearman correlation between selector importance scores (all neurons, LLaMA-1B). Measures how similarly two selectors rank the full neuron population. Rnd Mag Wan MA LRP IG C2 Rnd 1.00 .00 .00 .00 .00 .00 .00 Mag .00 1.00 .73 .66 −.22 −.20 −.23 Wan .00 .73 1.00 .89 −.37 −.45 −.44 MA .00 .66 .89 1.00 −.29 −.35 −.35 LRP .00 −.22 −.37 −.29 1.00 .70 .92 IG .00 −.20 −.45 −.35 .70 1.00 .92 C2 .00 −.23 −.44 −.35 .92 .92 1.00 10 1 10 2 10 3 10 4 10 5 10 6          
+
+> PPL @ 30% (log)
+> C2 (real)
+> Strict LRP IG
+> VETO-LRP
+> VETO-IG
+> Rank-rand. null
+> LRP layer-matched
+> IG layer-matched
+> Random
+> LLaMA-8B
+> 10 110 210 310 410 510 610 710 8
+> PPL @ 30% (log)
+> C2 (real)
+> Strict LRP IG
+> VETO-LRP
+> VETO-IG
+> Rank-rand. null
+> LRP layer-matched
+> IG layer-matched
+> Random
+> Qwen-8B
+> LeRF MoRF
+
+Figure 15 Consensus controls across families at 30% masking as a dumbbell plot. Each row is one mask variant; the LeRF PPL (red) and MoRF PPL (blue) are connected by a gray line. Wider span indicates stronger separation between least- and most-relevant rows. Real C ONSENSUS -2 performs strongly, but veto and rank-randomized variants show that the benefit is not explained by depth allocation or by generic rank averaging alone; disagreement- aware variants can outperform real C ONSENSUS -2 on some metrics. 
+
+30 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Table 29 Consensus controls at 30% masking (LLaMA-8B). 
+
+Mask LeRF ↓ MoRF ↑ Gap ↑ Mechanism CONSENSUS -2 (real) 66.08 1.54e6 1.54e6 agreement LRP layer-matched 459.26 494,193 493,734 layer alloc. IG layer-matched 1,301 481,082 479,781 layer alloc. Strict LRP ∩IG 10.73 1.39e6 1.39e6 intersection VETO-LRP 28.02 3.32e6 3.32e6 veto VETO-IG 28.29 1.88e6 1.88e6 veto Rank-rand. null 119.23 1.96e6 1.96e6 rank avg. RANDOM 762,286 645,432 −116,854 no-info null 
+
+Table 30 Consensus controls at 30% masking (Qwen-8B). 
+
+Mask LeRF ↓ MoRF ↑ Gap ↑ Mechanism CONSENSUS -2 (real) 187.2 2.83e7 2.83e7 agreement LRP layer-matched 648.7 3.53e7 3.53e7 layer alloc. IG layer-matched 3,239 2.64e7 2.64e7 layer alloc. Strict LRP ∩IG 20.9 159,199 159,178 intersection VETO-LRP 63.1 5.89e7 5.89e7 veto VETO-IG 41.7 1.56e7 1.56e7 veto Rank-rand. null 275.5 4.12e7 4.12e7 rank avg. RANDOM 7.19e6 2.09e6 −5.10e6 no-info null 
+
+Table 31 Consensus-2 rank distribution (LLaMA-8B). For neurons pruned by C ONSENSUS -2 at rate k: fraction also in bottom-k%of both LRP and IG simultaneously (“Both”), exactly one of the two (“Only-1”), or neither (“Neither”: neurons outside either single-method’s bottom-k% individually but elevated into the Borda bottom-k% by combined rank averaging). Rate Both agree Only-1 Neither 10% 52.2% 38.2% 9.6% 20% 57.0% 39.5% 3.5% 30% 65.9% 32.8% 1.3% 50% 75.8% 24.2% 0.0% 
+
+31 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+# D Diagnostic Analyses 
+
+Dangerous false negatives : Table 32 reports the dangerous false-negative rate (fraction of neurons scoring above the 2× dense PPL danger threshold that are not selected by the mask) at 30% masking for each selector. IG and C ONSENSUS -2 achieve zero dangerous false negatives. LRP misses one dangerous group ( 1.0% of dangerous neurons), while W ANDA and M EAN ACT . miss four dangerous groups, corresponding to 41 .4% and 35 .2% of dangerous neurons respectively. 
+
+Table 32 Dangerous false-negative rate at 30% masking (LLaMA-1B). Danger threshold: PPL > 33.0 (2 × dense). Lower = fewer dangerous false negatives. Selector #Danger #Total %Groups #Neurons %Neurons LRP 1 32 3.1% 1,113 1.0% IG 0 30 0.0% 0 0.0% WANDA 4 32 12.5% 46,800 41.4% MEAN ACT . 4 32 12.5% 39,782 35.2% CONSENSUS -2 0 32 0.0% 0 0.0% 
+
+Domain sensitivity: WikiText-2 vs. C4 calibration : Table 33 measures sensitivity to calibration-corpus choice (WikiText-2 vs. C4) via Spearman and Jaccard agreement, assessing robustness to dataset shift. The table reveals a refinement of the stability-validity dissociation: W ANDA and M EAN ACT . are extremely stable across corpora (Jaccard 
+
+0.94 -0.99 at 30% ) precisely because their scores are dominated by data-independent weight statistics or bulk activation magnitudes that barely shift between WikiText-2 and C4. Attribution methods are less stable across corpora at the mask level (LRP 0.65 , IG 0.77 , C ONSENSUS -2 0.75 at 30% ) because they extract a calibration-specific causal signal, yet the LeRF PPL stays low under both corpora (LRP 830 → 732 , IG 98 → 206 , C ONSENSUS -2 66 → 85 on the C4-calibrated mask evaluated on WikiText-2 test), so the underlying signal generalizes despite mask-level mobility. 
+
+Table 33 Domain sensitivity (LLaMA-8B). Spearman ρ and Jaccard between WikiText-2 and C4 calibrated scores/masks at 20% and 30%. LeRF PPL with each calibration source (evaluated on WikiText-2 test). Dense PPL = 10.58. LeRF@20% LeRF@30% Selector Spearman J@20 J@30 WT2 C4 WT2 C4 LRP 0.9233 0.5751 0.6458 340.46 466.44 830.38 731.83 IG 0.9704 0.6940 0.7725 38.96 69.48 97.79 205.51 CONSENSUS -2 0.9496 0.6420 0.7501 29.95 40.90 66.08 85.13 MEAN ACT . 0.9933 0.9614 0.9415 42,793 96,180 139,874 264,304 WANDA 0.9998 0.9857 0.9932 148,982 168,699 360,083 334,291 
+
+Random baseline seed variance : Table 34 confirms that the R ANDOM selector’s LeRF and MoRF PPL is stable across three random seeds. Despite a seed-to-seed std of ≈ 30% around the mean, the Random baseline sits at LeRF 
+
+548 k on LLaMA-1B against LRP’s 288 , a separation of three orders of magnitude that no plausible seed variance could close, so the seed-averaging is conservative for the headline conclusion. 
+
+Table 34 Random baseline PPL across 3 LeRF seeds and 3 MoRF seeds (LLaMA-1B, 30% masking). Reports mean ± std. LeRF@30 MoRF@30 Seed 42 707,057 278,836 Seed 43 578,339 231,310 Seed 44 359,560 522,863 Mean ± std 548,318 ± 175,683 344,336 ± 156,424 
+
+32 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 10% 20% 30% 50%                       
+
+> Masking rate k
+> Random
+> Magnitude
+> Wanda
+> MeanAct
+> LRP
+> IG
+> Consensus-2
+> 0.0 0.0 0.0 5.5
+> 0.0 0.0 6.0 6.0
+> 4.7 5.2 5.8 5.5
+> 6.1 6.2 5.9 0.0
+> 6.7 6.6 6.9 5.8
+> 6.0 6.2 6.1 6.2
+> 6.3 6.7 6.2 6.2
+
+Validity gap heatmap (LLaMA-8B): log 10 (MoRF LeRF) 
+
+> 2
+> 4
+> 6
+> 8
+> 10
+> 12
+> log 10  (gap)
+
+Figure 16 Validity gap heatmap, LLaMA-8B. Rows: selectors. Columns: masking rates (10/20/30/50%). Color: 
+
+log 10 (MoRF PPL − LeRF PPL ); higher (greener) means the selector separates safe from important neurons more strongly at that rate. Attribution selectors (bottom three rows) maintain a large positive gap across rates; non-attribution baselines flip or saturate. 
+
+Validity gap heatmap : Figure 16 shows the validity gap ( log 10 (MoRF PPL − LeRF PPL )) for LLaMA-8B across all selectors at four representative masking rates (10/20/30/50%). 33 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+# E Contrastive Refusal Editing: Full Numerics and Analyses 
+
+Evaluation protocol. Refusal classifier. Every model response is scored by ProtectAI/distilroberta-base-rejection-v1 , a Distil-RoBERTa classifier fine-tuned to label responses as refusal or compliance . The model generates greedily (max 200 tokens) to a zero-shot prompt; the classifier produces a binary label from the full response string. No sampling is used; evaluation is deterministic. 
+
+Sampling confidence intervals. All refusal rates are proportions over fixed prompt sets (CAST: 500 malign / 
+
+500 benign; OR-Bench-Hard: 1,000 ), so sampling uncertainty is computable in closed form. We report Wilson 95% 
+
+intervals in Table 44; the maximum half-width is ±0.044 at n=500 (and ±0.031 at n=1000 ), an order of magnitude smaller than the attribution-vs-control gaps in Table 2. These quantify sampling uncertainty only, not judge bias or run-to-run variance. 
+
+CAST-malign and CAST-benign. The CAST test set [ 5] contains 500 held-out risk prompts (harmful requests across 5 domains: hate, crime, adult, medical, legal) and 500 matched base prompts (semantically similar but benign). CAST-malign = fraction of risk prompts where the classifier outputs refusal ; CAST-benign = fraction of base prompts where the classifier outputs refusal (i.e., over-refusal on benign content). Each is a proportion in [0 , 1] .
+
+SorryBench. SorryBench [ 7] contains 450 test questions spanning 45 harm categories. A model “passes” if it refuses; we report the fraction of prompts refused. Unedited instruction-tuned models vary from ≈ 0.20 (medical on LLaMA-3.2-1B) to 1.00 (legal on LLaMA-3.2-3B, a ceiling effect). Higher = stronger refusal on harder adversarial prompts. 
+
+OR-Bench-Hard. OR-Bench-Hard [ 8] contains 1,000 prompts that appear harmful but are benign (e.g., questions about chemistry phrased provocatively). A model “fails” if it refuses these unnecessarily; we report the over-refusal fraction. Baseline instruction-tuned models sit near 0.30 ; aggressive row-zeroing raises this to 0.57 -0.88 for attribution selectors, indicating the specificity cost at strong operating points. 
+
+Downstream utility. We run the pre-edited and post-edited checkpoints through lm-eval-harness [38 ] in zero-shot mode on MMLU ( 57 tasks), GSM8K, and IFEval. We report the absolute post-minus-pre difference ( ∆MMLU, 
+
+∆GSM8K, ∆IFEval in accuracy / solve-rate / instruction-following points). Scores near 0 indicate the edit preserved general-purpose capability; large negative values indicate capability damage from over-aggressive masking. 
+
+Per-selector OOD and utility profile. CAST malign     
+
+> refusal
+> Benign safety
+> (1−over-ref.)
+> LM retention
+> (PPLbase/PPL)
+> SorryBench
+> (held-out OOD)
+> OR-Bench
+> (1−over-ref.)
+> 0
+> .25
+> .50
+> .75
+> 1.0
+> score (higher = better)
+> LRP IG Consensus-2 MeanAct Random
+
+Figure 17 Per-selector OOD profile on LLaMA-3.1-8B-Instruct (means across 5 harm domains). Parallel coordinates; every axis in 
+
+[0 , 1] , higher = better. LRP, IG, and C ONSENSUS -2 score high on malign refusal and SorryBench (held-out OOD) while maintaining benign safety; M EAN ACT . starts near zero on malign refusal (fails to install refusal) but scores perfectly on benign and LM retention; RANDOM falls between both. ∆MMLU / ∆GSM8K / ∆IFEval numerics in Table 45. 
+
+Medical/legal collapse: sparsity-driven. Medical and legal require k ≥ 0.05 -0.10 to install refusal, but WikiText PPL diverges sharply past k = 0 .05 (Figure 18); the collapse is driven by the sparsity these low-signal-density domains demand, not by the selector, and it appears for LRP, C ONSENSUS -2, and Random alike. 34 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 10 2 10 1 
+
+> Sparsity k
+> 10 2
+> 2 × 10 1
+> 3 × 10 1
+> 4 × 10 1
+> 6 × 10 1
+> WikiText PPL
+
+Perplexity vs sparsity (LRP, =0.5)     
+
+> hate
+> crime
+> medical
+> legal
+> PPL cap (100)
+> 10 210 1
+> Sparsity k
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> CAST malign refusal rate
+
+Safety vs sparsity (LRP, =0.5) 
+
+> hate
+> crime
+> medical
+> legal
+> baseline
+
+Figure 18 Left: WikiText PPL vs. sparsity k for hate, crime, medical, legal (LRP, λ = 0 .5, LLaMA-3.1-8B). Medical and legal PPL diverges sharply past k = 0 .05 (40 and 50 at k = 0 .10 ) while hate and crime stay below 24 at k = 0 .05 . Right: CAST malign refusal vs. k. Medical/legal need k ≥ 0.05 to cross the useful-refusal threshold, the same region where PPL diverges. 
+
+Harm-cluster geometry. 
+
+The cross-domain Jaccard overlap of top-1% |Ccomply | rows on Qwen3-LRP is shown in Figure 19. The block structure is clean: {hate, crime} and {medical, legal} are internally coupled, cross-cluster overlap is small. The contrastive subtraction recovers the model’s latent harm-category geometry: per-domain edits are projections onto a lower-rank cluster structure the model already has, which predicts that a single composed mask over {hate ∪ crime} rows would simultaneously install refusal for both domains. LLaMA-3.1-8B-LRP shows the same two-cluster pattern at attenuated magnitudes, with within-cluster overlap exceeding cross-cluster overlap throughout. hate crime adult medical legal                      
+
+> hate
+> crime
+> adult
+> medical
+> legal
+> ---0.45 0.13 0.03 0.01
+> 0.45 ---0.17 0.04 0.02
+> 0.13 0.17 ---0.13 0.09
+> 0.03 0.04 0.13 ---0.29
+> 0.01 0.02 0.09 0.29 ---
+> Cross-domain row Jaccard (Qwen3-LRP)
+> two tight blocks; cross-cluster overlap 0.13
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> row Jaccard
+
+Figure 19 Cross-domain redundancy. Top-1% row Jaccard (Qwen3-8B-LRP) as a heatmap; red boxes mark the two tight blocks {hate, crime} ( 0.445 ) and {medical, legal} ( 0.287 ). Cross-cluster overlap is ≤ 0.13 , evidencing latent harm-category structure. 
+
+Table 35 complements the cross-domain picture with cross-method redundancy: LRP and IG select nearly disjoint row subsets (3-6% overlap) yet both achieve high CAST-malign refusal on the same model. This confirms that refusal is distributed across a redundant subspace, not concentrated in a unique set of rows. 
+
+Table 35 Top-1% row Jaccard overlap between LRP and IG masks (same model, same domain). Values of 3-6% confirm that the two methods identify nearly disjoint subsets within the same redundant refusal subspace. For reference, LRP vs. a seeded-Random mask yields ≈ 0.005 Jaccard ( ∼10 × lower), ruling out that the LRP-IG overlap is coincidental. Model hate crime adult medical legal LLaMA-1B 0.051 0.042 0.042 0.039 0.035 LLaMA-3B 0.058 0.055 0.047 0.048 0.049 LLaMA-8B 0.059 0.057 0.046 0.047 0.041 Qwen3-8B 0.049 0.046 0.045 0.032 0.030 
+
+35 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Layer distribution of top-1% |Ccomply | rows (Table 36) substantiates the architecture-reversal finding (Section 5.3): on LLaMA-3.1-8B LRP is late-heavy (44% late) while IG is early-heavy (40% early); on Qwen3-8B both methods route to early layers, but LRP picks sharper rows there.                      
+
+> Table 36 Distribution of top-1% |Ccomply |rows over layer thirds (early / mid / late), hate domain. Random would be uniform
+> 0.33 /0.33 /0.33 .Model Method early mid late LLaMA-3.1-8B LRP 0.08 0.47 0.44 IG 0.40 0.37 0.22 Qwen3-8B LRP 0.59 0.26 0.14 IG 0.45 0.27 0.27
+
+Selector rescue procedure (LLaMA-3.1-8B-IG-adult). 
+
+For some (model , method , domain ) cells the default operating-point constraint set is empty: no (λ, k ) satisfies benign 
+
+≤ 0.10 with non-trivial refusal at PPL ≤ 100 . Among the 70 cells in our grid this fires once: LLaMA-3.1-8B IG-adult (Table 37). Every cell with non-trivial malign refusal on this triple has benign ≥ 0.18 , and increasing λ does not break benign below 0.20 . IG’s early-layer rows for adult-refusal are also activation-positive on adult-benign prompts, so zeroing them spills onto benign queries.                                                          
+
+> Table 37 LLaMA-3.1-8B IG-adult (λ, k )sweep. Every cell with non-trivial malign violates the benign ≤0.10 cap. The rescue picks the tightest-benign cell with non-trivial refusal.
+> (λ, k )malign benign PPL passes?
+> (0 .3,0.005) 0.358 0.238 13 ben ×
+> (0 .5,0.005) 0.400 0.250 13 ben ×
+> (0 .6,0.005) 0.422 0.216 13 ben ×
+> (0 .7,0.005) 0.408 0.216 13 ben ×
+> (0 .8,0.005) 0.544 0.180 13 rescue
+> (0 .5,0.02) 0.524 0.412 14 ben ×
+> (0 .7,0.05) 0.606 0.262 17 ben ×
+> (0 .8,0.05) 0.626 0.374 16 ben ×
+
+We apply a deterministic relaxation: for benign caps c ∈ { 0.05 , 0.10 , 0.15 , 0.20 , 0.25 }, build Vc and pick the smallest 
+
+c that contains at least one cell with malign > 5× baseline (here > 0.29 ). For 8B-IG-adult this is c⋆ = 0 .20 and the rescue cell is (λ, k ) = (0 .8, 0.005) with malign 0.544 , benign 0.180 , PPL 13 . The cell is marked ⋆ in Figure 2 and Table 39, and will be noted on its model card upon release. 
+
+λ penalty sweep. 
+
+Table 38 shows representative (λ, k ) cells for LLaMA-3.1-8B LRP-hate. Without λ (λ = 0 ) the top compliance rows overlap with general-LM rows and PPL collapses; at the published value λ = 0 .5 (k = 0 .02 ) the operating point reaches the highest CAST-malign ( 0.814 ) in this evaluation run. Excessive λ over-penalizes and trims refusal-specific rows from the candidate set.                               
+
+> Table 38 λsweep on LLaMA-3.1-8B LRP-hate.
+> λkmalign benign PPL 0.3 0.005 0.658 0.002 13 0.3 0.02 0.704 0.000 21 0.5 0.02 0.814 0.004 13 0.7 0.005 0.610 0.004 13 0.7 0.02 0.800 0.006 13 0.8 0.02 0.800 0.008 13
+
+Other models: LLaMA-3.2-1B / 3B and Qwen3-8B. 
+
+Table 39 provides the numerical summary visualized in Figure 3. 36 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+On LLaMA-3.2-1B, IG dominates 4 of 5 domains with lower k requirements (adult: IG k = 0 .01 , PPL = 27 vs. LRP k = 0 .05 , PPL = 56 ); LRP’s medical win is Pyrrhic ( k = 0 .15 , PPL = 99 ). On LLaMA-3.2-3B, IG dominates all 5 domains; IG-adult at k = 0 .01 achieves PPL = 19 (identical to dense) with malign = 0 .774 and no observed PPL cost; IG-crime reaches 0.980 . On Qwen3-8B, LRP wins 3 of 5 domains (with hate 0.962 , crime 0.974 , and medical narrowly at 0.666 vs. 0.662 ); Qwen baseline refusal and OR-Bench over-refusal are already high (hate = 0 .654 ,OR-Bench = 0 .60 ); LRP-legal causes SorryBench to drop ( 0.90 → 0.70 ) while IG-legal is unaffected ( 0.90 → 1.00 ). 
+
+Table 39 LRP vs. IG operating-point CAST malign across all four models (best (λ, k ) per cell, benign ≤ 0.10 , PPL ≤ 100 ); numerical companion to Figure 3. Model Domain LRP IG LLaMA-3.2-1B hate 0.752 0.924 crime 0.694 0.882 adult 0.414 0.806 medical 0.586 0.516 legal 0.200 0.456 LLaMA-3.2-3B hate 0.796 0.936 crime 0.810 0.980 adult 0.414 0.774 medical 0.514 0.720 legal 0.332 0.620 LLaMA-3.1-8B hate 0.824 0.844 crime 0.908 0.838 adult 0.486 0.544 ⋆
+
+medical 0.742 0.576 legal 0.480 0.540 Qwen3-8B hate 0.962 0.906 crime 0.974 0.906 adult 0.878 0.952 medical 0.666 0.662 legal 0.500 0.548 
+
+Table 40 Selector comparison on LLaMA-3.2-1B-Instruct: LRP vs. IG vs. Random at best per-domain operating points. Method Domain (λ, k ) CAST malign ↑ CAST benign ↓ PPL ↓ SorryBench ↑ OR-Bench ↓
+
+LRP hate (0 .3, 0.02) 0.440 → 0.752 0.000 → 0.004 25 → 36 0.54 → 0.88 0.26 → 0.44 IG hate (0 .3, 0.01) 0.438 → 0.924 0.000 → 0.018 25 → 29 0.52 → 0.98 0.26 → 0.68 RANDOM hate (−, 0.005) 0.436 → 0.496 0.000 → 0.004 25 → 29 0.52 → 0.76 0.26 → 0.38 LRP crime (0 .3, 0.02) 0.312 → 0.694 0.002 → 0.004 25 → 37 0.59 → 0.68 0.26 → 0.64 IG crime (0 .5, 0.01) 0.314 → 0.882 0.002 → 0.022 25 → 27 0.59 → 0.84 0.27 → 0.80 RANDOM crime (−, 0.005) 0.314 → 0.440 0.002 → 0.004 25 → 29 0.59 → 0.71 0.26 → 0.37 LRP adult (0 .5, 0.05) 0.060 → 0.414 0.000 → 0.046 25 → 56 0.40 → 0.65 0.27 → 0.61 IG adult (0 .5, 0.01) 0.060 → 0.806 0.002 → 0.008 25 → 27 0.40 → 0.60 0.26 → 0.77 RANDOM adult (−, 0.01) 0.062 → 0.186 0.002 → 0.024 25 → 49 0.40 → 0.35 0.25 → 0.41 LRP medical (0 .8, 0.15) 0.090 → 0.586 0.000 → 0.088 25 → 99 0.20 → 0.20 0.25 → 0.55 IG medical (0 .5, 0.01) 0.090 → 0.516 0.000 → 0.018 25 → 27 0.20 → 0.50 0.27 → 0.69 RANDOM medical (−, 0.01) 0.090 → 0.154 0.002 → 0.024 25 → 49 0.20 → 0.30 0.26 → 0.41 LRP legal (0 .8, 0.015) 0.022 → 0.200 0.002 → 0.088 25 → 27 0.30 → 0.90 0.24 → 0.58 IG legal (0 .3, 0.005) 0.024 → 0.456 0.002 → 0.088 25 → 32 0.30 → 0.90 0.27 → 0.78 RANDOM legal (−, 0.01) 0.024 → 0.074 0.002 → 0.022 25 → 49 0.30 → 0.60 0.27 → 0.40 
+
+37 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Table 41 Contrastive refusal editing: LLaMA-3.2-3B-Instruct. Method Domain (λ, k ) CAST malign ↑ CAST benign ↓ PPL ↓ SorryBench ↑ OR-Bench ↓
+
+LRP hate (0 .5, 0.05) 0.416 → 0.796 0.000 → 0.004 19 → 29 0.70 → 0.90 0.32 → 0.80 LRP crime (0 .7, 0.05) 0.294 → 0.810 0.000 → 0.010 19 → 23 0.72 → 0.72 0.32 → 0.80 LRP adult (0 .8, 0.05) 0.034 → 0.414 0.000 → 0.006 19 → 23 0.30 → 0.75 0.32 → 0.84 LRP medical (0 .3, 0.05) 0.108 → 0.514 0.000 → 0.016 19 → 69 0.20 → 0.30 0.32 → 0.40 LRP legal † (0 .3, 0.01) 0.038 → 0.332 0.000 → 0.032 19 → 32 1.00 → 1.00 0.32 → 0.88 IG hate (0 .5, 0.05) 0.416 → 0.936 0.000 → 0.020 19 → 33 0.70 → 0.96 0.32 → 0.82 IG crime (0 .8, 0.05) 0.294 → 0.980 0.000 → 0.092 19 → 24 0.72 → 0.87 0.32 → 0.94 IG adult (0 .5, 0.01) 0.034 → 0.774 0.000 → 0.060 19 → 19 0.30 → 0.95 0.32 → 0.92 IG medical (0 .3, 0.01) 0.108 → 0.720 0.000 → 0.060 19 → 27 0.20 → 0.80 0.32 → 0.81 IG legal † (0 .7, 0.02) 0.038 → 0.620 0.000 → 0.070 19 → 20 1.00 → 1.00 0.32 → 0.83 RANDOM hate (−, 0.005) 0.416 → 0.376 0.000 → 0.000 19 → 23 0.70 → 0.58 0.32 → 0.27 RANDOM crime (−, 0.005) 0.294 → 0.362 0.000 → 0.000 19 → 23 0.72 → 0.72 0.32 → 0.26 RANDOM adult (−, 0.020) 0.034 → 0.030 0.000 → 0.006 19 → 40 0.30 → 0.45 0.32 → 0.27 RANDOM medical (−, 0.005) 0.108 → 0.068 0.000 → 0.000 19 → 23 0.20 → 0.20 0.32 → 0.27 RANDOM legal † (−, 0.020) 0.038 → 0.022 0.000 → 0.006 19 → 40 0.90 → 0.90 0.32 → 0.27 
+
+† SorryBench ceiling: unedited 3B already refuses nearly all SorryBench legal prompts; CAST-malign improvement (0.038 →0.332–0.620) reflects harder adversarial prompts not captured by SorryBench. 
+
+38 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Table 42 Contrastive refusal editing: Qwen3-8B. Method Domain (λ, k ) CAST malign ↑ CAST benign ↓ PPL ↓ SorryBench ↑ OR-Bench ↓
+
+LRP hate (0 .8, 0.05) 0.654 → 0.962 0.000 → 0.084 19 → 22 0.86 → 1.00 0.60 → 0.99 LRP crime (0 .7, 0.02) 0.362 → 0.974 0.000 → 0.078 19 → 20 0.83 → 0.96 0.60 → 1.00 LRP adult (0 .5, 0.01) 0.086 → 0.878 0.000 → 0.026 19 → 20 0.60 → 1.00 0.60 → 1.00 LRP medical (0 .3, 0.02) 0.044 → 0.666 0.000 → 0.056 19 → 28 0.40 → 0.80 0.60 → 0.96 LRP legal ‡ (0 .7, 0.075) 0.012 → 0.500 0.000 → 0.044 19 → 24 0.90 → 0.70 0.60 → 0.61 IG hate (0 .7, 0.02) 0.654 → 0.906 0.000 → 0.014 19 → 21 0.86 → 0.98 0.60 → 0.94 IG crime (0 .7, 0.01) 0.362 → 0.906 0.000 → 0.086 19 → 20 0.83 → 0.87 0.60 → 0.87 IG adult (0 .8, 0.10) 0.086 → 0.952 0.000 → 0.092 19 → 35 0.60 → 1.00 0.60 → 0.47 IG medical (0 .7, 0.01) 0.044 → 0.662 0.000 → 0.054 19 → 20 0.40 → 0.40 0.60 → 0.93 IG legal (0 .8, 0.02) 0.012 → 0.548 0.000 → 0.046 19 → 21 0.90 → 1.00 0.60 → 0.95 RANDOM hate (−, 0.005) 0.654 → 0.622 0.000 → 0.002 19 → 20 0.86 → 0.78 0.60 → 0.54 RANDOM crime (−, 0.020) 0.362 → 0.378 0.000 → 0.002 19 → 24 0.83 → 0.80 0.60 → 0.53 RANDOM adult (−, 0.005) 0.086 → 0.064 0.000 → 0.002 19 → 20 0.60 → 0.55 0.60 → 0.54 RANDOM medical (−, 0.005) 0.044 → 0.038 0.000 → 0.002 19 → 20 0.40 → 0.30 0.60 → 0.54 RANDOM legal ‡ (−, 0.050) 0.012 → 0.008 0.000 → 0.002 19 → 34 0.90 → 0.70 0.60 → 0.41 
+
+‡ Qwen3 natively refuses 90% of SorryBench legal prompts; LRP/Random edits targeting adversarial CAST legal prompts (0.012 →0.500 / 0.008) slightly reduce natural refusal on softer SorryBench queries. IG-legal is unaffected (0.90 →1.00). 
+
+Calibration signal density. 
+
+Table 43 reports the fraction of neuron-rows with |Ccomply | > 0.5 after per-layer rank normalization for each domain and selector; the ordering and its implications for operating-point k are discussed in §5.3. 
+
+Table 43 Calibration signal density across all four models (fraction of neuron-rows with |Ccomply | > 0.5 after per-layer rank normalization; values in %). MA = MeanActivation; C2 = C ONSENSUS -2; both run on LLaMA-3.1-8B only. Signal density grows with LLaMA model size (hate LRP: 1B 4.2% → 3B 5.5% → 8B 5.8%); Qwen3-8B is 3 × denser than LLaMA-8B on hate LRP (17.4% vs. 5.8%), tracking its early-layer intent-classification architecture. The hate > crime > adult > medical > legal ordering holds across most model-method combinations and predicts the operating-point k: hate/crime converge at k = 0 .01 -0.02 ; legal requires k = 0 .05 -0.15 .LLaMA-1B LLaMA-3B LLaMA-8B Qwen3-8B Domain LRP IG LRP IG LRP IG MA C2 LRP IG hate 4.16 4.48 5.50 7.37 5.77 8.52 0.01 5.71 17.39 13.78 crime 4.12 5.53 5.18 7.70 4.82 7.56 0.01 4.86 12.42 9.35 adult 2.24 3.09 3.18 5.07 2.78 4.54 0.01 2.96 5.73 4.75 medical 2.31 2.77 2.65 3.74 2.44 3.59 0.01 2.68 2.76 3.31 legal 1.71 1.89 2.24 3.14 1.93 3.07 0.00 2.13 2.39 2.51 
+
+OOD safety and utility (full numerics). 
+
+Table 45 reports the held-out OOD refusal rates (SorryBench, OR-Bench-Hard) and utility deltas (MMLU, GSM8K, IFEval) for all 25 LLaMA-3.1-8B cells (5 methods × 5 domains) at their operating points. The first three columns repeat the main-body Figure 2 numerics for cross-reference; the held-out OOD columns are visualized in Figure 17. Baselines: MMLU 0.680 , GSM8K 0.510 , IFEval 0.818 ; baseline SorryBench ≈ 0.30 , OR-Bench-Hard ≈ 0.30 . Hate/crime/adult cells with k ≤ 0.02 preserve most utility; medical/legal cells at k = 0 .10 collapse on reasoning tasks. The collapse is sparsity-driven and fires for LRP, C ONSENSUS -2, and Random alike. 39 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+Table 44 Wilson 95% intervals for the LLaMA-3.1-8B refusal-editing rates of Table 45, from the printed proportions and prompt counts (CAST n=500 per split, OR-Bench-Hard n=1000 ); no artifacts required. CAST intervals are exact; OR-Bench rates are two-decimal, so those intervals are accurate to about ±0.01 . Every headline attribution-vs-control separation is disjoint at this level. Method Domain mal ↑ [95% CI] ben ↓ [95% CI] OR ↓ [95% CI] LRP hate .824 [.788, .855] .004 [.001, .014] .780 [.753, .805] LRP crime .908 [.879, .930] .008 [.003, .020] .880 [.858, .899] LRP adult .486 [.442, .530] .008 [.003, .020] .680 [.650, .708] LRP medical .742 [.702, .778] .028 [.017, .046] .620 [.590, .650] LRP legal .480 [.437, .524] .042 [.028, .063] .680 [.650, .708] IG hate .844 [.810, .873] .016 [.008, .031] .810 [.785, .833] IG crime .838 [.803, .868] .080 [.059, .107] .660 [.630, .689] IG adult ⋆ .544 [.500, .587] .180 [.149, .216] .570 [.539, .600] IG medical .576 [.532, .619] .090 [.068, .118] .640 [.610, .669] IG legal .540 [.496, .583] .096 [.073, .125] .640 [.610, .669] MEAN ACT . hate .124 [.098, .156] .004 [.001, .014] .190 [.167, .215] MEAN ACT . crime .080 [.059, .107] .004 [.001, .014] .160 [.139, .184] MEAN ACT . adult .008 [.003, .020] .002 [.000, .011] .280 [.253, .309] MEAN ACT . medical .026 [.015, .044] .004 [.001, .014] .230 [.205, .257] MEAN ACT . legal .036 [.023, .056] .004 [.001, .014] .340 [.311, .370] CONSENSUS -2 hate .846 [.812, .875] .002 [.000, .011] .830 [.805, .852] CONSENSUS -2 crime .948 [.925, .964] .008 [.003, .020] .870 [.848, .889] CONSENSUS -2 adult .534 [.490, .577] .014 [.007, .029] .770 [.743, .795] CONSENSUS -2 medical .798 [.761, .831] .052 [.036, .075] .700 [.671, .728] CONSENSUS -2 legal .382 [.340, .425] .014 [.007, .029] .760 [.733, .785] RANDOM hate .384 [.342, .427] .002 [.000, .011] .460 [.429, .491] RANDOM crime .298 [.260, .340] .000 [.000, .008] .460 [.429, .491] RANDOM adult .054 [.037, .077] .002 [.000, .011] .460 [.429, .491] RANDOM medical .120 [.094, .151] .008 [.003, .020] .350 [.321, .380] RANDOM legal .066 [.047, .091] .008 [.003, .020] .350 [.321, .380] 
+
+Table 45 Full per-cell numerics for contrastive refusal editing on LLaMA-3.1-8B-Instruct. mal/ben = CAST malign / benign refusal; Sorry / OR = held-out post-edit rates on SorryBench / OR-Bench-Hard; ∆MMLU/GSM8K/IFEval = post-minus-base difference (base MMLU 0.680 , GSM8K 0.510 , IFEval 0.818 ; negative = degradation). ⋆ = rescue cell with benign cap relaxed to 
+
+0.20 (achieved benign 0.18 ). Medical/legal collapse at k = 0 .10 is sparsity-driven, not selector-driven.                                                                                                                                                                                                                                                                                              
+
+> Method Domain (λ, k )mal ↑ben ↓PPL ↓Sorry ↑OR ↓∆MMLU ∆GSM ∆IF LRP hate (0 .5,0.02) 0.824 0.004 13 0.94 0.78 −0.075 −0.218 −0.030 LRP crime (0 .5,0.02) 0.908 0.008 13 0.86 0.88 −0.081 −0.322 −0.067 LRP adult (0 .7,0.01) 0.486 0.008 13 0.70 0.68 −0.057 −0.283 −0.033 LRP medical (0 .5,0.10) 0.742 0.028 40 0.30 0.62 −0.451 −0.510 −0.565 LRP legal (0 .5,0.10) 0.480 0.042 50 0.90 0.68 −0.449 −0.510 −0.614 IG hate (0 .8,0.005) 0.844 0.016 13 0.80 0.81 −0.056 −0.274 −0.024 IG crime (0 .8,0.005) 0.838 0.080 13 0.76 0.66 −0.086 −0.339 −0.174 IG adult (0 .8,0.005) ⋆0.544 0.180 13 0.75 0.57 −0.148 −0.451 −0.287 IG medical (0 .5,0.01) 0.576 0.090 13 0.70 0.64 −0.089 −0.331 −0.154 IG legal (0 .8,0.01) 0.540 0.096 13 1.00 0.64 −0.186 −0.449 −0.346 MEAN ACT .hate (0 .5,0.005) 0.124 0.004 13 0.12 0.19 −0.064 −0.375 +0.006 MEAN ACT .crime (0 .7,0.005) 0.080 0.004 13 0.42 0.16 −0.070 −0.207 ±0.000 MEAN ACT .adult (0 .3,0.005) 0.008 0.002 13 0.05 0.28 −0.053 −0.361 −0.018 MEAN ACT .medical (0 .8,0.005) 0.026 0.004 13 0.30 0.23 −0.060 −0.275 −0.012 MEAN ACT .legal (0 .5,0.01) 0.036 0.004 13 0.80 0.34 −0.056 −0.361 −0.017 CONSENSUS -2 hate (0 .3,0.01) 0.846 0.002 15 0.98 0.83 −0.071 −0.255 −0.025 CONSENSUS -2 crime (0 .8,0.02) 0.948 0.008 14 0.82 0.87 −0.073 −0.309 −0.040 CONSENSUS -2 adult (0 .5,0.01) 0.534 0.014 13 0.75 0.77 −0.062 −0.276 −0.054 CONSENSUS -2 medical (0 .3,0.10) 0.798 0.052 52 0.70 0.70 −0.450 −0.510 −0.599 CONSENSUS -2 legal (0 .7,0.075) 0.382 0.014 21 0.90 0.76 −0.327 −0.481 −0.233 RANDOM hate (−,0.010) 0.384 0.002 16 0.78 0.46 −0.127 −0.433 −0.073 RANDOM crime (−,0.005) 0.298 0.000 16 0.84 0.46 −0.147 −0.500 −0.028 RANDOM adult (−,0.010) 0.054 0.002 16 0.60 0.46 −0.147 −0.500 −0.073 RANDOM medical (−,0.020) 0.120 0.008 32 0.50 0.35 −0.426 −0.510 −0.324 RANDOM legal (−,0.020) 0.066 0.008 32 0.60 0.35 −0.426 −0.510 −0.323
+
+40 Faithfulness to Refusal: A Causal Audit of Neuron Selectors 
+
+# F Extended Discussion 
+
+Implications for attribution-guided pruning. The structural analyses qualify the attribution advantage in three ways. First, rank stability is a misleading proxy: Wanda is the most stable selector at Spearman 0.9998 and is not the most faithful, and MeanActivation’s near-perfect stability hides catastrophic causal invalidity. Second, the Wanda inversion at LLaMA-3.2-3B and Qwen3-8B (negative validity gap) shows that activation-weighted criteria can invert importance ordering on specific architectures. Third, false-negative rates confirm that IG and C ONSENSUS -2 both reach zero dangerous false negatives while LRP alone misses one dangerous group, W ANDA misses four ( 41 .4% of its masked neurons), and M EAN ACT . misses four ( 35 .2% ); domain sensitivity shows the rankings are robust to calibration corpus choice for the attribution cluster, while the high cross-corpus stability of the non-attribution baselines reflects their weak reliance on calibration content rather than genuine robustness. Rank stability and inter-method agreement are not sufficient proxies; LeRF/MoRF curves, or equivalent direct interventions, are what expose the failures documented here. 
+
+A protocol for behavior localization. The four-step protocol described in §6 (sufficiency, specificity, utility cost, cross-architecture replication) is motivated by the IG/LRP reversal (Section 5.3): a method that wins on LLaMA may lose on Qwen3, and the reversal is not noise but a function of where each method routes relevance relative to where the model computes the target. 
+
+Attribution and circuit discovery. Our method replaces the activation-patching inner loop of mechanistic inter-pretability with attribution (one forward and backward pass per prompt), trading some causal precision for speed. The layer-matched audit (Section 5.4) shows that the approximation is precise enough to localize behavior-specific circuitry at 70-cell scale, where full activation patching would be prohibitive. The redundant-subspace finding (Section 5.5) suggests circuit discovery and attribution answer different questions: a circuit is a candidate necessary mechanism, while an attribution-derived mask is one of many sufficient ablations in a redundant subspace. Reporting both gives different information. 
+
+Consensus as error control. CONSENSUS -2 is not an attribution method in its own right; it is a way of reducing the false-negative rate by requiring agreement between two attribution paradigms with incompatible mechanisms. It reduces false negatives at the LM level and wins on 3 of 5 LLaMA-3.1-8B refusal domains at the behavior level (hate, crime, medical), with adult within 0.01 of the IG-rescue cell and legal the only clear loss, despite an LRP/IG top-1% 
+
+Jaccard of about 6% (Table 35). The agreed rows concentrate on the same MLP gate_proj and up_proj subspace identified in Section 5.5: C ONSENSUS -2 is not finding new structure but confirming the gated-linear refusal subspace each method already identifies. In the remaining 94% of rows the two methods see different partial views, and Borda aggregation combines them into a more robust mask without forcing them to agree on row identities. 41

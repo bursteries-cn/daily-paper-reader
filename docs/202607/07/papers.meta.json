@@ -1,0 +1,54 @@
+{
+  "label": "2026-07-07",
+  "date": "2026-07-07",
+  "generated_at": "2026-07-07T21:06:40",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202607/07/2607.05310v1-evaluating-and-understanding-model-editing-for-medical-vision-language-models",
+      "section": "deep",
+      "title_en": "Evaluating and Understanding Model Editing for Medical Vision Language Models",
+      "authors": "Guli Zhu, Chenwei Wu, Liyue Shen",
+      "date": "2026-07-06",
+      "pdf": "https://arxiv.org/pdf/2607.05310v1",
+      "score": "9.0",
+      "evidence": "评估医学视觉语言模型的模型编辑",
+      "tldr": "现有医疗视觉语言模型编辑评估基准缺乏临床相关性，忽略图像文本变异、模态转换、知识组合和时间演进等挑战。为此提出M3Bench，包含16,276个临床问题，覆盖多种解剖、模态和专科，支持单次和顺序编辑。评估四种编辑器和六种模型后发现，梯度方法迁移性强但对局部性破坏严重，记忆方法保持局部性但缺乏组合泛化且超参数敏感。M3Bench为多模态模型编辑提供严格临床压力测试，指导更安全的后部署适应。",
+      "tags": "query:model-edit",
+      "abstract_en": "Model editing promises a fast, targeted way to correct post-deployment mistakes in medical vision-language models (VLMs) without costly retraining. However, existing multimodal model editing benchmarks focus on general-purpose tasks and do not reflect realistic clinical domain requirements and variability. To address this, we introduce M3Bench, a clinically grounded benchmark for multimodal model editing that evaluates whether an edit remains reliable, precise, and generalizable under the challenges of image and text variation, modality and protocol shifts, clinical knowledge composition, and temporal progression. M3Bench contains 16,276 questions spanning diverse anatomy, modalities, and specialties, and supports both single and sequential edits.   By evaluating 4 representative editors across 6 medical and general VLMs, we find that no method excels across all criteria. Gradient-based editors achieve strong transfer but suffer from catastrophic locality violations, whereas memory-based methods preserve locality but lack compositional generality and exhibit high backbone-dependent hyperparameter sensitivity. We further attribute these failures to the latent space geometry of VLMs and how different editing methods shift its landscape. Overall, M3Bench establishes a rigorous clinical stress test for multimodal model editing and offers actionable guidance for safer post-deployment adaptation. The benchmark is publicly available at https://github.com/BioMed-AI-Lab-U-Michgan/M3Bench .",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/07/2607.05355v1-faithfulness-to-refusal-a-causal-audit-of-neuron-selectors",
+      "section": "deep",
+      "title_en": "Faithfulness to Refusal: A Causal Audit of Neuron Selectors",
+      "authors": "Ananth Eswar, Pratinav Seth, Utsav Avaiya, Vinay Kumar Sankarapu",
+      "date": "2026-07-06",
+      "pdf": "https://arxiv.org/pdf/2607.05355v1",
+      "score": "9.0",
+      "evidence": "神经选择器的因果审计用于安全编辑",
+      "tldr": "归因分数常用于识别语言模型关键神经元，但因果重要性很少被直接验证。本文通过一次神经元归零的配对审计，在语言建模层面发现归因方法优于激活和幅度基线；在行为测试中，归因行足以安装拒绝有害内容，且不同归因方法通过不重叠行集实现，表明拒绝存在于冗余子空间中。高排名稳定性并不保证因果有效性。",
+      "tags": "query:model-edit",
+      "abstract_en": "Attribution scores increasingly identify which neuron rows of a language model matter for applications such as pruning, interpretability, and editing for safety, yet whether they identify causally important rows is rarely tested directly. We address this with two paired audits built on one-shot neuron-row zeroing. We first audit selectors at the language-modeling level: attribution methods substantially outperform activation and magnitude-based baselines at identifying dispensable rows across five LLMs. We then adapt the same intervention into a behavior test by driving it with a contrastive harmful-versus-benign signal; the attributed rows are sufficient to install refusal on hate and crime while keeping benign over-refusal low and preserving language model fluency, and specific in that layer-matched random controls at the same depths fail. Highly rank-stable selectors can be among the least causally valid. Refusal moreover lives in a redundant subspace, where different attribution methods install it through largely disjoint row sets, so the recovered edit is one realization of a sufficient set rather than a unique mechanism. Together, these findings show that rank-stability proxies miss the kinds of selector failures a direct causal audit can surface.%",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/07/2606.31876v2-harnessing-textual-refusal-directions-for-multimodal-safety",
+      "section": "quick",
+      "title_en": "Harnessing Textual Refusal Directions for Multimodal Safety",
+      "authors": "Moreno D'Incà, Nicu Sebe, Massimiliano Mancini",
+      "date": "2026-06-30",
+      "pdf": "https://arxiv.org/pdf/2606.31876v2",
+      "score": "7.0",
+      "evidence": "利用文本拒绝方向引导多模态LLM，类似用于安全的激活编辑",
+      "tldr": "多模态大模型因缺乏不安全多模态数据而难以安全对齐。本文提出MARS方法，利用文本拒绝方向跨模态泛化，通过激活重新居中、信任区域自适应缩放和最优层选择，在首个生成token施加干预。在五个SOTA模型上，MARS在不损害实用性的前提下显著提升安全性，并有效防御视频越狱攻击。结果揭示安全结构在模态间共享，文本拒绝方向为多模态对齐提供了新基础。",
+      "tags": "query:model-edit",
+      "abstract_en": "To improve safety in Large Language Models (LLMs) we can either perform post-training alignment or exploit refusal directions in the activation space. Both strategies are less feasible in Multimodal LLMs (MLLMs) as they require unsafe multimodal data, harder to collect than their unimodal counterpart. In this work, we relax this constraint and investigate whether textual refusal directions, extracted directly from the LLM backbone, generalize across modalities (i.e., image, video). Preliminary findings confirm this ability, though effectiveness is conditioned by layer selection, steering strength, and cross-modal alignment, with the latter causing safe multimodal inputs to be spuriously steered toward refusal. Building on this, we introduce Modality-Agnostic Refusal Steering (MARS), a light-weight training-free approach that injects multimodal safety without the need for multimodal safety data. MARS corrects modality misalignment via activation re-centering, adaptively scales steering strength within a geometrically defined trust region, and selects the optimal intervention layer, operating at the first generated token. Evaluated on five SOTA MLLMs across safety, utility, and video jailbreak benchmarks, MARS achieves consistent safety gains while preserving utility. These results reveal that safety-relevant structure is shared across modalities and that textual refusal directions are a powerful and underexplored foundation for multimodal alignment.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

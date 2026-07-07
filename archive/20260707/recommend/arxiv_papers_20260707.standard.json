@@ -1,0 +1,131 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-07T21:02:02.946138+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2607.05310v1",
+      "source": "arxiv",
+      "title": "Evaluating and Understanding Model Editing for Medical Vision Language Models",
+      "abstract": "Model editing promises a fast, targeted way to correct post-deployment mistakes in medical vision-language models (VLMs) without costly retraining. However, existing multimodal model editing benchmarks focus on general-purpose tasks and do not reflect realistic clinical domain requirements and variability. To address this, we introduce M3Bench, a clinically grounded benchmark for multimodal model editing that evaluates whether an edit remains reliable, precise, and generalizable under the challenges of image and text variation, modality and protocol shifts, clinical knowledge composition, and temporal progression. M3Bench contains 16,276 questions spanning diverse anatomy, modalities, and specialties, and supports both single and sequential edits.   By evaluating 4 representative editors across 6 medical and general VLMs, we find that no method excels across all criteria. Gradient-based editors achieve strong transfer but suffer from catastrophic locality violations, whereas memory-based methods preserve locality but lack compositional generality and exhibit high backbone-dependent hyperparameter sensitivity. We further attribute these failures to the latent space geometry of VLMs and how different editing methods shift its landscape. Overall, M3Bench establishes a rigorous clinical stress test for multimodal model editing and offers actionable guidance for safer post-deployment adaptation. The benchmark is publicly available at https://github.com/BioMed-AI-Lab-U-Michgan/M3Bench .",
+      "authors": [
+        "Guli Zhu",
+        "Chenwei Wu",
+        "Liyue Shen"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-07-06T16:49:10+00:00",
+      "link": "https://arxiv.org/pdf/2607.05310v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "evaluates model editing for medical VLMs",
+      "llm_evidence_cn": "评估医学视觉语言模型的模型编辑",
+      "llm_evidence": "评估医学视觉语言模型的模型编辑",
+      "canonical_evidence": "评估医学视觉语言模型的模型编辑",
+      "llm_tldr_en": "M3Bench evaluates model editing for medical VLMs under realistic clinical variations including image/text shifts, modality changes, and temporal progression.",
+      "llm_tldr_cn": "针对医学视觉语言模型的后部署修正，现有模型编辑基准缺乏临床领域变异性。本文提出M3Bench基准，涵盖16,276个问题，评估编辑在图像文本变化、模态协议转换、知识组合和时间演化下的可靠性、精准性和泛化性，支持单次和序列编辑评估，填补了多模态模型编辑在医学领域的空白。",
+      "llm_tldr": "针对医学视觉语言模型的后部署修正，现有模型编辑基准缺乏临床领域变异性。本文提出M3Bench基准，涵盖16,276个问题，评估编辑在图像文本变化、模态协议转换、知识组合和时间演化下的可靠性、精准性和泛化性，支持单次和序列编辑评估，填补了多模态模型编辑在医学领域的空白。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.05355v1",
+      "source": "arxiv",
+      "title": "Faithfulness to Refusal: A Causal Audit of Neuron Selectors",
+      "abstract": "Attribution scores increasingly identify which neuron rows of a language model matter for applications such as pruning, interpretability, and editing for safety, yet whether they identify causally important rows is rarely tested directly. We address this with two paired audits built on one-shot neuron-row zeroing. We first audit selectors at the language-modeling level: attribution methods substantially outperform activation and magnitude-based baselines at identifying dispensable rows across five LLMs. We then adapt the same intervention into a behavior test by driving it with a contrastive harmful-versus-benign signal; the attributed rows are sufficient to install refusal on hate and crime while keeping benign over-refusal low and preserving language model fluency, and specific in that layer-matched random controls at the same depths fail. Highly rank-stable selectors can be among the least causally valid. Refusal moreover lives in a redundant subspace, where different attribution methods install it through largely disjoint row sets, so the recovered edit is one realization of a sufficient set rather than a unique mechanism. Together, these findings show that rank-stability proxies miss the kinds of selector failures a direct causal audit can surface.%",
+      "authors": [
+        "Ananth Eswar",
+        "Pratinav Seth",
+        "Utsav Avaiya",
+        "Vinay Kumar Sankarapu"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.ET",
+        "cs.LG"
+      ],
+      "published": "2026-07-06T17:33:36+00:00",
+      "link": "https://arxiv.org/pdf/2607.05355v1",
+      "tags": [
+        "keyword:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "causal audit of neuron selectors for safety editing",
+      "llm_evidence_cn": "神经选择器的因果审计用于安全编辑",
+      "llm_evidence": "神经选择器的因果审计用于安全编辑",
+      "canonical_evidence": "神经选择器的因果审计用于安全编辑",
+      "llm_tldr_en": "Audits attribution scores for identifying neurons that can be zeroed to install refusal behavior for safety editing.",
+      "llm_tldr_cn": "模型编辑安全中，归因分数被用于识别重要神经元，但因果重要性少有验证。本文提出了基于单次神经元零化的因果审计方法，先验证归因方法在语言建模层面能识别冗余行，再将其适配为行为测试：用有害-无害对比信号驱动归因，零化后成功安装对仇恨与犯罪的拒绝行为，同时保持良性响应低误拒率。实验证明归因方法比基线更有效地识别可用于安全编辑的神经元。",
+      "llm_tldr": "模型编辑安全中，归因分数被用于识别重要神经元，但因果重要性少有验证。本文提出了基于单次神经元零化的因果审计方法，先验证归因方法在语言建模层面能识别冗余行，再将其适配为行为测试：用有害-无害对比信号驱动归因，零化后成功安装对仇恨与犯罪的拒绝行为，同时保持良性响应低误拒率。实验证明归因方法比基线更有效地识别可用于安全编辑的神经元。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "Find papers about model editing for safety in large language models",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.31876v2",
+      "source": "arxiv",
+      "title": "Harnessing Textual Refusal Directions for Multimodal Safety",
+      "abstract": "To improve safety in Large Language Models (LLMs) we can either perform post-training alignment or exploit refusal directions in the activation space. Both strategies are less feasible in Multimodal LLMs (MLLMs) as they require unsafe multimodal data, harder to collect than their unimodal counterpart. In this work, we relax this constraint and investigate whether textual refusal directions, extracted directly from the LLM backbone, generalize across modalities (i.e., image, video). Preliminary findings confirm this ability, though effectiveness is conditioned by layer selection, steering strength, and cross-modal alignment, with the latter causing safe multimodal inputs to be spuriously steered toward refusal. Building on this, we introduce Modality-Agnostic Refusal Steering (MARS), a light-weight training-free approach that injects multimodal safety without the need for multimodal safety data. MARS corrects modality misalignment via activation re-centering, adaptively scales steering strength within a geometrically defined trust region, and selects the optimal intervention layer, operating at the first generated token. Evaluated on five SOTA MLLMs across safety, utility, and video jailbreak benchmarks, MARS achieves consistent safety gains while preserving utility. These results reveal that safety-relevant structure is shared across modalities and that textual refusal directions are a powerful and underexplored foundation for multimodal alignment.",
+      "authors": [
+        "Moreno D'Incà",
+        "Nicu Sebe",
+        "Massimiliano Mancini"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-06-30T15:57:50+00:00",
+      "link": "https://arxiv.org/pdf/2606.31876v2",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "uses textual refusal directions to steer multimodal LLMs, akin to activation editing for safety",
+      "llm_evidence_cn": "利用文本拒绝方向引导多模态LLM，类似用于安全的激活编辑",
+      "llm_evidence": "利用文本拒绝方向引导多模态LLM，类似用于安全的激活编辑",
+      "canonical_evidence": "利用文本拒绝方向引导多模态LLM，类似用于安全的激活编辑",
+      "llm_tldr_en": "Extracts textual refusal directions from LLM backbone and applies them to multimodal models, showing cross-modal transfer but with limitations in layer selection and alignment.",
+      "llm_tldr_cn": "多模态大模型的安全对齐通常需要大量不安全多模态数据，收集困难。本文探索是否可以从语言模型骨干中提取文本拒绝方向并跨模态迁移到图像和视频。实验证实了迁移能力但受层选择、引导强度和跨模态对齐影响，提出了模态无关的拒绝引导方法。",
+      "llm_tldr": "多模态大模型的安全对齐通常需要大量不安全多模态数据，收集困难。本文探索是否可以从语言模型骨干中提取文本拒绝方向并跨模态迁移到图像和视频。实验证实了迁移能力但受层选择、引导强度和跨模态对齐影响，提出了模态无关的拒绝引导方法。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
