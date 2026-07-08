@@ -1,0 +1,135 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-08T21:00:25.232835+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2607.05969v1",
+      "source": "arxiv",
+      "title": "MemDefrag: Latent Memory Defragmentation for Large Language Models",
+      "abstract": "Latent memory, which stores past knowledge fragments as per-layer hidden states, has emerged as a promising paradigm (e.g., MemoryLLM and M+) for long-term memory in large language models (LLMs). However, the paradigm suffers from significant performance degradation during memory updates, due to positional encoding misalignment and the absence of any tracing mechanism to distinguish target memory fragments from irrelevant ones. To discover such a tracing mechanism, we probe the layer-wise attention density over stored memory fragments, and find that a small set of middle transformer layers consistently concentrates the highest density on the target fragment - exposing an inherent tracing signal. In light of this, we propose MemDefrag, a training-free and model-agnostic framework that (1) uses a middle-layer tracing signal to conduct memory defragmentation (rank, reorder, and filter memories), and (2) applies an informativeness-guided proportional forgetting mechanism once capacity is exceeded. Experiments show that MemDefrag substantially outperforms MemoryLLM and M+ on knowledge retention (e.g., 43.0% vs. 17.4%/17.6% after 50 memory updates) and long-context benchmarks, and generalizes well across various LLMs and latent-memory variants.",
+      "authors": [
+        "Ruiyi Yan",
+        "Zhuoyuan Mao",
+        "Yiwen Guo"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-07-07T08:04:34+00:00",
+      "link": "https://arxiv.org/pdf/2607.05969v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "latent memory defragmentation for updating LLM knowledge",
+      "llm_evidence_cn": "潜内存碎片整理用于更可靠的知识更新",
+      "llm_evidence": "潜内存碎片整理用于更可靠的知识更新",
+      "canonical_evidence": "潜内存碎片整理用于更可靠的知识更新",
+      "llm_tldr_en": "MemDefrag introduces a training-free method to fix performance degradation in latent memory updates by probing attention patterns, enabling more reliable knowledge editing.",
+      "llm_tldr_cn": "现有潜内存方法在更新知识时性能下降严重。本文提出MemDefrag，通过探测中间层注意力密度发现追踪信号，能够在不重新训练的情况下定位并更新目标记忆片段，同时排除无关干扰。实验表明该框架可提升记忆更新的一致性与准确性，为知识编辑提供了高效且稳定的一种新范式。",
+      "llm_tldr": "现有潜内存方法在更新知识时性能下降严重。本文提出MemDefrag，通过探测中间层注意力密度发现追踪信号，能够在不重新训练的情况下定位并更新目标记忆片段，同时排除无关干扰。实验表明该框架可提升记忆更新的一致性与准确性，为知识编辑提供了高效且稳定的一种新范式。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2607.00572v2",
+      "source": "arxiv",
+      "title": "HARC: Coupling Harmfulness and Refusal Directions for Robust Safety Alignment",
+      "abstract": "Understanding how aligned LLMs internally represent safety is critical for diagnosing alignment vulnerabilities, as it explains why jailbreaks succeed and informs the design of robust alignment strategies. Prior work shows that aligned LLMs encode harmfulness and refusal as separable directions in the residual stream at prompt-side token positions. We show that jailbreaks succeed at prompt encoding by suppressing either the refusal or harmfulness direction before any token is generated, with distinct attack classes occupying separable regions of the harmfulness-refusal plane. Extending the analysis to response-token positions, we find that the model recognizes harmful content while it is generating that content, even when it failed to recognize the input as harmful at the prompt side. Motivated by our findings, we introduce HARC (Harmfulness-And-Refusal Coupling), a fine-tuning method that pairs the two directions across both prompt and response positions. Since the intervention is confined to the harmfulness-refusal subspace, it leaves the rest of the residual stream intact and does not degrade general capability or inflate over-refusal. Across extensive experiments, HARC achieves the strongest robustness-capability-usability trade-off among six baselines spanning the major training-time and inference-time safety methods. The harmfulness and refusal directions at prompt and response positions transfer across the five model families and two scales we tested without architecture-specific tuning.",
+      "authors": [
+        "Shei Pern Chua",
+        "Hao Wu",
+        "Fangzhao Wu"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CR"
+      ],
+      "published": "2026-07-01T07:58:16+00:00",
+      "link": "https://arxiv.org/pdf/2607.00572v2",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "studies refusal directions and jailbreak mechanisms relevant to safety alignment editing",
+      "llm_evidence_cn": "研究拒绝方向和越狱机制，与安全对齐编辑相关",
+      "llm_evidence": "研究拒绝方向和越狱机制，与安全对齐编辑相关",
+      "canonical_evidence": "研究拒绝方向和越狱机制，与安全对齐编辑相关",
+      "llm_tldr_en": "HARC analyzes how jailbreaks suppress refusal/harmfulness directions in LLMs, providing insights for safety alignment editing.",
+      "llm_tldr_cn": "该论文通过分析大语言模型内部表示中的有害性和拒绝方向，揭示了越狱攻击通过抑制这些方向成功的原因。论文提出了一种耦合方法，将有害性和拒绝方向联合建模，从而在响应生成过程中识别有害内容。实验表明该方法能有效检测多种攻击类别，并为鲁棒安全对齐策略的设计提供了新视角。",
+      "llm_tldr": "该论文通过分析大语言模型内部表示中的有害性和拒绝方向，揭示了越狱攻击通过抑制这些方向成功的原因。论文提出了一种耦合方法，将有害性和拒绝方向联合建模，从而在响应生成过程中识别有害内容。实验表明该方法能有效检测多种攻击类别，并为鲁棒安全对齐策略的设计提供了新视角。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2607.05842v1",
+      "source": "arxiv",
+      "title": "Beyond Refusal: A Same-Lineage Study of Aligned and Abliterated LLMs for Vulnerability Analysis",
+      "abstract": "Large language model (LLM)-assisted software security operates at a difficult boundary: the vulnerability-analysis terminology needed for legitimate code review, triage, and repair can closely resemble terminology associated with misuse. Existing safety and cybersecurity evaluations are difficult to interpret in this setting because they often compare unrelated model families, thereby conflating safety behavior with differences in architecture, scale, training data, and deployment. To isolate this factor, we study safety state: whether refusal behavior remains intact (Aligned) or has been refusal-ablated (Abliterated) within same-lineage models. We ask how this safety state affects defensive utility across software-security workflows. We compare aligned instruction-tuned models with publicly released refusal-ablated descendants from two model families, Gemma and Qwen. We evaluate Aligned and Abliterated states on vulnerability detection, CWE attribution, vulnerable-line localization, root-cause localization, and executable patch validation. We further treat prompt wording as a controlled framing dimension: prompts begin with neutral code-review language, add authorization context, and vary the density of cybersecurity terminology. In a Gemma-based Java/Vul4J repair-validation study, Abliterated achieves higher early-stage validation rates, with 67.8%, 65.0%, and 32.8% of patches judged usable, successfully applied, and successfully compiled, respectively, compared with 29.9%, 24.9%, and 9.0% for Aligned. In the Qwen pair, Abliterated improves localization performance, increasing line-level F1 from 2.08% to 3.91% and Top-1 accuracy from 4.10% to 6.95%. These findings suggest that evaluations of LLM-based security assistants should jointly measure whether models respond, whether their usable responses are correct, and whether their outputs remain actionable across the engineering workflow.",
+      "authors": [
+        "Mingchen Li",
+        "Meikang Qiu",
+        "Zifan Peng",
+        "Heng Fan",
+        "Song Fu",
+        "Junhua Ding",
+        "Yunhe Feng"
+      ],
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE",
+        "cs.AI",
+        "cs.CR"
+      ],
+      "published": "2026-07-07T05:04:48+00:00",
+      "link": "https://arxiv.org/pdf/2607.05842v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "study of aligned vs abliterated LLMs for safety",
+      "llm_evidence_cn": "对齐与消融模型的安全行为研究",
+      "llm_evidence": "对齐与消融模型的安全行为研究",
+      "canonical_evidence": "对齐与消融模型的安全行为研究",
+      "llm_tldr_en": "Compares aligned and refusal-ablated LLMs from the same lineage to isolate safety state effects on vulnerability analysis utility.",
+      "llm_tldr_cn": "该论文通过同源模型比较对齐版本和消融拒绝版本的安全状态，以排除架构差异的影响。研究安全状态如何影响软件安全防御任务中的实际效用。实验发现消融拒绝后的模型在某些安全分析任务中表现更好，但可能引入新的风险。该工作为模型编辑中的安全状态评估提供了重要参考。",
+      "llm_tldr": "该论文通过同源模型比较对齐版本和消融拒绝版本的安全状态，以排除架构差异的影响。研究安全状态如何影响软件安全防御任务中的实际效用。实验发现消融拒绝后的模型在某些安全分析任务中表现更好，但可能引入新的风险。该工作为模型编辑中的安全状态评估提供了重要参考。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

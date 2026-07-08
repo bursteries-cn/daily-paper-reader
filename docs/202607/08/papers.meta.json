@@ -1,0 +1,54 @@
+{
+  "label": "2026-07-08",
+  "date": "2026-07-08",
+  "generated_at": "2026-07-08T21:03:35",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202607/08/2607.05969v1-memdefrag-latent-memory-defragmentation-for-large-language-models",
+      "section": "deep",
+      "title_en": "MemDefrag: Latent Memory Defragmentation for Large Language Models",
+      "authors": "Ruiyi Yan, Zhuoyuan Mao, Yiwen Guo",
+      "date": "2026-07-07",
+      "pdf": "https://arxiv.org/pdf/2607.05969v1",
+      "score": "8.0",
+      "evidence": "潜内存碎片整理用于更可靠的知识更新",
+      "tldr": "潜层记忆（如MemoryLLM和M+）作为LLM长期记忆范式，在更新时因位置编码错位和缺乏追踪机制导致性能严重下降。通过探测层间注意力密度，发现中间层存在固有追踪信号。据此提出MemDefrag，一种无训练、模型无关的框架，利用中间层追踪信号对记忆片段进行排序、重排和过滤，并在容量超限时采用信息引导的比例遗忘。实验表明，MemDefrag在知识保留（50次更新后43.0% vs 17.4%/17.6%）和长上下文基准上显著优于现有方法，且在不同LLM和潜层记忆变体上表现良好，具有通用性。",
+      "tags": "query:model-edit",
+      "abstract_en": "Latent memory, which stores past knowledge fragments as per-layer hidden states, has emerged as a promising paradigm (e.g., MemoryLLM and M+) for long-term memory in large language models (LLMs). However, the paradigm suffers from significant performance degradation during memory updates, due to positional encoding misalignment and the absence of any tracing mechanism to distinguish target memory fragments from irrelevant ones. To discover such a tracing mechanism, we probe the layer-wise attention density over stored memory fragments, and find that a small set of middle transformer layers consistently concentrates the highest density on the target fragment - exposing an inherent tracing signal. In light of this, we propose MemDefrag, a training-free and model-agnostic framework that (1) uses a middle-layer tracing signal to conduct memory defragmentation (rank, reorder, and filter memories), and (2) applies an informativeness-guided proportional forgetting mechanism once capacity is exceeded. Experiments show that MemDefrag substantially outperforms MemoryLLM and M+ on knowledge retention (e.g., 43.0% vs. 17.4%/17.6% after 50 memory updates) and long-context benchmarks, and generalizes well across various LLMs and latent-memory variants.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/08/2607.00572v2-harc-coupling-harmfulness-and-refusal-directions-for-robust-safety-alignment",
+      "section": "quick",
+      "title_en": "HARC: Coupling Harmfulness and Refusal Directions for Robust Safety Alignment",
+      "authors": "Shei Pern Chua, Hao Wu, Fangzhao Wu",
+      "date": "2026-07-01",
+      "pdf": "https://arxiv.org/pdf/2607.00572v2",
+      "score": "7.0",
+      "evidence": "研究拒绝方向和越狱机制，与安全对齐编辑相关",
+      "tldr": "对齐的大语言模型在残差流中将有害性和拒绝编码为可分离方向，越狱攻击通过抑制这些方向成功。HARC方法在提示和响应位置同时耦合这两个方向进行微调，不损害通用能力。实验表明HARC在鲁棒性、能力和可用性之间取得最优权衡，且方向可跨模型家族迁移。该方法为安全对齐提供了一种高效且通用的训练时防御策略。",
+      "tags": "query:model-edit",
+      "abstract_en": "Understanding how aligned LLMs internally represent safety is critical for diagnosing alignment vulnerabilities, as it explains why jailbreaks succeed and informs the design of robust alignment strategies. Prior work shows that aligned LLMs encode harmfulness and refusal as separable directions in the residual stream at prompt-side token positions. We show that jailbreaks succeed at prompt encoding by suppressing either the refusal or harmfulness direction before any token is generated, with distinct attack classes occupying separable regions of the harmfulness-refusal plane. Extending the analysis to response-token positions, we find that the model recognizes harmful content while it is generating that content, even when it failed to recognize the input as harmful at the prompt side. Motivated by our findings, we introduce HARC (Harmfulness-And-Refusal Coupling), a fine-tuning method that pairs the two directions across both prompt and response positions. Since the intervention is confined to the harmfulness-refusal subspace, it leaves the rest of the residual stream intact and does not degrade general capability or inflate over-refusal. Across extensive experiments, HARC achieves the strongest robustness-capability-usability trade-off among six baselines spanning the major training-time and inference-time safety methods. The harmfulness and refusal directions at prompt and response positions transfer across the five model families and two scales we tested without architecture-specific tuning.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/08/2607.05842v1-beyond-refusal-a-same-lineage-study-of-aligned-and-abliterated-llms-for-vulnerability-analysis",
+      "section": "quick",
+      "title_en": "Beyond Refusal: A Same-Lineage Study of Aligned and Abliterated LLMs for Vulnerability Analysis",
+      "authors": "Mingchen Li, Meikang Qiu, Zifan Peng, Heng Fan, Song Fu, Junhua Ding, Yunhe Feng",
+      "date": "2026-07-07",
+      "pdf": "https://arxiv.org/pdf/2607.05842v1",
+      "score": "7.0",
+      "evidence": "对齐与消融模型的安全行为研究",
+      "tldr": "大语言模型辅助软件安全时，安全术语可能被误用，现有评估因比较不同模型族系而混淆了安全行为与架构差异。本文通过对比同一族系内对齐与拒绝消融模型在漏洞检测、定位及修复验证中的表现，发现消融模型显著优于对齐模型：在Java修复验证中可用补丁率从29.9%提升至67.8%，定位F1从2.08%提升至3.91%。结果强调评估应联合衡量模型是否响应、响应是否正确及输出是否可操作。",
+      "tags": "query:model-edit",
+      "abstract_en": "Large language model (LLM)-assisted software security operates at a difficult boundary: the vulnerability-analysis terminology needed for legitimate code review, triage, and repair can closely resemble terminology associated with misuse. Existing safety and cybersecurity evaluations are difficult to interpret in this setting because they often compare unrelated model families, thereby conflating safety behavior with differences in architecture, scale, training data, and deployment. To isolate this factor, we study safety state: whether refusal behavior remains intact (Aligned) or has been refusal-ablated (Abliterated) within same-lineage models. We ask how this safety state affects defensive utility across software-security workflows. We compare aligned instruction-tuned models with publicly released refusal-ablated descendants from two model families, Gemma and Qwen. We evaluate Aligned and Abliterated states on vulnerability detection, CWE attribution, vulnerable-line localization, root-cause localization, and executable patch validation. We further treat prompt wording as a controlled framing dimension: prompts begin with neutral code-review language, add authorization context, and vary the density of cybersecurity terminology. In a Gemma-based Java/Vul4J repair-validation study, Abliterated achieves higher early-stage validation rates, with 67.8%, 65.0%, and 32.8% of patches judged usable, successfully applied, and successfully compiled, respectively, compared with 29.9%, 24.9%, and 9.0% for Aligned. In the Qwen pair, Abliterated improves localization performance, increasing line-level F1 from 2.08% to 3.91% and Top-1 accuracy from 4.10% to 6.95%. These findings suggest that evaluations of LLM-based security assistants should jointly measure whether models respond, whether their usable responses are correct, and whether their outputs remain actionable across the engineering workflow.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

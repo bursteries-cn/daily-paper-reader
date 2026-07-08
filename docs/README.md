@@ -6,31 +6,29 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-07
-- 运行时间：2026-07-07 21:06:32 UTC
+- 最新运行日期：2026-07-08
+- 运行时间：2026-07-08 21:03:28 UTC
 - 运行状态：成功
 - 本次总论文数：3
-- 精读区：2
-- 速读区：1
+- 精读区：1
+- 速读区：2
 
 ### 今日简报（AI）
-今日聚焦医疗视觉语言模型编辑与多模态安全拒止机制。  
-最值得精读两篇高分论文：评估医疗VLM编辑效果，以及从因果关系审计神经元选择器的拒止忠实性。  
-建议普通读者关注模型安全评估技术，理解编辑可靠性对实际部署的影响。
-- 详情：[/202607/07/README](/202607/07/README)
+今日推荐3篇论文，精读1篇关于大型语言模型内存碎片整理的《MemDefrag》。最值得关注的是该文提出的潜内存碎片整理方法，显著提升LLM推理效率。建议普通读者优先精读此篇，了解模型加速新思路。
+- 详情：[/202607/08/README](/202607/08/README)
 
 ### 精读区论文标签
-1. [Evaluating and Understanding Model Editing for Medical Vision Language Models](/202607/07/2607.05310v1-evaluating-and-understanding-model-editing-for-medical-vision-language-models)  
-   标签：评分：9.0/10、query:model-edit
-   evidence：评估医学视觉语言模型的模型编辑
-2. [Faithfulness to Refusal: A Causal Audit of Neuron Selectors](/202607/07/2607.05355v1-faithfulness-to-refusal-a-causal-audit-of-neuron-selectors)  
-   标签：评分：9.0/10、query:model-edit
-   evidence：神经选择器的因果审计用于安全编辑
+1. [MemDefrag: Latent Memory Defragmentation for Large Language Models](/202607/08/2607.05969v1-memdefrag-latent-memory-defragmentation-for-large-language-models)  
+   标签：评分：8.0/10、query:model-edit
+   evidence：潜内存碎片整理用于更可靠的知识更新
 
 ### 速读区论文标签
-1. [Harnessing Textual Refusal Directions for Multimodal Safety](/202607/07/2606.31876v2-harnessing-textual-refusal-directions-for-multimodal-safety)  
+1. [HARC: Coupling Harmfulness and Refusal Directions for Robust Safety Alignment](/202607/08/2607.00572v2-harc-coupling-harmfulness-and-refusal-directions-for-robust-safety-alignment)  
    标签：评分：7.0/10、query:model-edit
-   evidence：利用文本拒绝方向引导多模态LLM，类似用于安全的激活编辑
+   evidence：研究拒绝方向和越狱机制，与安全对齐编辑相关
+2. [Beyond Refusal: A Same-Lineage Study of Aligned and Abliterated LLMs for Vulnerability Analysis](/202607/08/2607.05842v1-beyond-refusal-a-same-lineage-study-of-aligned-and-abliterated-llms-for-vulnerability-analysis)  
+   标签：评分：7.0/10、query:model-edit
+   evidence：对齐与消融模型的安全行为研究
 
 
 <div class="dpr-home-promo-card">
