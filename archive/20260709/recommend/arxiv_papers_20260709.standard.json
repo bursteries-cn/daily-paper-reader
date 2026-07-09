@@ -1,0 +1,172 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-09T20:53:15.603585+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 3,
+    "deep_cap": 6,
+    "deep_selected": 3,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2607.01859v1",
+      "source": "arxiv",
+      "title": "Safety Targeted Embedding Exploit via Refinement",
+      "abstract": "Safety training for large language models (LLMs) is conducted predominantly in English, leaving uncertain how well safety mechanisms generalize to low-resource languages and mixed-language code-switching. We show that this creates an epistemic gap in which models confidently generate harmful responses for inputs that fall outside the distribution of their safety training. To study this phenomenon, we introduce STEER (Safety Targeted Embedding Exploit via Refinement), a gradient-guided attack that identifies words contributing most strongly to the model's refusal behavior and iteratively translates them into low-resource languages to suppress refusal while preserving harmful intent. Across six open-source 8B-parameter models, STEER achieves attack success rates of up to 93.0% on JailbreakBench and 96.7% on AdvBench, outperforming random code-switching and Greedy Coordinate Gradient (GCG). The resulting prompts also transfer to GPT-4o-mini, achieving a 35.5% attack success rate without requiring access to the target model, suggesting that the underlying weakness is not specific to a single architecture. These findings demonstrate that safety mechanisms aligned primarily on English cannot be assumed to generalize across multilingual inputs. We argue that improving multilingual safety requires broader coverage during alignment and mechanisms that explicitly detect and abstain on out-of-distribution inputs.",
+      "authors": [
+        "Joshua Adrian Cahyono"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-07-02T08:17:57+00:00",
+      "link": "https://arxiv.org/pdf/2607.01859v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "attack suppressing refusal via translation, related to jailbreak",
+      "llm_evidence_cn": "通过翻译抑制拒绝的越狱攻击",
+      "llm_evidence": "通过翻译抑制拒绝的越狱攻击",
+      "canonical_evidence": "通过翻译抑制拒绝的越狱攻击",
+      "llm_tldr_en": "STEER is a gradient-guided attack that translates refusal-causing words into low-resource languages to suppress refusal while preserving harmful intent, achieving high attack success rates across models.",
+      "llm_tldr_cn": "现有安全训练主要针对英语，导致模型对低资源语言和混合语言输入的安全泛化不足。STEER利用梯度引导识别对拒绝行为贡献最大的词，并将其翻译为低资源语言以抑制拒绝，同时保持有害意图。在六个8B模型上达到最高93.0%攻击成功率，揭示了安全机制的语料分布依赖缺陷。",
+      "llm_tldr": "现有安全训练主要针对英语，导致模型对低资源语言和混合语言输入的安全泛化不足。STEER利用梯度引导识别对拒绝行为贡献最大的词，并将其翻译为低资源语言以抑制拒绝，同时保持有害意图。在六个8B模型上达到最高93.0%攻击成功率，揭示了安全机制的语料分布依赖缺陷。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.02897v1",
+      "source": "arxiv",
+      "title": "PPE-Bench: A Benchmark for Evaluating MLLM Unlearning under Private-Public Entanglement",
+      "abstract": "Multimodal Large Language Models (MLLMs) have shown strong capabilities, but they may memorize private information from web data, raising privacy concerns. Machine unlearning offers a way to remove such private knowledge without retraining from scratch. However, existing MLLM unlearning benchmarks have two major limitations. First, they rely on simplified images that contain only the single target individual, failing to reflect the visual complexity of real-world photos. Second, they typically assume that the forget set and retain set are fully separated, ignoring the fact that private information is often visually entangled with benign public information. For example, a private individual may appear with a public figure or in front of a well-known landmark, where unlearning the private target should not damage the public context. To address these limitations, we propose PPE-Bench, a new benchmark for evaluating MLLM unlearning under private-public entanglement. Each image contains a target individual to be forgotten and public information to be preserved, including public figure and landmark. We further introduce two simple but effective methods to better preserve public information during unlearning. Through experiments, we find that existing unlearning methods can reduce private information leakage, but often substantially harm adjacent public information.",
+      "authors": [
+        "Xianren Zhang",
+        "Delvin Ce Zhang",
+        "Dongwon Lee",
+        "Suhang Wang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.CV"
+      ],
+      "published": "2026-07-03T02:48:26+00:00",
+      "link": "https://arxiv.org/pdf/2607.02897v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "benchmark for evaluating MLLM unlearning, a form of knowledge editing",
+      "llm_evidence_cn": "用于评估多模态大模型遗忘的基准，属于知识编辑形式",
+      "llm_evidence": "用于评估多模态大模型遗忘的基准，属于知识编辑形式",
+      "canonical_evidence": "用于评估多模态大模型遗忘的基准，属于知识编辑形式",
+      "llm_tldr_en": "PPE-Bench evaluates MLLM unlearning under private-public entanglement, using realistic complex images and entangled scenarios, revealing challenges beyond simplified benchmarks.",
+      "llm_tldr_cn": "现有MLLM遗忘基准使用简化图像且假设遗忘集与保留集完全分离，不反映真实世界复杂性。PPE-Bench采用包含多个目标个体的复杂图像，并设计公私信息纠缠场景。实验表明现有遗忘方法在纠缠场景下表现不佳，为知识编辑与隐私安全提供了更现实的评估平台。",
+      "llm_tldr": "现有MLLM遗忘基准使用简化图像且假设遗忘集与保留集完全分离，不反映真实世界复杂性。PPE-Bench采用包含多个目标个体的复杂图像，并设计公私信息纠缠场景。实验表明现有遗忘方法在纠缠场景下表现不佳，为知识编辑与隐私安全提供了更现实的评估平台。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.06649v1",
+      "source": "arxiv",
+      "title": "POPS: Recovering Unlearned Multi-Modality Knowledge in MLLMs with Prompt-Optimized Parameter Shaking",
+      "abstract": "Multimodal Large Language Models (MLLMs) have demonstrated impressive performance on cross-modal tasks by jointly training on large-scale textual and visual data, where privacy-sensitive examples could be unintentionally encoded, raising concerns about privacy or copyright violation. To this end, Multi-modality Machine Unlearning (MMU) was proposed as a mitigation that can effectively force MLLMs to forget private information. However, the robustness of such unlearning methods is not fully exploited when the model is published and accessible to malicious users. In this paper, we propose a novel adversarial strategy, namely Prompt-Optimized Parameter Shaking (POPS), aiming to recover the supposedly unlearned multi-modality knowledge from the MLLMs. Our method elicits the victim MLLMs to generate potential private examples via prompt-suffix optimization, and then exploits these synthesized outputs to fine-tune the models so they disclose the true private information. The experiments on the different MMU benchmarks reveal substantial weaknesses in the existing MMU algorithms. Our POPS can even achieve a near-complete recovery of supposedly erased sensitive information on the unlearned MLLMs, exposing fundamental vulnerabilities that challenge the foundational robustness of representative MMU-based privacy protections.",
+      "authors": [
+        "Zhangheng LI",
+        "Jianing Zhu",
+        "Junyuan Hong",
+        "Sungmin Eum",
+        "Shuowen Hu",
+        "Suya You",
+        "Zhangyang Wang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-07-07T16:28:54+00:00",
+      "link": "https://arxiv.org/pdf/2607.06649v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "adversarial attack to recover unlearned knowledge in MLLMs",
+      "llm_evidence_cn": "针对多模态大模型遗忘机制的对抗攻击",
+      "llm_evidence": "针对多模态大模型遗忘机制的对抗攻击",
+      "canonical_evidence": "针对多模态大模型遗忘机制的对抗攻击",
+      "llm_tldr_en": "POPS uses prompt-optimized parameter shaking to recover knowledge that was supposedly unlearned in Multimodal LLMs, exposing vulnerabilities in machine unlearning for safety.",
+      "llm_tldr_cn": "针对多模态大模型中的机器遗忘机制，本文提出一种名为POPS的对抗策略，通过优化提示并抖动模型参数，成功恢复了本应被遗忘的私有多模态知识。实验表明现有遗忘方法在面对恶意攻击时鲁棒性不足，揭示了模型编辑安全中的潜在风险，对提升大模型安全性具有警示意义。",
+      "llm_tldr": "针对多模态大模型中的机器遗忘机制，本文提出一种名为POPS的对抗策略，通过优化提示并抖动模型参数，成功恢复了本应被遗忘的私有多模态知识。实验表明现有遗忘方法在面对恶意攻击时鲁棒性不足，揭示了模型编辑安全中的潜在风险，对提升大模型安全性具有警示意义。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2607.00572v3",
+      "source": "arxiv",
+      "title": "HARC: Coupling Harmfulness and Refusal Directions for Robust Safety Alignment",
+      "abstract": "Understanding how aligned LLMs internally represent safety is critical for diagnosing alignment vulnerabilities, as it explains why jailbreaks succeed and informs the design of robust alignment strategies. Prior work shows that aligned LLMs encode harmfulness and refusal as separable directions in the residual stream at prompt-side token positions. We show that jailbreaks succeed at prompt encoding by suppressing either the refusal or harmfulness direction before any token is generated, with distinct attack classes occupying separable regions of the harmfulness-refusal plane. Extending the analysis to response-token positions, we find that the model recognizes harmful content while it is generating that content, even when it failed to recognize the input as harmful at the prompt side. Motivated by our findings, we introduce HARC (Harmfulness-And-Refusal Coupling), a fine-tuning method that pairs the two directions across both prompt and response positions. Since the intervention is confined to the harmfulness-refusal subspace, it leaves the rest of the residual stream intact and does not degrade general capability or inflate over-refusal. Across extensive experiments, HARC achieves the strongest robustness-capability-usability trade-off among six baselines spanning the major training-time and inference-time safety methods. The harmfulness and refusal directions at prompt and response positions transfer across the five model families and two scales we tested without architecture-specific tuning.",
+      "authors": [
+        "Shei Pern Chua",
+        "Hao Wu",
+        "Qianli Ma",
+        "Fangzhao Wu"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CR"
+      ],
+      "published": "2026-07-01T07:58:16+00:00",
+      "link": "https://arxiv.org/pdf/2607.00572v3",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "safety alignment and jailbreak analysis via internal representations",
+      "llm_evidence_cn": "通过内部表示分析安全对齐和越狱机制",
+      "llm_evidence": "通过内部表示分析安全对齐和越狱机制",
+      "canonical_evidence": "通过内部表示分析安全对齐和越狱机制",
+      "llm_tldr_en": "Shows that jailbreaks suppress either refusal or harmfulness directions in LLM residual streams, informing robust alignment strategies.",
+      "llm_tldr_cn": "该论文发现对齐LLM在残差流中编码了有害性和拒绝方向，越狱通过抑制这些方向实现。作者将攻击类映射到有害-拒绝平面，并扩展分析到响应位置，发现模型在生成时仍能识别有害内容，即使之前未识别。这些发现为设计鲁棒安全对齐策略提供了理论基础。",
+      "llm_tldr": "该论文发现对齐LLM在残差流中编码了有害性和拒绝方向，越狱通过抑制这些方向实现。作者将攻击类映射到有害-拒绝平面，并扩展分析到响应位置，发现模型在生成时仍能识别有害内容，即使之前未识别。这些发现为设计鲁棒安全对齐策略提供了理论基础。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

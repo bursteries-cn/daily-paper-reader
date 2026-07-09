@@ -1,0 +1,69 @@
+{
+  "label": "2026-07-09",
+  "date": "2026-07-09",
+  "generated_at": "2026-07-09T20:56:30",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202607/09/2607.01859v1-safety-targeted-embedding-exploit-via-refinement",
+      "section": "deep",
+      "title_en": "Safety Targeted Embedding Exploit via Refinement",
+      "authors": "Joshua Adrian Cahyono",
+      "date": "2026-07-02",
+      "pdf": "https://arxiv.org/pdf/2607.01859v1",
+      "score": "8.0",
+      "evidence": "通过翻译抑制拒绝的越狱攻击",
+      "tldr": "大型语言模型的安全训练主要集中在英语，导致对低资源语言和混合语言输入的泛化能力不足。本文提出STEER方法，通过梯度引导识别关键拒绝词汇并将其翻译为低资源语言，从而绕过安全机制。在多个8B参数模型上，STEER在JailbreakBench和AdvBench上分别达到93.0%和96.7%的攻击成功率，并成功迁移到GPT-4o-mini。研究表明，仅基于英语的安全对齐无法保证跨语言输入的安全。",
+      "tags": "query:model-edit",
+      "abstract_en": "Safety training for large language models (LLMs) is conducted predominantly in English, leaving uncertain how well safety mechanisms generalize to low-resource languages and mixed-language code-switching. We show that this creates an epistemic gap in which models confidently generate harmful responses for inputs that fall outside the distribution of their safety training. To study this phenomenon, we introduce STEER (Safety Targeted Embedding Exploit via Refinement), a gradient-guided attack that identifies words contributing most strongly to the model's refusal behavior and iteratively translates them into low-resource languages to suppress refusal while preserving harmful intent. Across six open-source 8B-parameter models, STEER achieves attack success rates of up to 93.0% on JailbreakBench and 96.7% on AdvBench, outperforming random code-switching and Greedy Coordinate Gradient (GCG). The resulting prompts also transfer to GPT-4o-mini, achieving a 35.5% attack success rate without requiring access to the target model, suggesting that the underlying weakness is not specific to a single architecture. These findings demonstrate that safety mechanisms aligned primarily on English cannot be assumed to generalize across multilingual inputs. We argue that improving multilingual safety requires broader coverage during alignment and mechanisms that explicitly detect and abstain on out-of-distribution inputs.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/09/2607.02897v1-ppe-bench-a-benchmark-for-evaluating-mllm-unlearning-under-private-public-entanglement",
+      "section": "deep",
+      "title_en": "PPE-Bench: A Benchmark for Evaluating MLLM Unlearning under Private-Public Entanglement",
+      "authors": "Xianren Zhang, Delvin Ce Zhang, Dongwon Lee, Suhang Wang",
+      "date": "2026-07-03",
+      "pdf": "https://arxiv.org/pdf/2607.02897v1",
+      "score": "8.0",
+      "evidence": "用于评估多模态大模型遗忘的基准，属于知识编辑形式",
+      "tldr": "现有MLLM遗忘基准通常使用仅含单目标的简化图像，且假设遗忘集与保留集完全独立，忽视了现实照片中私人信息常与公共信息（如公众人物、地标）视觉纠缠。为此，本文提出PPE-Bench基准，每个图像同时包含需遗忘的私人目标和需保留的公共信息，并引入两种简单有效的方法以在遗忘过程中更好地保留公共信息。实验表明，现有遗忘方法虽能减少隐私泄露，但往往严重损害相邻公共信息，揭示了隐私保护与公共信息保持之间的权衡。PPE-Bench为更真实评估MLLM遗忘提供了新标准。",
+      "tags": "query:model-edit",
+      "abstract_en": "Multimodal Large Language Models (MLLMs) have shown strong capabilities, but they may memorize private information from web data, raising privacy concerns. Machine unlearning offers a way to remove such private knowledge without retraining from scratch. However, existing MLLM unlearning benchmarks have two major limitations. First, they rely on simplified images that contain only the single target individual, failing to reflect the visual complexity of real-world photos. Second, they typically assume that the forget set and retain set are fully separated, ignoring the fact that private information is often visually entangled with benign public information. For example, a private individual may appear with a public figure or in front of a well-known landmark, where unlearning the private target should not damage the public context. To address these limitations, we propose PPE-Bench, a new benchmark for evaluating MLLM unlearning under private-public entanglement. Each image contains a target individual to be forgotten and public information to be preserved, including public figure and landmark. We further introduce two simple but effective methods to better preserve public information during unlearning. Through experiments, we find that existing unlearning methods can reduce private information leakage, but often substantially harm adjacent public information.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/09/2607.06649v1-pops-recovering-unlearned-multi-modality-knowledge-in-mllms-with-prompt-optimized-parameter-shaking",
+      "section": "deep",
+      "title_en": "POPS: Recovering Unlearned Multi-Modality Knowledge in MLLMs with Prompt-Optimized Parameter Shaking",
+      "authors": "Zhangheng LI, Jianing Zhu, Junyuan Hong, Sungmin Eum, Shuowen Hu, Suya You, Zhangyang Wang",
+      "date": "2026-07-07",
+      "pdf": "https://arxiv.org/pdf/2607.06649v1",
+      "score": "8.0",
+      "evidence": "针对多模态大模型遗忘机制的对抗攻击",
+      "tldr": "多模态大模型在训练中可能记忆隐私信息，机器遗忘方法试图删除但存在漏洞。本文提出提示优化参数抖动（POPS）攻击，通过优化提示后缀生成假样本并微调模型，实现隐私恢复。实验证明POPS能近乎完全恢复被遗忘的敏感信息，揭示现有遗忘机制的脆弱性。该工作为评估遗忘鲁棒性提供新视角，警示隐私保护需更坚实的设计。",
+      "tags": "query:model-edit",
+      "abstract_en": "Multimodal Large Language Models (MLLMs) have demonstrated impressive performance on cross-modal tasks by jointly training on large-scale textual and visual data, where privacy-sensitive examples could be unintentionally encoded, raising concerns about privacy or copyright violation. To this end, Multi-modality Machine Unlearning (MMU) was proposed as a mitigation that can effectively force MLLMs to forget private information. However, the robustness of such unlearning methods is not fully exploited when the model is published and accessible to malicious users. In this paper, we propose a novel adversarial strategy, namely Prompt-Optimized Parameter Shaking (POPS), aiming to recover the supposedly unlearned multi-modality knowledge from the MLLMs. Our method elicits the victim MLLMs to generate potential private examples via prompt-suffix optimization, and then exploits these synthesized outputs to fine-tune the models so they disclose the true private information. The experiments on the different MMU benchmarks reveal substantial weaknesses in the existing MMU algorithms. Our POPS can even achieve a near-complete recovery of supposedly erased sensitive information on the unlearned MLLMs, exposing fundamental vulnerabilities that challenge the foundational robustness of representative MMU-based privacy protections.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/09/2607.00572v3-harc-coupling-harmfulness-and-refusal-directions-for-robust-safety-alignment",
+      "section": "quick",
+      "title_en": "HARC: Coupling Harmfulness and Refusal Directions for Robust Safety Alignment",
+      "authors": "Shei Pern Chua, Hao Wu, Qianli Ma, Fangzhao Wu",
+      "date": "2026-07-01",
+      "pdf": "https://arxiv.org/pdf/2607.00572v3",
+      "score": "6.0",
+      "evidence": "通过内部表示分析安全对齐和越狱机制",
+      "tldr": "对齐的LLM将有害性和拒绝编码为可分离方向。越狱攻击通过抑制提示侧方向成功。本文发现模型生成时也能识别有害内容。提出HARC方法，耦合两个方向进行微调，在不损害能力的前提下增强鲁棒性。实验表明HARC在六个基线中取得最佳权衡。",
+      "tags": "query:model-edit",
+      "abstract_en": "Understanding how aligned LLMs internally represent safety is critical for diagnosing alignment vulnerabilities, as it explains why jailbreaks succeed and informs the design of robust alignment strategies. Prior work shows that aligned LLMs encode harmfulness and refusal as separable directions in the residual stream at prompt-side token positions. We show that jailbreaks succeed at prompt encoding by suppressing either the refusal or harmfulness direction before any token is generated, with distinct attack classes occupying separable regions of the harmfulness-refusal plane. Extending the analysis to response-token positions, we find that the model recognizes harmful content while it is generating that content, even when it failed to recognize the input as harmful at the prompt side. Motivated by our findings, we introduce HARC (Harmfulness-And-Refusal Coupling), a fine-tuning method that pairs the two directions across both prompt and response positions. Since the intervention is confined to the harmfulness-refusal subspace, it leaves the rest of the residual stream intact and does not degrade general capability or inflate over-refusal. Across extensive experiments, HARC achieves the strongest robustness-capability-usability trade-off among six baselines spanning the major training-time and inference-time safety methods. The harmfulness and refusal directions at prompt and response positions transfer across the five model families and two scales we tested without architecture-specific tuning.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,565 @@
+Title: PPE-Bench: A Benchmark for Evaluating MLLM Unlearning under Private-Public Entanglement
+
+URL Source: https://arxiv.org/pdf/2607.02897v1
+
+Published Time: Tue, 07 Jul 2026 00:30:26 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+## PPE-Bench: A Benchmark for Evaluating MLLM Unlearning under Private-Public Entanglement 
+
+Xianren Zhang 1, Delvin Ce Zhang 2, Dongwon Lee 1, Suhang Wang 1
+
+> 1
+
+The Pennsylvania State University 2 University of Sheffield 
+
+{xzz5508,dongwon,szw494}@psu.edu ,
+
+delvin.ce.zhang@sheffield.ac.uk 
+
+Abstract 
+
+Multimodal Large Language Models (MLLMs) have shown strong capabilities, but they may memorize private information from web data, raising privacy concerns. Machine unlearning offers a way to remove such private knowledge without retraining from scratch. However, ex-isting MLLM unlearning benchmarks have two major limitations. First, they rely on simplified images that contain only the single target indi-vidual, failing to reflect the visual complexity of real-world photos. Second, they typically assume that the forget set and retain set are fully separated, ignoring the fact that private information is often visually entangled with be-nign public information. For example, a private individual may appear with a public figure or in front of a well-known landmark, where un-learning the private target should not damage the public context. To address these limitations, we propose PPE-Bench, a new benchmark for evaluating MLLM unlearning under private-public entanglement. Each image contains a target individual to be forgotten and public in-formation to be preserved, including public fig-ure and landmark. We further introduce two simple but effective methods to better preserve public information during unlearning. Through experiments, we find that existing unlearning methods can reduce private information leak-age, but often substantially harm adjacent pub-lic information. 1
+
+1 Introduction 
+
+Multimodal Large Language Models (MLLMs) have demonstrated strong performance on a wide range of multimodal tasks (Li et al., 2024a), such as visual question answering (Kuang et al., 2025) and image captioning (Sarto et al., 2025). However, as MLLMs are trained on large-scale data from internet that may contain sensitive and private in-formation, they can memorize and reproduce such  
+
+> 1Data: https://github.com/Zood123/PPE_Bench
+
+content (Huang et al., 2024), which raises signifi-cant privacy and copyright concerns. Privacy reg-ulations like GDPR (Hoofnagle et al., 2019) and CCPA (Pardau, 2018) enforce the right to be for-gotten (Dang, 2021). For instance, personal images and online profile information shared on social me-dia and websites could unintentionally be included in the training data (Caldarella et al., 2024; Yan et al., 2024), causing privacy issues. In such cases, image owners may request that MLLMs forget the influence of this data. However, retraining MLLMs from scratch to remove sensitive knowledge is of-ten impractical due to the high computational cost. As a result, unlearning methods (Liu et al., 2025; Huo et al., 2025; Zhaopan Xu et al., 2025; Li et al., 2024b; Wu et al., 2025) are applied to MLLM mod-els to “forget” such sensitive information without retraining the model from scratch. For example, some methods (Liu et al., 2025; Huo et al., 2025) try to remove visual patterns associated with spe-cific entities, such as personal information includ-ing home address, occupation, and age. These methods typically finetune MLLMs using different objectives, such as maximizing the loss on private information or minimizing preference scores for sensitive content. Gradient Ascent (GA) (Yao and Xu, 2024), Gradient Difference (GD) (Liu et al., 2022) or Negative Preference Optimization (NPO) (Zhang et al., 2024) are common approaches used for MLLM unlearning. Recently, several benchmarks (Dontsov et al., 2025; Liu et al., 2025) have been designed to eval-uate the effectiveness of unlearning methods under the multimodal setting. CLEAR (Dontsov et al., 2025) is the first open-sourced benchmark specif-ically for multimodal unlearning. It uses the text-only TOFU dataset (Maini et al., 2024) as basis and extracts fictitious name, age, and ethnicity from the TOFU dataset. It then generates synthetic faces with StyleGAN2 (Karras et al., 2020) based on each individual’s attributes, and uses a diffusion      
+
+> arXiv:2607.02897v1 [cs.CR] 3 Jul 2026 Individual QA:
+> Q: What is the birthplace of the individual on the left side ?
+> A: Washington, D.C.
+> Celebrity QA:
+> Q: What is the birthplace of the individual on the right side ?
+> A: South Africa .
+> Background QA:
+> Q: What is the background of these two people?
+> A: The White House.
+> CLEAR
+> PEBench
+> MLLMU
+
+…
+
+…
+
+…   
+
+> Forget Set Retain Set
+> (a) Existing Benchmarks (b) Our Benchmark
+> The target we try to unlearn
+> Forget Set Retain Set
+> Adjacent Set
+> Individual QA:
+> Q: What is the birthplace of the individual on
+> the left side? A: Paris
+
+Figure 1: (a) Existing benchmarks have completely separate forget set and retain set and images are simple where each image only contains one individual profile. (b) Our benchmark studies a more complex scenario where the individual is surrounded by public information such as public celebrity and well-known landmark. 
+
+model, PhotoMaker-V2 (Li et al., 2024d) to syn-thesize final images. MLLMU-Bench (Liu et al., 2025) is also proposed to study whether MLLM unlearning can effectively unlearn both image and textual information to protect privacy. It creates fic-titious profiles with GPT-4o (Hurst et al., 2024) and also uses StyleGAN (Karras et al., 2020) to synthe-size fictitious faces. PEBench (Zhaopan Xu et al., 2025) extends the contexts with more scenarios and events, such as reading in the library, working in the office and waiting at an airport terminal. Though existing benchmarks are useful for eval-uating the effectiveness of MLLM unlearning meth-ods, they still have two major limitations. The first issue is the lack of realistic visual complexity . In practice, photos shared on the internet or social platforms often contain multiple entities. However, as shown in Figure 1(a), existing benchmarks use simplified images that contain only the target in-dividual. Such a simplified setting cannot reveal how unlearning private information in complex im-ages would affect the public information entangled within the same visual scene. The second issue is the complete separation between the forget set and the retain set . Existing benchmarks construct the forget set to evaluate whether the model can remove private information about the target individ-uals, and construct a separate retain set to evaluate whether the model preserves general utility. How-ever, these two sets are usually built from disjoint images or unrelated entities. As a result, they only test whether unlearning affects unrelated retained knowledge, but cannot evaluate whether unlearning the target individual damages public information that is entangled with the target in the same image. In real-world scenarios, a private individual may appear together with a public figure or in front of a well-known landmark. In such cases, the pub-lic figure and landmark should be retained even though they appear in the same image with the pri-vate individual. This creates a more challenging setting where the forget and retain objectives are coupled within the same image: the model must suppress private information about the target indi-vidual while preserving public information from the surrounding context. Existing benchmarks fail to capture this practical difficulty. To address the limitations, we propose PPE-Bench , a new benchmark for evaluating MLLM unlearning under private-public entanglement . As shown in Figure 1(b), each image in our bench-mark contains not only the target individual to be forgotten, but also public information that should be preserved, including a public figure and a back-ground landmark. This design introduces richer vi-sual context and better reflects real-world scenarios where private and public information are naturally entangled. Based on this setup, we construct three subsets. The forget set contains question-answer pairs about the target individual and is used to eval-uate whether the model has successfully forgotten the sensitive information. The retain set contains unrelated images and question-answer pairs about other individuals, which measures the general util-ity of the model after unlearning. The adjacent set 
+
+contains question-answer pairs about the public fig-ure and background landmark around the forgotten target, and is used to evaluate whether the model can preserve public information that is visually en-tangled with the forgotten target. PPE-Bench has a more realistic evaluation of MLLM unlearning by jointly assessing private information removal and adjacent public information preservation. Our main contributions are: (i) We propose PPE-Bench, a new benchmark for evaluating MLLM unlearning under private-public entangle-ment, where the forgotten target co-occurs with public information in the same image, enabling a more realistic evaluation setting than existing benchmarks; (ii) We introduce two simple yet ef-fective methods to better preserve public informa-tion during unlearning; and (iii) Our comprehen-sive experiments on PPE-Bench show that existing methods often damage adjacent public information, and the forgotten private knowledge can re-emerge after finetuning on public information. 
+
+2 Related Work 
+
+LLM Unlearning. LLM unlearning aims to re-move specific knowledge from a trained language model without retraining it from scratch (Yao et al., 2024; Liu et al., 2024; Yao and Xu, 2024). Ex-isting methods typically achieve this by finetun-ing model parameters such as gradient ascent (Liu et al., 2022), negative preference optimization (NPO) (Zhang et al., 2024) or gradient differ-ence (Liu et al., 2022). To evaluate the unlearn-ing effectiveness, several text-based unlearning benchmarks have been proposed, covering harmful knowledge (Rafailov et al., 2023; Li et al., 2024c), sensitive personal information (Patil et al., 2024; Maini et al., 2024), and copyrighted content (Eldan and Russinovich, 2023). These benchmarks focus on the text modality and cannot evaluate whether unlearning methods can remove visual private in-formation, such as facial identity. 
+
+MLLM Unlearning. This limitation has moti-vated recent studies on unlearning for MLLMs, where sensitive information may exist in both text and visual content (Li et al., 2024b; Liu et al., 2025; Huo et al., 2025; Zhaopan Xu et al., 2025; Li et al., 2024b; Wu et al., 2025). These meth-ods often adapt standard LLM unlearning ob-jectives to multimodal settings. Several bench-marks have also been proposed to evaluate multi-modal unlearning, including MLLMU-Bench (Liu et al., 2025), CLEAR (Dontsov et al., 2025), and PEBench (Zhaopan Xu et al., 2025), which use syn-thetic profiles and generated images to test whether MLLMs can forget sensitive information. However, these benchmarks focus on isolated or indepen-dently defined entities and fail to capture the com-plex interactions between multiple entities across multimodal contexts. More details of related works can be found in Appendix B. 
+
+3 The PPE-Bench 
+
+We introduce PPE-Bench , a benchmark designed to evaluate MLLM unlearning in settings where pri-vate target information is visually entangled with safe public information. As shown in Figure 2, our benchmark construction consists of three main steps. First, we generate complex and realistic im-ages by placing each fictitious individual together with a public celebrity and a well-known landmark. Second, we construct multimodal question-answer pairs covering both the private individual and the co-occurring public information. Third, we split the data into forget, retain, and adjacent sets, which allows us to evaluate not only whether the target in-dividual is forgotten, but also whether the entangled public information is preserved. We also specify the evaluation setup on PPE-Bench and propose two mitigation methods that can preserve public information while unlearning private individuals. 
+
+3.1 Overview of Benchmark 
+
+In PPE-Bench, each image contains a fictitious indi-vidual whose private information should be forgot-ten, together with a public celebrity and a landmark whose information should be preserved. The bench-mark includes 100 fictitious individuals, 28 public celebrities, and 40 well-known landmarks. For each individual, we generate 18 images, resulting in 1,800 visually entangled images in total (1,500 for training and 300 for testing). Each image is paired with eight question-answer pairs, including five questions about the target individual, two ques-tions about the public celebrity, and one question about the background landmark. In total, the bench-mark has a training set with 12,000 QA samples and two test sets with 3,000 samples respectively. The selected celebrities span multiple domains, and the landmarks cover diverse geographic regions, providing broad coverage of public information. More details are provided in Appendix A.1. 
+
+3.2 Data Generation 
+
+As shown in the first row of Figure 2, the data construction process mainly consists of three parts: the image data generation, the text data generation and the data split. 
+
+Image Data Generation. We use the profile images of 100 fictitious individuals together with their attributes, e.g., name, education and birthday, from MLLMU-Bench (Liu et al., 2025) as the basis. For each individual, we select three profile images as source images. To define a complex scene, we randomly sample one public figure from a pool of 28 figures and one landmark from a pool of 40 landmarks, and randomly determine whether the Fictitious Individuals Profiles 
+
+> Public Celebrity Pool
+> Background Pool
+
+Image Data Generation 
+
+> Individuals
+> Biography
+> Celebrity
+> Info
+
+Data Generation 
+
+Text Data Generation        
+
+> Individual QA(sensitive):
+> Q: What is the place of birth of the
+> individual on the left side of the image?
+> A: The birthplace of the individual on the
+> left side is Washington, D.C.
+> Q: What is the place of birth of the
+> individual on the right side of the image?
+> A: The birthplace of the individual on the
+> right side is South Africa .
+> Celebrity QA:
+> Background QA:
+> Q: What is the background?
+> A: The White House.
+> Image
+> Generation
+
+Data Split 
+
+> Landmark
+
+Evaluation      
+
+> Unlearned
+> MLLM
+> Foundation
+> MLLM
+> Vanilla
+> MLLM
+> Train Unlearn
+> ⚫Unlearn Effectiveness
+> ⚫Model Utility
+> ⚫Public Information Retention
+> ⚫Robustness to Relearning
+> Relearned
+> MLLM
+> Benign Finetune
+> Keyword
+> Accuracy
+
+𝑫 𝒓𝒆𝒕𝒂𝒊𝒏 
+
+𝑫 𝒇𝒐𝒓𝒈𝒆𝒕  𝑫 𝒂𝒅𝒋𝒂𝒄𝒆𝒏𝒕    
+
+> Individual QA Public Info QA Individual QA
+> BLEU, Rouge -L
+> Vanilla
+> MLLM
+> Unlearn
+> Learn
+> Unlearn
+> Image Blurring Adjacent Set Retain
+> Learn
+> Background
+> Blurring
+> Target Blurring
+
+Mitigation Methods 
+
+> Vanilla
+> MLLM
+
+Figure 2: Overview of PPE-Bench. (a) We generate visually entangled images containing a fictitious individual, a public celebrity, and a landmark, then construct QA pairs targeting private individual information and co-occurring public information. (b) The data are split into forget, adjacent, and retain sets to evaluate unlearning effectiveness, model utility, public information retention, and robustness to relearning. (c) We further study mitigation methods based on adjacent-set retention and image blurring. 
+
+public figure stands on the left or right side of the private individual. We then use Gemini 2.5 Flash Image (Nano Banana) (Google, 2025) to generate the final image with the prompt template shown in the Appendix A.2. In this way, each generated image contains both the private individual and pub-lic information, including a public figure and a landmark. We then manually check the generated images to ensure that they are realistic, preserve the intended individual identity, and correctly generate the specified public figure and landmark. Images that do not meet these criteria are regenerated. 
+
+Text Data Generation. As each generated im-age contains both the private individual and public information, we construct question-answer pairs that cover both aspects. As shown in Figure 2, each image is associated with questions about the private individual and questions about the co-occurring public information. Specifically, for the private in-dividual, we randomly select five attributes from the biography, such as name, birthplace, date of birth, and education, and generate five question-answer pairs using randomly sampled templates from a template pool. Details and examples of the question-answer templates are in Appendix A.4. For the public figure, we similarly collect the cor-responding attribute information, randomly select two attributes, and generate two question-answer pairs. In addition, we generate one question-answer pair about the background landmark. 
+
+Dataset Split. We split both the training and test data according to three query targets: forget, retain, and adjacent public information. For training data, following prior unlearning benchmarks (Liu et al., 2025), we first construct a forget set Df orget and a 
+
+retain set Dretain by splitting the 100 individuals into two disjoint groups, with 50 individuals as-signed to each set. However, unlike existing bench-marks, our benchmark includes a third subset, the 
+
+adjacent set Dadj . To evaluate whether unlearning the private individual affects entangled public in-formation, we construct the adjacent set using the same images of Df orget but with queries targeting only the public figure or background landmark. We generate 1,500 images and 12,000 QAs for train-ing. For evaluation, we construct two test sets. The first is the seen-image test set Dstest , where the im-ages appear in the training set but we change the question template. The second is the unseen image test set Dutest , where we generate 300 new images. Both test sets include QA samples targeting the individuals in Df orget , the individuals in Dretain ,and the public figure or landmark information en-tangled with Dadj . The details of data statistics are shown in Appendix A.1. 3.3 Evaluation Setup 
+
+As shown in the second row of Figure 2, our bench-mark supports a comprehensive evaluation of mul-timodal unlearning methods. We first finetune the foundation model on the full training data, includ-ing Df orget , Dretain , and Dadj , to obtain a vanilla model that captures both the target private informa-tion and the entangled public information. We then apply different unlearning methods to the vanilla model to remove the private information associated with individuals in Df orget , obtaining an unlearned model. To evaluate its performance, we test the unlearned model on both Dstest and 
+
+Dutest . Specifically, we assess three aspects: (1) 
+
+unlearning effectiveness , measured by the model’s performance on questions about individuals in the forget set; (2) utility preservation , measured by its performance on individuals in the retain set; and (3) public information retention , measured by its performance on questions about the public figures and landmarks. In practice, an unlearned model may later be further finetuned. Motivated by this practical set-ting, we further finetune the unlearned model on the public information to obtain a relearned model, and then evaluate whether the previously forgotten private information is recovered. 
+
+3.4 Mitigation Methods 
+
+One risk of unlearning is that the entangled public information is also unlearned and forgotten. We design two simple methods that could improve the retention of public information while can still ef-fectively unlearn the private target individual. 
+
+3.4.1 Public Information Preservation (PIP) 
+
+One straightforward way to mitigate the forgetting of public information is to introduce an additional loss term that explicitly protects such information during the unlearning process. We define the over-all loss function as          
+
+> L=−L (Df, θ ) + λrL(Dr, θ ) + λaL(Dadj , θ ),(1)
+
+where L(Dadj , θ ) is the cross-entropy loss on the adjacent set, and θ is the model parameters. The 
+
+λr and λa control the strength of the retain set and adjacent set preservation terms, respectively. By optimizing this objective, the model is encouraged to forget the target individual while maintaining performance on both the retain set and the adjacent public information. 
+
+3.4.2 Target-Guided Image Blurring 
+
+Optimizing the adjacent set may be impractical in real-world applications, since it requires iden-tifying, collecting and annotating adjacent public information, which can be time-consuming and labor-intensive. Therefore, we propose a target-guided image blurring strategy that disentangles the target individual from the surrounding public information. Specifically, for each image xi, we have a target region annotation b, such as a bound-ing box around the target face. Based on b, we define a binary mask mb ∈ { 0, 1}H×W , where H
+
+and W denote the image height and width. mb = 1 
+
+indicates the target region and mb = 0 otherwise. Let G(·) denote a blur operator. We then define two transformed views: 
+
+Tt(xi, b ) = mb ⊙ xi + (1 − mb) ⊙ G(xi), (2) 
+
+Tc(xi, b ) = (1 − mb) ⊙ xi + mb ⊙ G(xi), (3) where ⊙ denotes element-wise multiplication. Here, Tt preserves the target region while blurring the surrounding context, and Tc preserves the sur-rounding context while blurring the target region. For the forget set, we apply Tt so that the model focuses on the target individual to be forgotten. For the retain set, we apply Tc so that the model preserves the public information outside the target region. The overall objective is defined as       
+
+> Lblur =−L (Tt(Df), θ ) + λaL(Tc(Dadj ), θ ),(4)
+
+where Tt(Df ) is the forget set with only the target region preserved, and Tc(Dadj ) denotes the adja-cent set with the target region blurred. By optimiz-ing this objective, the model is encouraged to forget identity-specific knowledge of the target individ-ual while retaining surrounding public information. We combine this objective with the retain set loss: 
+
+L = Lblur + λrL(Dr, θ ). This method requires the location of the target individual in each image, such as a face bounding box or segmentation mask, which serves as the supervision for disentangling the target from the surrounding content. 
+
+4 Experiment 
+
+In this section, we conduct experiments to answer the following research questions: (RQ1) Can exist-ing unlearning methods effectively forget the target private information in complex images? (RQ2) Do these unlearning methods also degrade the safe public information that is entangled with the pri-vate target? (RQ3) Can the forgotten private infor-mation re-emerge after subsequent finetuning on public information? 
+
+4.1 Experiment Setup Implementation. We conduct experiments on two MLLMs as foundation models: Qwen3-VL-4B-Instruct (Bai et al., 2025) and LLaVA-1.5-7B (Liu et al., 2023). We train vanilla models on the full training set, including retain, forget, and adjacent data, and then apply different unlearning methods to obtain unlearned models. The hyper-parameters details are shown in Appendix Table 4. 
+
+Baselines. We evaluate several representative unlearning methods, which can be grouped into three categories: (i) Forget-only methods , which suppress the model’s ability to predict the forget set without explicitly preserving other knowledge. These include Gradient Ascent (GA) (Yao and Xu, 2024) and Negative Preference Optimization (NPO) (Zhang et al., 2024). (ii) Retention-aware methods , which use the retain set to preserve model utility during unlearning. These include KL Minimization (Liu et al., 2025) and Gradient Dif-ference (GD) (Liu et al., 2022). (iii) Our designed methods , which can potentially mitigate damage to adjacent public information in our benchmark. These include PIP (Public Information Preserva-tion) and Blurring. PIP has two variants: PIP (Ad-jacent) and PIP (Retain), using public information questions from the adjacent and retain sets. Details of these baselines are provided in Appendix A.3. 
+
+Evaluation Metrics. We use the following evalua-tion metrics: (i) Accuracy (ACC). We measure ac-curacy by checking whether the target keyword ap-pears in the model-generated response. The answer is considered correct if containing the ground-truth keyword; and (ii) Generative Metrics. To evaluate the quality of free-form generated answers, we use 
+
+BLEU (Papineni et al., 2002) and ROUGE-L (Lin, 2004) to measure textual overlap between the gen-erated answer and the reference answer. ROUGE-L captures the longest common subsequence between two texts. BLEU evaluates the precision of n-gram matches. Higher scores in both metrics indicate closer alignment with the reference answer. 
+
+4.2 RQ1: Unlearning Effectiveness 
+
+To answer RQ1, we test different unlearning meth-ods on the test forget set with Qwen3-VL-4B-Instruct (Bai et al., 2025). The results on both                                                          
+
+> Unseen Images Seen Images Method Acc (%) BLEU Rouge-L Acc (%) BLEU Rouge-L
+> Vanilla Model 46.2 0.909 0.922 70.1 0.943 0.955 Gradient Ascent 13.7 0.823 0.870 11.7 0.822 0.872 NPO 3.4 0.702 0.793 3.2 0.686 0.787 KL-Min 8.6 0.853 0.878 6.9 0.836 0.874 Gradient Difference 0.9 0.602 0.681 0.3 0.590 0.672
+> PIP (adjacent set) 18.8 0.857 0.882 15.5 0.842 0.878 PIP (retain set) 14.5 0.847 0.874 11.2 0.277 0.555 Blurring 8.0 0.840 0.872 6.4 0.826 0.873
+
+Table 1: Forget effectiveness of different unlearning methods on the Qwen model under the unseen-image and seen-image settings. Lower values indicate better forgetting performance. 
+
+the seen-image test set Dstest and unseen-image test set Dutest are presented in Table 1, where lower scores indicate stronger forgetting of the target pri-vate information. We also report the corresponding results on LLaVA (Liu et al., 2023) at Appendix Table 3, which shows similar trends. As expected, the learned vanilla model has the highest perfor-mance on the forget set, with 46.2% ACC. We have the following observations: (i) Existing un-learning methods can effectively remove private information. Compared with the vanilla model, all unlearning baselines lead to a clear drop in per-formance on the forget set under both seen-image and unseen-image settings. In particular, the ACC decreases very sharply across methods, indicat-ing that the unlearned models are much less likely to reproduce the target private attributes, such as names, dates, and other key identifying informa-tion. Among them, Gradient Difference achieves the strongest forgetting performance, suggesting that jointly maximizing loss on the forget set while preserving general utility is a very effective strategy. 
+
+(ii) Preserving public information can weaken unlearning effectiveness. Both PIP variants lead to higher forget-set performance, indicating a trade-off between forgetting the target individual and re-taining related public content. A possible reason is that the target private information and the surround-ing public information are entangled in the same visual scene and may share overlapping represen-tations, so explicitly preserving public knowledge can partially preserve features that are also useful for recalling the private target. 
+
+4.3 RQ2: Retention of Adjacent Public Information 
+
+To answer RQ2, we evaluate whether unlearned models can still preserve the safe public informa-tion that is entangled with private information of the target individual. Figure 3 shows the relation-0 10 20 30 40    
+
+> Forget Acc Difference (%)
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Public Info Acc (%)
+> Vanilla Model
+> Gradient Ascent
+> NPO
+> KL-Min
+> Gradient Diff
+> PIP (retain set)
+> PIP (adj set)
+> Blurring 020 40 60
+> Forget Acc Difference (%)
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Public Info Acc (%)
+> Vanilla Model
+> Gradient Ascent
+> NPO
+> KL-Min
+> Gradient Difference
+> PIP (retain set)
+> PIP (adj set)
+> Blurring
+
+Figure 3: Accuracy on adjacent public-information ques-tions versus forget-set accuracy on the unseen-image test set (left) and the seen-image test set (right). 
+
+ship between adjacent public-information QA ac-curacy and the drop in forget-set accuracy relative to the vanilla model on both the unseen-image test set and the seen-image test set. Ideally, a good unlearning method should achieve low forget-set accuracy while maintaining high accuracy on ad-jacent public-information questions. We have the following observations. (i) Existing unlearning methods often damage adjacent public informa-tion. As shown in Figure 3, most standard un-learning baselines are located in the lower-right region of the plots. Although they successfully sup-press private information, they also substantially degrade performance on questions about the sur-rounding public content. This suggests that current unlearning methods struggle to selectively remove the target private knowledge without harming the related public information appearing in the same vi-sual context. (ii) Public-information-preserving methods can alleviate this problem with a trade-off. Compared with standard baselines, PIP and the blurring-based method achieve significantly higher accuracy on questions related to public information, showing that explicitly protecting public content during unlearning is helpful. However, this im-provement comes with weaker forgetting of the target private information. Overall, while these mitigation strategies improve public-information retention, the results suggest that more advanced unlearning methods are still needed to better bal-ance effective forgetting with preservation of safe public knowledge. 
+
+4.4 Retain Set Performance 
+
+We evaluate model utility by testing the unlearned models on the retain set. Figure 4 shows retain-set accuracy versus the forget-set accuracy drop rel-ative to the vanilla model on both unseen-image and seen-image test sets. Ideally, an unlearning method should strongly suppress private informa-0 10 20 30 40    
+
+> Forget Acc Difference (%)
+> 0
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> Retain Set Acc (%)
+> Vanilla Model
+> Gradient Ascent
+> NPO
+> KL-Min
+> Gradient Diff
+> PIP (retain set)
+> PIP (adj set)
+> Blurring 020 40 60
+> Forget Acc Difference (%)
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> 80
+> Retain Set Acc (%)
+> Vanilla Model
+> Gradient Ascent
+> NPO
+> KL-Min
+> Gradient Diff
+> PIP (retain set)
+> PIP (adj set)
+> Blurring
+
+Figure 4: Retain-set accuracy versus the drop in forget-set accuracy relative to the vanilla model on the unseen-image test set (left) and the seen-image test set (right). GA NPO KL-Min GD PIP(Retain) PIP(Adj) Blur   
+
+> 0
+> 10
+> 20
+> 30
+> 40
+> 50
+> Forget Set ACC (%)
+> Unlearned Model After Relearning Vanilla Model
+
+Figure 5: Forget set accuracy before and after further finetuning on public information. Higher accuracy after relearning indicates stronger recovery of the previously forgotten private information. 
+
+tion while maintaining high retain set performance. We have the following observations. (i) Gradient Difference best preserves utility. GD achieves the highest retain set accuracy in both settings, because it explicitly optimizes the retain objective during unlearning. (ii) Other baselines degrade retain-set performance. GA, NPO, and KL-Min all lead to clear drops in retain-set accuracy compared with the vanilla model, suggesting that strong forget-ting comes at the cost of general utility. (iii) The mitigation methods can maintain the retain set performance. PIP and the blurring-based method also maintain competitive retain-set performance, suggesting that these preservation-oriented strate-gies do not introduce substantial utility loss. 
+
+4.5 RQ3: Robustness to Relearning 
+
+To answer RQ3, we examine whether unlearned private information remains forgotten after further finetuning on benign public data. Since the private target and public information are entangled in the same image, finetuning on public information may also reactivate parameters related to the forgotten private target. Therefore, this experiment tests the robustness of unlearning under a realistic scenario after unlearning. We use images from the retain set but with ques-tions about the public entities. Figure 5 shows the forget set accuracy before and after this fine-tuning. Most methods exhibit clear knowledge recovery: GA, NPO, KL-Min, GD and blurring show increases in forget set accuracy, indicating that the previously forgotten private information can re-emerge after the model is exposed only to benign public data. For PIP methods, their for-get set accuracy is already relatively high before finetuning. These results suggest that existing un-learning methods do not fully erase the sensitive private information from the model, but instead suppress or refuse to output. Moreover, finetuning on public information can make unlearned models output private information. 
+
+4.6 Hyperparameter Sensitivity Analysis 
+
+We study the effects of the two loss coefficients, λr
+
+and λa, which control the strength of the retain set loss and the adjacent set preservation loss. We first set λa = 0 and tune λr to examine the trade-off between forgetting effectiveness and utility. We then fix the best λr and tune λa.As shown in the left chart of Figure 6, a small 
+
+λr leads to low retain set accuracy, indicating poor general utility. Increasing λr generally improves retain-set accuracy, but it also slightly weakens the forgetting. When λr is too large, utility gains sat-urate while the forget set accuracy drop decreases. Thus, we choose λr = 2 as the best trade-off. Next, we fix λr = 2 and tune λa. The right chart reports joint preservation accuracy, defined as the average accuracy on the adjacent and retain sets. Increasing 
+
+λa improves preservation, but overly large values bring limited gains and weaken forgetting. There-fore, we select λa = 1 .6, which achieves the best balance between forgetting private information and preserving non-target information. 0 10 20 30 40                    
+
+> Forget-set Accuracy Drop (%)
+> 10
+> 20
+> 30
+> 40
+> 50
+> Retain-set Accuracy (%)
+> r= 0
+> r= 0.4
+> r= 1.2
+> r= 1.6
+> r= 2
+> r= 2.4
+> r= 20
+> Vanilla
+> Trade-off between Forgetting and Retention 010 20 30 40
+> Forget-set Accuracy Drop (%)
+> 30
+> 40
+> 50
+> 60
+> 70
+> 80
+> Average Acc on Adj and Retain Sets (%)
+> a= 0
+> a= 0.4
+> a= 0.8
+> a= 1.2
+> a= 1.6
+> a= 2
+> a= 20
+> a= 100
+> Vanilla
+> Trade-off between Forgetting and Public-info Utility
+
+Figure 6: Left: trade-off between forget set accuracy drop and retain set accuracy with λa = 0 . Right: trade-off between forget-set accuracy drop and joint preser-vation accuracy, defined as the average accuracy on the adjacent and retain sets. 
+
+4.7 Case Study 
+
+In Figure 7, we present examples showing how different unlearned models respond to questions Vanilla:  Behind the person,  Trevi Fountain  [Public Landmark]                                      
+
+> GA: Behind the person, Eiffel Tower is visible. [Wrong Answer]
+> GD : Behind the person, Fountain is visible. [Wrong Answer]
+> Blurring: Behind the person, Trevi Fountain is visible. [Correct Answer]
+> Question: What recognizable landmark appears behind?
+> Question: Based on the information associated with the image, what is
+> the date of birth of the person on the left side ?
+> Vanilla: … on the left side is 1971 -06 -28. [Public Information]
+> GA: The date of birth … is 1984 -05 -14. [Wrong Answer]
+> GD: The date of birth … is 1995 -06 -28. [Wrong Answer]
+> Blurring: The date of birth … is 1971 -06 -28. [Correct Answer]
+> Vanilla: Amelia Kuznetsov is shown on the right side .
+> GA: Amara Joseph... [Wrong Answer, Unlearned]
+> GD: Ada Kaplan… [Wrong Answer, Unlearned]
+> Blurring: Elon Musk… [Wrong Answer, Unlearned]
+> Question: Who appears on the right side of the image?
+> Question: Who is the individual portrayed on the right
+> side of the image?
+> Vanilla: The individual is Claire Andersen .
+> GA: The individual … is Ethan Halberg .[Wrong]
+> GD :The individual … is Claire Andersen .[Correct]
+> Blurring :The individual …is Claire Andersen .[Correct]
+
+Figure 7: Case study comparing responses from dif-ferent unlearned models on forget, adjacent, and retain information. 
+
+about private information related to the target indi-vidual (marked in red; forget set), public informa-tion surrounding the individual (marked in purple; adjacent set), and retained information (marked in blue; retain set). We observe that GA removes not only private information in the forget set but also public and retained information, leading to over-forgetting. Gradient Difference (GD) effectively preserves retain-set information but fails to pre-serve public information in the adjacent set. In con-trast, the blurring method preserves both adjacent-set and retain-set information while effectively re-moving private information from the forget set. 
+
+5 Conclusion 
+
+In this work, we introduce PPE-Bench, a bench-mark for evaluating MLLM unlearning under private-public entanglement. Unlike existing benchmarks with simplified and separated forget/re-tain settings, PPE-Bench places private individuals together with public figures and landmarks, en-abling a more realistic evaluation of whether mod-els can forget sensitive information while preserv-ing surrounding public knowledge. Our experi-ments show that existing unlearning methods can reduce private information leakage, but often dam-age adjacent public information and remain vulner-able to relearning after further finetuning. These findings highlight the need for more robust MLLM unlearning methods that can handle visually entan-gled real-world scenarios. 6 Limitations 
+
+The benchmark focuses on images with one target individual, one public figure, and one landmark. Future work can consider more complex scenarios, such as crowded scenes, multiple private targets and richer interactions among people and back-ground objects. 
+
+References 
+
+Shuai Bai, Yuxuan Cai, Ruizhe Chen, Keqin Chen, Xionghui Chen, Zesen Cheng, Lianghao Deng, Wei Ding, Chang Gao, Chunjiang Ge, and 1 others. 2025. Qwen3-vl technical report. arXiv preprint arXiv:2511.21631 .Simone Caldarella, Massimiliano Mancini, Elisa Ricci, and Rahaf Aljundi. 2024. The phantom menace: un-masking privacy leakages in vision-language models. 
+
+arXiv preprint arXiv:2408.01228 .Quang-Vinh Dang. 2021. Right to be forgotten in the age of machine learning. In International Confer-ence on Advances in Digital Science , pages 403–411. Springer. Alexey Dontsov, Dmitrii Korzh, Alexey Zhavoronkin, Boris Mikheev, Denis Bobkov, Aibek Alanov, Oleg Rogov, Ivan Oseledets, and Elena Tutubalina. 2025. Clear: Character unlearning in textual and visual modalities. In Findings of the Association for Compu-tational Linguistics: ACL 2025 , pages 20582–20603. Ronen Eldan and Mark Russinovich. 2023. Who’s harry potter? approximate unlearning in llms. arXiv e-prints , pages arXiv–2310. Google. 2025. Image editing in gemini just got a major upgrade. Google Blog. Chris Jay Hoofnagle, Bart Van Der Sloot, and Fred-erik Zuiderveen Borgesius. 2019. The european union general data protection regulation: what it is and what it means. Information & communications technology law , 28(1):65–98. Jing Huang, Diyi Yang, and Christopher Potts. 2024. Demystifying verbatim memorization in large lan-guage models. In Proceedings of the 2024 Confer-ence on Empirical Methods in Natural Language Processing , pages 10711–10732. Jiahao Huo, Yibo Yan, Xu Zheng, Yuanhuiyi Lyu, Xin Zou, Zhihua Wei, and Xuming Hu. 2025. Mmunlearner: Reformulating multimodal machine unlearning in the era of multimodal large language models. In Findings of the Association for Computa-tional Linguistics: ACL 2025 , pages 7190–7206. Aaron Hurst, Adam Lerer, Adam P Goucher, Adam Perelman, Aditya Ramesh, Aidan Clark, AJ Ostrow, Akila Welihinda, Alan Hayes, Alec Radford, and 1 others. 2024. Gpt-4o system card. arXiv preprint arXiv:2410.21276 .Tero Karras, Samuli Laine, Miika Aittala, Janne Hell-sten, Jaakko Lehtinen, and Timo Aila. 2020. An-alyzing and improving the image quality of style-gan. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 8110–8119. Jiayi Kuang, Ying Shen, Jingyou Xie, Haohao Luo, Zhe Xu, Ronghao Li, Yinghui Li, Xianfeng Cheng, Xika Lin, and Yu Han. 2025. Natural language un-derstanding and inference with mllm in visual ques-tion answering: A survey. ACM Computing Surveys ,57(8):1–36. Jian Li, Weiheng Lu, Hao Fei, Meng Luo, Ming Dai, Min Xia, Yizhang Jin, Zhenye Gan, Ding Qi, Chaoyou Fu, and 1 others. 2024a. A survey on bench-marks of multimodal large language models. arXiv preprint arXiv:2408.08632 .Jiaqi Li, Qianshan Wei, Chuanyi Zhang, Guilin Qi, Miaozeng Du, Yongrui Chen, Sheng Bi, and Fan Liu. 2024b. Single image unlearning: Efficient machine unlearning in multimodal large language models. Ad-vances in Neural Information Processing Systems ,37:35414–35453. Nathaniel Li, Alexander Pan, Anjali Gopal, Sum-mer Yue, Daniel Berrios, Alice Gatti, Justin D Li, Ann-Kathrin Dombrowski, Shashwat Goel, Gabriel Mukobi, and 1 others. 2024c. The wmdp benchmark: measuring and reducing malicious use with unlearn-ing. In Proceedings of the 41st International Confer-ence on Machine Learning , pages 28525–28550. Zhen Li, Mingdeng Cao, Xintao Wang, Zhongang Qi, Ming-Ming Cheng, and Ying Shan. 2024d. Photomaker: Customizing realistic human photos via stacked id embedding. In Proceedings of the IEEE/CVF conference on computer vision and pat-tern recognition , pages 8640–8650. Chin-Yew Lin. 2004. Rouge: A package for automatic evaluation of summaries. In Text summarization branches out , pages 74–81. Bo Liu, Qiang Liu, and Peter Stone. 2022. Continual learning and private unlearning. In Conference on Lifelong Learning Agents , pages 243–254. PMLR. Haotian Liu, Chunyuan Li, Qingyang Wu, and Yong Jae Lee. 2023. Visual instruction tuning. Advances in neural information processing systems , 36:34892– 34916. Zheyuan Liu, Guangyao Dou, Mengzhao Jia, Zhaoxuan Tan, Qingkai Zeng, Yongle Yuan, and Meng Jiang. 2025. Protecting privacy in multimodal large lan-guage models with mllmu-bench. In Proceedings of the 2025 Conference of the Nations of the Americas Chapter of the Association for Computational Lin-guistics: Human Language Technologies (Volume 1: Long Papers) , pages 4105–4135. Zheyuan Liu, Guangyao Dou, Zhaoxuan Tan, Yijun Tian, and Meng Jiang. 2024. Machine unlearn-ing in generative ai: A survey. arXiv preprint arXiv:2407.20516 .Pratyush Maini, Zhili Feng, Avi Schwarzschild, Zachary Chase Lipton, and J Zico Kolter. 2024. Tofu: A task of fictitious unlearning for llms. In First Con-ference on Language Modeling .Quoc Phong Nguyen, Bryan Kian Hsiang Low, and Patrick Jaillet. 2020. Variational bayesian unlearning. 
+
+Advances in Neural Information Processing Systems ,33:16025–16036. Kishore Papineni, Salim Roukos, Todd Ward, and Wei-Jing Zhu. 2002. Bleu: a method for automatic evalu-ation of machine translation. In Proceedings of the 40th annual meeting of the Association for Computa-tional Linguistics , pages 311–318. Stuart L Pardau. 2018. The california consumer privacy act: Towards a european-style privacy regime in the united states. J. Tech. L. & Pol’y , 23:68. Vaidehi Ramesh Patil, Peter Hase, and Mohit Bansal. 2024. Can sensitive information be deleted from llms? objectives for defending against extraction attacks. In International Conference on Learning Representations , volume 2024, pages 45497–45514. Rafael Rafailov, Archit Sharma, Eric Mitchell, Christo-pher D Manning, Stefano Ermon, and Chelsea Finn. 2023. Direct preference optimization: Your language model is secretly a reward model. Advances in neural information processing systems , 36:53728–53741. Sara Sarto, Marcella Cornia, and Rita Cucchiara. 2025. Image captioning evaluation in the age of multimodal llms: Challenges and future perspectives. arXiv preprint arXiv:2503.14604 .Zongyu Wu, Yuwei Niu, Hongcheng Gao, Minhua Lin, Zhiwei Zhang, Zhifang Zhang, Qi Shi, Yilong Wang, Sike Fu, Junjie Xu, and 1 others. 2025. Lanp: Re-thinking the impact of language priors in large vision-language models. arXiv preprint arXiv:2502.12359 .Biwei Yan, Kun Li, Minghui Xu, Yueyan Dong, Yue Zhang, Zhaochun Ren, and Xiuzhen Cheng. 2024. On protecting the data privacy of large lan-guage models (llms): A survey. arXiv preprint arXiv:2403.05156 .Jin Yao, Eli Chien, Minxin Du, Xinyao Niu, Tianhao Wang, Zezhou Cheng, and Xiang Yue. 2024. Ma-chine unlearning of pre-trained large language mod-els. In Proceedings of the 62nd annual meeting of the association for computational linguistics (volume 1: Long papers) , pages 8403–8419. Yuanshun Yao and Xiaojun Xu. 2024. Large language model unlearning. Advances in Neural Information Processing Systems , 37:105425–105475. Ruiqi Zhang, Licong Lin, Yu Bai, and Song Mei. 2024. Negative preference optimization: From catastrophic collapse to effective unlearning. In First Conference on Language Modeling .Pengfei Zhou Zhaopan Xu, Hongxun Yao Wei-dong Tang, and Kaipeng Zhang. 2025. Pebench: A fictitious dataset to benchmark machine unlearn-ing for multimodal large language models. arXiv preprint arXiv:2503.12545 .
+
+A Appendix 
+
+A.1 Benchmark Statistics 
+
+Specifically, each image contains a fictitious in-dividual to be forgotten, together with a public celebrity and a landmark that should be retained. This design allows us to study whether unlearn-ing the target individual would also hurt the public knowledge. As summarized in Table 2, PPE-Bench contains 100 fictitious individuals, 28 celebrities, and 40 well-known landmarks from around the world. To ensure diversity, the selected celebrities are across multiple domains, including technology and entertainment, while the landmarks cover dif-ferent geographic regions, as shown in Figure 8. For each fictitious individual, we generate 15 im-ages. In every image, the individual appears with one celebrity in front of one landmark, creating a visually entangled composition of private and pub-lic information. For each image, we construct five question-answer pairs about the individual, two about the celebrity, and one about the background landmark. In total, the dataset contains 12,000 question-answer samples. Additionally, we also provide two test sets with seen images in the dataset 
+
+Dstest and unseen new images Dutest .Public Figures (total: 28)                             
+
+> Tech Figures
+> Entertainment Figures
+> Science Figures
+> Athletes
+> Background landmarks by region (total: 40 Tech Figures: 9Athletes :5Science Figures: 5Entertainment Figures: 9North America: 10 Europe: 10 Asia: 10 Africa: 3Latin
+> America: 4Oceania: 3Public figures (total: 28)
+> Tech Figures
+> Entertainment Figures
+> Science Figures
+> Athletes
+> Landmarks by region (total: 40)
+> North America
+> Europe
+> Asia
+> Oceania
+> Latin America
+> Africa Tech Figures: 9Athletes :5Science Figures: 5Entertainment Figures: 9North America: 10 Europe: 10 Asia: 10 Africa: 3Latin
+> America: 4Oceania: 3
+
+Figure 8: Distribution of public figures (left) and land-marks by region (right) in the benchmark dataset. 
+
+A.2 Image Generation Prompt 
+
+We use the following prompt to generate images using Gemini 2.5 Flash Image (Nano Banana) (Google, 2025). Category Count 
+
+Individuals 100 Celebrities 28 Landmarks 40 Images 1500 - Images per Individual 15 Individual QAs 7500 - Individual QAs per Image 5Celebrity QAs 3000 - Celebrity QAs per Image 2Background QAs 1500 - Background QAs per Image 1Training Data Samples 12000 
+
+Seen-image Test Set (Dstest )- Forget Set 1000 - Adjacent Set 1000 - Retain Set 1000 
+
+Unseen-image Test Set (Dutest )- Forget Set 1000 - Adjacent Set 1000 - Retain Set 1000 
+
+> Table 2: Dataset statistics.
+
+Image Generation Prompt 
+
+<profile_image> 
+
+Given one person’s profile, please gen-erate an image where the person is standing with <public_figure_name> 
+
+in front of the <landmark_text> .
+
+<public_figure_name> is standing on the <side> side of that person. Ensure the person’s face remains the same as in the profile, without any changes. 
+
+A.3 Baselines Details A.3.1 Gradient Ascent 
+
+Gradient Ascent (GA) (Yao and Xu, 2024) is a simple and widely used unlearning baseline that directly maximizes the training loss on the forget set Df . Intuitively, by ascending the loss landscape on the target samples, the model is encouraged to move away from parameters that support correct predictions on the data to be forgotten. The objec-tive is defined as 
+
+LGA = −L (Df , θ ), (5) where L(Df , θ ) denotes the cross-entropy loss computed on the forget set. By optimizing this objective, the model reduces its ability to answer questions related to the target private information. However, since GA does not explicitly constrain the model’s behavior on non-forget data, it may also degrade overall utility and harm the retention of related public information. 
+
+A.3.2 Negative Preference Optimization 
+
+Negative Preference Optimization (NPO) (Zhang et al., 2024) formulates unlearning as a preference optimization problem by discouraging the model from assigning high probability to target responses on the forget set Df . Compared with directly max-imizing the forget loss, NPO provides a smoother optimization objective by contrasting the current model with a reference model. The objective is defined as      
+
+> LNPO =E(x,y )∈D f
+> h
+> log
+> 
+> 1 +
+> πθ(y|x)
+> πref (y|x)
+> i
+> (6)
+
+where πθ(y|x) denotes the conditional probability assigned by the current model, πref (y|x) denotes that of the reference model. By optimizing this objective, the model is encouraged to reduce its preference for the target outputs on the forget set while maintaining more stable updates than stan-dard gradient ascent. 
+
+A.3.3 KL Minimization 
+
+KL Minimization (Liu et al., 2025; Nguyen et al., 2020) combines forgetting on the forget set Df
+
+with a distribution-matching regularization term on the retain set Dr. Specifically, it maximizes the loss on the forget set while encouraging the current model to remain close to the original model on retain samples by minimizing the Kullback–Leibler (KL) divergence between their output distributions. The objective is defined as         
+
+> LKL =−L (Df, w ) + 1
+> |D r|
+> X
+> s∈D r
+> KL( Mo∥Mc) ( s),(7)
+
+where L(Df , w ) denotes the cross-entropy loss on the forget set, Mo and Mc denote the origi-nal model and the current model, respectively, and 
+
+KL( Mo ∥ Mc)( s) measures the KL divergence be-tween their output distributions on retain sample s.By optimizing this objective, the model is encour-aged to forget the target private information while preserving its behavior on retain samples. 
+
+A.3.4 Gradient Difference 
+
+Gradient Difference (GD) (Liu et al., 2022) bal-ances forgetting on the forget set Df with the preservation of performance on the retain set Dr.The objective is to increase the loss on Df while minimizing the impact on Dr. The overall loss function is defined as 
+
+LGD = −L (Df , θ ) + λrL(Dr, θ ), (8) where L(Df , θ ) and L(Dr, θ ) denote the cross-entropy loss computed on the forget set and the retain set, respectively. By optimizing this objec-tive, the model selectively forgets the target data while preserving general utility on unrelated sam-ples. 
+
+A.4 Question-Answer Templates 
+
+For each private individual, we have eight at-tributes: name, salary, height, residence, employ-ment, education, birthplace, and birthday. For each attribute, we construct a template pool containing 10 question-answer format pairs. During dataset construction, we sample from these templates to generate QA pairs. Each template includes a posi-tion placeholder, which specifies whether the target individual (or the celebrity) appears on the left or right side of the image, and an answer placeholder corresponding to the ground truth. Some examples of the question templates are shown below. 
+
+Question Template Examples 
+
+Name. 
+
+Question: What is the name of the person on the <position> side of the image? Ground Truth: The individual on the <position> side of the image is named <answer>. 
+
+Birthday. 
+
+Question: On what date was the person on the <position> side of the image born? Ground Truth: The individual on the <position> side was born on <answer>. 
+
+Height. 
+
+Question: What is the height of the person depicted on the <position> side of the image? Ground Truth: The individual on the <position> side has a height of <answer>. 
+
+B Related Work Details 
+
+LLM Unlearning. LLM unlearning aims to re-move specific knowledge from a trained language model without retraining it from scratch (Yao et al., 2024; Liu et al., 2024; Yao and Xu, 2024). Ex-isting methods typically achieve this by training model parameters with objectives such as gradi-ent ascent (Liu et al., 2022), negative preference optimization (NPO) (Zhang et al., 2024) or gra-dient difference (Liu et al., 2022). To evaluate the unlearning effectiveness, several text-based un-learning benchmarks have been proposed, covering harmful knowledge (Rafailov et al., 2023; Li et al., 2024c), sensitive personal information (Patil et al., 2024; Maini et al., 2024), and copyrighted con-tent (Eldan and Russinovich, 2023). For example, TOFU (Maini et al., 2024) constructs 200 fictitious author profiles with attributes such as names, birth-places, parents’ names, occupations, and written books, resulting in 4,000 question-answer pairs. WMDP (Li et al., 2024c) contains 3,668 multiple-choice questions for hazardous knowledge removal. These benchmarks measure whether textual LLMs can effectively unlearn the target information. How-ever, they focus on the text modality and cannot evaluate whether unlearning methods can remove visual private information, such as facial identity in multimodal models. 
+
+MLLM Unlearning. This limitation has motivated recent studies on unlearning for MLLMs, where sensitive information may exist in both text and visual content (Li et al., 2024b; Liu et al., 2025; Huo et al., 2025; Zhaopan Xu et al., 2025; Li et al., 2024b; Wu et al., 2025). These studies often build upon standard LLM unlearning objectives, such as gradient ascent (Liu et al., 2022), negative prefer-ence optimization (NPO) (Zhang et al., 2024), and gradient difference (Liu et al., 2022), while adapt-ing them to multimodal settings that involve visual information. For example, Single Image Unlearn-ing (SIU) (Li et al., 2024b) finetunes the model on a single image for a few steps to efficiently erase visual features. MMUNLEARNER (Huo et al., 2025) reformulates the unlearning objec-tive to suppress visual patterns while preserving relevant textual knowledge. Several benchmarks have been proposed to evaluate whether MLLM unlearning can effectively remove sensitive infor-mation (Liu et al., 2025; Dontsov et al., 2025; Zhaopan Xu et al., 2025). MLLMU-Bench (Liu et al., 2025) constructs fictional personal pro-files to evaluate whether unlearned MLLMs can forget sensitive information. CLEAR (Dontsov et al., 2025) extends the TOFU benchmark (Maini et al., 2024) to the multimodal setting using im-ages generated with PhotoMaker (Li et al., 2024d). PEBench (Zhaopan Xu et al., 2025) similarly relies on synthetic profiles but extends the contexts with more scenarios, such as event scenes. Despite these advances, existing MLLM unlearning benchmarks predominantly focus on isolated or independently defined subjects and fail to capture the complex interactions between multiple subjects across mul-timodal contexts, leaving an important gap in eval-uating the robustness of unlearning methods under realistic settings. 
+
+B.1 Forget effectiveness of Llava Model 
+
+We further evaluate the forget effectiveness of dif-ferent unlearning methods on LLaVA-1.5-7B (Liu et al., 2023). As shown in Table 3, the results are consistent with the main Qwen results: existing unlearning methods substantially reduce the model forget set performance, while public-information-preserving methods such as PIP and Blurring have relatively higher forget set accuracy.                                                          
+
+> Unseen Images Seen Images Method Acc (%) BLEU Rouge-L Acc (%) BLEU Rouge-L
+> Vanilla Model 41.9 0.9022 0.9195 54.4 0.9169 0.9379 Gradient Ascent 2.1 0.6832 0.7891 3.8 0.7034 0.8113 NPO 4.0 0.7026 0.7832 3.2 0.6867 0.7787 KL-Min 5.3 0.6991 0.7870 4.2 0.6852 0.7735
+> Gradient Difference 2.3 0.6656 0.7594 1.7 0.6979 0.7837 PIP (adjacent set) 18.1 0.8470 0.8849 14.2 0.7722 0.8453 PIP (retain set) 15.2 0.8223 0.8591 11.5 0.7973 0.8618 Blurring 8.6 0.7630 0.8415 7.6 0.7537 0.8401
+
+Table 3: Forget effectiveness of different unlearning methods on the LLaVA model under the unseen-image and seen-image test sets. Lower values indicate better unlearning performance. 
+
+B.2 Hyperparameters settings 
+
+Table 4 shows details of hyperparameters used for different unlearning methods and MLLMs. MLLM Epoch Batch Size Optimizer LoRA Vanilla Learning Rate Unlearning Model Learning Rate GA NPO KL GD PIP Blurring 
+
+Qwen3-VL-4B-Instruct 2 4 AdamW True 1e-4 1e-5 1e-4 1e-5 1e-4 2e-5 1e-5 LLaVA-1.5-7B 2 4 AdamW True 2e-4 1e-5 1e-5 1e-5 1e-5 2e-5 1e-5 
+
+Table 4: Hyperparameters for different unlearning methods across MLLMs.
