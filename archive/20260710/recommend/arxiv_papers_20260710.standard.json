@@ -1,0 +1,177 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-10T21:31:57.912893+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 3,
+    "deep_cap": 6,
+    "deep_selected": 3,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2607.07918v1",
+      "source": "arxiv",
+      "title": "Efficient Safety Alignment of Language Models via Latent Personality Traits",
+      "abstract": "Current safety methods for large language models are known to be vulnerable to adversarial attacks, motivating research into robust alternatives. Latent Adversarial Training (LAT) is among the most effective defenses, but can degrade utility and requires training on large datasets of harmful prompts. We introduce Latent Personality Alignment (LPA), which replaces explicit harm refusal with adversarial training on just 66 harm-agnostic statements drawn from psychometric personality literature. We hypothesize that personality-anchored representations share latent structure with harm avoidance, so adversarially stabilizing them implicitly constrains the subspace exploited by jailbreak attacks. LPA achieves near-zero attack success rates on HarmBench across direct requests and five jailbreak methods, despite never seeing harmful content during training and no loss of performance on standard benchmarks. Moreover, the training process is lightweight; the entire procedure completes in minutes on a single GPU and uses 75x fewer examples than standard LAT. Extensive ablations demonstrate the robustness, efficiency, and generalization of our method.",
+      "authors": [
+        "Mohamed Amine Merzouk",
+        "Nolan Smyth",
+        "Damiano Fornasiere",
+        "Linh Le",
+        "David Williams-King",
+        "Adam Oberman"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CL",
+        "cs.CR"
+      ],
+      "published": "2026-07-08T21:03:27+00:00",
+      "link": "https://arxiv.org/pdf/2607.07918v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "proposes latent personality alignment for safety, implicitly editing model behavior",
+      "llm_evidence_cn": "提出潜在人格对齐方法用于安全对齐，隐式编辑模型行为",
+      "llm_evidence": "提出潜在人格对齐方法用于安全对齐，隐式编辑模型行为",
+      "canonical_evidence": "提出潜在人格对齐方法用于安全对齐，隐式编辑模型行为",
+      "llm_tldr_en": "Proposes Latent Personality Alignment (LPA) that replaces explicit refusal with adversarial training on personality statements to robustly defend against jailbreaks, achieving near-zero attack success rates on HarmBench.",
+      "llm_tldr_cn": "针对现有安全对齐方法易受对抗攻击且需要大量有害提示的局限，本文提出潜在人格对齐（LPA）方法，仅用66条人格陈述进行对抗训练，隐式约束越狱攻击利用的潜在子空间。实验表明，LPA在HarmBench上实现了接近零的攻击成功率，并且保持了模型实用性。该方法为高效且鲁棒的安全对齐提供了新思路。",
+      "llm_tldr": "针对现有安全对齐方法易受对抗攻击且需要大量有害提示的局限，本文提出潜在人格对齐（LPA）方法，仅用66条人格陈述进行对抗训练，隐式约束越狱攻击利用的潜在子空间。实验表明，LPA在HarmBench上实现了接近零的攻击成功率，并且保持了模型实用性。该方法为高效且鲁棒的安全对齐提供了新思路。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.02714v1",
+      "source": "arxiv",
+      "title": "Not All Refusals Are Equal: How Safety Alignment Fails Cybersecurity at Scale",
+      "abstract": "There is no doubt that safety alignment is an essential step in LLM training. However, conceptually it does not distinguish between various domains and the level of potential harm of a query, which creates significant complications in the fields like cyber security, where a model should not be constrained by its safety circuits to accomplish the goals of legitimate, authorized operations. In this work, we share our findings from a large scale abliteration experiment on 24 open-source LLMs and show that domain-specific abliteration is achievable with standard methodology on the example of a 1T-parameter Kimi K2. Building on recent work showing that refusal in LLMs occupies a multi-dimensional subspace within layers, we find that it is also distributed widely across layers, especially in trillion-parameter MoE architectures, and so we aim to capture the part of it that represents harmful concepts in the cybersecurity domain exclusively. We also investigate the correlation between models' features and the effect of domain-specific abliteration, identifying that the type of safety training and architecture are the most reliable predictors. Finally, we classify the models into 3 \\emph{abliteration susceptibility} tiers and put forward a set of conjectures as to why a particular effect from this intervention might be observed in a given model.",
+      "authors": [
+        "Vadym Hadetskyi",
+        "Dario Pasquini",
+        "Artem Sorokin"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-07-02T19:05:07+00:00",
+      "link": "https://arxiv.org/pdf/2607.02714v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "studies domain-specific abliteration as a form of safety alignment editing",
+      "llm_evidence_cn": "研究领域特定的去对齐（abliteration）作为安全对齐编辑的一种形式",
+      "llm_evidence": "研究领域特定的去对齐（abliteration）作为安全对齐编辑的一种形式",
+      "canonical_evidence": "研究领域特定的去对齐（abliteration）作为安全对齐编辑的一种形式",
+      "llm_tldr_en": "Finds that safety alignment can be selectively removed via abliteration, demonstrating domain-specific editing of refusal behavior.",
+      "llm_tldr_cn": "该论文揭示安全对齐在网络安全等领域的过度约束问题，并基于大规模实验证明领域特定去对齐（abliteration）是可行的。通过识别拒绝行为的多维子空间，实现了对特定领域（如网络安全）的拒绝机制精准移除，同时保留其它领域的安全性。这为安全对齐编辑提供了新思路。",
+      "llm_tldr": "该论文揭示安全对齐在网络安全等领域的过度约束问题，并基于大规模实验证明领域特定去对齐（abliteration）是可行的。通过识别拒绝行为的多维子空间，实现了对特定领域（如网络安全）的拒绝机制精准移除，同时保留其它领域的安全性。这为安全对齐编辑提供了新思路。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.07881v1",
+      "source": "arxiv",
+      "title": "Functional and Secure Code Generation with Task Vectors",
+      "abstract": "Large language models (LLMs) are increasingly used for code generation, but they struggle to generate functional code free of security vulnerabilities. Prior work to improve the secure code generation abilities of such coding LLMs has largely focused on evaluating code functionality and security separately using different datasets, or focused on finding vulnerabilities post-generation. At the same time, the text-generation domain has seen significant work on alignment techniques, where models are tuned such that their outputs exhibit certain qualities (e.g., helpfulness, harmlessness). Of particular interest is task-vector arithmetic, where linear operations on LLM weights can be used to arbitrarily enhance alignment while incurring only minimal computational overhead. We develop a novel method, SecVecCoder, leveraging task vectors to produce trustworthy code that is simultaneously functional and secure without the need for post-generation adjustment. Across six coding LLMs from three families on the CodeGuard+ benchmark, SecVecCoder improves the rate of trustworthy code completions by 2.1-36.0 percentage points over the base model, with improvements on unseen CWE types reaching up to 39.1 percentage points. Since the effectiveness of the coding LLM relies only on changing the model weights, SecVecCoder requires no method-specific decoding and hence achieves a decoding latency within 0.6% of the base model's, on average.",
+      "authors": [
+        "Felix Wang",
+        "Anudeep Das",
+        "Mei Nagappan",
+        "N. Asokan"
+      ],
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE",
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-07-08T19:32:22+00:00",
+      "link": "https://arxiv.org/pdf/2607.07881v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "task-vector arithmetic for secure code generation",
+      "llm_evidence_cn": "使用任务向量算术增强代码生成安全性",
+      "llm_evidence": "使用任务向量算术增强代码生成安全性",
+      "canonical_evidence": "使用任务向量算术增强代码生成安全性",
+      "llm_tldr_en": "Uses task-vector arithmetic, a model editing technique, to simultaneously improve functionality and security of LLM-generated code, showing that alignment via weight arithmetic can reduce vulnerabilities.",
+      "llm_tldr_cn": "该论文针对LLM生成代码时存在安全漏洞的问题，提出利用任务向量算术（一种模型编辑技术）来增强代码的功能性和安全性。通过在编码LLM的权重上进行线性操作，无需额外训练即可提升对齐效果。实验表明，该方法能有效降低生成代码中的漏洞数量，同时保持功能正确性，为模型编辑在安全领域的应用提供了新思路。",
+      "llm_tldr": "该论文针对LLM生成代码时存在安全漏洞的问题，提出利用任务向量算术（一种模型编辑技术）来增强代码的功能性和安全性。通过在编码LLM的权重上进行线性操作，无需额外训练即可提升对齐效果。实验表明，该方法能有效降低生成代码中的漏洞数量，同时保持功能正确性，为模型编辑在安全领域的应用提供了新思路。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2607.07916v1",
+      "source": "arxiv",
+      "title": "Persona Cartography: Charting Language Model Personality Traits in Weight Space",
+      "abstract": "Large language models exhibit recurring behavioural patterns -- personas -- that shape generalisation and safety, but we lack reliable tools for decomposing, measuring, and controlling them. Our central insight is to treat personas as positions in a space of behavioural traits, using the OCEAN framework to describe model personas in terms of Openness, Conscientiousness, Extraversion, Agreeableness, and Neuroticism. We train low-rank adapters to amplify or suppress individual traits, and evaluate their effects using an LLM-judge calibrated against a human-validated panel, trait-specific multiple-choice benchmarks, and standard capability evaluations. Across six models from three families (4B-32B), we find that each adapter moves its target trait largely monotonically with scale, combines approximately additively with other adapters to construct mixed personas, and preserves performance on capability benchmarks at moderate scales. We further show that the induced trait axes affect safety-relevant behaviour in downstream evaluations: for example, moving along neuroticism and agreeableness axes affects frustration and sycophancy respectively. We also introduce an unsupervised psychometric pipeline that recovers four interpretable behavioural factors (tone, initiative, didacticism, epistemic caution) from model rollouts. Persona control can then be considered in terms of learning, scaling, and composing traits in weight space, providing a bridge between personality measurement, model editing, and safety.",
+      "authors": [
+        "Luke Baines",
+        "Anton Gonzalvez Hawthorne",
+        "Mariia Koroliuk",
+        "Irakli Shalibashvili",
+        "Clément Dumas",
+        "Konstantinos Voudouris",
+        "David Demitri Africa"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-07-08T21:00:44+00:00",
+      "link": "https://arxiv.org/pdf/2607.07916v1",
+      "tags": [
+        "keyword:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "modifies model weights via adapters to control behavioral traits relevant to safety",
+      "llm_evidence_cn": "通过适配器修改模型权重以控制与安全相关的行为特征",
+      "llm_evidence": "通过适配器修改模型权重以控制与安全相关的行为特征",
+      "canonical_evidence": "通过适配器修改模型权重以控制与安全相关的行为特征",
+      "llm_tldr_en": "Proposes treating LLM personas as positions in behavior trait space, training low-rank adapters to amplify/suppress traits, enabling controllable safety-relevant behaviors.",
+      "llm_tldr_cn": "大型语言模型展现出影响推理和安全的重复角色模式，但缺乏控制工具。本文提出将角色视为OCEAN特征空间中的位置，通过训练低秩适配器来放大或抑制特定特征，从而实现对模型行为的细粒度控制。在多个模型上的实验表明，适配器能有效移动目标特征，为安全对齐编辑提供了新方法。",
+      "llm_tldr": "大型语言模型展现出影响推理和安全的重复角色模式，但缺乏控制工具。本文提出将角色视为OCEAN特征空间中的位置，通过训练低秩适配器来放大或抑制特定特征，从而实现对模型行为的细粒度控制。在多个模型上的实验表明，适配器能有效移动目标特征，为安全对齐编辑提供了新方法。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

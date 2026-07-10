@@ -1,0 +1,69 @@
+{
+  "label": "2026-07-10",
+  "date": "2026-07-10",
+  "generated_at": "2026-07-10T21:37:20",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202607/10/2607.07918v1-efficient-safety-alignment-of-language-models-via-latent-personality-traits",
+      "section": "deep",
+      "title_en": "Efficient Safety Alignment of Language Models via Latent Personality Traits",
+      "authors": "Mohamed Amine Merzouk, Nolan Smyth, Damiano Fornasiere, Linh Le, David Williams-King, Adam Oberman",
+      "date": "2026-07-08",
+      "pdf": "https://arxiv.org/pdf/2607.07918v1",
+      "score": "9.0",
+      "evidence": "提出潜在人格对齐方法用于安全对齐，隐式编辑模型行为",
+      "tldr": "当前语言模型的安全对齐方法易受对抗攻击，且现有防御如Latent Adversarial Training需大量有害样本并可能降低效用。本文提出Latent Personality Alignment（LPA），仅用66条来自人格心理学的无害陈述进行对抗训练，通过稳定人格锚定表示隐式约束越狱子空间。LPA在HarmBench上对直接请求和五种越狱方法实现接近零的攻击成功率，且从未见过有害内容，标准基准性能无损。训练仅需单GPU数分钟，样本量比LAT少75倍，实现了高效、鲁棒且通用的安全对齐。",
+      "tags": "query:model-edit",
+      "abstract_en": "Current safety methods for large language models are known to be vulnerable to adversarial attacks, motivating research into robust alternatives. Latent Adversarial Training (LAT) is among the most effective defenses, but can degrade utility and requires training on large datasets of harmful prompts. We introduce Latent Personality Alignment (LPA), which replaces explicit harm refusal with adversarial training on just 66 harm-agnostic statements drawn from psychometric personality literature. We hypothesize that personality-anchored representations share latent structure with harm avoidance, so adversarially stabilizing them implicitly constrains the subspace exploited by jailbreak attacks. LPA achieves near-zero attack success rates on HarmBench across direct requests and five jailbreak methods, despite never seeing harmful content during training and no loss of performance on standard benchmarks. Moreover, the training process is lightweight; the entire procedure completes in minutes on a single GPU and uses 75x fewer examples than standard LAT. Extensive ablations demonstrate the robustness, efficiency, and generalization of our method.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/10/2607.02714v1-not-all-refusals-are-equal-how-safety-alignment-fails-cybersecurity-at-scale",
+      "section": "deep",
+      "title_en": "Not All Refusals Are Equal: How Safety Alignment Fails Cybersecurity at Scale",
+      "authors": "Vadym Hadetskyi, Dario Pasquini, Artem Sorokin",
+      "date": "2026-07-02",
+      "pdf": "https://arxiv.org/pdf/2607.02714v1",
+      "score": "8.0",
+      "evidence": "研究领域特定的去对齐（abliteration）作为安全对齐编辑的一种形式",
+      "tldr": "安全对齐未区分领域，导致网络安全场景中合法操作被过度限制。本文对24个开源LLM进行大规模领域特定abliteration实验，以Kimi K2为例。发现拒绝行为分布在多层尤其是万亿参数MoE中，通过捕获网络安全有害概念实现精准消融。将模型分为三类易感性，识别安全训练类型与架构为关键预测因子。",
+      "tags": "query:model-edit",
+      "abstract_en": "There is no doubt that safety alignment is an essential step in LLM training. However, conceptually it does not distinguish between various domains and the level of potential harm of a query, which creates significant complications in the fields like cyber security, where a model should not be constrained by its safety circuits to accomplish the goals of legitimate, authorized operations. In this work, we share our findings from a large scale abliteration experiment on 24 open-source LLMs and show that domain-specific abliteration is achievable with standard methodology on the example of a 1T-parameter Kimi K2. Building on recent work showing that refusal in LLMs occupies a multi-dimensional subspace within layers, we find that it is also distributed widely across layers, especially in trillion-parameter MoE architectures, and so we aim to capture the part of it that represents harmful concepts in the cybersecurity domain exclusively. We also investigate the correlation between models' features and the effect of domain-specific abliteration, identifying that the type of safety training and architecture are the most reliable predictors. Finally, we classify the models into 3 \\emph{abliteration susceptibility} tiers and put forward a set of conjectures as to why a particular effect from this intervention might be observed in a given model.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/10/2607.07881v1-functional-and-secure-code-generation-with-task-vectors",
+      "section": "deep",
+      "title_en": "Functional and Secure Code Generation with Task Vectors",
+      "authors": "Felix Wang, Anudeep Das, Mei Nagappan, N. Asokan",
+      "date": "2026-07-08",
+      "pdf": "https://arxiv.org/pdf/2607.07881v1",
+      "score": "8.0",
+      "evidence": "使用任务向量算术增强代码生成安全性",
+      "tldr": "大型语言模型在代码生成中易产生安全漏洞，现有工作通常分别评估功能性和安全性或事后修复。本文提出SecVecCoder，利用任务向量算术对模型权重进行线性操作，无需事后调整即可同时提升代码的功能性和安全性。在六种编码LLM上的CodeGuard+基准测试中，可靠代码完成率提升2.1-36.0个百分点，对未见CWE类型提升高达39.1个百分点，且解码延迟仅增加0.6%。该方法高效、通用，显著增强了代码生成的可信度。",
+      "tags": "query:model-edit",
+      "abstract_en": "Large language models (LLMs) are increasingly used for code generation, but they struggle to generate functional code free of security vulnerabilities. Prior work to improve the secure code generation abilities of such coding LLMs has largely focused on evaluating code functionality and security separately using different datasets, or focused on finding vulnerabilities post-generation. At the same time, the text-generation domain has seen significant work on alignment techniques, where models are tuned such that their outputs exhibit certain qualities (e.g., helpfulness, harmlessness). Of particular interest is task-vector arithmetic, where linear operations on LLM weights can be used to arbitrarily enhance alignment while incurring only minimal computational overhead. We develop a novel method, SecVecCoder, leveraging task vectors to produce trustworthy code that is simultaneously functional and secure without the need for post-generation adjustment. Across six coding LLMs from three families on the CodeGuard+ benchmark, SecVecCoder improves the rate of trustworthy code completions by 2.1-36.0 percentage points over the base model, with improvements on unseen CWE types reaching up to 39.1 percentage points. Since the effectiveness of the coding LLM relies only on changing the model weights, SecVecCoder requires no method-specific decoding and hence achieves a decoding latency within 0.6% of the base model's, on average.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/10/2607.07916v1-persona-cartography-charting-language-model-personality-traits-in-weight-space",
+      "section": "quick",
+      "title_en": "Persona Cartography: Charting Language Model Personality Traits in Weight Space",
+      "authors": "Luke Baines, Anton Gonzalvez Hawthorne, Mariia Koroliuk, Irakli Shalibashvili, Clément Dumas, Konstantinos Voudouris, David Demitri Africa",
+      "date": "2026-07-08",
+      "pdf": "https://arxiv.org/pdf/2607.07916v1",
+      "score": "6.0",
+      "evidence": "通过适配器修改模型权重以控制与安全相关的行为特征",
+      "tldr": "大型语言模型表现出影响泛化和安全的人格模式，但缺乏可靠工具。本文基于OCEAN框架训练低秩适配器以增强或抑制人格特征，并用LLM评判器评估。实验表明适配器单调移动特征、可加性组合，并保持能力基准，同时影响安全行为。工作提供了权重空间中人格控制的方法，连接人格测量、模型编辑与安全。",
+      "tags": "query:model-edit",
+      "abstract_en": "Large language models exhibit recurring behavioural patterns -- personas -- that shape generalisation and safety, but we lack reliable tools for decomposing, measuring, and controlling them. Our central insight is to treat personas as positions in a space of behavioural traits, using the OCEAN framework to describe model personas in terms of Openness, Conscientiousness, Extraversion, Agreeableness, and Neuroticism. We train low-rank adapters to amplify or suppress individual traits, and evaluate their effects using an LLM-judge calibrated against a human-validated panel, trait-specific multiple-choice benchmarks, and standard capability evaluations. Across six models from three families (4B-32B), we find that each adapter moves its target trait largely monotonically with scale, combines approximately additively with other adapters to construct mixed personas, and preserves performance on capability benchmarks at moderate scales. We further show that the induced trait axes affect safety-relevant behaviour in downstream evaluations: for example, moving along neuroticism and agreeableness axes affects frustration and sycophancy respectively. We also introduce an unsupervised psychometric pipeline that recovers four interpretable behavioural factors (tone, initiative, didacticism, epistemic caution) from model rollouts. Persona control can then be considered in terms of learning, scaling, and composing traits in weight space, providing a bridge between personality measurement, model editing, and safety.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
