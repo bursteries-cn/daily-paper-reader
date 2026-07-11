@@ -6,32 +6,28 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-10
-- 运行时间：2026-07-10 21:37:13 UTC
+- 最新运行日期：2026-07-11
+- 运行时间：2026-07-11 21:08:37 UTC
 - 运行状态：成功
-- 本次总论文数：4
-- 精读区：3
+- 本次总论文数：2
+- 精读区：1
 - 速读区：1
 
 ### 今日简报（AI）
-今日聚焦大模型安全对齐与人格特质研究，共精读3篇、速读1篇。最值得关注的是《Efficient Safety Alignment via Latent Personality Traits》（9.0分）揭示了通过潜在人格特征提升对齐效率，以及《Not All Refusals Are Equal》（8.0分）指出安全对齐在网络安全场景下的拒绝机制失效问题。建议普通读者优先关注安全对齐的实际效果差异，避免盲目信任模型的安全限制。
-- 详情：[/202607/10/README](/202607/10/README)
+今日研读2篇，聚焦大模型微调中记忆知识泛化失败机制及多模态模型越狱攻击。  
+精读揭示微调时记忆知识泛化失败的原因，速读展示通过过载攻击突破视觉语言模型安全防线。  
+建议关注大模型泛化与安全加固，优先精读泛化机制论文。
+- 详情：[/202607/11/README](/202607/11/README)
 
 ### 精读区论文标签
-1. [Efficient Safety Alignment of Language Models via Latent Personality Traits](/202607/10/2607.07918v1-efficient-safety-alignment-of-language-models-via-latent-personality-traits)  
-   标签：评分：9.0/10、query:model-edit
-   evidence：提出潜在人格对齐方法用于安全对齐，隐式编辑模型行为
-2. [Not All Refusals Are Equal: How Safety Alignment Fails Cybersecurity at Scale](/202607/10/2607.02714v1-not-all-refusals-are-equal-how-safety-alignment-fails-cybersecurity-at-scale)  
+1. [Towards Mechanistically Understanding Why Memorized Knowledge Fails to Generalize in Large Language Model Finetuning](/202607/11/2607.08393v1-towards-mechanistically-understanding-why-memorized-knowledge-fails-to-generalize-in-large-language-model-finetuning)  
    标签：评分：8.0/10、query:model-edit
-   evidence：研究领域特定的去对齐（abliteration）作为安全对齐编辑的一种形式
-3. [Functional and Secure Code Generation with Task Vectors](/202607/10/2607.07881v1-functional-and-secure-code-generation-with-task-vectors)  
-   标签：评分：8.0/10、query:model-edit
-   evidence：使用任务向量算术增强代码生成安全性
+   evidence：探究大模型微调新知识后无法泛化的原因，提出自修补干预方法
 
 ### 速读区论文标签
-1. [Persona Cartography: Charting Language Model Personality Traits in Weight Space](/202607/10/2607.07916v1-persona-cartography-charting-language-model-personality-traits-in-weight-space)  
-   标签：评分：6.0/10、query:model-edit
-   evidence：通过适配器修改模型权重以控制与安全相关的行为特征
+1. [Overloading Large Vision-Language Models for Jailbreaking](/202607/11/2607.02961v1-overloading-large-vision-language-models-for-jailbreaking)  
+   标签：评分：7.0/10、query:model-edit
+   evidence：提出针对大视觉语言模型的越狱攻击方法
 
 
 <div class="dpr-home-promo-card">
