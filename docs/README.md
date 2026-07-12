@@ -6,28 +6,22 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-11
-- 运行时间：2026-07-11 21:08:37 UTC
+- 最新运行日期：2026-07-12
+- 运行时间：2026-07-12 19:54:13 UTC
 - 运行状态：成功
-- 本次总论文数：2
-- 精读区：1
-- 速读区：1
+- 本次总论文数：0
+- 精读区：0
+- 速读区：0
 
 ### 今日简报（AI）
-今日研读2篇，聚焦大模型微调中记忆知识泛化失败机制及多模态模型越狱攻击。  
-精读揭示微调时记忆知识泛化失败的原因，速读展示通过过载攻击突破视觉语言模型安全防线。  
-建议关注大模型泛化与安全加固，优先精读泛化机制论文。
-- 详情：[/202607/11/README](/202607/11/README)
+> 今日无新推荐，系统未产出可展示论文。
+- 详情：[/202607/12/README](/202607/12/README)
 
 ### 精读区论文标签
-1. [Towards Mechanistically Understanding Why Memorized Knowledge Fails to Generalize in Large Language Model Finetuning](/202607/11/2607.08393v1-towards-mechanistically-understanding-why-memorized-knowledge-fails-to-generalize-in-large-language-model-finetuning)  
-   标签：评分：8.0/10、query:model-edit
-   evidence：探究大模型微调新知识后无法泛化的原因，提出自修补干预方法
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Overloading Large Vision-Language Models for Jailbreaking](/202607/11/2607.02961v1-overloading-large-vision-language-models-for-jailbreaking)  
-   标签：评分：7.0/10、query:model-edit
-   evidence：提出针对大视觉语言模型的越狱攻击方法
+- 本次无速读推荐。
 
 
 <div class="dpr-home-promo-card">
