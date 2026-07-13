@@ -1,0 +1,39 @@
+{
+  "label": "2026-07-13",
+  "date": "2026-07-13",
+  "generated_at": "2026-07-13T21:07:52",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202607/13/2607.07903v1-mechanistic-interpretability-of-llm-jailbreaks-via-internal-attribution-graphs",
+      "section": "quick",
+      "title_en": "Mechanistic Interpretability of LLM Jailbreaks via Internal Attribution Graphs",
+      "authors": "Anupam Wagle, Ifrat Ikhtear Uddin, Chaowei Zhang, Longwei Wang",
+      "date": "2026-07-08",
+      "pdf": "https://arxiv.org/pdf/2607.07903v1",
+      "score": "7.0",
+      "evidence": "对越狱攻击的机制可解释性",
+      "tldr": "大语言模型（LLM）易受越狱攻击，但现有方法缺乏对内部推理变化的洞察。本文提出内部计算图框架，通过对比干净与攻击提示的因果结构，发现攻击会抑制安全组件、涌现攻击特征并重路由计算路径。基于此，进一步分解计算结构，识别漏洞模式并实施因果干预。实验表明计算图偏差与不安全行为强相关，且干预可提升鲁棒性，为理解与缓解LLM漏洞提供了机制性基础。",
+      "tags": "query:model-edit",
+      "abstract_en": "Large language models (LLMs) exhibit remarkable capabilities but remain highly vulnerable to adversarial prompts and jailbreak attacks. Existing approaches primarily analyze these failures through input-output behaviors or attribution methods, offering limited insight into how adversarial perturbations alter the model's internal reasoning. Consequently, the mechanisms underlying unsafe or incorrect behaviors remain poorly understood. We introduce a mechanistic framework for diagnosing LLM vulnerabilities using paired internal computation graphs, which represent prompt-specific inference as structured causal interactions among latent features. By constructing and aligning computation graphs for clean and attacked prompts, we reveal that adversarial attacks induce systematic transformations of internal reasoning, including suppression of safety-relevant components, emergence of attack-specific features, and rerouting of computation paths. Building on this representation, we propose a unified framework that (i) decomposes computation into invariant, suppressed, and emergent structures, (ii) identifies recurring vulnerability motifs associated with failure modes, and (iii) performs causal interventions on nodes, paths, and subgraphs to directly evaluate their contributions to attack success. This enables a transition from descriptive attribution to causal diagnosis of model failures. Experiments across multiple open-source LLMs and diverse adversarial and jailbreak benchmarks demonstrate that structural deviations in internal computation graphs strongly correlate with unsafe behaviors. Furthermore, targeted interventions on identified vulnerability motifs improve model robustness, establishing internal computation graphs as a principled foundation for understanding, diagnosing, and mitigating LLM vulnerabilities.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/13/2607.09450v1-robustifying-vision-language-models-via-test-time-prompt-adaptation",
+      "section": "quick",
+      "title_en": "Robustifying Vision-Language Models via Test-Time Prompt Adaptation",
+      "authors": "Xingyu Zhu, Huanshen Wu, Shuo Wang, Beier Zhu, Jiannan Ge, Jiaheng Zhang, Long Chen",
+      "date": "2026-07-10",
+      "pdf": "https://arxiv.org/pdf/2607.09450v1",
+      "score": "6.0",
+      "evidence": "测试时提示自适应用于抵御对抗攻击",
+      "tldr": "针对视觉语言模型在对抗扰动下性能下降的问题，现有测试时自适应方法依赖样本级置信度，忽略了数据分布结构。本文发现对抗扰动虽破坏整体表示，但增强视图的分布常保留语义完整性，由此提出RITA框架，利用最优传输将增强视觉特征分布对齐文本原型，并引入动态缓存进行在线精炼。实验表明，RITA在保持干净准确率的同时显著提升对抗鲁棒性，为测试时自适应提供了分布对齐的新范式。",
+      "tags": "query:model-edit",
+      "abstract_en": "Pre-trained Vision-Language Models (VLMs) such as CLIP achieve strong zero-shot generalization, but their performance degrades sharply under adversarial perturbations. Existing test-time adaptation methods typically rely on sample-level confidence heuristics, overlooking the intrinsic distributional structure of the data. This sample-centric approach limits robustness, as it fails to distinguish confident adversarial mispredictions from true semantic consistency. In this work, we observe that adversarial distortion is structurally brittle: while holistic representations are corrupted, semantic integrity is often preserved in the distribution of augmented views. Motivated by this insight, we propose RITA, a Robust test-tIme prompt-TAdaptation framework that shifts from sample-level estimates to distribution-level alignment. Specifically, RITA employs optimal transport to align the distribution of augmented visual features with textual prototypes, mitigating adversarial outliers and rectifying cross-modal semantic misalignment. Furthermore, we introduce a dynamic cache to progressively accumulate reliable cues from the test stream for online refinement. Extensive experiments demonstrate that RITA significantly improves adversarial robustness without compromising clean accuracy.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
