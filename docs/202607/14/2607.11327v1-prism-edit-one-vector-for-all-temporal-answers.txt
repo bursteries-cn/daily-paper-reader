@@ -1,0 +1,913 @@
+Title: PRISM Edit: One Vector for All Temporal Answers
+
+URL Source: https://arxiv.org/pdf/2607.11327v1
+
+Published Time: Tue, 14 Jul 2026 03:13:27 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+# PRISM Edit: One Vector for All Temporal Answers *
+
+Chen Huang 1,† , Qi Zheng 1,† , Ruiqin Zheng 2, Long Zeng 1,* , Yuantong Xu 2,* 
+
+> 1
+
+Tsinghua University, 2ByteDance   
+
+> †Equal contribution. *Corresponding authors.
+> Correspondence: zenglong@sz.tsinghua.edu.cn
+
+Abstract 
+
+Model editing keeps large language models (LLMs) up to date without retraining, but tem-poral facts expose a limitation of the prevail-ing locate-and-edit paradigm: an update is not always a replacement. When a fact changes, the new answer should become current while the old answer may remain correct in histor-ical time contexts. Building on this insight, we use causal tracing to show that LLMs al-ready support this distinction via a two-stage internal computation: early MLP layers re-trieve a time-agnostic subject representation, and later layers modulate it with temporal con-text to yield the time-correct answer. Moti-vated by this finding, we introduce PRISM Edit , which optimizes a single polysemous rep-resentation across temporal contexts and lever-ages the model’s inherent modulation pathway to route it to temporally correct predictions— without any architectural modification. We evaluate on T IME CONFLICT , a new temporal editing benchmark we introduce, and on tem-porally augmented C OUNTER FACT . PRISM Edit improves over the best baseline by +23.3 Temporal Consistency (TC) and +33.7 Current Relative-time Score (CRS) on average while being more than 2× faster. Code and data are publicly available in an anonymized repository at https://anonymous.4open.science/r/ PRISM-Edit-ABE2 .
+
+1 Introduction 
+
+Large language models store extensive factual knowledge, yet the world they describe keeps changing. Knowledge editing allows models to continuously acquire new knowledge without full retraining, typically by modifying a small set of parameters associated with a target memory (Cao et al., 2021; Mitchell et al., 2022; Meng et al., 2022, 2023; Zhang et al., 2024; Fang et al., 2025). How-ever, existing methods implicitly assume that every  
+
+> *Code and data: https://github.com/Cheer-Huang/ PRISM-Edit
+
+edit is a wholesale replacement of the old fact. This assumption breaks down for temporal facts, where the old answer does not become wrong—it merely ceases to be current. For example, when the U.S. presidency transfers from Biden to Trump in Jan-uary 2025, the new fact should become current, yet “Who was the U.S. president in 2023?” must still return Biden . A temporal editor must therefore perform a harder operation: incorporate the new answer while preserving the historical conditions under which the old answer is still true. The difficulty lies in the locate-and-edit paradigm itself: it locates a factual association 
+
+(s, r, o ) and overwrites it with a new target o′. This works for single-valued facts, but it mismatches temporal knowledge, where the same (s, r ) pair can map to different objects under different time contexts. As a result, standard editors often col-lapse time-conditioned behavior into a single edited answer, degrading historical recall after temporal edits (Yin et al., 2024; Cheng et al., 2024; Zhao et al., 2026) (Figure 1). Existing temporal-editing strategies attempt to patch this gap by storing sepa-rate parameters per time period (Zhao et al., 2026) or splitting updates into multiple independent ed-its (Yin et al., 2024). Yet these approaches leave a key question unanswered: if the unedited model can already answer time-conditioned prompts, why should editing ignore the model’s own temporal computation? We take a fundamentally different approach. Rather than imposing external temporal structure, we first ask how the model internally resolves tem-poral ambiguity, and then design an editing method that works with —not against—this mechanism. Through causal tracing on (s, r, o, t ) tuples (§3), we discover that subject retrieval at early MLP lay-ers is time-agnostic, while temporal disambigua-tion emerges via later-layer modulation of the same subject signal. This finding motivates PRISM Edit 
+
+(Polysemous Representation via Intrinsic Signal arXiv:2607.11327v1 [cs.LG] 13 Jul 2026 Figure 1: Standard editing vs. PRISM Edit. Left: conventional locate-and-edit methods overwrite the factual association with a single new target, collapsing historical recall (“In 2023. . . ” incorrectly returns Trump ). Right: PRISM Edit optimizes a single polysemous vector v∗ that encodes both temporal answers; the model’s own downstream modulation routes it to the temporally correct prediction under each time context. 
+
+Modulation): we write a single polysemous v∗ into the model and let the model’s own downstream temporal modulation route the representation to time-correct answers—requiring no architectural changes, no auxiliary modules, and no per-period storage. Our main contributions are as follows: • We reveal through causal tracing on (s, r, o, t )
+
+tuples that large language models process tem-poral knowledge via a two-stage mechanism: time-agnostic subject retrieval at early MLP layers, followed by later-layer temporal mod-ulation of the same subject signal (§3). • We formalize temporal polysemy and propose 
+
+PRISM Edit , which reconceptualizes tempo-ral editing from writing separate per-period facts to writing a single polysemous v∗ that the model’s own modulation disambiguates— requiring no architectural changes or auxiliary modules (§4). • We introduce T IME CONFLICT , a temporal editing benchmark spanning 24 relations and 22,708 records, and show that PRISM Edit achieves state-of-the-art performance across TIME CONFLICT and temporally augmented COUNTER FACT , improving over the best baseline by +23 .3 TC and +33 .7 CRS on average while being more than 2× faster on temporal editing tasks (§5). 
+
+2 Related Work 
+
+2.1 Locate-then-Edit Knowledge Editing 
+
+Knowledge editing enables efficient updates of spe-cific facts in LLMs without full retraining (Zhang et al., 2024). Among various approaches, the locate-then-edit paradigm has proven particularly effective by first identifying where knowledge is stored and then directly modifying the correspond-ing parameters. ROME (Meng et al., 2022) ap-plies causal tracing to locate factual associations in mid-layer MLP modules and performs rank-one weight updates. MEMIT (Meng et al., 2023) ex-tends this to batch editing by distributing updates across multiple critical layers. AlphaEdit (Fang et al., 2025) further projects updates into the null space of preserved knowledge to minimize interfer-ence with unrelated facts. Other paradigms such as external memory approaches (Hartvigsen et al., 2023; Mitchell et al., 2022) and dual-memory ar-chitectures (Wang et al., 2024) avoid direct parame-ter modification but introduce additional inference overhead. However, all these methods treat knowl-edge as temporally static, ignoring that historical facts remain valid within their original time scope. 
+
+2.2 Temporal Knowledge Editing 
+
+Real-world knowledge evolves over time, yet most editing methods treat facts as temporally static, sim-ply overwriting old facts with new ones. Early work probes this temporal dimension on the language modeling side: Dhingra et al. (2022) introduce TempLAMA and show that LMs encode temporally scoped facts but quickly become stale, motivating time-aware updates. Yin et al. (2024) first formal-ized temporal knowledge editing (TKE), arguing that historical facts remain valid within their orig-inal time scope and proposing the AToKe bench-mark. Subsequent work has explored this direction from various angles: Temple-MQA (Cheng et al., 2024) constructs temporal knowledge graphs for time-aware multi-hop reasoning, and SPIKE (Zhao et al., 2026) introduces sparse parameter injection anchored to temporal markers for multi-granularity temporal editing. Our method, PRISM Edit, takes a fundamentally different approach: we jointly opti-mize a single time-agnostic v∗, allowing the model to naturally produce different answers based on temporal context. 
+
+3 Tracing Temporal Knowledge in LLMs 
+
+In this section, we investigate how large language models internally process temporal knowledge through causal tracing and representational sim-ilarity analysis. 
+
+3.1 Methods 
+
+Understanding how temporal context influences factual retrieval requires tracing information flow across the model’s internal layers. To this end, we adopt causal tracing (Meng et al., 2022), a probing technique that measures the causal con-tribution of individual hidden states to a model’s prediction. The procedure involves three runs: (1) a clean run that records all hidden states un-der uncorrupted inputs, (2) a corrupted run that adds Gaussian noise to a selected token group at the embedding layer, yielding a degraded predic-tion, and (3) a restore run that restores a single (token, layer, component) activation to its clean-run value, while leaving all other activations at their corrupted values. From this, the indirect ef-fect (IE) is defined as Prestore (correct answer ) −
+
+Pcorrupted (correct answer ), measuring how much restoring a single activation recovers the model’s prediction, thereby identifying which activations are causally responsible for factual recall. For standard (s, r, o ) triplets, causal tracing has localized factual recall to the early MLP lay-ers (Geva et al., 2021) at the subject’s last token, where the indirect effect peaks. Temporal knowl-edge, however, follows an extended (s, r, o, t )
+
+structure, where producing the correct answer de-mands not only recognizing the subject but also anchoring in time. This raises a key question: how do subject and temporal signals jointly deter-mine the model’s prediction? 
+
+To answer this, we extend causal tracing to disen-tangle subject and temporal contributions. Rather than corrupting subject tokens as a whole, we cor-rupt subject tokens and time tokens separately, ob-taining individual IE maps for each information pathway. Concretely, we compute the average IE on LLaMA-3-8B-Instruct (Grattafiori et al., 2024) over 500 temporal knowledge pairs that the model answers correctly, varying the choice of mediator over all (token, layer, component) triplets with com-ponent ∈ {MLP, Attention}. See Appendix A for more details. Additionally, we perform a representational sim-ilarity analysis: for the same subject under new-time vs. old-time prompts, we compute layer-wise cosine similarity of hidden states at key token posi-tions, revealing how temporal information progres-sively affects representations across layers. 
+
+3.2 Findings 
+
+The resulting AIE maps (Figure 2) show a strik-ing asymmetry: subject effects concentrate at the early MLP layers (L4–8) of the subject-last token, while temporal effects are more distributed across positions and components. Combined with the rep-resentational similarity analysis (Figure 3), these maps reveal three key findings on the model’s tem-poral processing mechanism: 
+
+Finding 1: Subject retrieval is time-agnostic. 
+
+Consistent with prior work on factual recall (Meng et al., 2022, 2023; Dai et al., 2022; Geva et al., 2023), our causal tracing confirms the early MLP layers (L4–8) at the last subject token as the core knowledge-storage site, with the largest indirect effect peaking at L4 MLP (IE=0.549; Figure 2b). What is new, however, is that this abstract knowl-edge retrieval is largely time-agnostic, supported by two converging pieces of evidence: (i) the last sub-ject representation forms a plateau ( cos ≥ 0.97 )across the critical MLP layers (L4–8) (Figure 3, orange), showing that the subject representation is nearly invariant to different temporal context; (ii) when time tokens are corrupted (Figure 2e), the IE at the last subject early MLP layers remains neg-ligible, indicating that temporal information rarely enters the subject pathway. 
+
+Finding 2: Temporal context arrives early but acts late. To the last token, temporal information Figure 2: Average indirect effect (AIE) of individual model components over 500 temporal facts reveals two spatially separated causal sites. Top row corrupts subject tokens; bottom row corrupts time tokens. (a) An early site emerges at the subject-last token and a late site at the last token. (b) MLP dominates the early site, reflecting abstract subject knowledge retrieval. (c) Attention dominates the late site, reflecting subject-to-prediction transport.     
+
+> (d) When time tokens are corrupted, the early site at the time-last token is weak, but a strong late site at the last token confirms that temporal context critically influences the final prediction. (e) MLP effects at the subject position largely vanish; a mild MLP peak at the last token reflects temporal processing after the subject signal arrives.
+> (f) Attention carries temporal context to the last token earlier than subject information.
+> Figure 3: Layer-wise cosine similarity of hidden states under new-time vs. old-time prompts.
+
+actually arrives earlier than subject information: attention layers around L10–15 carry temporal con-text to the prediction position (IE=0.356 at L10, Figure 2f), several layers before the subject signal is transported to the last token via L16 attention (Figure 2c). Yet its effect on the output does not manifest immediately. Figure 3 (blue) shows that the two temporal prompts first converge in the mid-dle layers (cosine rising to ≈ 0.82 ). This conver-gence is driven by the subject signal: arriving at the last token via L16 attention, the (shared) subject representation momentarily dominates the hidden state, masking the temporal differences between the two prompts. This attention-mediated temporal pathway is also supported by the recently identified Temporal Heads (Park et al., 2025). Only in the upper layers do the two prompts diverge (cosine dropping to ≈ 0.70 ), reflecting temporal modula-tion that acts only after the subject signal is in place. Together with Finding 1, this reveals a two-stage 
+
+mechanism: the subject signal arrives and domi-nates the last-token representation (convergence); the temporal signal, which arrived earlier, yet mod-ulates this subject-grounded signal in the upper layers (divergence). 
+
+Finding 3: The editing site cannot discriminate time. Findings 1 and 2 together expose a fun-damental obstacle to locate-and-edit methods (see Section 2.1) on temporal facts. Since these meth-ods edit the MLP at the subject-last token, where 
+
+k is the input that conditions the write, any linear update ∆W at this layer satisfies 
+
+∥∆W k new −∆W k old ∥ ≤ ∥ ∆W ∥·∥ knew − kold ∥
+
+| {z } 
+
+> ≈0
+
+.
+
+(1) where knew and kold denote the MLP input at the subject-last token under the new-time and old-time prompts, respectively. In other words, the two tem-poral prompts cannot be used as distinct retrieval conditions, so a single edit cannot deliver different values vnew and vold for them. This is a geometric limit of the representation space, not a failure of optimization—no choice of optimizer or objective can recover what the keys cannot distinguish. And it is exactly why methods that try to edit different answers for different times, such as METO (Yin et al., 2024), fail at this layer. 
+
+Design implication for editing. Taken together, the three key findings describe a coherent intrinsic mechanism: one time-agnostic subject signal plus later temporal modulation yields different answers .This naturally suggests the right design principle: instead of forcing the edit layer to separate time— something it cannot do, as Equation 1 shows—we should let the model’s own temporal modulation pathway handle the disambiguation. The next sec-tion formalizes this principle and turns it into a concrete editing objective. 
+
+4 PRISM Editing: Aligning Edits with Temporal Modulation 
+
+The mechanistic trace in §3 reveals a structural separation between where a factual edit is stored and how the model resolves its temporal meaning. We now formalize this separation and show why it causes existing methods to fail, then derive PRISM Edit as a direct remedy. 
+
+4.1 Background: Locate-then-Edit Formulation 
+
+Locate-then-edit methods (Meng et al., 2022, 2023; Fang et al., 2025) first identify an editing site, then compute a target hidden state at that site and write it into the weights. Let v0 denote the unedited hidden state at hook layer ℓ⋆ and subject-last position, and 
+
+Gv0+δ denote the model with that position replaced by v0 + δ. These methods optimize δ on a single edit prompt, in which any time expression is treated as ordinary context: 
+
+δ∗ 
+
+> std
+
+= arg min 
+
+> δ
+
+h
+
+− log PGv0+δ (oedit | pedit ) + Ω( δ)
+
+i
+
+,
+
+v∗ 
+
+> std
+
+= v0 + δ∗
+
+> std
+
+.
+
+(2) Here pedit is the edit prompt built from (s, r ) and, when applicable, a temporal context tedit ; oedit is the target answer, and Ω( δ) is a locality regular-izer. The optimized v∗ 
+
+> std
+
+is then realized as weight updates {∆Wℓ}ℓ∈L at a chosen set of subject-last MLP layers L. By Finding 1, the resulting updates are time-agnostic at the editing site—collapsing ev-ery temporal query to the same target v∗ 
+
+> std
+
+(Eq. 1). To break this collapse, PRISM Edit (§4.2) reformu-lates the target computation step. 
+
+4.2 PRISM Edit Downstream temporal modulation. Although the edit overwrites the subject-position state with the time-blind target v∗
+
+> std
+
+, temporal information is not lost: by Finding 2, higher-layer attention at the last token combines the propagated subject representation with time-token hidden states before producing the final prediction. Schematically, 
+
+hlast out (s, t ) = f  ¯s, ct
+
+, (3) where hlast out (s, t ) is the final last-token residual state, ¯s is the subject-position representation prop-agated from the editing site (nearly shared across temporal contexts by Finding 1), ct are the hid-den states at time-token positions, and f aggre-gates contributions from layers above the editing range. Different ct can elicit different outputs from a shared ¯s —a latent routing capacity that PRISM Edit will exploit. 
+
+Temporal polysemy. This routing capacity moti-vates what we call temporal polysemy : one written value should support multiple context-conditioned readouts. Rather than storing independent answer representations for each timestamp, a single v∗
+
+should serve as a shared subject anchor that down-stream temporal modulation reads differently under different time cues: 
+
+v∗ ct1
+
+−−−→ o1, v∗ ct2
+
+−−−→ o2, . . . 
+
+This mirrors linguistic polysemy—one form, mul-tiple context-dependent meanings. The required mechanism already exists in the base model (Sec-tion 3). PRISM therefore adds no explicit router; instead, it optimizes the written value so that the existing attention pathway can read v∗ under the available temporal cue ct.
+
+Joint optimization objective. To realize tempo-ral polysemy, v∗ = v0 + δ∗ must be compati-ble with every temporal context simultaneously. Whereas prior work mainly refines the weight-write stage, PRISM Edit revisits the target-computation stage itself: rather than optimizing δ from a single edit prompt as in Eq. (2) , PRISM learns one shared 
+
+δ∗ from all relevant temporal contexts. Given 
+
+N temporal contexts {(ti, o i)}Ni=1 for the same subject–relation pair (s, r ), we solve: 
+
+Li(δ) = − log PGv0+δ [ oi | pi(s, r, t i) ] ,
+
+δ∗ = arg min 
+
+> δN
+
+X
+
+> i=1
+
+λi Li(δ) + Ω( δ),
+
+v∗ = v0 + δ∗.
+
+(4) where pi(s, r, t i) is a prompt with subject s, rela-tion r, and temporal context ti; the log-probability is summed over all target tokens of oi; λi are per-context weights, and Ω( δ) collects locality and norm regularizers. This formulation naturally ex-tends to an arbitrary number of temporal snapshots. The most common temporal editing case is a two-state transition with (tnew , t old ), for which Eq. (4) instantiates as: 
+
+δ∗ = arg min  
+
+> δ
+
+Lnew + λold Lold + Lbare 
+
++ Ω( δ),
+
+v∗ = v0 + δ∗.
+
+(5) 
+
+Lnew and Lold are the NLL losses for (tnew , o new )
+
+and (told , o old ), and Lbare targets onew on a prompt without temporal context—reflecting that real-world queries often omit explicit time markers, in which case the model should default to the current answer. The complete PRISM Edit procedure is summa-rized in Algorithm 1. 
+
+5 Experiments 
+
+5.1 Experimental Setup Task Definition. We study temporally conflicting edits : given a subject–relation pair whose object changes over time, the edited model must (i) return the new object under a post-update timestamp, (ii) return the old object under a pre-update timestamp, and (iii) default to the new object under a bare 
+
+prompt without temporal context. 
+
+Datasets. Static editing benchmarks such as COUNTER FACT (Meng et al., 2022) and zsRE (Levy et al., 2017) cast an edit as a single 
+
+(s, r, o → o∗) rewrite, with no temporal dimension. The closest temporal alternative, ATOKE (Yin et al., 2024), covers only 9 YAGO3 relations at year-level since/until granularity—too coarse for mid-year role changes and too narrow for relational generality. We therefore introduce TIME CONFLICT 
+
+(T IME CF), a temporal editing dataset of 22,708 records over 24 relations with day-level time stamps—broader in coverage and finer in granularity. Each record has the form 
+
+⟨s, r, o before , t before , o after , t after ⟩ and comes in two variants: TIME CF-F ACTUAL keeps the real successor for evaluation under real-world updates, while TIME CF-F ICTIONAL replaces 
+
+oafter with a counterfactual entity, eliminating contamination from pretraining knowledge. To assess generalization, we additionally evaluate on COUNTER FACT †, a temporally augmented version of C OUNTER FACT (Meng et al., 2022). Dataset details are in Appendix B. 
+
+Metrics. We adopt and extend the temporal-edit metrics of Yin et al. (2024). All metrics are com-puted on the post-edit model. • CES / HES (Current / Historical Explicit-time Score): accuracy on post-/pre-update timestamp prompts; • CES-P / HES-P : paraphrased variants of CES / HES; • CRS (Current Relative-time Score): accuracy on bare prompts without explicit time mark-ers, where the model should default to the new object; • TC (Temporal Consistency): the fraction of records on which CES and HES are jointly correct—the strictest measure of current– historical coexistence in a single model. Unlike prior work that evaluates edits via token-level negative log-likelihood (NLL), we adopt nor-malized substring match as our primary metric—a strictly harder criterion that requires the model to generate the correct entity rather than merely as-signing it higher probability among candidates. 
+
+Models and Baselines. We conduct experiments on GPT-J (6B) (Wang and Komatsuzaki, 2021) and 
+
+Llama-3 (8B) (Grattafiori et al., 2024); results in the main text use Llama-3, with full GPT-J results in Appendix C. We compare two families of editors: (i) locate-then-edit —ROME (Meng et al., 2022), MEMIT (Meng et al., 2023), AlphaEdit (Fang et al., Dataset Method CES ↑ CES-P ↑ CRS ↑ HES ↑ HES-P ↑ TC ↑
+
+Pre-Edit 1.1 ±0.3 0.6 ±0.1 1.0 ±0.3 48.7 ±1.6 46.6 ±1.2 0.4 ±0.2 
+
+Fine-Tuning 49.5 ±1.6 38.1 ±1.3 13.7 ±1.1 62.1 ±1.5 54.8 ±1.4 33.1 ±1.5 
+
+ROME 0.0 ±0.0 0.0 ±0.0 0.0 ±0.0 0.1 ±0.0 0.1 ±0.0 0.0 ±0.0 
+
+COUNTER FACT † MEMIT 47.3 ±1.6 38.4 ±1.3 35.5 ±1.5 60.9 ±1.5 56.7 ±1.3 20.2 ±1.3 
+
+AlphaEdit 64.5 ±1.5 51.6 ±1.2 33.6 ±1.5 80.6 ±1.3 74.4 ±1.1 46.8 ±1.6 
+
+METO 59.4 ±1.6 51.3 ±1.6 36.7 ±1.5 72.3 ±1.4 68.2 ±1.5 35.0 ±1.5 
+
+PRISM Edit 86.4 ±1.1 75.5 ±1.0 82.5 ±1.2 95.5 ±0.7 85.1 ±0.7 82.4 ±1.2
+
+Pre-Edit 9.5 ±0.9 7.5 ±0.8 9.2 ±0.9 15.7 ±1.2 13.9 ±1.1 2.9 ±0.5 
+
+Fine-Tuning 12.8 ±1.1 10.9 ±1.0 10.7 ±1.0 11.4 ±1.0 9.0 ±0.9 4.0 ±0.6 
+
+ROME 0.0 ±0.0 0.0 ±0.0 0.0 ±0.0 0.0 ±0.0 0.0 ±0.0 0.0 ±0.0 
+
+TIME CF-F ACTUAL MEMIT 11.9 ±1.0 9.2 ±0.9 14.9 ±1.1 13.4 ±1.1 8.2 ±0.9 4.0 ±0.6 
+
+AlphaEdit 43.6 ±1.6 32.2 ±1.5 34.1 ±1.5 49.6 ±1.6 36.5 ±1.5 19.4 ±1.3 
+
+METO 30.5 ±1.5 21.9 ±1.3 20.4 ±1.3 39.7 ±1.5 28.3 ±1.4 13.1 ±1.1 
+
+PRISM Edit 59.2 ±1.6 48.1 ±1.6 61.7 ±1.5 60.8 ±1.5 51.1 ±1.6 37.4 ±1.5
+
+Pre-Edit 1.6 ±0.4 1.2 ±0.3 2.0 ±0.4 15.7 ±1.2 13.9 ±1.1 0.5 ±0.2 
+
+Fine-Tuning 9.0 ±0.9 7.1 ±0.8 9.6 ±0.9 13.2 ±1.1 10.9 ±1.0 2.4 ±0.5 
+
+ROME 0.0 ±0.0 0.0 ±0.0 0.0 ±0.0 0.0 ±0.0 0.1 ±0.1 0.0 ±0.0 
+
+TIME CF-F ICTIONAL MEMIT 6.0 ±0.8 4.9 ±0.7 6.1 ±0.8 9.8 ±0.9 8.3 ±0.9 1.7 ±0.4 
+
+AlphaEdit 16.0 ±1.2 9.7 ±0.9 9.6 ±0.9 48.8 ±1.6 38.4 ±1.5 6.5 ±0.8 
+
+METO 9.2 ±0.9 4.6 ±0.7 4.2 ±0.6 35.9 ±1.5 27.0 ±1.4 4.6 ±0.7 
+
+PRISM Edit 36.0 ±1.5 25.4 ±1.4 37.4 ±1.5 60.2 ±1.5 49.0 ±1.6 22.8 ±1.3
+
+Table 1: Main results on temporal knowledge editing (1,000 records per dataset, sequential editing in batches of 100). Best in bold , second-best underlined . Metric definitions are in §5.1; † denotes our temporal augmentation of COUNTER FACT (Meng et al., 2022) (Appendix B). 
+
+2025) and METO (Yin et al., 2024), where the first three do not account for temporal information and METO additionally incorporates temporal context into the editing objective; (ii) memory-based —GRACE (Hartvigsen et al., 2023) and WISE (Wang et al., 2024). Memory-based methods introduce 
+
+auxiliary memory modules with retrieval/routing mechanisms rather than directly editing the original weights at a target site, making them not directly comparable to (i); we report their results in Ap-pendix C. We further include Fine-Tuning (FT) and the unedited model ( Pre-Edit ) as references. For methods that do not explicitly model time, we treat the new and historical facts as two indepen-dent edit requests. 
+
+5.2 Main Results 
+
+Table 1 reports results on all three datasets. PRISM Edit ranks first on every metric, with the largest gains on CRS and TC —the indicators most di-rectly testing temporal coexistence. We highlight three observations. 
+
+Uniform gains across temporal conditions. Av-eraged across the three datasets, PRISM Edit out-performs the strongest baseline by +19 .2 on CES, 
+
++33 .7 on CRS, and +12 .5 on HES—both current and historical facts are recalled accurately, with the largest gain on bare prompts. We attribute this CRS lead to the fact that, without an explicit tem-poral anchor, the model tends to fall back to the default behavior at the edited site; PRISM Edit makes this default an explicit optimization target, whereas conventional editing methods can only re-solve it implicitly. 
+
+Joint correctness under temporal coexistence. TC requires CES and HES to be jointly correct on the same record. PRISM Edit improves over the second-best method by +23 .3 on TC on average across the three datasets, indicating not isolated per-query wins but genuine coexistence of current and historical answers within one edited model. 
+
+Faster editing without a quality trade-off. Ta-ble 2 shows PRISM Edit averages 5.44 s per record— 2.8× faster than AlphaEdit and 5.2×
+
+faster than METO, while achieving the best scores in Table 1. The speedup comes from both the edit-ing protocol and the optimization: PRISM Edit treats one record as a single edit rather than two independent edits per temporal condition (four for METO), and the multi-time target provides stronger supervision when solving the shared value. Method FT ‡ ROME METO AlphaEdit MEMIT PRISM Edit        
+
+> Time (s) ↓0.91 38.18 28.32 15.10 11.74 5.44
+
+Table 2: Average per-record edit time on LL AMA-3 (8B), averaged over C OUNTER FACT †, T IME CF-FACTUAL , and T IME CF-F ICTIONAL . ‡FT is faster but fails editing (Table 1).                                                                                 
+
+> λold λbare CES CES-P HES HES-P CRS TC Avg
+> Without bare-prompt supervision ( λbare =0 ):
+> 1076.0 53.0 67.0 49.0 45.0 50.0 56.7 2073.0 50.0 77.0 59.0 39.0 61.0 59.8 3064.0 49.0 78.0 62.0 36.0 56.0 57.5
+> With bare-prompt supervision:
+> 1179.0 53.0 60.0 48.0 78.0 47.0 60.8 1279.0 55.0 57.0 48.0 72.0 46.0 59.5 2179.0 55.0 69.0 54.0 70.0 57.0 64.0
+> 2279.0 55.0 72.0 54.0 74.0 59.0 65.5
+> 3171.0 49.0 72.0 56.0 69.0 56.0 62.2 3273.0 50.0 74.0 54.0 76.0 55.0 63.7
+
+Table 3: Loss-weight ablation on T IME CF-F ACTUAL 
+
+(100 records, %), with λnew =1 fixed. Best per column in bold . Without Lbare , CRS collapses below 45%; adding it recovers CRS to 70–78%. The shaded row (λold =λbare =2 ) is our default, achieving the highest Avg and the best overall trade-off. 
+
+5.3 Ablation Study 
+
+Compared with conventional editing objectives that optimize the new fact alone, PRISM Edit addition-ally introduces historical and bare-time targets. We ablate their weights on T IME CF-F ACTUAL (Ta-ble 3, λnew =1 fixed), to test whether Lold enables coexistence and Lbare controls the bare-prompt de-fault. Three patterns emerge from Table 3. (i) Lold 
+
+enables current–historical coexistence but over-corrects when too strong: with λbare =0 , raising 
+
+λold from 1 to 2 lifts HES from 67.0 to 77.0, but 
+
+λold =3 drops CES to 64.0. (ii) Lbare controls the bare-prompt default: without it, CRS stays at 36– 45; adding it recovers CRS to at least 69. (iii) 
+
+(λold , λ bare )=(2 , 2) achieves the best overall trade-off, which we adopt as the default. Additional context-template ablations are in Ap-pendix C.3. 
+
+6 Conclusion 
+
+We presented PRISM Edit , a mechanism-aligned method for temporal knowledge editing. Through the first causal-tracing analysis of temporal facts, we identified a two-stage mechanism: early MLP layers retrieve a time-agnostic subject signal, and upper-layer attention modulates this signal with temporal context. This geometry exposes a fun-damental obstacle for prior locate-then-edit meth-ods: they force time-conditioned writes at a sin-gle MLP site, contradicting the model’s two-stage solution where temporal disambiguation happens downstream. Rather than forcing this separation at the edit site, PRISM Edit jointly optimizes a single polysemous hidden state v∗ that the model’s own downstream modulation routes to time-appropriate answers—requiring no architectural changes or ex-ternal memory. We also introduce T IME CF, a temporal editing benchmark of 22,708 records over 24 relations with day-level time stamps. On T IME CF and a tem-porally augmented C OUNTER FACT , PRISM Edit ranks first on every metric, with average gains of 
+
++23 .3 on TC and +33 .7 on CRS over the strongest baseline, while running over 2× faster than prior editors. More broadly, our findings support a simple prin-ciple: aligning edits with the model’s intrinsic computation is more effective than imposing ex-ternal structure—a mechanism-first approach that may generalize to other context-conditioned edit-ing tasks. 
+
+7 Limitations 
+
+While PRISM Edit demonstrates strong perfor-mance on temporal knowledge editing, we ac-knowledge several limitations. First, although TIME CF provides day-level annotations, our main experiments operate at the year level; editing at finer granularities (month or day) remains untested and may require denser supervision. Second, our evaluation focuses on the current-vs-historical set-ting (one current and one historical answer per subject); scaling the joint optimization to k > 2
+
+coexisting temporal targets is left to future work. Finally, the mechanism we exploit—upper-layer at-tention modulating a shared subject representation via contextual cues—is likely not unique to time. Extending v∗ to other forms of context-conditioned polysemy is a natural direction enabled by our framework. 
+
+References 
+
+Rie Kubota Ando and Tong Zhang. 2005. A framework for learning predictive structures from multiple tasks and unlabeled data. Journal of Machine Learning Research , 6:1817–1853. Galen Andrew and Jianfeng Gao. 2007. Scalable train-ing of L1-regularized log-linear models. In Proceed-ings of the 24th International Conference on Machine Learning , pages 33–40. Nicola De Cao, Wilker Aziz, and Ivan Titov. 2021. Edit-ing factual knowledge in language models. In Pro-ceedings of the 2021 Conference on Empirical Meth-ods in Natural Language Processing (EMNLP2021) .Keyuan Cheng, Gang Lin, Haoyang Fei, Lu Yu, Muham-mad Asif Ali, Lijie Hu, Di Wang, and 1 others. 2024. Multi-hop question answering under temporal knowl-edge editing. arXiv preprint arXiv:2404.00492 .Damai Dai, Li Dong, Yaru Hao, Zhifang Sui, Baobao Chang, and Furu Wei. 2022. Knowledge neurons in pretrained transformers. In Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pages 8493– 8502, Dublin, Ireland. Association for Computational Linguistics. Bhuwan Dhingra, Jeremy R. Cole, Julian Martin Eisenschlos, Daniel Gillick, Jacob Eisenstein, and William W. Cohen. 2022. Time-aware language mod-els as temporal knowledge bases. Transactions of the Association for Computational Linguistics , 10:257– 273. Junfeng Fang, Houcheng Jiang, Kun Wang, Yunshan Ma, Jie Shi, Xiang Wang, Xiangnan He, and Tat-Seng Chua. 2025. Alphaedit: Null-space constrained model editing for language models. In The Thirteenth International Conference on Learning Representa-tions .Mor Geva, Jasmijn Bastings, Katja Filippova, and Amir Globerson. 2023. Dissecting recall of factual associa-tions in auto-regressive language models. In Proceed-ings of the 2023 Conference on Empirical Methods in Natural Language Processing , pages 12216–12235, Singapore. Association for Computational Linguis-tics. Mor Geva, Roei Schuster, Jonathan Berant, and Omer Levy. 2021. Transformer feed-forward layers are key-value memories. In Proceedings of the 2021 Confer-ence on Empirical Methods in Natural Language Pro-cessing , pages 5484–5495, Online and Punta Cana, Dominican Republic. Association for Computational Linguistics. Aaron Grattafiori, Abhimanyu Dubey, Abhinav Jauhri, Abhinav Pandey, Abhishek Kadian, Ahmad Al-Dahle, Aiesha Letman, Akhil Mathur, Alan Schelten, Alex Vaughan, and 1 others. 2024. The llama 3 herd of models. arXiv preprint arXiv:2407.21783 .Tom Hartvigsen, Swami Sankaranarayanan, Hamid Palangi, Yoon Kim, and Marzyeh Ghassemi. 2023. Aging with grace: Lifelong model editing with dis-crete key-value adaptors. In Advances in Neural Information Processing Systems .Omer Levy, Minjoon Seo, Eunsol Choi, and Luke Zettle-moyer. 2017. Zero-shot relation extraction via read-ing comprehension. In Proceedings of the 21st Con-ference on Computational Natural Language Learn-ing (CoNLL 2017) , pages 333–342. Kevin Meng, David Bau, Alex Andonian, and Yonatan Belinkov. 2022. Locating and editing factual associa-tions in gpt. Advances in neural information process-ing systems , 35:17359–17372. Kevin Meng, Arnab Sen Sharma, Alex Andonian, Yonatan Belinkov, and David Bau. 2023. Mass edit-ing memory in a transformer. The Eleventh Inter-national Conference on Learning Representations (ICLR) .Eric Mitchell, Charles Lin, Antoine Bosselut, Chelsea Finn, and Christopher D Manning. 2022. Fast model editing at scale. In International Conference on Learning Representations .Yein Park, Chanwoong Yoon, Jungwoo Park, Minbyul Jeong, and Jaewoo Kang. 2025. Does time have its place? temporal heads: Where language models re-call time-specific information. In Proceedings of the 63rd Annual Meeting of the Association for Compu-tational Linguistics (Volume 1: Long Papers) , pages 16616–16643, Vienna, Austria. Association for Com-putational Linguistics. Mohammad Sadegh Rasooli and Joel R. Tetreault. 2015. Yara parser: A fast and accurate dependency parser. 
+
+Computing Research Repository , arXiv:1503.06733. Version 2. Zhaochen Su, Jun Zhang, Xiaoye Qu, Tong Zhu, Yanshu Li, Jiashuo Sun, Juntao Li, Min Zhang, and Yu Cheng. 2024. $\texttt{ConflictBank}$: A benchmark for evaluating the influence of knowledge conflicts in LLMs. In The Thirty-eight Conference on Neural Information Processing Systems Datasets and Bench-marks Track .Ben Wang and Aran Komatsuzaki. 2021. GPT-J-6B: A 6 billion parameter autoregressive lan-guage model. https://github.com/kingoflolz/ mesh-transformer-jax .Peng Wang, Zexi Li, Ningyu Zhang, Ziwen Xu, Yunzhi Yao, Yong Jiang, Pengjun Xie, Fei Huang, and Hua-jun Chen. 2024. WISE: Rethinking the knowledge memory for lifelong model editing of large language models. In The Thirty-eighth Annual Conference on Neural Information Processing Systems .Xunjian Yin, Jin Jiang, Liming Yang, and Xiaojun Wan. 2024. History matters: Temporal knowledge edit-ing in large language model. In Proceedings of the AAAI Conference on Artificial Intelligence , vol-ume 38, pages 19413–19421. Ningyu Zhang, Yunzhi Yao, Bozhong Tian, Peng Wang, Shumin Deng, Mengru Wang, Zekun Xi, Shengyu Mao, Jintian Zhang, Yuansheng Ni, Siyuan Cheng, Ziwen Xu, Xin Xu, Jia-Chen Gu, Yong Jiang, Pengjun Xie, Fei Huang, Lei Liang, Zhiqiang Zhang, and 3 others. 2024. A comprehensive study of knowl-edge editing for large language models. Preprint ,arXiv:2401.01286. Simiao Zhao, Ning Pang, Zhen Tan, Yanli Hu, Weidong Xiao, and Xiang Zhao. 2026. Multi-granularity tem-poral knowledge editing over large language models. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 40, pages 28742–28750. Zexuan Zhong, Zhengxuan Wu, Christopher D Manning, Christopher Potts, and Danqi Chen. 2023. MQuAKE: Assessing knowledge editing in language models via multi-hop questions. In The 2023 Conference on Empirical Methods in Natural Language Processing .
+
+A Causal Tracing Details 
+
+This section provides implementation details of the extended causal tracing procedure described in §3. The base three-run protocol and indirect effect (IE) definition follow Meng et al. (2022); below we focus on our extensions. 
+
+Data filtering. We run the unedited model on all records in T IME CF-Factual and retain only those for which the model correctly predicts the target object under the time-conditioned prompt. This fil-tering is necessary because causal tracing measures how much a restored activation recovers the correct prediction; only when the model already produces the correct answer in the clean run can the indirect effect be meaningfully interpreted. This yields 533 qualifying records. 
+
+Disentangling subject and temporal pathways. 
+
+Our key extension is to separately corrupt the sub-ject tokens and the time tokens, yielding two in-dependent IE maps that isolate each information pathway. In the standard causal tracing protocol, the re-store step patches the full hidden state h(ℓ) 
+
+> i
+
+at a given (token i, layer ℓ) back to its clean-run value. To further disentangle the contributions of different components, we perform component-level restora-tion : in a Transformer layer the residual update decomposes as h(ℓ) 
+
+> i
+
+= h(ℓ−1)  
+
+> i
+
++ a(ℓ) 
+
+> i
+
++ m(ℓ) 
+
+> i
+
+, where 
+
+a(ℓ) 
+
+> i
+
+is the Attention sub-layer output and m(ℓ) 
+
+> i
+
+is the MLP sub-layer output. “Restore MLP only” means we patch m(ℓ) 
+
+> i
+
+to its clean-run value while keeping a(ℓ) 
+
+> i
+
+corrupted; “Restore Attention only” does the converse. This allows us to measure each component’s independent causal contribution to the final prediction. Crossing two corruption targets (subject tokens vs. time tokens) with three restoration granulari-ties (total hidden state, MLP only, Attention only) yields the six conditions shown in Figure 2. Pan-els (a)–(c) corrupt the subject tokens: panel (a) restores the full hidden state to reveal the over-all subject-IE map; panels (b) and (c) restore only MLP or only Attention, respectively, to isolate each component’s individual contribution. Panels (d)– (f) mirror this design for the time tokens. For each panel, we compute the IE at every (layer, token-position) cell and average across all qualifying sam-ples, yielding the heatmaps presented in Figure 2. 
+
+Cross-architecture generalization. We apply the same procedure to GPT-J(6B). As shown in Figure 4, the temporal pathway consistently ac-tivates at earlier layers than the subject pathway, corroborating the findings on LLaMA-3 reported in §3. 
+
+B Dataset Details 
+
+B.1 TimeConflict B.1.1 Dataset Construction 
+
+We construct T IME CONFLICT from the Wikidata JSON dump ( latest-all.json.bz2 ). We extract temporal triples for 100 candidate properties us-ing qualifier timestamps (P580 start-time, P582 end-time, P585 point-in-time), group them by sub-ject, and detect temporal conflicts—pairs where 
+
+after_object starts after the cutoff (January 1, 2023) and before_object is its most recent pre-decessor with a different identity. After removing records with missing labels and deduplicating by (before_object , after_object , after_start ), 24 properties yield ≥10 valid conflicts each, pro-ducing 22,708 records in total. For T IME CF-Fictional, we replace each after_object with a random entity from the same-relation entity pool (seed = 42), preserving original timestamps. 
+
+B.1.2 Dataset Statistics 
+
+Table 4 summarizes the key statistics of T IME CON -
+
+> FLICT
+
+. The per-relation record counts and sampling distribution are detailed in Table 5. The distribu-tion is long-tailed—the top 3 relations account for approximately 72% of all records, reflecting real-world knowledge update frequency. 
+
+B.1.3 Experiment Sampling Strategy 
+
+For our main experiments, we sample 1,000 records from the full dataset. Relations with fewer than 0 4 8 12 16 20 24 
+
+1st time 
+
+Mid time 
+
+Last time 
+
+1st subj 
+
+Mid subj 
+
+Last subj 
+
+Further 
+
+Last 
+
+(a) AIE of Hidden h (l)
+
+> i
+> 0.00
+> 0.05
+> 0.10
+> 0.15
+
+0 4 8 12 16 20 24 
+
+(b) AIE of MLP 
+
+> 0.00
+> 0.05
+> 0.10
+> 0.15
+
+0 4 8 12 16 20 24 
+
+(c) AIE of Attn  
+
+> IE 0.00
+> 0.05
+> 0.10
+> 0.15
+
+0 4 8 12 16 20 24 
+
+Layer 
+
+1st time 
+
+Mid time 
+
+Last time 
+
+1st subj 
+
+Mid subj 
+
+Last subj 
+
+Further 
+
+Last 
+
+(d) AIE of Hidden h (l)
+
+> i
+> 0.00
+> 0.05
+> 0.10
+> 0.15
+
+0 4 8 12 16 20 24 
+
+Layer 
+
+(e) AIE of MLP 
+
+> 0.00
+> 0.05
+> 0.10
+> 0.15
+
+0 4 8 12 16 20 24 
+
+Layer 
+
+(f) AIE of Attn  
+
+> IE 0.00
+> 0.05
+> 0.10
+> 0.15
+> corrupt( s) predict( o)corrupt( t) predict( o)
+
+Figure 4: Six-panel causal tracing heatmap for GPT-J, produced with the same protocol as Figure 2. Table 4: Summary statistics of T IME CONFLICT .
+
+Statistic Value 
+
+Total records 22,708 Relations 24 Unique subjects >18,000 Granularity Day-level Cutoff date 2023-01-01 Before-object range 1751-09 – 2024-12 After-object range 2023-01 – 2025-12 Experiment sample 1,000 
+
+100 records (14 relations, 431 records) are included entirely; the remaining 569 slots are allocated pro-portionally among the 10 larger relations. Within each large relation, we apply time-stratified sam-pling (40% newest, 30% middle, 30% oldest by 
+
+after_object start date) to ensure temporal di-versity. We filter out records with empty labels or identical before/after objects. All sampling uses seed = 42. Table 5 shows the resulting distribution. 
+
+B.1.4 Data Examples 
+
+Below we show a T IME CF-Factual record and its TIME CF-Fictional counterpart. The Fictional vari-ant is obtained by replacing after_object with a random entity from the same-relation pool while keeping all other fields unchanged. TIME CF-Factual Example 
+
+id: 341 
+
+relation: P6 (head of government) 
+
+Table 5: Per-relation distribution of the 1,000 sampled records. 
+
+ID Relation #Samp. #Full 
+
+P108 employer 231 8,747 P39 position held 145 5,538 P361 part of 74 75 P276 location 70 70 P35 head of state 66 66 P54 member of sports team 57 2,167 P710 participant 49 49 P102 political party 44 44 P166 award received 40 1,519 P449 original broadcaster 35 35 P131 admin. territorial entity 32 1,236 P286 head coach 28 1,082 P26 spouse 25 25 P749 parent organization 17 17 P793 significant event 16 600 P551 residence 14 14 P6 head of government 12 467 P355 child organization 12 12 P161 cast member 10 10 P488 chairperson 9 356 P69 educated at 4 165 P463 member of 4 167 P527 has part(s) 3 123 P1037 director / manager 3 124 
+
+Total 1,000 22,708 subject: Toronto (Q172) 
+
+before_object: John Tory time_range: 2014-12-01 to 2023-02-15 
+
+after_object: Olivia Chow time_range: 2023-07-12 to ... 
+
+TIME CF-Fictional Example 
+
+id: 341 
+
+relation: P6 (head of government) 
+
+subject: Toronto (Q172) 
+
+before_object: John Tory time_range: 2014-12-01 to 2023-02-15 
+
+after_object: Thomas Müller time_range: 2023-07-12 to ... 
+
+B.1.5 Comparison with Existing Datasets 
+
+Table 6 compares T IME CONFLICT with existing knowledge editing datasets. Our dataset is the first to provide day-level temporal granularity with both factual and counterfactual variants. 
+
+Table 6: Comparison with existing knowledge editing datasets.                         
+
+> Dataset Source #Rec. #Rel. Granul. CF
+> CounterFact (Meng et al., 2022) Wikidata 21,919 32 None ✓
+> MQuAKE (Zhong et al., 2023) Wikidata 3,000 37 None ✓
+> ConflictBank (Su et al., 2024) Wikidata 553K –Year –AToKe (Yin et al., 2024) YAGO3.0 8,820 13 Year –TIME CF (Ours) Wikidata 22,708 24 Day ✓
+
+B.2 COUNTER FACT † Augmentation 
+
+The original C OUNTER FACT (Meng et al., 2022) is a static counterfactual knowledge-editing bench-mark; we refer readers to the original paper for its full construction protocol. In this work, we use it as the basis for C OUNTER FACT †, a temporalized counterpart that keeps the original subject–relation– object rewrite semantics but adds an explicit histor-ical/current distinction. This lets us test whether an editing method can introduce temporal condition-ing into facts that are not temporal in the original benchmark. 
+
+B.2.1 Augmentation Protocol Relation filtering. We first restrict the original relations to a subset of 12 time-sensitive relations 
+
+(e.g., occupation, employer, head of state, head of government, position held), keeping records where assigning the old and new answers to different time periods is semantically meaningful. This yields 
+
+6,219 records from the original 21,919. 
+
+Temporal augmentation. We augment each fil-tered C OUNTER FACT record into a two-period con-trast. The original answer is preserved in histor-ical contexts, while the counterfactual target is assigned to current contexts. This turns a static subject–relation rewrite into a temporal editing case: a successful method must produce differ-ent answers for the same subject–relation pair de-pending on the temporal context. To reduce re-liance on any single wording, we instantiate the his-torical/current contrast with several semantically equivalent temporal expressions (e.g., Since /Before ,
+
+From . . . onward /Prior to , As of /Up to ). 
+
+B.2.2 Data Example 
+
+Below we show an original C OUNTER FACT record and its C OUNTER FACT † counterpart. The aug-mented variant converts the static rewrite into a two-period temporal contrast. Original C OUNTER FACT Example 
+
+id: 18329 
+
+relation: occupation 
+
+subject: William Hardy Wilson 
+
+true_object: architect 
+
+counterfactual_target: journalist 
+
+edit: architect → journalist Augmented C OUNTER FACT Example 
+
+id: 18329 
+
+relation: occupation 
+
+subject: William Hardy Wilson 
+
+before_object: architect time_context: “Prior to 2027, the occupa-tion of William Hardy Wilson was ”
+
+after_object: journalist time_context: “From 2027 onward, the oc-cupation of William Hardy Wilson has been ”
+
+B.2.3 Scope and Complementarity 
+
+COUNTER FACT † is a synthetic temporalization of C OUNTER FACT (Meng et al., 2022), the most widely adopted benchmark in the knowledge edit-ing literature. By extending it to the temporal setting, we can evaluate our method on a well-established and broadly recognized data source, strengthening the comparability and credibility of our results. It complements T IME CF: T IME CF evaluates naturally occurring temporal changes, while C OUNTER FACT † tests whether a method can impose temporal distinctions on originally static facts. For our main experiments, we sample 1,000 records from C OUNTER FACT †.
+
+C Additional Experimental Results 
+
+C.1 GPT-J Results 
+
+GPT-J-6B (Wang and Komatsuzaki, 2021) is a widely used benchmark model in the knowledge editing literature. We replicate the main experi-ment (§5) on it to test cross-architecture general-ization; only the editing layers are re-selected via causal tracing. As shown in Table 7, PRISM Edit achieves the best overall performance across multi-ple datasets, with particularly strong gains on CRS, confirming that temporal-polysemy editing trans-fers across architectures. 
+
+C.2 Memory-Based Methods (Llama-3 & GPT-J) 
+
+Although PRISM Edit primarily focuses on parameter-modifying editing on the MLP pathway analyzed in §3, we also compare against representa-tive memory-based editors to position our method within the broader knowledge-editing landscape. We select GRACE (Hartvigsen et al., 2023) and WISE (Wang et al., 2024) as representative base-lines: GRACE attaches an external key–value code-book and retrieves a stored value when the input matches a cached key, while WISE introduces a parametric side memory together with a router that decides whether to read from the main FFN or the side memory. Since both mechanisms oper-ate outside the MLP pathway and follow a funda-mentally different design principle from parameter-modifying editors, we report them separately. Tables 8 and 9 present the full comparison. Meth-ods of this type perform reasonably on direct-evaluation metrics (CES, HES, TC), but still exhibit a clear gap on the paraphrase-robust counterparts CES-P and HES-P. We view this difference as rea-sonable: such approaches deliberately leave the original model parameters intact and instead allo-cate extra memory or auxiliary modules to host the edited knowledge, so their behavior on unseen inputs is largely determined by how well those in-puts are matched against the cached entries. In contrast, PRISM Edit performs parametric editing directly on the MLP pathway analyzed in §3, and consistently leads on CES-P, HES-P, and the inte-grated temporal-consistency score CRS, with the advantage being especially stable on paraphrase-robust metrics. Table 10 further shows that PRISM Edit also maintains a clear efficiency advantage, with a lower average per-record edit time than both GRACE and WISE. 
+
+C.3 Ablation on Context Templates 
+
+In MEMIT (Meng et al., 2023), the target value vector is optimized by averaging over P random prefix contexts prepended to the templated prompt, encouraging the edit to generalize beyond a single surface form. Since PRISM Edit already jointly op-timizes v∗ over multiple temporal conditions, this multi-condition diversity may subsume the role of random prefixes. We test this hypothesis by fix-ing λold =λbare =2 and varying the number of para-phrased context templates per temporal condition from 1 to 10. Results confirm this hypothesis. Increasing tem-plates from 1 to 2 marginally improves CES/CES-P, yet degrades historical retention (HES/HES-P) and overall TC. At 10 templates, CRS peaks but TC drops by 10 points. The single-template default achieves the best overall balance (72.0/54.0/59.0 on HES/HES-P/TC), indicating that PRISM Edit’s multi-condition objective already provides suffi-cient optimization diversity—additional prefix aug-mentation only dilutes the temporal signal at the write site. 
+
+C.4 Case Study 
+
+To visualize how PRISM Edit operates at the individual-record level, we conduct a case study on the post-edit model: for the same subject, we issue two queries that differ only in their temporal to-ken (new-time and old-time), extract the last-token hidden states across all 32 layers, and project the two 32-layer trajectories onto their joint top-2 prin-cipal components. By design, after a single v∗ is written into the MLP, the model’s own temporal-modulation pathway should route the deep-layer readout to time-appropriate answers. Below we randomly sample six successful (Case 1–Case 6) and two failed cases (Fail Case 1, Fail Case 2) for comparative inspection; the corresponding queries are listed in Table 12. In the six successful cases shown in Figure 5, the two trajectories overlap in the early layers—where representations encode syntax and entity identity— Dataset Method CES ↑ CES-P ↑ CRS ↑ HES ↑ HES-P ↑ TC ↑
+
+Pre-Edit 0.8 ±0.3 0.9 ±0.2 1.0 ±0.3 28.0 ±1.4 25.1 ±1.1 0.3 ±0.2 
+
+Fine-Tuning 21.3 ±1.3 6.0 ±0.4 1.7 ±0.4 57.9 ±1.6 35.2 ±1.0 14.5 ±1.1 
+
+ROME 5.7 ±0.7 4.3 ±0.4 3.5 ±0.6 91.8 ±0.9 80.9 ±0.9 4.2 ±0.6 
+
+COUNTER FACT † MEMIT 80.5 ±1.3 71.4 ±1.2 43.4 ±1.6 81.0 ±1.2 72.8 ±1.1 63.4 ±1.5 
+
+AlphaEdit 99.9 ±0.1 90.6 ±0.5 43.0 ±1.6 99.9 ±0.1 91.2 ±0.5 99.8 ±0.1
+
+METO 82.5 ±1.2 72.8 ±1.4 43.0 ±1.6 84.4 ±1.1 75.4 ±1.4 68.0 ±1.5 
+
+PRISM Edit 99.3 ±0.3 86.9 ±0.6 88.2 ±1.0 99.7 ±0.2 86.0 ±0.6 99.0 ±0.3 
+
+Pre-Edit 5.1 ±0.7 4.4 ±0.6 7.0 ±0.8 7.4 ±0.8 4.4 ±0.6 1.3 ±0.4 
+
+Fine-Tuning 3.6 ±0.6 2.1 ±0.5 3.8 ±0.6 4.0 ±0.6 4.2 ±0.6 0.4 ±0.2 
+
+ROME 6.2 ±0.8 5.7 ±0.7 6.5 ±0.8 24.9 ±1.4 22.6 ±1.3 2.7 ±0.5 
+
+TIME CF-F ACTUAL MEMIT 51.2 ±1.6 29.7 ±1.4 31.5 ±1.5 52.6 ±1.6 31.5 ±1.5 27.6 ±1.4 
+
+AlphaEdit 96.8 ±0.6 62.8 ±1.5 48.0 ±1.6 98.1 ±0.4 67.4 ±1.5 95.3 ±0.7 
+
+METO 48.7 ±1.6 28.7 ±1.4 17.0 ±1.2 52.4 ±1.6 32.6 ±1.5 28.1 ±1.4 
+
+PRISM Edit 99.1 ±0.3 92.3 ±0.8 91.2 ±0.9 98.6 ±0.4 91.4 ±0.9 97.7 ±0.5
+
+Pre-Edit 1.2 ±0.3 0.8 ±0.3 2.2 ±0.5 7.4 ±0.8 4.4 ±0.6 0.2 ±0.1 
+
+Fine-Tuning 1.4 ±0.4 0.6 ±0.2 1.0 ±0.3 6.0 ±0.8 1.9 ±0.4 0.5 ±0.2 
+
+ROME 2.1 ±0.5 1.2 ±0.3 1.8 ±0.4 22.8 ±1.3 17.9 ±1.2 1.1 ±0.3 
+
+TIME CF-F ICTIONAL MEMIT 30.9 ±1.5 15.6 ±1.1 16.0 ±1.2 49.9 ±1.6 31.8 ±1.5 18.0 ±1.2 
+
+AlphaEdit 90.5 ±0.9 52.2 ±1.6 33.2 ±1.5 97.6 ±0.5 68.6 ±1.5 88.4 ±1.0 
+
+METO 29.0 ±1.4 13.9 ±1.1 9.4 ±0.9 48.7 ±1.6 28.6 ±1.4 18.8 ±1.2 
+
+PRISM Edit 98.7 ±0.4 84.9 ±1.1 81.8 ±1.2 97.2 ±0.5 86.0 ±1.1 95.9 ±0.6
+
+Table 7: Results on GPT-J (6B) for temporal knowledge editing (1,000 records per dataset, sequential editing in batches of 100). Best in bold , second-best underlined . † denotes our temporal augmentation of C OUNTER -FACT (Meng et al., 2022). 
+
+Dataset Method CES ↑ CES-P ↑ CRS ↑ HES ↑ HES-P ↑ TC ↑
+
+Pre-Edit 1.1 ±0.3 0.6 ±0.1 1.0 ±0.3 48.7 ±1.6 46.6 ±1.2 0.4 ±0.2 
+
+COUNTER FACT † GRACE 34.5 ±1.5 7.3 ±0.8 1.0 ±0.3 78.6 ±1.3 52.5 ±1.6 34.2 ±1.5 
+
+WISE 3.4 ±0.6 2.3 ±0.5 1.4 ±0.4 49.4 ±1.6 47.2 ±1.6 1.6 ±0.4 
+
+PRISM Edit 86.4 ±1.1 75.5 ±1.0 82.5 ±1.2 95.5 ±0.7 85.1 ±0.7 82.4 ±1.2
+
+Pre-Edit 9.5 ±0.9 7.5 ±0.8 9.2 ±0.9 15.7 ±1.2 13.9 ±1.1 2.9 ±0.5 
+
+TIME CF-Factual GRACE 95.1 ±0.7 7.5 ±0.8 9.2 ±0.9 96.8 ±0.6 13.9 ±1.1 93.5 ±0.8
+
+WISE 9.0 ±0.9 7.2 ±0.8 8.9 ±0.9 15.5 ±1.1 13.7 ±1.1 2.9 ±0.5 
+
+PRISM Edit 59.2 ±1.6 48.1 ±1.6 61.7 ±1.5 60.8 ±1.5 51.1 ±1.6 37.4 ±1.5 
+
+Pre-Edit 1.6 ±0.4 1.2 ±0.3 2.0 ±0.4 15.7 ±1.2 13.9 ±1.1 0.5 ±0.2 
+
+TIME CF-Fictional GRACE 96.7 ±0.6 1.2 ±0.3 2.0 ±0.4 96.8 ±0.6 13.9 ±1.1 93.6 ±0.8
+
+WISE 1.6 ±0.4 1.2 ±0.3 2.0 ±0.4 15.7 ±1.2 13.9 ±1.1 0.5 ±0.2 
+
+PRISM Edit 36.0 ±1.5 25.4 ±1.4 37.4 ±1.5 60.2 ±1.5 49.0 ±1.6 22.8 ±1.3 
+
+Table 8: Memory-based editors on LLaMA-3. Best in bold , second-best underlined. 
+
+and then diverge in the later layers toward distinct attractors corresponding to the respective target an-swers. Each subplot marks its divergence onset layer with a diamond marker. Note that on the PCA plane the marker may visually appear close to the trajectory origin: this is because the early ten-plus layers carry essentially shared representations (the two queries share everything but a single tempo-ral token), not because the divergence starts from 
+
+L0. Across the six cases the onset ranges from 
+
+L17 to L23 (mean ≈ L20 ), and the separation ac-celerates markedly from L23 onward, reaching its maximum at the final layer. This bifurcation pat-tern is consistent with the intended mechanism: a single polysemous value v∗ is written into the MLP, and the model’s existing temporal-modulation path-way routes the readout to time-appropriate answers without requiring separate edits for each time con-dition. Figure 5 further shows two failure cases. The tra-jectory shape differs noticeably from the successful cases: instead of fanning out from a single shared bifurcation point, the two curves travel along a common arc for an extended span before separat-Dataset Method CES ↑ CES-P ↑ CRS ↑ HES ↑ HES-P ↑ TC ↑
+
+Pre-Edit 0.8 ±0.3 0.9 ±0.2 1.0 ±0.3 28.0 ±1.4 25.1 ±1.1 0.3 ±0.2 
+
+COUNTER FACT † GRACE 100.0 ±0.0 20.7 ±1.3 1.0 ±0.3 100.0 ±0.0 39.5 ±1.5 100.0 ±0.0
+
+WISE 12.7 ±1.1 7.7 ±0.8 7.2 ±0.8 55.1 ±1.6 47.8 ±1.6 4.6 ±0.7 
+
+PRISM Edit 99.3 ±0.3 86.9 ±0.6 88.2 ±1.0 99.7 ±0.2 86.0 ±0.6 99.0 ±0.3 
+
+Pre-Edit 5.1 ±0.7 4.4 ±0.6 7.0 ±0.8 7.4 ±0.8 4.4 ±0.6 1.3 ±0.4 
+
+TIME CF-Factual GRACE 100.0 ±0.0 4.4 ±0.6 7.0 ±0.8 100.0 ±0.0 4.4 ±0.6 100.0 ±0.0
+
+WISE 8.2 ±0.9 7.0 ±0.8 7.5 ±0.8 13.9 ±1.1 8.9 ±0.9 2.8 ±0.5 
+
+PRISM Edit 99.1 ±0.3 92.3 ±0.8 91.2 ±0.9 98.6 ±0.4 91.4 ±0.9 97.7 ±0.5 
+
+Pre-Edit 1.2 ±0.3 0.8 ±0.3 2.2 ±0.5 7.4 ±0.8 4.4 ±0.6 0.2 ±0.1 
+
+TIME CF-Fictional GRACE 100.0 ±0.0 0.8 ±0.3 2.2 ±0.5 100.0 ±0.0 4.4 ±0.6 100.0 ±0.0
+
+WISE 3.9 ±0.6 2.1 ±0.5 2.5 ±0.5 15.5 ±1.1 11.5 ±1.0 1.3 ±0.4 
+
+PRISM Edit 98.7 ±0.4 84.9 ±1.1 81.8 ±1.2 97.2 ±0.5 86.0 ±1.1 95.9 ±0.6 
+
+Table 9: Memory-based editors on GPT-J. Best in bold , second-best underlined. PC1 
+
+> PC2
+> (a) Case 1
+> "Democratic"
+> "New"
+> L17
+> PC1
+> PC2
+> (b) Case 2
+> "Instituto"
+> "University"
+> L22
+> PC1
+> PC2
+> (c) Case 3
+> "Central"
+> "Birla"
+> L20
+> PC1
+> PC2
+> (d) Case 4
+> "Worcester"
+> "Catholic"
+> L20
+> PC1
+> PC2
+> (e) Case 5
+> "Commander"
+> "Officer"
+> L15
+> PC1
+> PC2
+> (f) Case 6
+> "SoftBank"
+> "Brightstar"
+> L15
+> PC1
+> PC2
+> (g) Fail Case 1
+> "University"
+> "Fujita"
+> L21
+> PC1
+> PC2
+> (h) Fail Case 2
+> "University"
+> "Yeditepe"
+> L18
+
+Figure 5: PCA trajectories of last-token hidden states across all 32 layers for multiple edits on LLaMA-3-8B. 
+
+Blue: new-time query; Orange: old-time query. Both trajectories are extracted from the same edited model and differ only in the temporal context of the input query. •: layer 0; ⋆: final layer ( L31 ). Opacity encodes layer depth (light →dark = shallow →deep). The diamond marks the divergence onset layer, and the italic Lk label points to it. Panels (a)–(f) are successful edits; panels (g)–(h) are failure cases where the new-time prediction is incorrect. Example queries for each panel are listed in Table 12. 
+
+Model Method Time (s) ↓
+
+LL AMA-3 GRACE 8.06 WISE 25.86 
+
+PRISM Edit 5.44 
+
+GPT-J GRACE 27.22 WISE 20.87 
+
+PRISM Edit 3.33 
+
+Table 10: Average per-record edit time for memory-based methods and PRISM Edit. 
+
+ing, with one branch reaching the target and the other landing on a semantically adjacent but non-target entity. We tentatively attribute this to insuffi-cient refinement within the remaining depth after a coarse routing has been completed, and leave a 
+
+# ctx CES CES-P HES HES-P CRS TC 
+
+1 79.0 55.0 72.0 54.0 74.0 59.0 
+
+2 80.0 59.0 65.0 45.0 78.0 52.0 3 77.0 52.0 68.0 48.0 79.0 57.0 6 74.0 50.0 64.0 48.0 75.0 49.0 10 71.0 45.0 64.0 43.0 80.0 49.0 
+
+Table 11: Context-template ablation on T IME CON -
+
+FLICT -Factual ( N =100 , %). Shaded row is the default. 
+
+rigorous test to future work. Overall, these visualizations provide qualitative evidence that PRISM Edit induces a layer-wise bi-furcation in representation space starting around 
+
+L20 , consistent with the polysemous-value mech-anism: a single v∗ writes a multi-valued payload Panel Example query 
+
+(a) Case 1 “The political party of Kiyoshi Ueda is” (b) Case 2 “Óscar López-Pérez is employed by” (c) Case 3 “Rajneesh Choubisa is employed by” (d) Case 4 “Luis Gregory Gutierrez Zamalloa is em-ployed by” (e) Case 5 “The award received by Pierre de Bousquet de Florian is” (f) Case 6 “A subsidiary of SoftBank Group is” (g) Fail Case 1 “Kentaro Tsukamoto is employed by” (h) Fail Case 2 “Batuhan Turhan Bozkurt is employed by” 
+
+Table 12: Example queries for each panel of Figure 5. 
+
+into the MLP and the model’s existing temporal-modulation pathway routes the deep-layer readout to the appropriate time. 
+
+D PRISM Edit Algorithm 
+
+Algorithm 1 PRISM Edit 
+
+Input: edits E={eb}Bb=1 with 
+
+eb=( sb, r b, {(tb,i , o b,i , λ b,i )}Nb
+
+> i=1
+
+); pretrained model θ;target layer ℓ⋆; layers to edit L; null-space projection statistics {Cℓ, P ℓ}ℓ∈L 
+
+Output: edited model θ′
+
+1: for eb ∈ E do 
+
+2: Db ← { (pi(sb, r b, t b,i ), o b,i , λ b,i )}Nb
+
+> i=1
+
+3: v0,b ← hℓ⋆ (pbare ,b , subj _last) ; δb ← 0
+
+4: δ∗ 
+
+> b
+
+← arg min δb
+
+P 
+
+> (p,o,λ )∈D b
+
+λ L(p, o ; δb)+Ω( δb)
+
+where L(p, o ; δb)= − log PG(v0,b +δb)(o | p)
+
+5: v∗ 
+
+> b
+
+← v0,b + δ∗
+
+> b
+
+6: end for 
+
+7: for ℓw ∈ L do 
+
+8: for eb ∈ E do 
+
+9: hcur  
+
+> b,ℓ w
+
+← hℓw (pbare ,b , subj _last) 
+
+10: kb,ℓ w ← 1
+
+> P
+
+PPq=1 kℓw (xq ⊕sb)
+
+11: rb,ℓ w ← (v∗ 
+
+> b
+
+−hcur  
+
+> b,ℓ w
+
+)/|{ ℓ∈L :ℓ≥ℓw }| 
+
+12: end for 
+
+13: Kℓw ← [k1,ℓ w ,. . ., k B,ℓ w ]
+
+14: Rℓw ← [r1,ℓ w ,. . ., r B,ℓ w ]
+
+15: ∆Wℓw ← Rℓw K⊤ 
+
+> ℓw
+
+Pℓw M −1
+
+> ℓw
+
+where Mℓw =Pℓw (Cℓw +Kℓw K⊤ 
+
+> ℓw
+
+)+ ηI 
+
+16: Wℓw ← Wℓw + ∆ Wℓw
+
+17: end for 
+
+18: θ′ ← θ with updated {Wℓw }ℓw ∈L 
+
+19: return edited model θ′
+
+Notation. hℓ(p, t ) ∈ Rd denotes the hidden state at layer ℓ and token position t for input p. The 
+
+target layer ℓ⋆ is where the polysemous value v∗
+
+is optimized, and L is the set of layers to edit . For edit b, pbare ,b is the bare prompt built from (sb, r b)
+
+without temporal tokens, subj _last marks the last-subject-token position, and λb,i weights the i-th target pair (tb,i , o b,i ). The key kℓ(·) is the MLP key at layer ℓ, averaged over random context templates 
+
+{xq}Pq=1 . Finally, Cℓ and Pℓ are the pre-computed key covariance and null-space projector at layer ℓ,and η is the L2 regularization coefficient.

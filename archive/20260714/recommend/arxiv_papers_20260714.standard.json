@@ -1,0 +1,171 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-14T21:03:20.093018+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2607.11327v1",
+      "source": "arxiv",
+      "title": "PRISM Edit: One Vector for All Temporal Answers",
+      "abstract": "Model editing keeps large language models (LLMs) up to date without retraining, but temporal facts expose a limitation of the prevailing locate-and-edit paradigm: an update is not always a replacement. When a fact changes, the new answer should become current while the old answer may remain correct in historical time contexts. Building on this insight, we use causal tracing to show that LLMs already support this distinction via a two-stage internal computation: early MLP layers retrieve a time-agnostic subject representation, and later layers modulate it with temporal context to yield the time-correct answer. Motivated by this finding, we introduce PRISM Edit, which optimizes a single polysemous representation across temporal contexts and leverages the model's inherent modulation pathway to route it to temporally correct predictions, without any architectural modification. We evaluate on TimeConflict, a new temporal editing benchmark we introduce, and on temporally augmented CounterFact. PRISM Edit improves over the best baseline by +23.3 Temporal Consistency (TC) and +33.7 Current Relative-time Score (CRS) on average while being more than 2x faster. Code and data are publicly available at https://github.com/AnonymousStudy972/PRISM-Edit.",
+      "authors": [
+        "Chen Huang",
+        "Qi Zheng",
+        "Ruiqin Zheng",
+        "Long Zeng",
+        "Yuantong Xu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-07-13T09:46:57+00:00",
+      "link": "https://arxiv.org/pdf/2607.11327v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Proposes PRISM Edit for temporal model editing, directly addressing LLM editing",
+      "llm_evidence_cn": "提出PRISM Edit进行时间性模型编辑，直接处理大语言模型编辑",
+      "llm_evidence": "提出PRISM Edit进行时间性模型编辑，直接处理大语言模型编辑",
+      "canonical_evidence": "提出PRISM Edit进行时间性模型编辑，直接处理大语言模型编辑",
+      "llm_tldr_en": "Introduces PRISM Edit, which optimizes a single polysemous representation for temporal facts, leveraging LLMs inherent temporal modulation for model editing.",
+      "llm_tldr_cn": "现有模型编辑假设事实更新即替换，但时间性事实需要区分新旧答案。本文通过因果追踪发现LLM内部存在两阶段计算，并提出PRISM Edit，优化一个多义表示以在不同时间上下文中产生正确答案，利用模型固有调制能力，无需重训练。",
+      "llm_tldr": "现有模型编辑假设事实更新即替换，但时间性事实需要区分新旧答案。本文通过因果追踪发现LLM内部存在两阶段计算，并提出PRISM Edit，优化一个多义表示以在不同时间上下文中产生正确答案，利用模型固有调制能力，无需重训练。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.11475v1",
+      "source": "arxiv",
+      "title": "HyperSafe: Inference-Time Safety Recovery for Fine-Tuned Language Models",
+      "abstract": "Safety alignment in large language models can be fragile under fine-tuning, as even benign task adaptation may increase harmful compliance. Existing defenses mainly follow two directions: they either intervene during or after fine-tuning through retraining or weight modification, which can be costly and may hurt task performance, or they use model-agnostic safety classifiers, which may miss failures specific to a given fine-tuned checkpoint. These limitations motivate a post hoc, model-specific, and non-invasive approach to safety restoration. To meet these requirements, we propose HyperSafe, a framework that restores safety behavior by generating a model-specific Safe Side Network (SSN) for each fine-tuned checkpoint. HyperSafe uses layer-wise activation fingerprints to capture how fine-tuning changes the model's inner representations. With a small set of given calibration prompts, the hypernetwork maps these fingerprints to the parameters of the \\ssn{} in a single forward pass. The generated \\ssn{} runs alongside the frozen fine-tuned model and performs prompt-level safety classification: harmful prompts are routed to refusal, while safe prompts are answered by the original fine-tuned model. Thus, HyperSafe requires no gradient updates, no safety data at deployment time, and no modification to the deployed model weights. We evaluate HyperSafe on two model families, Qwen2-7B and LLaMA-3-8B, across multiple safety benchmarks. HyperSafe reduces harmful response rates from 19-31% to below 1% on every held-out checkpoint, while keeping downstream task accuracy within 1% of the fine-tuned baseline on average. Code is available at https://github.com/nokronim/project-safety-remedy.",
+      "authors": [
+        "Aznaur Aliev",
+        "Carlos Hinojosa",
+        "Abdelrahman Eldesokey",
+        "Bang An",
+        "Bernard Ghanem",
+        "Yibo Yang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CL"
+      ],
+      "published": "2026-07-13T12:28:43+00:00",
+      "link": "https://arxiv.org/pdf/2607.11475v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "inference-time safety recovery for fine-tuned LLMs",
+      "llm_evidence_cn": "微调后大语言模型的安全恢复",
+      "llm_evidence": "微调后大语言模型的安全恢复",
+      "canonical_evidence": "微调后大语言模型的安全恢复",
+      "llm_tldr_en": "HyperSafe restores safety behavior after fine-tuning by generating a model-specific Safe Side Network (SSN) using layer-wise activations, without retraining or weight modification.",
+      "llm_tldr_cn": "针对微调后大语言模型安全对齐脆弱的问题，本文提出HyperSafe框架，通过生成模型专属的安全侧网络（SSN）来恢复安全行为，无需重训或修改原始权重。该方法基于逐层激活进行后处理，在多种模型上有效修复了微调引发的有害服从，同时保持了任务性能，为模型编辑安全提供了非侵入性的解决方案。",
+      "llm_tldr": "针对微调后大语言模型安全对齐脆弱的问题，本文提出HyperSafe框架，通过生成模型专属的安全侧网络（SSN）来恢复安全行为，无需重训或修改原始权重。该方法基于逐层激活进行后处理，在多种模型上有效修复了微调引发的有害服从，同时保持了任务性能，为模型编辑安全提供了非侵入性的解决方案。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2607.10226v1",
+      "source": "arxiv",
+      "title": "When Are Sparse Feature Interventions Actually Localized? Matched Evaluation for SAE-Based Safety Control",
+      "abstract": "We evaluate when sparse autoencoder (SAE) features act as localized control handles for safety-relevant behavior. This question is difficult because apparent success can arise from weak interventions, mismatched baselines, model robustness, or degenerate outputs that automated safety judges mark as unsafe without representing meaningful harmful compliance. We introduce a matched coherence-gated evaluation protocol for runtime safety interventions: methods are compared at matched target-effect points, and the primary target metric counts harmful compliance only when an output is both judge-unsafe and coherent. Applying this protocol to three prompt splits on Gemma-2-9B-it with a Gemma Scope layer-20 residual SAE, we find that SAE feature ablation has a narrow useful regime. SAE top800 reaches a low-to-mid target effect with lower total perturbation and competitive utility, but SAE top1600 loses utility relative to a matched dense refusal-direction baseline, and SAE top3200 primarily induces coherence collapse. Human audit confirms that coherence gating removes unsafe-only artifacts, and feature diagnostics show that the useful regime is driven by a stable head of refusal-aligned features whose activation separation decays rapidly with rank. These results argue that SAE-based safety interventions should be evaluated as regime-dependent control mechanisms rather than assumed to be uniformly localized.",
+      "authors": [
+        "Daming Luo"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CR"
+      ],
+      "published": "2026-07-11T09:31:45+00:00",
+      "link": "https://arxiv.org/pdf/2607.10226v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Evaluates sparse feature interventions for safety control, methodologically relevant to model editing for safety",
+      "llm_evidence_cn": "评估稀疏特征干预用于安全控制，方法上与模型编辑安全相关",
+      "llm_evidence": "评估稀疏特征干预用于安全控制，方法上与模型编辑安全相关",
+      "canonical_evidence": "评估稀疏特征干预用于安全控制，方法上与模型编辑安全相关",
+      "llm_tldr_en": "Introduces a matched coherence-gated evaluation protocol for SAE-based safety interventions, addressing when sparse features act as localized control handles.",
+      "llm_tldr_cn": "稀疏特征干预用于安全控制时存在伪成功问题，本文提出匹配一致性门控评估协议，确保干预效果不是来自弱干预或退化输出。在Gemma-2-9B-it上应用，发现仅部分特征真正局部化。",
+      "llm_tldr": "稀疏特征干预用于安全控制时存在伪成功问题，本文提出匹配一致性门控评估协议，确保干预效果不是来自弱干预或退化输出。在Gemma-2-9B-it上应用，发现仅部分特征真正局部化。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "Find papers about model editing for safety in large language models",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2607.10803v1",
+      "source": "arxiv",
+      "title": "Weight-Adjusted Gradients Reveal Parameter Importance and Failure Modes in LLMs",
+      "abstract": "Understanding which parameters are influential in Large Language Models (LLMs) is central to improving their efficiency, reliability, and interpretability. We introduce Weight-Adjusted Gradients (WAG), a simple yet effective approach for estimating parameter importance that explicitly captures the interaction between model weights and first-order gradient information and identifies parameters that disproportionately influence model behavior, such as those responsible for collapse phenomena in LLMs. Across a range of models and settings, we show that WAG surfaces a tiny but critical subset of parameters whose modification leads to dramatic degradation in performance, a failure mode that existing importance metrics overlook. These findings reveal a previously underexplored interplay between weights and gradients, suggesting that parameter importance cannot be fully understood through either signal alone. The surprising effectiveness of WAG points to fundamental structural properties of trained networks and motivates new open questions about the role of zeroth-order and first-order information in deep learning. We demonstrate the practical utility of WAG across multiple applications, including expert allocation in mixture-of-expert architectures, parameter-specific unlearning, mixed-precision quantization, and layer selection for knowledge editing. Our results position WAG as a unified approach for analyzing, debugging, and controlling LLMs, and opens new directions for principled model-level interpretation.",
+      "authors": [
+        "Shrestha Datta",
+        "Hongfu Liu",
+        "Anshuman Chhabra"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-07-12T15:21:19+00:00",
+      "link": "https://arxiv.org/pdf/2607.10803v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "parameter importance for model editing",
+      "llm_evidence_cn": "参数重要性用于模型编辑",
+      "llm_evidence": "参数重要性用于模型编辑",
+      "canonical_evidence": "参数重要性用于模型编辑",
+      "llm_tldr_en": "WAG estimates parameter importance by capturing weight-gradient interaction, revealing a critical subset whose modification degrades LLM performance, aiding editing precision.",
+      "llm_tldr_cn": "针对大语言模型编辑中需要识别关键参数的问题，本文提出权重调整梯度（WAG）方法，通过捕捉权重与一阶梯度交互来估计参数重要性。实验表明WAG能发现少量关键参数，修改它们会导致性能急剧下降，这为模型编辑提供了精准的定位工具，有助于避免编辑破坏模型核心能力。",
+      "llm_tldr": "针对大语言模型编辑中需要识别关键参数的问题，本文提出权重调整梯度（WAG）方法，通过捕捉权重与一阶梯度交互来估计参数重要性。实验表明WAG能发现少量关键参数，修改它们会导致性能急剧下降，这为模型编辑提供了精准的定位工具，有助于避免编辑破坏模型核心能力。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
