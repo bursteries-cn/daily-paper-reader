@@ -1,0 +1,101 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-15T21:07:34.372571+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2607.11327v2",
+      "source": "arxiv",
+      "title": "PRISM Edit: One Vector for All Temporal Answers",
+      "abstract": "Model editing keeps large language models (LLMs) up to date without retraining, but temporal facts expose a limitation of the prevailing locate-and-edit paradigm: an update is not always a replacement. When a fact changes, the new answer should become current while the old answer may remain correct in historical time contexts. Building on this insight, we use causal tracing to show that LLMs already support this distinction via a two-stage internal computation: early MLP layers retrieve a time-agnostic subject representation, and later layers modulate it with temporal context to yield the time-correct answer. Motivated by this finding, we introduce PRISM Edit, which optimizes a single polysemous representation across temporal contexts and leverages the model's inherent modulation pathway to route it to temporally correct predictions, without any architectural modification. We evaluate on TimeConflict, a new temporal editing benchmark we introduce, and on temporally augmented CounterFact. PRISM Edit improves over the best baseline by +23.3 Temporal Consistency (TC) and +33.7 Current Relative-time Score (CRS) on average while being more than 2x faster. Code and data are publicly available at https://github.com/AnonymousStudy972/PRISM-Edit.",
+      "authors": [
+        "Chen Huang",
+        "Qi Zheng",
+        "Ruiqin Zheng",
+        "Long Zeng",
+        "Yuantong Xu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-07-13T09:46:57+00:00",
+      "link": "https://arxiv.org/pdf/2607.11327v2",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Proposes PRISM Edit for temporal model editing",
+      "llm_evidence_cn": "提出PRISM Edit进行时间性模型编辑",
+      "llm_evidence": "提出PRISM Edit进行时间性模型编辑",
+      "canonical_evidence": "提出PRISM Edit进行时间性模型编辑",
+      "llm_tldr_en": "PRISM Edit addresses limitation of locate-and-edit paradigm for temporal facts in LLMs by optimizing a single polysemous representation across temporal contexts.",
+      "llm_tldr_cn": "现有模型编辑方法在处理时间性事实时，将更新视为简单替换，忽略了历史答案的正确性。本文通过因果追踪发现LLM内部两阶段计算支持时间感知，提出PRISM Edit优化单个多义表示以跨时间上下文生成正确答案。实验表明该方法有效平衡了时效性和历史准确性。",
+      "llm_tldr": "现有模型编辑方法在处理时间性事实时，将更新视为简单替换，忽略了历史答案的正确性。本文通过因果追踪发现LLM内部两阶段计算支持时间感知，提出PRISM Edit优化单个多义表示以跨时间上下文生成正确答案。实验表明该方法有效平衡了时效性和历史准确性。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2607.07707v1",
+      "source": "arxiv",
+      "title": "Co-LMLM: Continuous-Query Limited Memory Language Models",
+      "abstract": "Limited memory language models (LMLMs) externalize factual knowledge during pretraining to a knowledge base (KB), rather than memorizing it in their weights. During generation, the model then fetches knowledge from the KB as needed. This recently introduced paradigm provides multiple advantages, including knowledge control capabilities that remain beyond conventional LLMs. We propose continuous-query LMLM (CO-LMLM), where the KB pairs continuous keys with textual knowledge values, a significant departure from prior reliance on relational KB and queries. CO-LMLM generates flexible vector queries at minimal cost, while still integrating human-readable and attributable retrieved knowledge into its generation. We pair this design with an annotation pipeline that tags free-form factual spans in arbitrary text, removing prior work's restriction to Wikipedia. Across pretraining on Wikipedia and FineWeb-Edu and at multiple model scales, CO-LMLM outperforms prior LMLMs and vanilla LLMs in both perplexity and factual precision. At 360M scale, this includes lower perplexity than models pretrained on 40x more data, and SimpleQA-verified performance that is in line with gpt-4o-mini and higher than Claude Sonnet 4.5.",
+      "authors": [
+        "Yair Feldman",
+        "Linxi Zhao",
+        "Nathan Godey",
+        "Dongyoung Go",
+        "Yilun Hua",
+        "Kilian Q. Weinberger",
+        "Jennifer J. Sun",
+        "Yoav Artzi"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-07-08T17:59:45+00:00",
+      "link": "https://arxiv.org/pdf/2607.07707v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "knowledge control via external KB, similar to knowledge editing",
+      "llm_evidence_cn": "通过外部知识库进行知识控制，与知识编辑概念相似",
+      "llm_evidence": "通过外部知识库进行知识控制，与知识编辑概念相似",
+      "canonical_evidence": "通过外部知识库进行知识控制，与知识编辑概念相似",
+      "llm_tldr_en": "Proposes Co-LMLM with continuous queries to external KB for knowledge control, enabling edits-like behavior without modifying model weights.",
+      "llm_tldr_cn": "该论文提出Co-LMLM模型，通过连续查询外部知识库实现知识控制，避免在模型权重中记忆事实。该方法支持灵活的知识更新和溯源，与知识编辑的目标一致。实验表明，该模型在保持生成质量的同时，能够有效控制知识使用，为知识编辑提供了新的思路。",
+      "llm_tldr": "该论文提出Co-LMLM模型，通过连续查询外部知识库实现知识控制，避免在模型权重中记忆事实。该方法支持灵活的知识更新和溯源，与知识编辑的目标一致。实验表明，该模型在保持生成质量的同时，能够有效控制知识使用，为知识编辑提供了新的思路。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

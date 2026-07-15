@@ -1,0 +1,39 @@
+{
+  "label": "2026-07-15",
+  "date": "2026-07-15",
+  "generated_at": "2026-07-15T21:10:07",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202607/15/2607.11327v2-prism-edit-one-vector-for-all-temporal-answers",
+      "section": "deep",
+      "title_en": "PRISM Edit: One Vector for All Temporal Answers",
+      "authors": "Chen Huang, Qi Zheng, Ruiqin Zheng, Long Zeng, Yuantong Xu",
+      "date": "2026-07-13",
+      "pdf": "https://arxiv.org/pdf/2607.11327v2",
+      "score": "9.0",
+      "evidence": "提出PRISM Edit进行时间性模型编辑",
+      "tldr": "现有模型编辑方法将事实更新视为简单替换，忽略了历史答案在特定时间上下文中的正确性。PRISM Edit基于因果追踪发现的LLM两阶段计算，优化单一多义表示，利用模型固有调制路径产生时序正确预测。在TimeConflict和时序增强CounterFact上，时序一致性提升23.3分，当前相对时间得分提升33.7分，速度提升两倍以上。该方法无需架构修改，实现了高效精准的时序知识编辑。",
+      "tags": "query:model-edit",
+      "abstract_en": "Model editing keeps large language models (LLMs) up to date without retraining, but temporal facts expose a limitation of the prevailing locate-and-edit paradigm: an update is not always a replacement. When a fact changes, the new answer should become current while the old answer may remain correct in historical time contexts. Building on this insight, we use causal tracing to show that LLMs already support this distinction via a two-stage internal computation: early MLP layers retrieve a time-agnostic subject representation, and later layers modulate it with temporal context to yield the time-correct answer. Motivated by this finding, we introduce PRISM Edit, which optimizes a single polysemous representation across temporal contexts and leverages the model's inherent modulation pathway to route it to temporally correct predictions, without any architectural modification. We evaluate on TimeConflict, a new temporal editing benchmark we introduce, and on temporally augmented CounterFact. PRISM Edit improves over the best baseline by +23.3 Temporal Consistency (TC) and +33.7 Current Relative-time Score (CRS) on average while being more than 2x faster. Code and data are publicly available at https://github.com/AnonymousStudy972/PRISM-Edit.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/15/2607.07707v1-co-lmlm-continuous-query-limited-memory-language-models",
+      "section": "quick",
+      "title_en": "Co-LMLM: Continuous-Query Limited Memory Language Models",
+      "authors": "Yair Feldman, Linxi Zhao, Nathan Godey, Dongyoung Go, Yilun Hua, Kilian Q. Weinberger, Jennifer J. Sun, Yoav Artzi",
+      "date": "2026-07-08",
+      "pdf": "https://arxiv.org/pdf/2607.07707v1",
+      "score": "6.0",
+      "evidence": "通过外部知识库进行知识控制，与知识编辑概念相似",
+      "tldr": "传统大语言模型依赖参数记忆知识，存在更新困难和知识幻觉问题。本文提出Co-LMLM，使用连续向量查询知识库，将可归因文本知识外化并融入生成。在Wikipedia和FineWeb-Edu上的预训练中，模型困惑度低于先前LMLM及普通LLM，360M参数模型困惑度优于40倍数据训练的模型，且事实精度与gpt-4o-mini相当。该方法实现了更灵活高效的知识外化，增强了模型的可控性和可解释性。",
+      "tags": "query:model-edit",
+      "abstract_en": "Limited memory language models (LMLMs) externalize factual knowledge during pretraining to a knowledge base (KB), rather than memorizing it in their weights. During generation, the model then fetches knowledge from the KB as needed. This recently introduced paradigm provides multiple advantages, including knowledge control capabilities that remain beyond conventional LLMs. We propose continuous-query LMLM (CO-LMLM), where the KB pairs continuous keys with textual knowledge values, a significant departure from prior reliance on relational KB and queries. CO-LMLM generates flexible vector queries at minimal cost, while still integrating human-readable and attributable retrieved knowledge into its generation. We pair this design with an annotation pipeline that tags free-form factual spans in arbitrary text, removing prior work's restriction to Wikipedia. Across pretraining on Wikipedia and FineWeb-Edu and at multiple model scales, CO-LMLM outperforms prior LMLMs and vanilla LLMs in both perplexity and factual precision. At 360M scale, this includes lower perplexity than models pretrained on 40x more data, and SimpleQA-verified performance that is in line with gpt-4o-mini and higher than Claude Sonnet 4.5.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
