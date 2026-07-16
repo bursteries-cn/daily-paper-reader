@@ -6,26 +6,26 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-15
-- 运行时间：2026-07-15 21:10:02 UTC
+- 最新运行日期：2026-07-16
+- 运行时间：2026-07-16 21:18:16 UTC
 - 运行状态：成功
 - 本次总论文数：2
 - 精读区：1
 - 速读区：1
 
 ### 今日简报（AI）
-今日精读1篇高分论文《PRISM Edit》，速读1篇低分研究《Co-LMLM》。重点推荐PRISM Edit的时间向量统一答案方法，适合时序问答场景。建议优先精读PRISM Edit，速读Co-LMLM可作为扩展了解。
-- 详情：[/202607/15/README](/202607/15/README)
+今日精读1篇、速读1篇，重点聚焦大模型安全对齐与高效交互。最值得关注的是《Optimizing Against Safety Representations》，揭示了通过激活引导对抗后缀操控模型拒绝行为的几何机制。建议跟随顶级安全会议动态，深入研究大模型拒绝行为的可解释性。
+- 详情：[/202607/16/README](/202607/16/README)
 
 ### 精读区论文标签
-1. [PRISM Edit: One Vector for All Temporal Answers](/202607/15/2607.11327v2-prism-edit-one-vector-for-all-temporal-answers)  
-   标签：评分：9.0/10、query:model-edit
-   evidence：提出PRISM Edit进行时间性模型编辑
+1. [Optimizing Against Safety Representations: Activation-Guided Adversarial Suffixes and the Geometry of Refusal](/202607/16/2607.08883v1-optimizing-against-safety-representations-activation-guided-adversarial-suffixes-and-the-geometry-of-refusal)  
+   标签：评分：8.0/10、query:model-edit
+   evidence：针对安全表示的攻击与编辑启示
 
 ### 速读区论文标签
-1. [Co-LMLM: Continuous-Query Limited Memory Language Models](/202607/15/2607.07707v1-co-lmlm-continuous-query-limited-memory-language-models)  
+1. [Deep Interaction: An Efficient Human-AI Interaction Method for Large Reasoning Models](/202607/16/2607.14049v1-deep-interaction-an-efficient-human-ai-interaction-method-for-large-reasoning-models)  
    标签：评分：6.0/10、query:model-edit
-   evidence：通过外部知识库进行知识控制，与知识编辑概念相似
+   evidence：提出直接编辑LLM回复以纠正错误，可应用于安全编辑
 
 
 <div class="dpr-home-promo-card">

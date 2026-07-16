@@ -1,0 +1,95 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-16T21:16:09.880165+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2607.08883v1",
+      "source": "arxiv",
+      "title": "Optimizing Against Safety Representations: Activation-Guided Adversarial Suffixes and the Geometry of Refusal",
+      "abstract": "Behavioral alignment in large language models often masks fragile internal safety representations. Recent work suggests that refusal behavior is mediated by low-dimensional directions in activation space. This raises questions about how such representations are structured, localized, and accessed by optimization. We study adversarial suffix attacks as a probe of representational alignment. We introduce Activation-Guided GCG, which replaces output-based objectives with losses that directly target a model's internal refusal direction. Across several objective variants, we find that suppressing refusal globally across all layers and positions is more effective than targeting a single layer-position pair. This suggests that safety representations are distributed across the forward pass rather than causally localized to a single site. We further introduce Soft-GCG, a continuous relaxation of discrete suffix optimization using Gumbel-Softmax. Soft-GCG achieves a 33 $\\times$ speedup over standard GCG while improving attack success rates. Evaluating across model scales, we find that smaller models remain vulnerable while larger models resist both activation- and suffix-based attacks at our compute-constrained settings, consistent with larger and better safety trained models being harder to jailbreak. Together, our results clarify how safety mechanisms are encoded and can be broken in contemporary models. These insights provide concrete guidance for designing more robust and representation-aware alignment strategies.",
+      "authors": [
+        "Ege Çakar",
+        "Hannah Guan",
+        "Kayden Kehe"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-07-09T19:21:29+00:00",
+      "link": "https://arxiv.org/pdf/2607.08883v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "targets safety representations for editing",
+      "llm_evidence_cn": "针对安全表示的攻击与编辑启示",
+      "llm_evidence": "针对安全表示的攻击与编辑启示",
+      "canonical_evidence": "针对安全表示的攻击与编辑启示",
+      "llm_tldr_en": "Activation-Guided GCG targets internal refusal directions across layers, revealing how to manipulate safety representations for attacks or defenses.",
+      "llm_tldr_cn": "大语言模型的行为对齐可能掩盖脆弱的内部安全表示。本文研究对抗性后缀攻击如何探测表示对齐，提出激活引导的GCG方法，用内部拒绝方向替代输出目标，发现在所有层和位置全局压制拒绝比单层更有效。这为理解安全表示的几何结构提供了新视角，对模型编辑防御具有潜在价值。",
+      "llm_tldr": "大语言模型的行为对齐可能掩盖脆弱的内部安全表示。本文研究对抗性后缀攻击如何探测表示对齐，提出激活引导的GCG方法，用内部拒绝方向替代输出目标，发现在所有层和位置全局压制拒绝比单层更有效。这为理解安全表示的几何结构提供了新视角，对模型编辑防御具有潜在价值。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2607.14049v1",
+      "source": "arxiv",
+      "title": "Deep Interaction: An Efficient Human-AI Interaction Method for Large Reasoning Models",
+      "abstract": "The emergence of Chain-of-Thought (CoT) reasoning has significantly enhanced the ability of large language models (LLMs) to tackle complex, multi-step tasks. However, when errors occur, current interaction approaches typically involve re-generating another response that may make mistakes again, or users laboriously flag the faulty step in follow-up turns that may get responses <You are right, I made a mistake here> followed by similar errors recurring. To address this issue, we propose an efficient human intervention mechanism for precisely correcting reasoning errors in LLMs, termed Deep Interaction. Our approach enables direct editing of the original response, allowing erroneous parts to be corrected while preserving accurate reasoning steps. We refine the edited CoT into a distilled prompt, which then steers the LLM along the corrected reasoning path. Experimental results show that our method achieves over a 25% improvement in correction success rate and reduces token usage by approximately 40% on STEM tasks reasoning compared to baseline approaches.",
+      "authors": [
+        "Hefeng Zhou",
+        "Jinxuan Zhang",
+        "Jiong Lou",
+        "Yuxin Liu",
+        "Chaochao Lu",
+        "Jingjing Qu",
+        "Jie Li"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-07-15T17:16:43+00:00",
+      "link": "https://arxiv.org/pdf/2607.14049v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "proposes direct editing of LLM responses to correct errors, could be applied to safety editing",
+      "llm_evidence_cn": "提出直接编辑LLM回复以纠正错误，可应用于安全编辑",
+      "llm_evidence": "提出直接编辑LLM回复以纠正错误，可应用于安全编辑",
+      "canonical_evidence": "提出直接编辑LLM回复以纠正错误，可应用于安全编辑",
+      "llm_tldr_en": "Deep Interaction enables direct human editing of LLM reasoning responses to correct errors while preserving correct parts.",
+      "llm_tldr_cn": "该论文提出深度交互方法，允许用户直接编辑大语言模型的推理回复，精准修正错误部分并保留正确推理。该方法通过交互式编辑替代传统的重新生成或多轮纠正，提高效率。实验表明可有效改善推理准确性，对安全对齐编辑具有潜在迁移价值。",
+      "llm_tldr": "该论文提出深度交互方法，允许用户直接编辑大语言模型的推理回复，精准修正错误部分并保留正确推理。该方法通过交互式编辑替代传统的重新生成或多轮纠正，提高效率。实验表明可有效改善推理准确性，对安全对齐编辑具有潜在迁移价值。",
+      "llm_tags": [
+        "query:model-edit:composite"
+      ],
+      "matched_query_tag": "query:model-edit:composite",
+      "matched_query_text": "Papers central to 查找大模型安全领域的模型编辑方向论文, especially work that connects or combines: large language model editing; model editing safety; knowledge editing; safety alignment editing; jailbreak editing; Find papers about model editing for safety in large language models; Research on knowledge editing to improve LLM safety; How can model editing prevent attacks on large language models.",
+      "matched_requirement_id": "req-composite-model-edit",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

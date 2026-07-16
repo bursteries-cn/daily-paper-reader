@@ -1,0 +1,39 @@
+{
+  "label": "2026-07-16",
+  "date": "2026-07-16",
+  "generated_at": "2026-07-16T21:18:21",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202607/16/2607.08883v1-optimizing-against-safety-representations-activation-guided-adversarial-suffixes-and-the-geometry-of-refusal",
+      "section": "deep",
+      "title_en": "Optimizing Against Safety Representations: Activation-Guided Adversarial Suffixes and the Geometry of Refusal",
+      "authors": "Ege Çakar, Hannah Guan, Kayden Kehe",
+      "date": "2026-07-09",
+      "pdf": "https://arxiv.org/pdf/2607.08883v1",
+      "score": "8.0",
+      "evidence": "针对安全表示的攻击与编辑启示",
+      "tldr": "大语言模型的拒绝行为由激活空间中低维方向介导，但安全表示分布在前向传播中而非定位于单点。我们提出Activation-Guided GCG和Soft-GCG方法，前者通过全局抑制所有层的拒绝方向提升攻击效果，后者利用Gumbel-Softmax连续松弛实现33倍加速。跨模型实验显示小模型易被攻破，大模型在计算受限下更鲁棒。研究揭示了安全机制的编码与脆弱性，为鲁棒对齐策略提供指导。",
+      "tags": "query:model-edit",
+      "abstract_en": "Behavioral alignment in large language models often masks fragile internal safety representations. Recent work suggests that refusal behavior is mediated by low-dimensional directions in activation space. This raises questions about how such representations are structured, localized, and accessed by optimization. We study adversarial suffix attacks as a probe of representational alignment. We introduce Activation-Guided GCG, which replaces output-based objectives with losses that directly target a model's internal refusal direction. Across several objective variants, we find that suppressing refusal globally across all layers and positions is more effective than targeting a single layer-position pair. This suggests that safety representations are distributed across the forward pass rather than causally localized to a single site. We further introduce Soft-GCG, a continuous relaxation of discrete suffix optimization using Gumbel-Softmax. Soft-GCG achieves a 33 $\\times$ speedup over standard GCG while improving attack success rates. Evaluating across model scales, we find that smaller models remain vulnerable while larger models resist both activation- and suffix-based attacks at our compute-constrained settings, consistent with larger and better safety trained models being harder to jailbreak. Together, our results clarify how safety mechanisms are encoded and can be broken in contemporary models. These insights provide concrete guidance for designing more robust and representation-aware alignment strategies.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/16/2607.14049v1-deep-interaction-an-efficient-human-ai-interaction-method-for-large-reasoning-models",
+      "section": "quick",
+      "title_en": "Deep Interaction: An Efficient Human-AI Interaction Method for Large Reasoning Models",
+      "authors": "Hefeng Zhou, Jinxuan Zhang, Jiong Lou, Yuxin Liu, Chaochao Lu, Jingjing Qu, Jie Li",
+      "date": "2026-07-15",
+      "pdf": "https://arxiv.org/pdf/2607.14049v1",
+      "score": "6.0",
+      "evidence": "提出直接编辑LLM回复以纠正错误，可应用于安全编辑",
+      "tldr": "链式思维推理增强了大模型的多步任务能力，但现有交互在出错时低效且易重复错误。本文提出Deep Interaction，允许用户直接编辑原始回复中的错误部分，并将修正后的推理链精炼为蒸馏提示，引导模型沿正确路径推理。实验表明，该方法在STEM任务中修正成功率提升超25%，token消耗减少约40%，实现了高效精准的推理纠错。",
+      "tags": "query:model-edit",
+      "abstract_en": "The emergence of Chain-of-Thought (CoT) reasoning has significantly enhanced the ability of large language models (LLMs) to tackle complex, multi-step tasks. However, when errors occur, current interaction approaches typically involve re-generating another response that may make mistakes again, or users laboriously flag the faulty step in follow-up turns that may get responses <You are right, I made a mistake here> followed by similar errors recurring. To address this issue, we propose an efficient human intervention mechanism for precisely correcting reasoning errors in LLMs, termed Deep Interaction. Our approach enables direct editing of the original response, allowing erroneous parts to be corrected while preserving accurate reasoning steps. We refine the edited CoT into a distilled prompt, which then steers the LLM along the corrected reasoning path. Experimental results show that our method achieves over a 25% improvement in correction success rate and reduces token usage by approximately 40% on STEM tasks reasoning compared to baseline approaches.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
