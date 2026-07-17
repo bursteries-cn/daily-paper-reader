@@ -6,26 +6,22 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-16
-- 运行时间：2026-07-16 21:18:16 UTC
+- 最新运行日期：2026-07-17
+- 运行时间：2026-07-17 21:19:43 UTC
 - 运行状态：成功
-- 本次总论文数：2
-- 精读区：1
-- 速读区：1
+- 本次总论文数：0
+- 精读区：0
+- 速读区：0
 
 ### 今日简报（AI）
-今日精读1篇、速读1篇，重点聚焦大模型安全对齐与高效交互。最值得关注的是《Optimizing Against Safety Representations》，揭示了通过激活引导对抗后缀操控模型拒绝行为的几何机制。建议跟随顶级安全会议动态，深入研究大模型拒绝行为的可解释性。
-- 详情：[/202607/16/README](/202607/16/README)
+> 今日无新推荐，系统未产出可展示论文。
+- 详情：[/202607/17/README](/202607/17/README)
 
 ### 精读区论文标签
-1. [Optimizing Against Safety Representations: Activation-Guided Adversarial Suffixes and the Geometry of Refusal](/202607/16/2607.08883v1-optimizing-against-safety-representations-activation-guided-adversarial-suffixes-and-the-geometry-of-refusal)  
-   标签：评分：8.0/10、query:model-edit
-   evidence：针对安全表示的攻击与编辑启示
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Deep Interaction: An Efficient Human-AI Interaction Method for Large Reasoning Models](/202607/16/2607.14049v1-deep-interaction-an-efficient-human-ai-interaction-method-for-large-reasoning-models)  
-   标签：评分：6.0/10、query:model-edit
-   evidence：提出直接编辑LLM回复以纠正错误，可应用于安全编辑
+- 本次无速读推荐。
 
 
 <div class="dpr-home-promo-card">
