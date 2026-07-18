@@ -1,0 +1,60 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-18T20:19:15.659453+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2607.15081v1",
+      "source": "arxiv",
+      "title": "DataShield: Uncovering Risky Fine-Tuning Data Across LLMs Through Consensus Subspace Alignment",
+      "abstract": "Fine-tuning large language models (LLMs) on domain-specific datasets has become a standard paradigm for adapting LLMs to specialized applications. However, recent work has shown that even fine-tuning on benign task-specific data can substantially weaken the safety capabilities of LLMs. While existing efforts have made progress in identifying data responsible for safety degradation, they usually rely on a single mean vector computed over a specific model with its tokenizer to represent the safety direction, which limits both the effectiveness and transferability of their risk assessment measures. To address these limitations, we propose DataShield, a data assessment framework that identifies risky fine-tuning samples and response segments through consensus subspace alignment over joint safety-critical semantic spaces derived from multiple safety-aligned LLMs. Within these spaces, DataShield extracts consensus safe and unsafe subspaces using semantic spectral decomposition over safe and unsafe data representations. The risk of a data sample or segment is then estimated by measuring its relative alignment with the unsafe and safe subspaces, enabling both sample-level filtering and fine-grained segment-level masking. Compared with state-of-the-art filtering and masking baselines, DataShield reduces ASR by 14.6\\% with sample filtering and 32.3\\% with segment masking, while preserving downstream utility and avoiding target-model-specific risk computation.",
+      "authors": [
+        "Zefeng Wu",
+        "Weiwei Qi",
+        "Jielong Chen",
+        "Tianhang Zheng",
+        "Di Hong",
+        "Chaochao Lu",
+        "Liang He",
+        "Zhan Qin",
+        "Kui Ren"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-16T14:51:42+00:00",
+      "link": "https://arxiv.org/pdf/2607.15081v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Identifies risky fine-tuning data that weakens safety; improves safety alignment",
+      "llm_evidence_cn": "识别降低安全性的微调数据，提升安全对齐",
+      "llm_evidence": "识别降低安全性的微调数据，提升安全对齐",
+      "canonical_evidence": "识别降低安全性的微调数据，提升安全对齐",
+      "llm_tldr_en": "DataShield identifies risky fine-tuning data across LLMs via consensus subspace alignment, improving safety assessment robustness and transferability; it is a practical tool for safe alignment and model editing data screening.",
+      "llm_tldr_cn": "微调领域数据可能导致大语言模型安全性显著下降。现有方法依赖单一模型的安全方向向量，泛化性差且难以迁移。本文提出DataShield框架，通过共识子空间对齐技术，在不同模型间一致地识别有风险的微调样本。实验表明，DataShield能有效发现导致安全退化的数据，其评估结果可跨模型迁移，提升了安全对齐的鲁棒性。该工作为安全微调和模型编辑中的数据筛选提供了实用工具，有助于在编辑过程中保持模型的安全性。",
+      "llm_tldr": "微调领域数据可能导致大语言模型安全性显著下降。现有方法依赖单一模型的安全方向向量，泛化性差且难以迁移。本文提出DataShield框架，通过共识子空间对齐技术，在不同模型间一致地识别有风险的微调样本。实验表明，DataShield能有效发现导致安全退化的数据，其评估结果可跨模型迁移，提升了安全对齐的鲁棒性。该工作为安全微调和模型编辑中的数据筛选提供了实用工具，有助于在编辑过程中保持模型的安全性。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
