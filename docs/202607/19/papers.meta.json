@@ -1,0 +1,54 @@
+{
+  "label": "2026-07-19",
+  "date": "2026-07-19",
+  "generated_at": "2026-07-19T20:57:10",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202607/19/2607.11070v1-mj-multi-turn-llm-jailbreaking-via-decomposed-credit-assignment",
+      "section": "deep",
+      "title_en": "MJ: Multi-turn LLM Jailbreaking via Decomposed Credit Assignment",
+      "authors": "Junyoung Park, Namgyu Park, Sechan Lee, Yoon-Chan Jhi, Jihoon Cho, Sangdon Park",
+      "date": "2026-07-13",
+      "pdf": "https://arxiv.org/pdf/2607.11070v1",
+      "score": "8.0",
+      "evidence": "多轮越狱学习方法，分解信用分配",
+      "tldr": "多轮越狱攻击是LLM面临的实际威胁，但现有方法对各轮贡献的信用分配过于粗粒度。本文提出DC-GRPO框架，通过分解信用为每轮分配独立的组相对学习信号，结合即时与未来信用避免误分配。在多个受害模型上，动态与静态加权变体分别达到98.26%和97.88%的ASR5@3，远超SEMA和TROJail。核心贡献在于验证了轮级别组相对信用分配的有效性，而非特定加权规则。",
+      "tags": "query:model-edit",
+      "abstract_en": "Modern large language models (LLMs) operate in interactive multi-turn settings, making multi-turn jailbreaking a realistic threat model and an important setting for automated red teaming. A core challenge in learning multi-turn jailbreak attackers is credit assignment: different turns contribute differently to the final outcome, yet existing learning signals are often too coarse to identify their individual contributions. We propose decomposed credit GRPO (DC-GRPO), a unified turn-level credit assignment framework for Group Relative Policy Optimization in multi-turn jailbreak learning. DC-GRPO assigns a separate group-relative learning signal to each turn by combining immediate and future credit, avoiding the credit misassignment induced by broadcasting a single trajectory-level score across the dialogue. We instantiate this framework with static and dynamic weighting rules that differ in how the two credit sources are balanced while sharing the same turn-level structure. Across multiple victim LLMs and benchmarks, the dynamic- and static-weighted variants achieve average ASR5@3 scores of 98.26% and 97.88%, respectively, substantially outperforming the state-of-the-art methods, including SEMA (86.58%) and TROJail (86.23%). Their consistently strong performance indicates that the central empirical benefit comes from turn-level group-relative credit assignment rather than a particular weighting rule. Warning: This paper contains examples of harmful content.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/19/2607.14049v1-deep-interaction-an-efficient-human-ai-interaction-method-for-large-reasoning-models",
+      "section": "quick",
+      "title_en": "Deep Interaction: An Efficient Human-AI Interaction Method for Large Reasoning Models",
+      "authors": "Hefeng Zhou, Jinxuan Zhang, Jiong Lou, Yuxin Liu, Chaochao Lu, Jingjing Qu, Jie Li",
+      "date": "2026-07-15",
+      "pdf": "https://arxiv.org/pdf/2607.14049v1",
+      "score": "7.0",
+      "evidence": "直接编辑LLM响应以纠正推理错误",
+      "tldr": "大型推理模型在Chain-of-Thought推理中出错时，现有交互方式效率低且易重复错误。本文提出Deep Interaction方法，允许用户直接编辑原始响应中的错误步骤，并将修正后的推理路径精炼为蒸馏提示，引导模型沿正确路径生成。实验表明，在STEM任务上纠正成功率提升超25%，token使用减少约40%。该方法实现了精准、高效的人机交互修正，显著提升模型纠错能力。",
+      "tags": "query:model-edit",
+      "abstract_en": "The emergence of Chain-of-Thought (CoT) reasoning has significantly enhanced the ability of large language models (LLMs) to tackle complex, multi-step tasks. However, when errors occur, current interaction approaches typically involve re-generating another response that may make mistakes again, or users laboriously flag the faulty step in follow-up turns that may get responses <You are right, I made a mistake here> followed by similar errors recurring. To address this issue, we propose an efficient human intervention mechanism for precisely correcting reasoning errors in LLMs, termed Deep Interaction. Our approach enables direct editing of the original response, allowing erroneous parts to be corrected while preserving accurate reasoning steps. We refine the edited CoT into a distilled prompt, which then steers the LLM along the corrected reasoning path. Experimental results show that our method achieves over a 25% improvement in correction success rate and reduces token usage by approximately 40% on STEM tasks reasoning compared to baseline approaches.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/19/2607.13425v1-data-efficient-adaptation-of-llms-via-attention-head-reweighting",
+      "section": "quick",
+      "title_en": "Data-Efficient Adaptation of LLMs via Attention Head Reweighting",
+      "authors": "Tuomas Oikarinen, Zixiao Chen, Charlotte Siska, Tsui-Wei Weng, Chandan Singh, Jianfeng Gao",
+      "date": "2026-07-15",
+      "pdf": "https://arxiv.org/pdf/2607.13425v1",
+      "score": "6.0",
+      "evidence": "通过重加权注意力头实现高效适应，可用于模型编辑场景",
+      "tldr": "在安全等标注稀缺领域，大型语言模型（LLM）在样本极少的情况下难以有效适应新任务。本文提出注意力头重加权（AHR），通过为每个注意力头学习一个可训练的标量权重，实现数据高效的参数微调，仅修改约0.0001%的模型参数。在少样本文本分类基准上，AHR以少200-1000倍的可训练参数，超越了LoRA等标准方法。此外，学习到的权重可解释，有助于分析LLM上下文学习背后的注意力头功能特化。",
+      "tags": "query:model-edit",
+      "abstract_en": "Learning effectively from limited data is critical in domains like security where labeled examples are scarce. Large language models (LLMs) have demonstrated some capabilities for data-efficient learning, especially through parameter-efficient adaptation methods, but continue to struggle when faced with few samples for difficult tasks. To meet this challenge, we propose Attention Head Reweighting (AHR), a data-efficient method that adapts LLMs to new text-classification tasks by learning only a single scalar per attention head. This drastically reduces the number of parameters that need to be learned by making use of the functional specialization of individual attention heads. Experiments on diverse open-source text classification datasets show that AHR can outperform standard baselines like LoRA when learning from limited samples, despite having 200-1000x fewer trainable parameters, as our AHR only modifies ~0.0001% of the model's parameters. In addition, our learned weights are easy to interpret and can be analyzed to better understand the mechanisms and attention heads responsible for in-context learning abilities in LLMs.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

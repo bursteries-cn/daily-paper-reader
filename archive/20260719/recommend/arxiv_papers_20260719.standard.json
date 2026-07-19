@@ -1,0 +1,140 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-19T20:53:33.441044+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2607.11070v1",
+      "source": "arxiv",
+      "title": "MJ: Multi-turn LLM Jailbreaking via Decomposed Credit Assignment",
+      "abstract": "Modern large language models (LLMs) operate in interactive multi-turn settings, making multi-turn jailbreaking a realistic threat model and an important setting for automated red teaming. A core challenge in learning multi-turn jailbreak attackers is credit assignment: different turns contribute differently to the final outcome, yet existing learning signals are often too coarse to identify their individual contributions. We propose decomposed credit GRPO (DC-GRPO), a unified turn-level credit assignment framework for Group Relative Policy Optimization in multi-turn jailbreak learning. DC-GRPO assigns a separate group-relative learning signal to each turn by combining immediate and future credit, avoiding the credit misassignment induced by broadcasting a single trajectory-level score across the dialogue. We instantiate this framework with static and dynamic weighting rules that differ in how the two credit sources are balanced while sharing the same turn-level structure. Across multiple victim LLMs and benchmarks, the dynamic- and static-weighted variants achieve average ASR5@3 scores of 98.26% and 97.88%, respectively, substantially outperforming the state-of-the-art methods, including SEMA (86.58%) and TROJail (86.23%). Their consistently strong performance indicates that the central empirical benefit comes from turn-level group-relative credit assignment rather than a particular weighting rule. Warning: This paper contains examples of harmful content.",
+      "authors": [
+        "Junyoung Park",
+        "Namgyu Park",
+        "Sechan Lee",
+        "Yoon-Chan Jhi",
+        "Jihoon Cho",
+        "Sangdon Park"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-07-13T04:19:37+00:00",
+      "link": "https://arxiv.org/pdf/2607.11070v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Multi-turn jailbreak learning method with decomposed credit assignment",
+      "llm_evidence_cn": "多轮越狱学习方法，分解信用分配",
+      "llm_evidence": "多轮越狱学习方法，分解信用分配",
+      "canonical_evidence": "多轮越狱学习方法，分解信用分配",
+      "llm_tldr_en": "Proposes DC-GRPO for multi-turn jailbreak learning, assigning turn-level credit to improve attack success rate.",
+      "llm_tldr_cn": "该论文针对多轮交互场景下的LLM越狱攻击，提出基于分解信用分配的DC-GRPO框架，为每个回合分配独立的组相对学习信号，解决了传统方法中信用分配不准确的问题。实验证明该方法能显著提高越狱攻击成功率，为理解多轮越狱机制和开发防御策略提供了重要工具。",
+      "llm_tldr": "该论文针对多轮交互场景下的LLM越狱攻击，提出基于分解信用分配的DC-GRPO框架，为每个回合分配独立的组相对学习信号，解决了传统方法中信用分配不准确的问题。实验证明该方法能显著提高越狱攻击成功率，为理解多轮越狱机制和开发防御策略提供了重要工具。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2607.14049v1",
+      "source": "arxiv",
+      "title": "Deep Interaction: An Efficient Human-AI Interaction Method for Large Reasoning Models",
+      "abstract": "The emergence of Chain-of-Thought (CoT) reasoning has significantly enhanced the ability of large language models (LLMs) to tackle complex, multi-step tasks. However, when errors occur, current interaction approaches typically involve re-generating another response that may make mistakes again, or users laboriously flag the faulty step in follow-up turns that may get responses <You are right, I made a mistake here> followed by similar errors recurring. To address this issue, we propose an efficient human intervention mechanism for precisely correcting reasoning errors in LLMs, termed Deep Interaction. Our approach enables direct editing of the original response, allowing erroneous parts to be corrected while preserving accurate reasoning steps. We refine the edited CoT into a distilled prompt, which then steers the LLM along the corrected reasoning path. Experimental results show that our method achieves over a 25% improvement in correction success rate and reduces token usage by approximately 40% on STEM tasks reasoning compared to baseline approaches.",
+      "authors": [
+        "Hefeng Zhou",
+        "Jinxuan Zhang",
+        "Jiong Lou",
+        "Yuxin Liu",
+        "Chaochao Lu",
+        "Jingjing Qu",
+        "Jie Li"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-07-15T17:16:43+00:00",
+      "link": "https://arxiv.org/pdf/2607.14049v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "direct editing of LLM responses for error correction",
+      "llm_evidence_cn": "直接编辑LLM响应以纠正推理错误",
+      "llm_evidence": "直接编辑LLM响应以纠正推理错误",
+      "canonical_evidence": "直接编辑LLM响应以纠正推理错误",
+      "llm_tldr_en": "Deep Interaction enables direct human editing of LLM reasoning errors while preserving correct parts, improving error correction efficiency.",
+      "llm_tldr_cn": "现有交互方式难以精准修正LLM推理中的错误，往往导致重新生成或重复错误。本文提出Deep Interaction机制，允许用户直接在原始响应中编辑错误部分，同时保留正确推理链。实验验证该方法能有效修正错误且不破坏上下文，为人类有效干预LLM输出提供了新思路。",
+      "llm_tldr": "现有交互方式难以精准修正LLM推理中的错误，往往导致重新生成或重复错误。本文提出Deep Interaction机制，允许用户直接在原始响应中编辑错误部分，同时保留正确推理链。实验验证该方法能有效修正错误且不破坏上下文，为人类有效干预LLM输出提供了新思路。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2607.13425v1",
+      "source": "arxiv",
+      "title": "Data-Efficient Adaptation of LLMs via Attention Head Reweighting",
+      "abstract": "Learning effectively from limited data is critical in domains like security where labeled examples are scarce. Large language models (LLMs) have demonstrated some capabilities for data-efficient learning, especially through parameter-efficient adaptation methods, but continue to struggle when faced with few samples for difficult tasks. To meet this challenge, we propose Attention Head Reweighting (AHR), a data-efficient method that adapts LLMs to new text-classification tasks by learning only a single scalar per attention head. This drastically reduces the number of parameters that need to be learned by making use of the functional specialization of individual attention heads. Experiments on diverse open-source text classification datasets show that AHR can outperform standard baselines like LoRA when learning from limited samples, despite having 200-1000x fewer trainable parameters, as our AHR only modifies ~0.0001% of the model's parameters. In addition, our learned weights are easy to interpret and can be analyzed to better understand the mechanisms and attention heads responsible for in-context learning abilities in LLMs.",
+      "authors": [
+        "Tuomas Oikarinen",
+        "Zixiao Chen",
+        "Charlotte Siska",
+        "Tsui-Wei Weng",
+        "Chandan Singh",
+        "Jianfeng Gao"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-07-15T04:03:24+00:00",
+      "link": "https://arxiv.org/pdf/2607.13425v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "adaptation method by reweighting attention heads, applicable to model editing",
+      "llm_evidence_cn": "通过重加权注意力头实现高效适应，可用于模型编辑场景",
+      "llm_evidence": "通过重加权注意力头实现高效适应，可用于模型编辑场景",
+      "canonical_evidence": "通过重加权注意力头实现高效适应，可用于模型编辑场景",
+      "llm_tldr_en": "Attention Head Reweighting (AHR) adapts LLMs with a single scalar per head, enabling data-efficient tuning for few-shot tasks, relevant to parameter-efficient editing.",
+      "llm_tldr_cn": "在安全等领域标注数据稀缺的挑战下，本文提出注意力头重加权（AHR）方法，通过为每个注意力头学习一个标量实现模型适应。AHR利用注意力头的功能特化，极大减少可学习参数。实验在多个文本分类数据集上显示AHR在少样本任务中表现优异，为参数高效编辑提供了新思路。",
+      "llm_tldr": "在安全等领域标注数据稀缺的挑战下，本文提出注意力头重加权（AHR）方法，通过为每个注意力头学习一个标量实现模型适应。AHR利用注意力头的功能特化，极大减少可学习参数。实验在多个文本分类数据集上显示AHR在少样本任务中表现优异，为参数高效编辑提供了新思路。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
