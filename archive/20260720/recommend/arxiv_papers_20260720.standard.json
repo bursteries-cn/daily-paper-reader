@@ -1,0 +1,176 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-20T20:19:25.377676+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [
+    {
+      "id": "2607.12831v1",
+      "source": "arxiv",
+      "title": "Knowledgeless Language Models: Suppressing Parametric Recall for Evidence-Grounded Language Modeling",
+      "abstract": "Language models encode substantial factual knowledge in their parameters, which can lead to unreliable behavior when this knowledge is outdated, incomplete, or misaligned with the provided context. In this work, we study whether modifying the pretraining signal can systematically shift models away from parametric recall and toward evidence-grounded reasoning. We introduce Knowledge--''Less'' Language Models (KLLMs), a fundamentally different epistemic training paradigm for LLMs, which are pretrained on corpora in which named entities are anonymized, thereby removing a primary channel for entity-linked factual supervision. This intervention substantially reduces closed-book factual recall, while often improving performance on tasks where relevant information is provided as context. Across multiple model scales, KLLMs consistently outperform matched baselines on contextual question answering, fact verification, and hallucination detection benchmarks. Crucially, in retrieval-grounded settings with imperfect evidence, KLLMs show improved robustness and achieve up to 20--25\\% relative gains over standard language models. They further exhibit better calibration, with improved ECE, Brier score, and AUROC, as well as more reliable abstention behavior. Our results demonstrate that suppressing entity-linked supervision during pretraining induces a shift in epistemic behavior: KLLMs rely less on parametric knowledge and more on external evidence, leading to improved reliability under realistic conditions. This suggests that pretraining-time control over knowledge acquisition can complement retrieval-augmented and tool-based systems by providing a more evidence-sensitive base model.",
+      "authors": [
+        "Roi Cohen",
+        "Yvan Carré",
+        "Nick Lechtenbörger",
+        "Hendrik Droste",
+        "Lucas Kerschke",
+        "Russa Biswas",
+        "Gerard de Melo",
+        "Jan Buys"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-07-14T14:48:53+00:00",
+      "link": "https://arxiv.org/pdf/2607.12831v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "suppresses parametric recall for evidence-grounded reasoning, akin to knowledge editing",
+      "llm_evidence_cn": "抑制参数化回忆以促进基于证据的推理，类似知识编辑",
+      "llm_evidence": "抑制参数化回忆以促进基于证据的推理，类似知识编辑",
+      "canonical_evidence": "抑制参数化回忆以促进基于证据的推理，类似知识编辑",
+      "llm_tldr_en": "Knowledgeless Language Models pretrain on anonymized corpora to suppress parametric recall, shifting models toward evidence-grounded reasoning; analogous to knowledge editing by reducing reliance on stored facts.",
+      "llm_tldr_cn": "语言模型参数中编码了大量事实知识，但信息过时或不完整时会导致不可靠行为。该工作提出KLLMs，通过在预训练语料中匿名化命名实体，系统性抑制参数化回忆，促使模型更依赖上下文证据推理。实验表明，该方法大幅降低了闭卷事实回忆能力，同时通常提升基于证据的任务性能，为模型编辑提供了类似的知识抑制思路。",
+      "llm_tldr": "语言模型参数中编码了大量事实知识，但信息过时或不完整时会导致不可靠行为。该工作提出KLLMs，通过在预训练语料中匿名化命名实体，系统性抑制参数化回忆，促使模型更依赖上下文证据推理。实验表明，该方法大幅降低了闭卷事实回忆能力，同时通常提升基于证据的任务性能，为模型编辑提供了类似的知识抑制思路。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2607.11997v2",
+      "source": "arxiv",
+      "title": "Are we Merging the Right Models? Impact of Expert Training Duration on Model Merging for LLMs",
+      "abstract": "Multi-task model merging combines separately trained expert models into a single model that handles all tasks without co-training. Standard practice merges experts at their optimal validation loss. We challenge this convention by systematically studying how training duration of domain experts affects the quality of the merged model. We fine-tune experts on five domains (Math, Code, Instruction Following, Multilingual, and Safety) across three model sizes (Qwen 3.5 0.8B, 2B, and 4B), saving checkpoints from 25% to 500% of the optimal training steps and evaluating five merging methods at each duration. Our findings reveal a striking method-dependent pattern: simple averaging degrades sharply with overfitting, while sparsification-based methods achieve their best performance well past the validation optimum. We formalize this through bias-variance decomposition analysis, drawing a parallel to random forests where averaging benefits from high-variance individual learners. These results suggest that training duration and merging method should be chosen jointly rather than independently.",
+      "authors": [
+        "Nikita Kozodoi",
+        "Zainab Afolabi",
+        "Jack Butler"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "stat.ML"
+      ],
+      "published": "2026-07-13T16:08:30+00:00",
+      "link": "https://arxiv.org/pdf/2607.11997v2",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "studies impact of expert training duration on model merging, including safety domain",
+      "llm_evidence_cn": "研究专家训练时长对模型合并的影响，包括安全领域",
+      "llm_evidence": "研究专家训练时长对模型合并的影响，包括安全领域",
+      "canonical_evidence": "研究专家训练时长对模型合并的影响，包括安全领域",
+      "llm_tldr_en": "This work challenges standard practice of merging LLM experts at optimal validation loss by systematically studying training duration effects on merged model quality across five domains including safety.",
+      "llm_tldr_cn": "多任务模型合并通常合并各专家在最优验证损失时的检查点。该工作系统研究了训练时长（从最优步数的25%到500%）对合并质量的影响，涵盖数学、代码、指令跟随、多语言和安全五个领域。发现简单平均方法在过拟合时性能急剧下降，而稀疏化方法更鲁棒。这提示安全专家模型的合并需谨慎选择训练时长。",
+      "llm_tldr": "多任务模型合并通常合并各专家在最优验证损失时的检查点。该工作系统研究了训练时长（从最优步数的25%到500%）对合并质量的影响，涵盖数学、代码、指令跟随、多语言和安全五个领域。发现简单平均方法在过拟合时性能急剧下降，而稀疏化方法更鲁棒。这提示安全专家模型的合并需谨慎选择训练时长。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2607.11997v1",
+      "source": "arxiv",
+      "title": "Are we Merging the Right Models? Impact of Expert Training Duration on Model Merging for LLMs",
+      "abstract": "Multi-task model merging combines separately trained expert models into a single model that handles all tasks without co-training. Standard practice merges experts at their optimal validation loss. We challenge this convention by systematically studying how training duration of domain experts affects the quality of the merged model. We fine-tune experts on five domains (Math, Code, Instruction Following, Multilingual, and Safety) across three model sizes (Qwen 3.5 0.8B, 2B, and 4B), saving checkpoints from 25\\% to 500\\% of the optimal training steps and evaluating five merging methods at each duration. Our findings reveal a striking method-dependent pattern: simple averaging degrades sharply with overfitting, while sparsification-based methods achieve their best performance well past the validation optimum. We formalize this through bias-variance decomposition analysis, drawing a parallel to random forests where averaging benefits from high-variance individual learners. These results suggest that training duration and merging method should be chosen jointly rather than independently.",
+      "authors": [
+        "Nikita Kozodoi",
+        "Zainab Afolabi",
+        "Jack Butler"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "stat.ML"
+      ],
+      "published": "2026-07-13T16:08:30+00:00",
+      "link": "https://arxiv.org/pdf/2607.11997v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Model merging of safety experts relates to LLM editing theme",
+      "llm_evidence_cn": "安全专家模型合并与模型编辑主题相关",
+      "llm_evidence": "安全专家模型合并与模型编辑主题相关",
+      "canonical_evidence": "安全专家模型合并与模型编辑主题相关",
+      "llm_tldr_en": "Studies how training duration of domain experts affects model merging quality for LLMs, including a safety domain, revealing method-dependent patterns.",
+      "llm_tldr_cn": "该论文系统研究了领域专家模型训练时长对多任务模型合并质量的影响，涵盖数学、代码、指令跟随、多语言和安全五个领域。实验发现简单平均合并会随过拟合急剧退化，而稀疏化方法表现不同。为模型编辑中调整模型行为提供方法论启示，尤其涉及安全领域专家合并。",
+      "llm_tldr": "该论文系统研究了领域专家模型训练时长对多任务模型合并质量的影响，涵盖数学、代码、指令跟随、多语言和安全五个领域。实验发现简单平均合并会随过拟合急剧退化，而稀疏化方法表现不同。为模型编辑中调整模型行为提供方法论启示，尤其涉及安全领域专家合并。",
+      "llm_tags": [
+        "query:model-edit:composite"
+      ],
+      "matched_query_tag": "query:model-edit:composite",
+      "matched_query_text": "Papers central to 查找大模型安全领域的模型编辑方向论文, especially work that connects or combines: large language model editing; model editing safety; knowledge editing; safety alignment editing; jailbreak editing; Find papers about model editing for safety in large language models; Research on knowledge editing to improve LLM safety; How can model editing prevent attacks on large language models.",
+      "matched_requirement_id": "req-composite-model-edit",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.12792v1",
+      "source": "arxiv",
+      "title": "Silent Alarm: A J-Space Protocol for Comparing Danger Recognition Across Models and Quantization Levels",
+      "abstract": "Jailbreak-robustness research typically evaluates safety through generated responses using an LLM-as-judge approach. Such evaluations, however, are sensitive to the benchmark's grading procedure and capture only observed behavior on a given set of attacks, without directly revealing the hidden fragility of the underlying safety mechanisms. This work proposes JADR (Jacobian Assessment of Danger Recognition), a protocol that measures a model's internal representation through Jacobian space (J-space, a recently proposed workspace of verbalizable concepts) before the first response token is generated. For every prompt and layer we record the top-k J-space tokens; these are grouped into six behavioral scenario axes and compared between a danger sample based on StrongREJECT and a safe control drawn from XSTest and OKTest. The method does not call on an external judge model: the computation runs entirely locally, on the activations of the model under evaluation, which lets us compare both different models against each other and modifications of a single model -- quantization and fine-tuning in particular -- on the same terms. The final comparison rests on the proposed SafetyAUC metric, complemented with bootstrap confidence intervals. The protocol is applied to six models (Qwen3-1.7B, Qwen3-4B, Qwen3-8B, Qwen3-Uncensored-4B, Qwen3-SafeRL-4B, Gemma 2 9B) across three weight-representation regimes -- BF16, INT8, and INT4 -- and checked against an independent behavioral evaluation with the StrongREJECT grader. The metric separates models with a strong versus a weak internal safety mechanism with statistical significance and captures substantively different effects across quantization regimes.",
+      "authors": [
+        "Roman Prosvirnin",
+        "Victor Minchenkov",
+        "Alexey Soldatov",
+        "Vladimir Bashun"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-07-14T14:08:18+00:00",
+      "link": "https://arxiv.org/pdf/2607.12792v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "measures model internal danger recognition for jailbreak robustness",
+      "llm_evidence_cn": "测量模型内部危险识别能力用于越狱鲁棒性",
+      "llm_evidence": "测量模型内部危险识别能力用于越狱鲁棒性",
+      "canonical_evidence": "测量模型内部危险识别能力用于越狱鲁棒性",
+      "llm_tldr_en": "Silent Alarm proposes JADR, a protocol measuring LLM internal danger recognition via Jacobian space before response generation, enabling comparison of safety mechanisms across models and quantization levels.",
+      "llm_tldr_cn": "现有越狱鲁棒性研究依赖生成后响应评估，无法揭示底层安全机制的脆弱性。该工作提出JADR协议，通过Jacobian空间测量模型在生成首词前的内部表示，将顶层J-space标记映射到行为场景轴，实现跨模型和量化级别的危险识别能力比较。该方法提供了对模型安全机制内部运作的更深入洞察。",
+      "llm_tldr": "现有越狱鲁棒性研究依赖生成后响应评估，无法揭示底层安全机制的脆弱性。该工作提出JADR协议，通过Jacobian空间测量模型在生成首词前的内部表示，将顶层J-space标记映射到行为场景轴，实现跨模型和量化级别的危险识别能力比较。该方法提供了对模型安全机制内部运作的更深入洞察。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

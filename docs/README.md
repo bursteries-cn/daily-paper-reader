@@ -6,31 +6,32 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-19
-- 运行时间：2026-07-19 20:57:01 UTC
+- 最新运行日期：2026-07-20
+- 运行时间：2026-07-20 20:22:23 UTC
 - 运行状态：成功
-- 本次总论文数：3
+- 本次总论文数：4
 - 精读区：1
-- 速读区：2
+- 速读区：3
 
 ### 今日简报（AI）
-今日精读一篇高分论文，重点探讨多轮对话中大语言模型的越狱攻击机理，速读则聚焦高效人机交互与注意力头重加权适配方法。  
-最值得关注的是《MJ: Multi-turn LLM Jailbreaking via Decomposed Credit Assignment》，它揭示了通过分解信用分配实现多轮攻击的新路径，对安全防护有直接启示。  
-建议读者后续可深入研读该文提出的攻击与防御框架，并关注大模型在人机协同中暴露的交互安全短板。
-- 详情：[/202607/19/README](/202607/19/README)
+今日精读1篇高分论文，速读3篇涉及模型合并与危险识别。最值得关注的是《Knowledgeless Language Models》（8.0分），提出了抑制参数记忆的证据驱动方法。建议优先精读该论文以掌握前沿思路，再根据兴趣浏览速读内容。
+- 详情：[/202607/20/README](/202607/20/README)
 
 ### 精读区论文标签
-1. [MJ: Multi-turn LLM Jailbreaking via Decomposed Credit Assignment](/202607/19/2607.11070v1-mj-multi-turn-llm-jailbreaking-via-decomposed-credit-assignment)  
+1. [Knowledgeless Language Models: Suppressing Parametric Recall for Evidence-Grounded Language Modeling](/202607/20/2607.12831v1-knowledgeless-language-models-suppressing-parametric-recall-for-evidence-grounded-language-modeling)  
    标签：评分：8.0/10、query:model-edit
-   evidence：多轮越狱学习方法，分解信用分配
+   evidence：抑制参数化回忆以促进基于证据的推理，类似知识编辑
 
 ### 速读区论文标签
-1. [Deep Interaction: An Efficient Human-AI Interaction Method for Large Reasoning Models](/202607/19/2607.14049v1-deep-interaction-an-efficient-human-ai-interaction-method-for-large-reasoning-models)  
+1. [Are we Merging the Right Models? Impact of Expert Training Duration on Model Merging for LLMs](/202607/20/2607.11997v2-are-we-merging-the-right-models-impact-of-expert-training-duration-on-model-merging-for-llms)  
    标签：评分：7.0/10、query:model-edit
-   evidence：直接编辑LLM响应以纠正推理错误
-2. [Data-Efficient Adaptation of LLMs via Attention Head Reweighting](/202607/19/2607.13425v1-data-efficient-adaptation-of-llms-via-attention-head-reweighting)  
+   evidence：研究专家训练时长对模型合并的影响，包括安全领域
+2. [Are we Merging the Right Models? Impact of Expert Training Duration on Model Merging for LLMs](/202607/20/2607.11997v1-are-we-merging-the-right-models-impact-of-expert-training-duration-on-model-merging-for-llms)  
    标签：评分：6.0/10、query:model-edit
-   evidence：通过重加权注意力头实现高效适应，可用于模型编辑场景
+   evidence：安全专家模型合并与模型编辑主题相关
+3. [Silent Alarm: A J-Space Protocol for Comparing Danger Recognition Across Models and Quantization Levels](/202607/20/2607.12792v1-silent-alarm-a-j-space-protocol-for-comparing-danger-recognition-across-models-and-quantization-levels)  
+   标签：评分：6.0/10、query:model-edit
+   evidence：测量模型内部危险识别能力用于越狱鲁棒性
 
 
 <div class="dpr-home-promo-card">

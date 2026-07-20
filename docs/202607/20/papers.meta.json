@@ -1,0 +1,69 @@
+{
+  "label": "2026-07-20",
+  "date": "2026-07-20",
+  "generated_at": "2026-07-20T20:22:30",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202607/20/2607.12831v1-knowledgeless-language-models-suppressing-parametric-recall-for-evidence-grounded-language-modeling",
+      "section": "deep",
+      "title_en": "Knowledgeless Language Models: Suppressing Parametric Recall for Evidence-Grounded Language Modeling",
+      "authors": "Roi Cohen, Yvan Carré, Nick Lechtenbörger, Hendrik Droste, Lucas Kerschke, Russa Biswas, Gerard de Melo, Jan Buys",
+      "date": "2026-07-14",
+      "pdf": "https://arxiv.org/pdf/2607.12831v1",
+      "score": "8.0",
+      "evidence": "抑制参数化回忆以促进基于证据的推理，类似知识编辑",
+      "tldr": "语言模型因编码大量参数知识而导致不可靠行为。本文提出知识缺失语言模型（KLLMs），通过预训练时匿名化命名实体，抑制参数回忆，迫使模型依赖外部证据。实验表明，KLLMs在上下文问答、事实验证和幻觉检测上优于基线，且在检索增强场景下鲁棒性提升20-25%，校准更优。该方法通过预训练阶段控制知识获取，为构建更可靠的证据敏感基座模型提供了新思路。",
+      "tags": "query:model-edit",
+      "abstract_en": "Language models encode substantial factual knowledge in their parameters, which can lead to unreliable behavior when this knowledge is outdated, incomplete, or misaligned with the provided context. In this work, we study whether modifying the pretraining signal can systematically shift models away from parametric recall and toward evidence-grounded reasoning. We introduce Knowledge--''Less'' Language Models (KLLMs), a fundamentally different epistemic training paradigm for LLMs, which are pretrained on corpora in which named entities are anonymized, thereby removing a primary channel for entity-linked factual supervision. This intervention substantially reduces closed-book factual recall, while often improving performance on tasks where relevant information is provided as context. Across multiple model scales, KLLMs consistently outperform matched baselines on contextual question answering, fact verification, and hallucination detection benchmarks. Crucially, in retrieval-grounded settings with imperfect evidence, KLLMs show improved robustness and achieve up to 20--25\\% relative gains over standard language models. They further exhibit better calibration, with improved ECE, Brier score, and AUROC, as well as more reliable abstention behavior. Our results demonstrate that suppressing entity-linked supervision during pretraining induces a shift in epistemic behavior: KLLMs rely less on parametric knowledge and more on external evidence, leading to improved reliability under realistic conditions. This suggests that pretraining-time control over knowledge acquisition can complement retrieval-augmented and tool-based systems by providing a more evidence-sensitive base model.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/20/2607.11997v2-are-we-merging-the-right-models-impact-of-expert-training-duration-on-model-merging-for-llms",
+      "section": "quick",
+      "title_en": "Are we Merging the Right Models? Impact of Expert Training Duration on Model Merging for LLMs",
+      "authors": "Nikita Kozodoi, Zainab Afolabi, Jack Butler",
+      "date": "2026-07-13",
+      "pdf": "https://arxiv.org/pdf/2607.11997v2",
+      "score": "7.0",
+      "evidence": "研究专家训练时长对模型合并的影响，包括安全领域",
+      "tldr": "标准做法是在专家模型达到最优验证损失时合并，但该研究挑战了这一惯例。通过系统改变专家训练时长（25%-500%最优步数）并评估五种合并方法，发现简单平均在过拟合后性能骤降，而基于稀疏化的方法在远超最优时长时表现最佳。结合偏差-方差分解，类比随机森林，表明训练时长与合并方法需联合优化。",
+      "tags": "query:model-edit",
+      "abstract_en": "Multi-task model merging combines separately trained expert models into a single model that handles all tasks without co-training. Standard practice merges experts at their optimal validation loss. We challenge this convention by systematically studying how training duration of domain experts affects the quality of the merged model. We fine-tune experts on five domains (Math, Code, Instruction Following, Multilingual, and Safety) across three model sizes (Qwen 3.5 0.8B, 2B, and 4B), saving checkpoints from 25% to 500% of the optimal training steps and evaluating five merging methods at each duration. Our findings reveal a striking method-dependent pattern: simple averaging degrades sharply with overfitting, while sparsification-based methods achieve their best performance well past the validation optimum. We formalize this through bias-variance decomposition analysis, drawing a parallel to random forests where averaging benefits from high-variance individual learners. These results suggest that training duration and merging method should be chosen jointly rather than independently.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/20/2607.11997v1-are-we-merging-the-right-models-impact-of-expert-training-duration-on-model-merging-for-llms",
+      "section": "quick",
+      "title_en": "Are we Merging the Right Models? Impact of Expert Training Duration on Model Merging for LLMs",
+      "authors": "Nikita Kozodoi, Zainab Afolabi, Jack Butler",
+      "date": "2026-07-13",
+      "pdf": "https://arxiv.org/pdf/2607.11997v1",
+      "score": "6.0",
+      "evidence": "安全专家模型合并与模型编辑主题相关",
+      "tldr": "多任务模型合并通常使用验证损失最优的专家检查点，但研究发现不同合并方法对训练时长的敏感度截然不同。简单平均方法在专家过拟合时性能急剧下降，而基于稀疏化的方法在训练远超最优步数时表现最佳。通过偏差-方差分解揭示其内在原因，类比随机森林中高方差个体平均获益。这一发现表明专家训练时长和合并方法应联合优化，而非独立选择。",
+      "tags": "query:model-edit",
+      "abstract_en": "Multi-task model merging combines separately trained expert models into a single model that handles all tasks without co-training. Standard practice merges experts at their optimal validation loss. We challenge this convention by systematically studying how training duration of domain experts affects the quality of the merged model. We fine-tune experts on five domains (Math, Code, Instruction Following, Multilingual, and Safety) across three model sizes (Qwen 3.5 0.8B, 2B, and 4B), saving checkpoints from 25\\% to 500\\% of the optimal training steps and evaluating five merging methods at each duration. Our findings reveal a striking method-dependent pattern: simple averaging degrades sharply with overfitting, while sparsification-based methods achieve their best performance well past the validation optimum. We formalize this through bias-variance decomposition analysis, drawing a parallel to random forests where averaging benefits from high-variance individual learners. These results suggest that training duration and merging method should be chosen jointly rather than independently.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/20/2607.12792v1-silent-alarm-a-j-space-protocol-for-comparing-danger-recognition-across-models-and-quantization-levels",
+      "section": "quick",
+      "title_en": "Silent Alarm: A J-Space Protocol for Comparing Danger Recognition Across Models and Quantization Levels",
+      "authors": "Roman Prosvirnin, Victor Minchenkov, Alexey Soldatov, Vladimir Bashun",
+      "date": "2026-07-14",
+      "pdf": "https://arxiv.org/pdf/2607.12792v1",
+      "score": "6.0",
+      "evidence": "测量模型内部危险识别能力用于越狱鲁棒性",
+      "tldr": "针对现有越狱鲁棒性评估依赖外部评判模型且无法揭示内部安全机制脆弱性的问题，本文提出JADR协议，通过Jacobian空间在生成首个token前探测模型内部表示，将top-k令牌映射到六个行为场景轴，比较危险与安全提示的差异。方法完全本地运行，无需外部模型，可公平比较不同模型及同一模型的量化或微调版本。基于SafetyAUC度量和bootstrap置信区间，在六种模型和三种量化精度上验证，指标显著区分强弱安全机制，并揭示量化带来的不同影响。",
+      "tags": "query:model-edit",
+      "abstract_en": "Jailbreak-robustness research typically evaluates safety through generated responses using an LLM-as-judge approach. Such evaluations, however, are sensitive to the benchmark's grading procedure and capture only observed behavior on a given set of attacks, without directly revealing the hidden fragility of the underlying safety mechanisms. This work proposes JADR (Jacobian Assessment of Danger Recognition), a protocol that measures a model's internal representation through Jacobian space (J-space, a recently proposed workspace of verbalizable concepts) before the first response token is generated. For every prompt and layer we record the top-k J-space tokens; these are grouped into six behavioral scenario axes and compared between a danger sample based on StrongREJECT and a safe control drawn from XSTest and OKTest. The method does not call on an external judge model: the computation runs entirely locally, on the activations of the model under evaluation, which lets us compare both different models against each other and modifications of a single model -- quantization and fine-tuning in particular -- on the same terms. The final comparison rests on the proposed SafetyAUC metric, complemented with bootstrap confidence intervals. The protocol is applied to six models (Qwen3-1.7B, Qwen3-4B, Qwen3-8B, Qwen3-Uncensored-4B, Qwen3-SafeRL-4B, Gemma 2 9B) across three weight-representation regimes -- BF16, INT8, and INT4 -- and checked against an independent behavioral evaluation with the StrongREJECT grader. The metric separates models with a strong versus a weak internal safety mechanism with statistical significance and captures substantively different effects across quantization regimes.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
