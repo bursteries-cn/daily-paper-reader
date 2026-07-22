@@ -1,0 +1,54 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-22T21:21:23.368292+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 0,
+    "quick_skim_target": 11,
+    "quick_selected": 0
+  },
+  "deep_dive": [
+    {
+      "id": "2607.18639v1",
+      "source": "arxiv",
+      "title": "Mark, Don't Erase: Token Inoculation for Dual-Use Knowledge in LLMs",
+      "abstract": "Safety interventions on dual-use knowledge typically choose between destroying hazardous content (e.g., unlearning, filtering) and suppressing it at the output layer (e.g., refusal training); both pay a tax in adjacent-domain competence or over-refusal. We argue that the right operation is conditioning, not reduction: we show that hazardous knowledge can be retained in the model and behaviorally gated by a privileged control token. Our method, Token Inoculation, introduces a binding-and-branching approach. First, during continued pre-training, we mark hazardous content by inserting a special token alongside dual-use documents, so the model binds the marker to the underlying semantics of the hazardous domain. Second, during supervised fine-tuning, we teach the model to answer hazardous queries correctly when the special token is present and to refuse them when it is absent, thereby enabling selective refusal without removing dual-use knowledge. On hazardous domain (e.g., WMDP-Bio), Token Inoculation reduces accuracy from 79% to 18% while retaining 93% of the base-model's benign-domain performance (e.g., MMLU), achieving the best safety-utility trade-off against unlearning and refusal-tuning baselines across 1B-14B model scales. We further show that refusal selectivity is controllable through the quality of the conditioning signal and that domain-specific semantic binding during pre-training is critical for the conditional behavior to generalize beyond memorized triggers. Our results suggest that safety alignment is better cast as a conditioning problem than a forgetting one: behavioral control is more precise when sensitive knowledge is retained under controlled access than when it is destroyed.",
+      "authors": [
+        "Seunghyun Lee",
+        "Dongyoon Han",
+        "Sangdoo Yun"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CL"
+      ],
+      "published": "2026-07-21T02:15:39+00:00",
+      "link": "https://arxiv.org/pdf/2607.18639v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "safety intervention on dual-use knowledge using control token gating",
+      "llm_evidence_cn": "使用控制令牌门控双重用途知识的安全干预",
+      "llm_evidence": "使用控制令牌门控双重用途知识的安全干预",
+      "canonical_evidence": "使用控制令牌门控双重用途知识的安全干预",
+      "llm_tldr_en": "Token Inoculation introduces a binding-and-branching approach to gate hazardous dual-use knowledge in LLMs via a privileged control token, preserving knowledge while enabling safe behavior switching, avoiding domain competence loss and over-refusal.",
+      "llm_tldr_cn": "双重用途知识的安全干预常面临知识删除导致领域能力下降或仅抑制输出造成过度拒绝的困境。本文提出令牌接种方法，通过持续预训练将特殊标记与危险知识绑定，并在微调中学习条件分支，使得模型可通过控制令牌门控危险知识。实验表明，该方法在保留知识的同时实现安全行为切换，避免了传统方法的副作用。该研究为模型编辑提供了新的条件化安全对齐路径。",
+      "llm_tldr": "双重用途知识的安全干预常面临知识删除导致领域能力下降或仅抑制输出造成过度拒绝的困境。本文提出令牌接种方法，通过持续预训练将特殊标记与危险知识绑定，并在微调中学习条件分支，使得模型可通过控制令牌门控危险知识。实验表明，该方法在保留知识的同时实现安全行为切换，避免了传统方法的副作用。该研究为模型编辑提供了新的条件化安全对齐路径。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": []
+}

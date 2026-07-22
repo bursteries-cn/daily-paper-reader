@@ -1,0 +1,24 @@
+{
+  "label": "2026-07-22",
+  "date": "2026-07-22",
+  "generated_at": "2026-07-22T21:23:15",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202607/22/2607.18639v1-mark-dont-erase-token-inoculation-for-dual-use-knowledge-in-llms",
+      "section": "deep",
+      "title_en": "Mark, Don't Erase: Token Inoculation for Dual-Use Knowledge in LLMs",
+      "authors": "Seunghyun Lee, Dongyoon Han, Sangdoo Yun",
+      "date": "2026-07-21",
+      "pdf": "https://arxiv.org/pdf/2607.18639v1",
+      "score": "9.0",
+      "evidence": "使用控制令牌门控双重用途知识的安全干预",
+      "tldr": "针对大语言模型中双重用途知识的安全干预，传统方法或删除知识或压制输出，会损害相邻领域性能或导致过度拒绝。本文提出Token Inoculation方法，在继续预训练时通过特殊标记绑定危险知识，在微调时训练模型根据标记存在与否选择性回答或拒绝，从而在不消除知识条件下实现可控拒绝。在1B-14B模型上，该方法将WMDP-Bio准确率从79%降至18%，同时保留93%的MMLU良性性能，安全-效用权衡达到最佳。研究表明安全对齐应作为条件问题而非遗忘问题，知识保留下的行为控制更精确。",
+      "tags": "query:model-edit",
+      "abstract_en": "Safety interventions on dual-use knowledge typically choose between destroying hazardous content (e.g., unlearning, filtering) and suppressing it at the output layer (e.g., refusal training); both pay a tax in adjacent-domain competence or over-refusal. We argue that the right operation is conditioning, not reduction: we show that hazardous knowledge can be retained in the model and behaviorally gated by a privileged control token. Our method, Token Inoculation, introduces a binding-and-branching approach. First, during continued pre-training, we mark hazardous content by inserting a special token alongside dual-use documents, so the model binds the marker to the underlying semantics of the hazardous domain. Second, during supervised fine-tuning, we teach the model to answer hazardous queries correctly when the special token is present and to refuse them when it is absent, thereby enabling selective refusal without removing dual-use knowledge. On hazardous domain (e.g., WMDP-Bio), Token Inoculation reduces accuracy from 79% to 18% while retaining 93% of the base-model's benign-domain performance (e.g., MMLU), achieving the best safety-utility trade-off against unlearning and refusal-tuning baselines across 1B-14B model scales. We further show that refusal selectivity is controllable through the quality of the conditioning signal and that domain-specific semantic binding during pre-training is critical for the conditional behavior to generalize beyond memorized triggers. Our results suggest that safety alignment is better cast as a conditioning problem than a forgetting one: behavioral control is more precise when sensitive knowledge is retained under controlled access than when it is destroyed.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
