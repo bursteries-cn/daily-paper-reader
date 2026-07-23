@@ -1,0 +1,69 @@
+{
+  "label": "2026-07-23",
+  "date": "2026-07-23",
+  "generated_at": "2026-07-23T21:25:06",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202607/23/2607.19894v1-defense-against-llm-backdoors-using-critical-neuron-isolation-pruning",
+      "section": "deep",
+      "title_en": "Defense Against LLM Backdoors using Critical Neuron Isolation Pruning",
+      "authors": "Yuxi Li, Zhibo Zhang, Kailong Wang, Xingshuo Han, Ling Shi, Haoyu Wang",
+      "date": "2026-07-22",
+      "pdf": "https://arxiv.org/pdf/2607.19894v1",
+      "score": "8.0",
+      "evidence": "通过神经元剪枝防御模型编辑攻击",
+      "tldr": "大型语言模型易受后门攻击，现有防御局限于微调后门且难以应对模型编辑攻击。本文提出DeCNIP，通过表征分析识别触发行为，隔离后门关键神经元并选择性剪枝。在6个开源LLM和2个基准上，攻击成功率降低超95%，仅干预0.1%神经元，正常性能保持97%。该方法机制明确、鲁棒且可扩展，统一了检测与防御。",
+      "tags": "query:model-edit",
+      "abstract_en": "Large language models (LLMs) are vulnerable to backdoor attacks, where hidden triggers induce malicious outputs. Existing defenses generally fall into inference-time detection or training-time mitigation, but face two key limitations. First, they focus on fine-tuning-based backdoors (e.g., PEFT modules) and fail to address insidious model-editing attacks that bypass training pipelines. Second, they target simple classification settings and do not naturally extend to open-ended LLM generation and do not naturally extend to the open-ended generation characteristics of LLMs. Consequently, these methods focus on surface-level behavioral patterns while neglecting the deeper representational causes of malicious activations. This lack of mechanistic understanding forces defenses to depend on empirical heuristics, limiting their robustness, generality, and practical applicability in real-world LLM deployment.   To bridge this gap, we introduce DeCNIP (Defense with Critical Neuron Isolation Pruning), which leverages representational analysis to identify and neutralize backdoors in a unified pipeline. Specifically, DeCNIP identifies trigger-like behaviors by optimizing a cross-entropy loss between harmful prompts with candidate tokens and benign inputs. This representational discovery exposes latent threats by uncovering mechanisms through which triggers hijack model weights. It then isolates Backdoor Critical Neurons (BCNs) and prunes them selectively to remove malicious influence while preserving model utility. Extensive evaluations on six open-source LLMs and two benchmark datasets demonstrate that DeCNIP achieves over 95% relative reduction in Attack Success Rate (ASR), outperforming seven state-of-the-art defenses with only 0.1% neuron intervention. Moreover, it maintains 97% of the model's performance on normal benchmarks, demonstrating its efficacy, robustness, and scalability.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/23/2607.17152v1-how-jailbreak-attacks-inform-safety-alignment-a-defender-centric-shapley-based-evaluation-of-jailbreak-contributions",
+      "section": "quick",
+      "title_en": "How Jailbreak Attacks Inform Safety Alignment: A Defender-Centric, Shapley-Based Evaluation of Jailbreak Contributions",
+      "authors": "Yukai Zhou, Feiyang Lu, Xiaokai Mao, Jinfei Liu, Wenjie Wang",
+      "date": "2026-07-19",
+      "pdf": "https://arxiv.org/pdf/2607.17152v1",
+      "score": "7.0",
+      "evidence": "评估越狱攻击对安全对齐的贡献，直接关联越狱编辑",
+      "tldr": "越狱攻击通常以攻击成功率衡量，但能攻破模型的攻击未必有助于提升模型安全。本文提出以防御者为中心的评估视角，将攻击作为红队数据用于安全训练所带来下游安全改进作为效用指标。基于此，引入A-MESS框架，使用Shapley值归因单个攻击的边际效用，并通过优化选取紧凑攻击子集。实验发现ASR排名与防御者效用弱对齐，直接优化子集比传统方法更有效，强调了攻击作为安全改进资源的评价价值。",
+      "tags": "query:model-edit",
+      "abstract_en": "Jailbreak attacks on large language models are usually evaluated by attacker-centric metrics such as attack success rate (ASR), yet an attack that breaks a model is not necessarily useful for improving its safety. We propose a defender-centric view of jailbreak evaluation, where attacks are evaluated by the downstream safety improvements they enable when used as red-teaming data for safety training. Building on this view, we introduce A-MESS (Minimal Effective Attack-Subset Selection), a setting-agnostic framework for attributing and selecting jailbreak attacks from black-box subset utility observations. A-MESS estimates AttackSHAP, a Shapley-based score that attributes marginal utility to individual attacks and selects compact attack subsets under user-specified budgets via greedy or surrogate-based optimization. Across controlled utility landscapes and real LLM safety settings, we find that ASR rankings are weakly aligned with defender-centric utility, that AttackSHAP can be estimated accurately with limited utility queries, and that directly optimizing subsets yields stronger safety utility than attacker-centric or attribution-only selection. These results suggest evaluating jailbreak attacks as resources for improving safety, not only as tools for breaking models.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/23/2607.14256v1-automatic-hard-example-synthesis-with-multi-level-agentic-data-curation",
+      "section": "quick",
+      "title_en": "Automatic Hard Example Synthesis with Multi-Level Agentic Data Curation",
+      "authors": "Genglin Liu, Muye Zhang, Krishnamurthy Viswanathan, Nichole J. Hansen, Blaž Bratanič, Nathan L Clement, Shalini Ghosh, Ariel Fuxman",
+      "date": "2026-07-15",
+      "pdf": "https://arxiv.org/pdf/2607.14256v1",
+      "score": "6.0",
+      "evidence": "合成困难样本用于安全对齐，通过数据生成辅助模型编辑",
+      "tldr": "多模态大模型在内容安全任务中易受对抗攻击，传统方法难以扩展。本文提出自动化红队框架，通过多智能体系统（高推理架构师、图像生成器、多级评审委员会）迭代合成边界案例。在公开基准上，该方法将假阴性率从41.2%降至24.5%。无需人工标注即可显著提升模型鲁棒性，为安全对齐提供可扩展方案。",
+      "tags": "query:model-edit",
+      "abstract_en": "Multimodal Large Language Models (MLLMs) are increasingly deployed for nuanced content safety and moderation tasks, yet they remain vulnerable to adversarial attacks and out-of-distribution edge cases. Traditional active learning and manual annotation fail to scale against the complexity and volume of novel multimodal threats. In this paper, we propose an automated, agentic red-teaming framework that systematically synthesizes difficult examples using an iterative strategy that proposes novel hypotheses as well as mutating on past attempts. Leveraging a multi-agent architecture that consists of a high-reasoning Architect agent, an advanced image generator, and a multi-level verification committee of LLM raters, our system autonomously uncovers boundary-pushing violations and ambiguous policy edge cases without any human intervention. By employing these carefully synthesized adversarial examples as in-context demonstrations via test-time Retrieval, we substantially improve the target model's robustness, reducing the False Negative Rate (FNR) from 41.2% to 24.5% in a public image safety benchmark without relying on any human labeling.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/23/2607.19604v1-scaling-laws-for-hypernetwork-based-knowledge-injection-in-large-language-models",
+      "section": "quick",
+      "title_en": "Scaling Laws for Hypernetwork-Based Knowledge Injection in Large Language Models",
+      "authors": "Nischay Dhankhar, Dos Baha, Abulhair Saparov",
+      "date": "2026-07-21",
+      "pdf": "https://arxiv.org/pdf/2607.19604v1",
+      "score": "6.0",
+      "evidence": "探索基于超网络的知识注入，与知识编辑相关",
+      "tldr": "超网络通过生成LoRA适配器实现大规模知识注入。本文首次系统研究超网络在知识注入中的缩放定律，构建了包含数千万多跳问答对的MegaWikiQA数据集。实验表明，超网络在深度、宽度和目标网络大小上均呈现可预测的幂律缩放，且OOD泛化能力强于LoRA微调和全微调。这为超网络作为训练时适应的可扩展方案提供了实证基础。",
+      "tags": "query:model-edit",
+      "abstract_en": "Injecting factual knowledge into large language models (LLMs) reliably and at scale remains an open challenge. Hypernetworks provide a promising solution to large-scale knowledge injection. Although hypernetworks are typically applied for test-time adaptation, we explore their use in train-time knowledge injection, where, given a large corpus of facts, we train a hypernetwork to generate a fixed LoRA adapter that, when inserted into the target model, enable the model to answer questions about those facts. In this work, we investigate whether hypernetworks can be used to perform train-time knowledge injection and how this ability varies with scale. The scaling behavior of hypernetworks remains largely unstudied. Our design decouples the hypernetwork's injection capacity from the target model's general capability, enabling, for the first time, a rigorous study of scaling laws for hypernetwork architectures. We characterize how loss, reasoning accuracy, and out-of-distribution (OOD) generalization vary with hypernetwork depth, width, and target network size. We construct a large-scale dataset, called MegaWikiQA, containing tens of millions of multi-hop question-answer examples across 39 domains constructed from examples in Wikidata5M. Our results reveal: (i) hypernetwork-based injection exhibits broadly predictive power law scaling along all architecture axes; and (ii) hypernetworks are capable of reliable OOD generalization at increasing scales, suggesting that hypernetwork provides a promising alternative to other train-time adaptation methods such as LoRA finetuning and full fine-tuning, exhibiting steeper scaling exponents in all OOD evaluations. Together, these results establish hypernetworks as a principled and scalable substrate for train-time adaptation, and provide the first empirically grounded scaling laws to guide hypernetworks for factual reasoning in large language models.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

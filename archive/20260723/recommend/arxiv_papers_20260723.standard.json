@@ -1,0 +1,179 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-23T21:21:30.344672+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [
+    {
+      "id": "2607.19894v1",
+      "source": "arxiv",
+      "title": "Defense Against LLM Backdoors using Critical Neuron Isolation Pruning",
+      "abstract": "Large language models (LLMs) are vulnerable to backdoor attacks, where hidden triggers induce malicious outputs. Existing defenses generally fall into inference-time detection or training-time mitigation, but face two key limitations. First, they focus on fine-tuning-based backdoors (e.g., PEFT modules) and fail to address insidious model-editing attacks that bypass training pipelines. Second, they target simple classification settings and do not naturally extend to open-ended LLM generation and do not naturally extend to the open-ended generation characteristics of LLMs. Consequently, these methods focus on surface-level behavioral patterns while neglecting the deeper representational causes of malicious activations. This lack of mechanistic understanding forces defenses to depend on empirical heuristics, limiting their robustness, generality, and practical applicability in real-world LLM deployment.   To bridge this gap, we introduce DeCNIP (Defense with Critical Neuron Isolation Pruning), which leverages representational analysis to identify and neutralize backdoors in a unified pipeline. Specifically, DeCNIP identifies trigger-like behaviors by optimizing a cross-entropy loss between harmful prompts with candidate tokens and benign inputs. This representational discovery exposes latent threats by uncovering mechanisms through which triggers hijack model weights. It then isolates Backdoor Critical Neurons (BCNs) and prunes them selectively to remove malicious influence while preserving model utility. Extensive evaluations on six open-source LLMs and two benchmark datasets demonstrate that DeCNIP achieves over 95% relative reduction in Attack Success Rate (ASR), outperforming seven state-of-the-art defenses with only 0.1% neuron intervention. Moreover, it maintains 97% of the model's performance on normal benchmarks, demonstrating its efficacy, robustness, and scalability.",
+      "authors": [
+        "Yuxi Li",
+        "Zhibo Zhang",
+        "Kailong Wang",
+        "Xingshuo Han",
+        "Ling Shi",
+        "Haoyu Wang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-07-22T08:29:06+00:00",
+      "link": "https://arxiv.org/pdf/2607.19894v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "defends against model-editing attacks via neuron pruning",
+      "llm_evidence_cn": "通过神经元剪枝防御模型编辑攻击",
+      "llm_evidence": "通过神经元剪枝防御模型编辑攻击",
+      "canonical_evidence": "通过神经元剪枝防御模型编辑攻击",
+      "llm_tldr_en": "Proposes Critical Neuron Isolation Pruning to defend LLMs against backdoor attacks, including model-editing attacks that bypass training pipelines; shows effectiveness in preserving utility while removing malicious behaviors.",
+      "llm_tldr_cn": "现有后门防御方法主要针对微调型后门，无法应对通过模型编辑植入的后门。本文提出关键神经元隔离剪枝方法，通过定位与后门行为相关的关键神经元并对其进行剪枝，在保持模型原有效用的前提下有效移除后门行为。实验表明该方法能防御包括模型编辑攻击在内的多种后门，提升了LLM的安全性。",
+      "llm_tldr": "现有后门防御方法主要针对微调型后门，无法应对通过模型编辑植入的后门。本文提出关键神经元隔离剪枝方法，通过定位与后门行为相关的关键神经元并对其进行剪枝，在保持模型原有效用的前提下有效移除后门行为。实验表明该方法能防御包括模型编辑攻击在内的多种后门，提升了LLM的安全性。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2607.17152v1",
+      "source": "arxiv",
+      "title": "How Jailbreak Attacks Inform Safety Alignment: A Defender-Centric, Shapley-Based Evaluation of Jailbreak Contributions",
+      "abstract": "Jailbreak attacks on large language models are usually evaluated by attacker-centric metrics such as attack success rate (ASR), yet an attack that breaks a model is not necessarily useful for improving its safety. We propose a defender-centric view of jailbreak evaluation, where attacks are evaluated by the downstream safety improvements they enable when used as red-teaming data for safety training. Building on this view, we introduce A-MESS (Minimal Effective Attack-Subset Selection), a setting-agnostic framework for attributing and selecting jailbreak attacks from black-box subset utility observations. A-MESS estimates AttackSHAP, a Shapley-based score that attributes marginal utility to individual attacks and selects compact attack subsets under user-specified budgets via greedy or surrogate-based optimization. Across controlled utility landscapes and real LLM safety settings, we find that ASR rankings are weakly aligned with defender-centric utility, that AttackSHAP can be estimated accurately with limited utility queries, and that directly optimizing subsets yields stronger safety utility than attacker-centric or attribution-only selection. These results suggest evaluating jailbreak attacks as resources for improving safety, not only as tools for breaking models.",
+      "authors": [
+        "Yukai Zhou",
+        "Feiyang Lu",
+        "Xiaokai Mao",
+        "Jinfei Liu",
+        "Wenjie Wang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.CL"
+      ],
+      "published": "2026-07-19T09:18:35+00:00",
+      "link": "https://arxiv.org/pdf/2607.17152v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "evaluates jailbreak attacks for safety alignment, directly related to jailbreak editing",
+      "llm_evidence_cn": "评估越狱攻击对安全对齐的贡献，直接关联越狱编辑",
+      "llm_evidence": "评估越狱攻击对安全对齐的贡献，直接关联越狱编辑",
+      "canonical_evidence": "评估越狱攻击对安全对齐的贡献，直接关联越狱编辑",
+      "llm_tldr_en": "Introduces A-MESS, a defender-centric framework to attribute and select jailbreak attacks by their marginal utility in improving model safety via Shapley values, moving beyond attacker-centric metrics.",
+      "llm_tldr_cn": "针对越狱攻击评估偏重攻击成功率而忽视防御价值的问题，提出以防御者为中心的A-MESS框架。利用Shapley值量化每个越狱攻击对安全对齐训练的边际贡献，从而选择最有效的攻击子集。实验表明该方法能识别出真正有助于提升模型安全性的攻击，为越狱编辑中的攻击筛选提供了理论依据。",
+      "llm_tldr": "针对越狱攻击评估偏重攻击成功率而忽视防御价值的问题，提出以防御者为中心的A-MESS框架。利用Shapley值量化每个越狱攻击对安全对齐训练的边际贡献，从而选择最有效的攻击子集。实验表明该方法能识别出真正有助于提升模型安全性的攻击，为越狱编辑中的攻击筛选提供了理论依据。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2607.14256v1",
+      "source": "arxiv",
+      "title": "Automatic Hard Example Synthesis with Multi-Level Agentic Data Curation",
+      "abstract": "Multimodal Large Language Models (MLLMs) are increasingly deployed for nuanced content safety and moderation tasks, yet they remain vulnerable to adversarial attacks and out-of-distribution edge cases. Traditional active learning and manual annotation fail to scale against the complexity and volume of novel multimodal threats. In this paper, we propose an automated, agentic red-teaming framework that systematically synthesizes difficult examples using an iterative strategy that proposes novel hypotheses as well as mutating on past attempts. Leveraging a multi-agent architecture that consists of a high-reasoning Architect agent, an advanced image generator, and a multi-level verification committee of LLM raters, our system autonomously uncovers boundary-pushing violations and ambiguous policy edge cases without any human intervention. By employing these carefully synthesized adversarial examples as in-context demonstrations via test-time Retrieval, we substantially improve the target model's robustness, reducing the False Negative Rate (FNR) from 41.2% to 24.5% in a public image safety benchmark without relying on any human labeling.",
+      "authors": [
+        "Genglin Liu",
+        "Muye Zhang",
+        "Krishnamurthy Viswanathan",
+        "Nichole J. Hansen",
+        "Blaž Bratanič",
+        "Nathan L Clement",
+        "Shalini Ghosh",
+        "Ariel Fuxman"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.MA"
+      ],
+      "published": "2026-07-15T18:13:05+00:00",
+      "link": "https://arxiv.org/pdf/2607.14256v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "synthesizes hard examples for safety alignment, supports model editing via data generation",
+      "llm_evidence_cn": "合成困难样本用于安全对齐，通过数据生成辅助模型编辑",
+      "llm_evidence": "合成困难样本用于安全对齐，通过数据生成辅助模型编辑",
+      "canonical_evidence": "合成困难样本用于安全对齐，通过数据生成辅助模型编辑",
+      "llm_tldr_en": "Proposes an automated multi-agent red-teaming framework that synthesizes difficult examples for multimodal LLM content safety, using iterative mutation and verification, revealing model boundaries in safety tasks.",
+      "llm_tldr_cn": "针对多模态大模型在内容安全任务中易受对抗攻击的问题，提出了一种自动化的多智能体红队测试框架。该框架通过高推理能力架构师智能体、图像生成器和多级LLM评审委员会，迭代合成困难样本，自主发现模型安全边界。实验表明该方法能高效生成多样化攻击样本，显著提升模型鲁棒性。该工作为安全对齐编辑提供了高质量的困难数据生成工具。",
+      "llm_tldr": "针对多模态大模型在内容安全任务中易受对抗攻击的问题，提出了一种自动化的多智能体红队测试框架。该框架通过高推理能力架构师智能体、图像生成器和多级LLM评审委员会，迭代合成困难样本，自主发现模型安全边界。实验表明该方法能高效生成多样化攻击样本，显著提升模型鲁棒性。该工作为安全对齐编辑提供了高质量的困难数据生成工具。",
+      "llm_tags": [
+        "query:model-edit:composite"
+      ],
+      "matched_query_tag": "query:model-edit:composite",
+      "matched_query_text": "Papers central to 查找大模型安全领域的模型编辑方向论文, especially work that connects or combines: large language model editing; model editing safety; knowledge editing; safety alignment editing; jailbreak editing; Find papers about model editing for safety in large language models; Research on knowledge editing to improve LLM safety; How can model editing prevent attacks on large language models.",
+      "matched_requirement_id": "req-composite-model-edit",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2607.19604v1",
+      "source": "arxiv",
+      "title": "Scaling Laws for Hypernetwork-Based Knowledge Injection in Large Language Models",
+      "abstract": "Injecting factual knowledge into large language models (LLMs) reliably and at scale remains an open challenge. Hypernetworks provide a promising solution to large-scale knowledge injection. Although hypernetworks are typically applied for test-time adaptation, we explore their use in train-time knowledge injection, where, given a large corpus of facts, we train a hypernetwork to generate a fixed LoRA adapter that, when inserted into the target model, enable the model to answer questions about those facts. In this work, we investigate whether hypernetworks can be used to perform train-time knowledge injection and how this ability varies with scale. The scaling behavior of hypernetworks remains largely unstudied. Our design decouples the hypernetwork's injection capacity from the target model's general capability, enabling, for the first time, a rigorous study of scaling laws for hypernetwork architectures. We characterize how loss, reasoning accuracy, and out-of-distribution (OOD) generalization vary with hypernetwork depth, width, and target network size. We construct a large-scale dataset, called MegaWikiQA, containing tens of millions of multi-hop question-answer examples across 39 domains constructed from examples in Wikidata5M. Our results reveal: (i) hypernetwork-based injection exhibits broadly predictive power law scaling along all architecture axes; and (ii) hypernetworks are capable of reliable OOD generalization at increasing scales, suggesting that hypernetwork provides a promising alternative to other train-time adaptation methods such as LoRA finetuning and full fine-tuning, exhibiting steeper scaling exponents in all OOD evaluations. Together, these results establish hypernetworks as a principled and scalable substrate for train-time adaptation, and provide the first empirically grounded scaling laws to guide hypernetworks for factual reasoning in large language models.",
+      "authors": [
+        "Nischay Dhankhar",
+        "Dos Baha",
+        "Abulhair Saparov"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.LG"
+      ],
+      "published": "2026-07-21T22:09:55+00:00",
+      "link": "https://arxiv.org/pdf/2607.19604v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "explores hypernetwork-based knowledge injection, related to knowledge editing",
+      "llm_evidence_cn": "探索基于超网络的知识注入，与知识编辑相关",
+      "llm_evidence": "探索基于超网络的知识注入，与知识编辑相关",
+      "canonical_evidence": "探索基于超网络的知识注入，与知识编辑相关",
+      "llm_tldr_en": "Investigates scaling laws for hypernetwork-based knowledge injection into LLMs, where a hypernetwork generates LoRA adapters to add facts; finds that performance improves with model and data size, offering a pathway for scalable knowledge editing.",
+      "llm_tldr_cn": "大规模注入事实知识到语言模型仍具挑战。本文研究基于超网络的知识注入方法，超网络根据事实语料生成LoRA适配器，将其插入目标模型以回答相关事实。实验揭示了超网络知识注入的缩放行为，随着模型和数据规模增大性能提升，为可扩展的知识编辑提供了方向。",
+      "llm_tldr": "大规模注入事实知识到语言模型仍具挑战。本文研究基于超网络的知识注入方法，超网络根据事实语料生成LoRA适配器，将其插入目标模型以回答相关事实。实验揭示了超网络知识注入的缩放行为，随着模型和数据规模增大性能提升，为可扩展的知识编辑提供了方向。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "knowledge editing",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
