@@ -1,0 +1,24 @@
+{
+  "label": "2026-07-26",
+  "date": "2026-07-26",
+  "generated_at": "2026-07-26T20:22:55",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202607/26/2607.21300v1-unlearning-under-imbalance-benchmarking-fairness-in-multimodal-llm-unlearning",
+      "section": "deep",
+      "title_en": "Unlearning Under Imbalance: Benchmarking Fairness in Multimodal LLM Unlearning",
+      "authors": "Lorenzo Orsingher, Thomas De Min, Massimiliano Mancini, Davide Talon, Elisa Ricci",
+      "date": "2026-07-23",
+      "pdf": "https://arxiv.org/pdf/2607.21300v1",
+      "score": "8.0",
+      "evidence": "多模态大语言模型遗忘公平性评估",
+      "tldr": "现有遗忘研究假设遗忘请求均匀分布，但现实场景中不同群体遗忘频率不均，可能导致模型偏见。本文提出FAIRGET基准，模拟多种不平衡遗忘场景，并设计FAUN算法，利用偏见感知激活引导机制实现公平遗忘。实验结果表明，FAUN在遗忘质量和公平性上均显著优于现有方法。该工作为多模态大模型不平衡遗忘的公平性评估和算法设计提供了重要基准与有效方案。",
+      "tags": "query:model-edit",
+      "abstract_en": "Machine unlearning has emerged as a tool for removing personal data from trained models to comply with recent AI regulations. To evaluate unlearning effectiveness in multimodal large language models (MLLMs), prior works fine-tune models on fictitious identities, simulating unlearning requests on subsets of these IDs, which are typically uniformly distributed. However, in realistic scenarios, people from different demographic groups may request to be unlearned at different frequencies, potentially altering the model's internal beliefs for these groups and leading to biased behaviors. To fill this gap, we propose FAIRGET, the first Visual Question Answering benchmark that evaluates unlearning under unbalanced, realistic, forget requests. These requests are designed to simulate multiple realistic scenarios, ranging from simple to challenging settings, that lead to biased unlearned models if fairness is not accounted for. Additionally, we propose FAUN, the first unlearning algorithm for MLLMs that forgets unlearning data while preserving model fairness. FAUN exploits a bias-aware activation steering mechanism to unlearn identities while accounting for the unbalanced nature of the forget data. Experiments on FAIRGET and the established FIUBench demonstrate our method's superiority both in unlearning quality and fairness.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

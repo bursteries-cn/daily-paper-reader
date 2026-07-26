@@ -1,0 +1,56 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-26T20:21:00.542824+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 0,
+    "quick_skim_target": 11,
+    "quick_selected": 0
+  },
+  "deep_dive": [
+    {
+      "id": "2607.21300v1",
+      "source": "arxiv",
+      "title": "Unlearning Under Imbalance: Benchmarking Fairness in Multimodal LLM Unlearning",
+      "abstract": "Machine unlearning has emerged as a tool for removing personal data from trained models to comply with recent AI regulations. To evaluate unlearning effectiveness in multimodal large language models (MLLMs), prior works fine-tune models on fictitious identities, simulating unlearning requests on subsets of these IDs, which are typically uniformly distributed. However, in realistic scenarios, people from different demographic groups may request to be unlearned at different frequencies, potentially altering the model's internal beliefs for these groups and leading to biased behaviors. To fill this gap, we propose FAIRGET, the first Visual Question Answering benchmark that evaluates unlearning under unbalanced, realistic, forget requests. These requests are designed to simulate multiple realistic scenarios, ranging from simple to challenging settings, that lead to biased unlearned models if fairness is not accounted for. Additionally, we propose FAUN, the first unlearning algorithm for MLLMs that forgets unlearning data while preserving model fairness. FAUN exploits a bias-aware activation steering mechanism to unlearn identities while accounting for the unbalanced nature of the forget data. Experiments on FAIRGET and the established FIUBench demonstrate our method's superiority both in unlearning quality and fairness.",
+      "authors": [
+        "Lorenzo Orsingher",
+        "Thomas De Min",
+        "Massimiliano Mancini",
+        "Davide Talon",
+        "Elisa Ricci"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-07-23T13:24:34+00:00",
+      "link": "https://arxiv.org/pdf/2607.21300v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "machine unlearning evaluation for fairness in multimodal LLMs",
+      "llm_evidence_cn": "多模态大语言模型遗忘公平性评估",
+      "llm_evidence": "多模态大语言模型遗忘公平性评估",
+      "canonical_evidence": "多模态大语言模型遗忘公平性评估",
+      "llm_tldr_en": "This paper introduces FAIRGET, a VQA benchmark for evaluating unlearning under unbalanced realistic forget requests in multimodal LLMs, addressing fairness concerns across demographic groups.",
+      "llm_tldr_cn": "论文提出FAIRGET基准，针对多模态大语言模型在不平衡遗忘请求下的公平性进行评估。现有遗忘评估大多假设均匀分布，但实际中不同群体遗忘频率不同，可能导致模型偏见。FAIRGET通过构建视觉问答任务模拟真实不平衡场景，系统评估遗忘效果和公平性。实验表明，不平衡遗忘会显著影响模型对不同群体的行为，强调了公平性在遗忘中的重要性。",
+      "llm_tldr": "论文提出FAIRGET基准，针对多模态大语言模型在不平衡遗忘请求下的公平性进行评估。现有遗忘评估大多假设均匀分布，但实际中不同群体遗忘频率不同，可能导致模型偏见。FAIRGET通过构建视觉问答任务模拟真实不平衡场景，系统评估遗忘效果和公平性。实验表明，不平衡遗忘会显著影响模型对不同群体的行为，强调了公平性在遗忘中的重要性。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": []
+}
