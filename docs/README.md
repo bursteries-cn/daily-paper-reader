@@ -6,26 +6,26 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-26
-- 运行时间：2026-07-26 20:22:50 UTC
+- 最新运行日期：2026-07-27
+- 运行时间：2026-07-27 21:03:40 UTC
 - 运行状态：成功
 - 本次总论文数：1
-- 精读区：1
-- 速读区：0
+- 精读区：0
+- 速读区：1
 
 ### 今日简报（AI）
-今日精读1篇高价值论文，聚焦多模态大模型在数据不平衡下的“遗忘”公平性评测。  
-该研究首次系统评估了模型在类别失衡时遗忘行为的公平性，发现现有方法对弱势类别遗忘效果不均衡。  
-建议关注此方向以理解模型偏见根源，未来可尝试结合再平衡训练与遗忘技术。
-- 详情：[/202607/26/README](/202607/26/README)
+1) 今日仅速读1篇论文：《A Unified Moral-Value Dataset for Instruction Tuning》，总体评分6.0/10，暂无精读内容。  
+2) 该论文提出了一个统一道德价值数据集用于指令微调，但学术价值一般，建议优先关注其他方向。  
+3) 明天可留意更高质量的实证研究或大模型对齐领域的新进展，避免在低分论文上花费过多时间。
+- 详情：[/202607/27/README](/202607/27/README)
 
 ### 精读区论文标签
-1. [Unlearning Under Imbalance: Benchmarking Fairness in Multimodal LLM Unlearning](/202607/26/2607.21300v1-unlearning-under-imbalance-benchmarking-fairness-in-multimodal-llm-unlearning)  
-   标签：评分：8.0/10、query:model-edit
-   evidence：多模态大语言模型遗忘公平性评估
+- 本次无精读推荐。
 
 ### 速读区论文标签
-- 本次无速读推荐。
+1. [A Unified Moral-Value Dataset for Instruction Tuning](/202607/27/2607.21279v1-a-unified-moral-value-dataset-for-instruction-tuning)  
+   标签：评分：6.0/10、query:model-edit
+   evidence：构建统一道德价值观数据集用于指令微调以对齐LLM
 
 
 <div class="dpr-home-promo-card">

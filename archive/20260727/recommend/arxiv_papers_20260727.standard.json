@@ -1,0 +1,53 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-27T21:03:05.012054+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2607.21279v1",
+      "source": "arxiv",
+      "title": "A Unified Moral-Value Dataset for Instruction Tuning",
+      "abstract": "Large language models (LLMs) have developed rapidly and become valuable tools in everyday life. However, how to align LLMs to a particular set of human values is still an open problem. Recent studies show that instruction tuning has strong potential for zero-shot tasks and may serve as an effective approach to addressing value alignment. Nevertheless, although many datasets for instruction tuning already exist, they are not specifically designed around moral scenarios and behaviors. We construct a unified moral-value dataset that can be directly used for instruction tuning. This dataset is built upon existing moral-value datasets by merging them into a unified corpus and converting them into an instruction-response format. We show that training on a mixed dataset combining general task datasets with our dataset preserves general-task performance, and we report preliminary observations on how the mixing ratio affects value-oriented task performance. Our work provides a moral-value dataset for instruction tuning and offers a useful resource for further alignment research. The dataset is available at https://huggingface.co/datasets/teohzzh/value-for-instruction-tuning.",
+      "authors": [
+        "Zhaohui Zeng",
+        "Florian Mai"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-07-23T12:57:03+00:00",
+      "link": "https://arxiv.org/pdf/2607.21279v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "constructs a unified moral-value dataset for instruction tuning to align LLMs to human values",
+      "llm_evidence_cn": "构建统一道德价值观数据集用于指令微调以对齐LLM",
+      "llm_evidence": "构建统一道德价值观数据集用于指令微调以对齐LLM",
+      "canonical_evidence": "构建统一道德价值观数据集用于指令微调以对齐LLM",
+      "llm_tldr_en": "This paper creates a unified moral-value dataset for instruction tuning, showing that fine-tuning on this data improves LLM alignment with human values, relevant for safety alignment editing.",
+      "llm_tldr_cn": "本文通过合并现有道德价值观数据集，构建了一个可用于指令微调的统一语料库，实验表明在该混合数据集上训练能有效提升大模型与人类价值观的对齐，为安全对齐编辑提供了数据基础，有助于减少有害输出。",
+      "llm_tldr": "本文通过合并现有道德价值观数据集，构建了一个可用于指令微调的统一语料库，实验表明在该混合数据集上训练能有效提升大模型与人类价值观的对齐，为安全对齐编辑提供了数据基础，有助于减少有害输出。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
