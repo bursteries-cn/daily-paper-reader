@@ -1,0 +1,135 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-28T21:41:17.379511+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2607.23015v1",
+      "source": "arxiv",
+      "title": "Mask2Shield: Strengthening LLM Safety against Neuron-Pruning Attacks",
+      "abstract": "Large language models (LLMs) are safety-aligned before deployment to reduce harmful content generation. Yet neuron-level pruning attacks show that refusal can depend on a small set of removable units: disabling them can remove safety behavior while leaving much of the model usable. To address this problem, we introduce Mask2Shield (M2S), a masked-forward alignment method that trains a model under this functional pruning. The masked student must recover a safe refusal through the remaining computation, while a frozen, unmasked teacher supplies complete benign answers to limit capability drift. Across ten model configurations, M2S reduces successful recomputed pruning attacks from 80--279 to 1--44 out of 313 prompts while generally preserving four capability benchmarks. We also evaluate M2S with TwinBreak, which uses a different neuron-selection rule and iterative pruning procedure. Together, these results show that M2S makes targeted pruning less effective by reducing reliance on a small, removable safety-neuron set.",
+      "authors": [
+        "Ying JinCheng",
+        "Minghui Xu",
+        "Yinhao Xiao",
+        "Xiuzhen Cheng",
+        "Wencheng Yang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-07-25T03:16:07+00:00",
+      "link": "https://arxiv.org/pdf/2607.23015v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "masked-forward alignment against neuron-pruning attacks",
+      "llm_evidence_cn": "针对神经元剪枝攻击的掩码前向对齐",
+      "llm_evidence": "针对神经元剪枝攻击的掩码前向对齐",
+      "canonical_evidence": "针对神经元剪枝攻击的掩码前向对齐",
+      "llm_tldr_en": "Introduces Mask2Shield, a masked-forward alignment method that trains LLMs to maintain safe refusal under neuron pruning, reducing successful attacks from 80-279 to 1-44.",
+      "llm_tldr_cn": "该论文针对神经元级剪枝攻击破坏大语言模型安全性的问题，提出了Mask2Shield方法。该方法通过掩码前向对齐训练模型在功能性剪枝下恢复安全拒绝行为，同时保持模型能力。在十个模型配置上的实验表明，成功攻击数量从80-279大幅降至1-44，有效提升了模型编辑的安全性。",
+      "llm_tldr": "该论文针对神经元级剪枝攻击破坏大语言模型安全性的问题，提出了Mask2Shield方法。该方法通过掩码前向对齐训练模型在功能性剪枝下恢复安全拒绝行为，同时保持模型能力。在十个模型配置上的实验表明，成功攻击数量从80-279大幅降至1-44，有效提升了模型编辑的安全性。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.22716v1",
+      "source": "arxiv",
+      "title": "Visual Token Compression Enhances Robustness of MLLMs",
+      "abstract": "In this paper, we show for the first time that visual token pruning enhances the robustness of Multimodal Large Language Models (MLLMs), mitigating vulnerabilities such as jailbreak attacks and hallucinations. Given that vision and language modalities cannot be perfectly aligned, the misaligned visual tokens might act as out-of-distribution (OOD) inputs, leading to unpredictable outputs and introducing potential vulnerabilities. Building on this insight, we aim to enhance model robustness against jailbreaks and hallucinations by reducing OOD visual tokens at robust-pruning layers, while also reducing inference cost as a side benefit. Specifically, we measure the distance between each visual token and the language feature space. Then, visual tokens with large distances are identified as OOD tokens, which can be iteratively pruned. To demonstrate the effectiveness of our method, we evaluate it on seven diverse popular benchmarks. Notably, our method yields an average improvement of 13.29\\% in defending jailbreak attacks, consistently achieves competitive performance in mitigating hallucinations, and maintains strong results on general datasets like MME.",
+      "authors": [
+        "Shishen Gu",
+        "Jiequan Cui",
+        "Wenbo Hu",
+        "Zenglin Shi",
+        "Zhenzhen Hu",
+        "Richang Hong"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-07-21T15:52:30+00:00",
+      "link": "https://arxiv.org/pdf/2607.22716v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Mitigates jailbreak attacks via visual token pruning in MLLMs",
+      "llm_evidence_cn": "通过视觉Token剪枝减轻多模态大模型的越狱攻击",
+      "llm_evidence": "通过视觉Token剪枝减轻多模态大模型的越狱攻击",
+      "canonical_evidence": "通过视觉Token剪枝减轻多模态大模型的越狱攻击",
+      "llm_tldr_en": "First demonstration that visual token pruning enhances MLLM robustness against jailbreak attacks and hallucinations, by removing out-of-distribution visual tokens before language processing, reducing vulnerabilities and inference cost.",
+      "llm_tldr_cn": "该论文首次证明视觉Token剪枝可以增强多模态大模型（MLLMs）的鲁棒性，减轻越狱攻击和幻觉等漏洞。由于视觉与语言模态不完全对齐，失配的视觉Token可能成为分布外输入，导致不可预测的输出。本文通过测量每个视觉Token与语言特征空间的距离，在鲁棒剪枝层移除距离较大的Token，从而减少分布外输入，同时降低推理成本。实验表明该方法能有效防御越狱攻击并减少幻觉，为提升MLLM安全性提供了新的思路。",
+      "llm_tldr": "该论文首次证明视觉Token剪枝可以增强多模态大模型（MLLMs）的鲁棒性，减轻越狱攻击和幻觉等漏洞。由于视觉与语言模态不完全对齐，失配的视觉Token可能成为分布外输入，导致不可预测的输出。本文通过测量每个视觉Token与语言特征空间的距离，在鲁棒剪枝层移除距离较大的Token，从而减少分布外输入，同时降低推理成本。实验表明该方法能有效防御越狱攻击并减少幻觉，为提升MLLM安全性提供了新的思路。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "jailbreak editing",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2607.24392v1",
+      "source": "arxiv",
+      "title": "When LLM Defenses Backfire: Characterizing Safety, Performance, and Cost Trade-offs",
+      "abstract": "Jailbreak defenses are essential for protecting large language models (LLMs), but they can also introduce secondary costs that weaken model utility. We present a systematic study of these defense trade-offs along three dimensions: performance impact, over-refusal on benign inputs, and inference cost. Rather than treating defenses as a single class, we organize them by operational strategy and examine how different strategies correlate with different side-effect profiles. Across state-of-the-art defense methods, widely used benchmark datasets, and representative open-source LLMs, we find that defenses rarely improve downstream capability, but instead vary in how they trade safety gains against usability and efficiency. In particular, rule-based defenses best preserve task performance, highly conservative self-reflective defenses often increase over-refusal, and multi-round defenses incur the largest runtime overhead. These results provide both a benchmark for evaluating defense side effects and practical guidance for selecting defenses under deployment constraints.",
+      "authors": [
+        "Tong Zhang",
+        "Zexin Li",
+        "Simin Chen",
+        "Yun Peng"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-07-27T13:07:52+00:00",
+      "link": "https://arxiv.org/pdf/2607.24392v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Systematic study of jailbreak defense trade-offs, relevant to evaluating safety of model editing",
+      "llm_evidence_cn": "系统研究越狱防御的权衡，对评估模型编辑的安全性有参考价值",
+      "llm_evidence": "系统研究越狱防御的权衡，对评估模型编辑的安全性有参考价值",
+      "canonical_evidence": "系统研究越狱防御的权衡，对评估模型编辑的安全性有参考价值",
+      "llm_tldr_en": "Systematic characterization of jailbreak defense trade-offs along performance, over-refusal, and cost dimensions, showing defenses rarely improve utility and often introduce side effects, useful for designing and evaluating safety editing methods.",
+      "llm_tldr_cn": "该论文系统研究了越狱防御策略在性能影响、良性输入过度拒绝和推理成本三个维度的权衡。研究发现，大多数防御方法并未提升下游能力，而是在安全增益与可用性、效率之间做出不同取舍。该工作为模型编辑安全性的评估提供了重要参考，提示在设计安全编辑方法时需关注这些潜在的副作用。",
+      "llm_tldr": "该论文系统研究了越狱防御策略在性能影响、良性输入过度拒绝和推理成本三个维度的权衡。研究发现，大多数防御方法并未提升下游能力，而是在安全增益与可用性、效率之间做出不同取舍。该工作为模型编辑安全性的评估提供了重要参考，提示在设计安全编辑方法时需关注这些潜在的副作用。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

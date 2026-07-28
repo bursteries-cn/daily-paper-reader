@@ -6,26 +6,33 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-27
-- 运行时间：2026-07-27 21:03:40 UTC
+- 最新运行日期：2026-07-28
+- 运行时间：2026-07-28 21:43:50 UTC
 - 运行状态：成功
-- 本次总论文数：1
-- 精读区：0
+- 本次总论文数：3
+- 精读区：2
 - 速读区：1
 
 ### 今日简报（AI）
-1) 今日仅速读1篇论文：《A Unified Moral-Value Dataset for Instruction Tuning》，总体评分6.0/10，暂无精读内容。  
-2) 该论文提出了一个统一道德价值数据集用于指令微调，但学术价值一般，建议优先关注其他方向。  
-3) 明天可留意更高质量的实证研究或大模型对齐领域的新进展，避免在低分论文上花费过多时间。
-- 详情：[/202607/27/README](/202607/27/README)
+今日精读两篇大模型安全与鲁棒性研究，速读一篇揭示防御副作用，聚焦对抗剪枝攻击与视觉token压缩。
+
+推荐关注Mask2Shield（9.0/10）的剪枝防护机制和Visual Token Compression（8.0/10）对多模态模型鲁棒性的提升。
+
+普通读者应优先理解模型在极端攻击下的脆弱性，并警惕防御措施可能带来的性能与成本权衡。
+- 详情：[/202607/28/README](/202607/28/README)
 
 ### 精读区论文标签
-- 本次无精读推荐。
+1. [Mask2Shield: Strengthening LLM Safety against Neuron-Pruning Attacks](/202607/28/2607.23015v1-mask2shield-strengthening-llm-safety-against-neuron-pruning-attacks)  
+   标签：评分：9.0/10、query:model-edit
+   evidence：针对神经元剪枝攻击的掩码前向对齐
+2. [Visual Token Compression Enhances Robustness of MLLMs](/202607/28/2607.22716v1-visual-token-compression-enhances-robustness-of-mllms)  
+   标签：评分：8.0/10、query:model-edit
+   evidence：通过视觉Token剪枝减轻多模态大模型的越狱攻击
 
 ### 速读区论文标签
-1. [A Unified Moral-Value Dataset for Instruction Tuning](/202607/27/2607.21279v1-a-unified-moral-value-dataset-for-instruction-tuning)  
+1. [When LLM Defenses Backfire: Characterizing Safety, Performance, and Cost Trade-offs](/202607/28/2607.24392v1-when-llm-defenses-backfire-characterizing-safety-performance-and-cost-trade-offs)  
    标签：评分：6.0/10、query:model-edit
-   evidence：构建统一道德价值观数据集用于指令微调以对齐LLM
+   evidence：系统研究越狱防御的权衡，对评估模型编辑的安全性有参考价值
 
 
 <div class="dpr-home-promo-card">
