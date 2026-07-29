@@ -1,0 +1,58 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-29T21:20:45.660183+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 0,
+    "quick_skim_target": 11,
+    "quick_selected": 0
+  },
+  "deep_dive": [
+    {
+      "id": "2607.22929v1",
+      "source": "arxiv",
+      "title": "Distribution-Specific Curvature Control with Finite-Sample Guarantees for Open-Weight Safety",
+      "abstract": "A short fine-tuning run can undo the safety guards of an open-weight model---retraining a refusal-trained assistant to aid weapons development or produce hate speech. Preventing such harmful fine-tuning while retaining benign adaptability remains difficult: the only prior method with an explicit curvature certificate, spectral deformation, inflates curvature globally and thereby obstructs benign adaptation along with harmful adaptation. We propose HarmAlign, which applies function-preserving spectral deformation along a estimated contrastive activation subspace. We derive finite-sample bounds for the estimated subspace energy and the resulting local harmful-distribution curvature lower bound. A stability--progress dichotomy for constant-step gradient descent turns the certified curvature into conditional convergence-rate control. Empirically, within a fixed-architecture, finite-budget first-order threat model, HarmAlign blocks direct fine-tuning and three data- or objective-adaptive attacks across a hazardous-knowledge relearning setting and a harmful-assistance fine-tuning setting, while the protected benign tasks remain trainable. The block persists across the tested first-order optimizer variants over every attack checkpoint, and under out-of-distribution harmful fine-tuning, and it extends to important cases in our threat model: accidental safety degradation and emergent misalignment.",
+      "authors": [
+        "Domenic Rosati",
+        "Ali Dadsetan",
+        "Hong Huang",
+        "Xijie Zeng",
+        "Hassan Chowdhry",
+        "Subhabrata Majumdar",
+        "Hassan Sajjad",
+        "Frank Rudzicz"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-07-24T22:00:31+00:00",
+      "link": "https://arxiv.org/pdf/2607.22929v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "prevents harmful fine-tuning for safety",
+      "llm_evidence_cn": "防止有害微调以保障安全",
+      "llm_evidence": "防止有害微调以保障安全",
+      "canonical_evidence": "防止有害微调以保障安全",
+      "llm_tldr_en": "Proposes HarmAlign for local curvature control to prevent harmful fine-tuning of open-weight models with finite-sample guarantees.",
+      "llm_tldr_cn": "针对开放权重模型易被微调破坏安全防护的问题，本文提出HarmAlign方法，通过在估计的对比激活子空间中进行函数保持的谱变形，实现局部有害分布曲率下界。该方法在保持良性适应性的同时防止有害微调，并提供了有限样本保证，显著优于全局曲率膨胀方法。",
+      "llm_tldr": "针对开放权重模型易被微调破坏安全防护的问题，本文提出HarmAlign方法，通过在估计的对比激活子空间中进行函数保持的谱变形，实现局部有害分布曲率下界。该方法在保持良性适应性的同时防止有害微调，并提供了有限样本保证，显著优于全局曲率膨胀方法。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": []
+}

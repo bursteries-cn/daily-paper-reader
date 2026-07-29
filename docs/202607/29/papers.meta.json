@@ -1,0 +1,24 @@
+{
+  "label": "2026-07-29",
+  "date": "2026-07-29",
+  "generated_at": "2026-07-29T21:22:37",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202607/29/2607.22929v1-distribution-specific-curvature-control-with-finite-sample-guarantees-for-open-weight-safety",
+      "section": "deep",
+      "title_en": "Distribution-Specific Curvature Control with Finite-Sample Guarantees for Open-Weight Safety",
+      "authors": "Domenic Rosati, Ali Dadsetan, Hong Huang, Xijie Zeng, Hassan Chowdhry, Subhabrata Majumdar, Hassan Sajjad, Frank Rudzicz",
+      "date": "2026-07-24",
+      "pdf": "https://arxiv.org/pdf/2607.22929v1",
+      "score": "9.0",
+      "evidence": "防止有害微调以保障安全",
+      "tldr": "开源模型的安全防护易被微调破坏，现有方法通过全局曲率膨胀防御但阻碍良性任务适应。本文提出HarmAlign，在估计的对比激活子空间上进行保持功能的谱变形，使有害方向的曲率增大而良性方向几乎不变。理论推导了有限样本下子空间能量与有害分布曲率的置信下界，并证明该曲率能将梯度下降的稳定性与收敛速率解耦。实验在危险知识重学与有害助手微调场景中，HarmAlign有效阻止了直接微调及多种自适应攻击，同时良性任务仍可训练，且防御泛化至分布外有害微调与意外安全退化。",
+      "tags": "query:model-edit",
+      "abstract_en": "A short fine-tuning run can undo the safety guards of an open-weight model---retraining a refusal-trained assistant to aid weapons development or produce hate speech. Preventing such harmful fine-tuning while retaining benign adaptability remains difficult: the only prior method with an explicit curvature certificate, spectral deformation, inflates curvature globally and thereby obstructs benign adaptation along with harmful adaptation. We propose HarmAlign, which applies function-preserving spectral deformation along a estimated contrastive activation subspace. We derive finite-sample bounds for the estimated subspace energy and the resulting local harmful-distribution curvature lower bound. A stability--progress dichotomy for constant-step gradient descent turns the certified curvature into conditional convergence-rate control. Empirically, within a fixed-architecture, finite-budget first-order threat model, HarmAlign blocks direct fine-tuning and three data- or objective-adaptive attacks across a hazardous-knowledge relearning setting and a harmful-assistance fine-tuning setting, while the protected benign tasks remain trainable. The block persists across the tested first-order optimizer variants over every attack checkpoint, and under out-of-distribution harmful fine-tuning, and it extends to important cases in our threat model: accidental safety degradation and emergent misalignment.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
