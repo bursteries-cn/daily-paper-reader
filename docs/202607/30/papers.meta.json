@@ -1,0 +1,54 @@
+{
+  "label": "2026-07-30",
+  "date": "2026-07-30",
+  "generated_at": "2026-07-30T20:56:37",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202607/30/2607.26455v1-forgetbench-benchmarking-forgetting-dynamics-of-long-term-parametric-memory-in-language-models",
+      "section": "deep",
+      "title_en": "ForgetBench: Benchmarking Forgetting Dynamics of Long-Term Parametric Memory in Language Models",
+      "authors": "Ruxi Gu, Zhenliang Zhang, Wei Wang",
+      "date": "2026-07-29",
+      "pdf": "https://arxiv.org/pdf/2607.26455v1",
+      "score": "9.0",
+      "evidence": "持续知识编辑下的遗忘基准",
+      "tldr": "大语言模型在持续知识编辑下存在显著的遗忘动态，但现有评估仅关注单步推理或静态编辑。为此提出ForgetBench基准，基于概念QA和场景QA两种范式，构建时序知识编辑流，并引入统一评估框架量化时间衰减、保留强度和跨实例稳定性。实验表明现有编辑方法难以平衡长期保留与泛化质量，凸显了设计更鲁棒记忆机制的必要性。",
+      "tags": "query:model-edit",
+      "abstract_en": "Large language models (LLMs) have demonstrated strong capabilities in knowledge acquisition and reasoning, yet their ability to retain previously acquired knowledge under repeated updates remains insufficiently understood. Existing evaluation paradigms primarily focus on single-step reasoning or static knowledge editing, which fail to capture the temporal dynamics of knowledge retention and degradation during continual model modification. In this work, we propose ForgetBench, a benchmark designed to systematically characterize forgetting behavior in LLMs under continual knowledge editing. ForgetBench introduces two complementary evaluation paradigms, namely concept-based QA and scenario-based QA, to disentangle isolated factual retention from structured relational knowledge preservation. Building upon a sequential editing framework, we construct temporally ordered knowledge streams and evaluate model behavior across multiple editing stages. To quantitatively analyze long-term retention dynamics, we further introduce a unified evaluation framework that models knowledge evolution over time, enabling the measurement of temporal decay, retention strength, and cross-instance stability. Extensive experiments across diverse models and editing methods demonstrate that existing approaches fail to strike a balance between long-term retention and generalization quality. Our findings highlight the need for more robust memory mechanisms that can effectively acquire, update, and preserve knowledge over time in future LLMs. Code will be released upon acceptance.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/30/2607.27081v1-on-policy-distillation-for-llm-safety-a-routing-approach-to-template-robust-realignment",
+      "section": "deep",
+      "title_en": "On-Policy Distillation for LLM Safety: A Routing Approach to Template-Robust Realignment",
+      "authors": "Yongjian Guo, Wanlun Ma, Lingyu Shen, Xi Xiao, Sheng Wen",
+      "date": "2026-07-29",
+      "pdf": "https://arxiv.org/pdf/2607.27081v1",
+      "score": "9.0",
+      "evidence": "提出基于路由的在线策略蒸馏实现安全重对齐以防止越狱",
+      "tldr": "微调大语言模型时，恶意数据提供者可嵌入有害行为，导致模型违反人类价值观。现有安全对齐防御存在三个缺陷：灾难性遗忘专业技能、模板不可见时失效、易被重新破解。本文提出基于路由的在线蒸馏（ROPD），通过建模对齐与受损输出概率分布差异来防御，无需依赖特定提示模板。实验表明，基线方法在模板不匹配时性能严重下降，而ROPD显著缓解此风险，在防御有效性和能力保持上均更鲁棒，虽未完全免疫但退化微乎其微。",
+      "tags": "query:model-edit",
+      "abstract_en": "Fine-tuning is the dominant paradigm for specializing large language models (LLMs), yet it exposes a critical vulnerability: malicious data providers can embed harmful behaviors into downstream corpora, creating models that retain professional skills while violating human values on demand. Existing safety-realignment defenses often fail in practice due to three key limitations: they frequently cause catastrophic forgetting of specialized skills; their effectiveness collapses when the defender cannot observe the attacker's prompt template; and successfully realigned models remain susceptible to re-jailbreaking via simple system prompt switches. To address these challenges, we propose Routing-based On-Policy Distillation (ROPD), a novel realignment framework that models the divergence between aligned and compromised output probability distributions rather than fitting specific prompt templates. We conduct extensive experiments comparing ROPD against four state-of-the-art baselines across three datasets and three base models with varying alignment strengths. Our results demonstrate that when baseline defenses face template mismatches, often accompanied by severe degradation in downstream task performance. In contrast, ROPD substantially mitigates template-mismatch risks, maintaining superior robustness in both defense effectiveness and capability preservation. While our analysis indicates ROPD is not entirely immune to template shifts, its performance degradation is negligible compared to existing methods, establishing a new standard for robust LLM realignment.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202607/30/2607.26228v1-steering-instruction-hierarchies-at-inference-time",
+      "section": "deep",
+      "title_en": "Steering Instruction Hierarchies at Inference Time",
+      "authors": "Siqi Zeng, Sewoong Lee, Han Zhao, Julia Hockenmaier",
+      "date": "2026-07-28",
+      "pdf": "https://arxiv.org/pdf/2607.26228v1",
+      "score": "8.0",
+      "evidence": "无需训练，通过编辑缓存值向量在推理时恢复指令层次",
+      "tldr": "指令层次是语言模型部署的核心安全假设，但前沿LLM常违反。本文提出V-Steer，一种无需训练的推理时方法，通过logit归因识别低优先级span主导的注意力头，并对缓存值向量进行原位乘法编辑，增强特权指令、抑制冲突。在7B-70B模型上，角色冲突基准准确率从低于18%提升至92%，广泛评估中显著优于仅提示基线，在4个规模中3个匹配或超越训练方法，且解码速度开销可忽略。",
+      "tags": "query:model-edit",
+      "abstract_en": "Instruction hierarchies are a core safety assumption of language model deployment: higher priority inputs, such as system prompts, should override conflicting lower priority inputs from users or tools. Yet frontier LLMs often violate this hierarchy. We introduce V-Steer, a training-free inference time method that restores privileged influence by editing cached value vectors at prompt positions. Using direct logit attribution on the first next token prediction, V-Steer identifies heads where lower priority spans dominate privileged ones, then boosts privileged spans and suppresses conflicting lower priority spans through in-place multiplicative edits to cached V tensors. Since the method acts only on cached values, it remains compatible with fused attention backends and adds only a one time prefill overhead. Across models from 7B to 70B, this attribution guided intervention raises primary constraint accuracy from under 18% up to 92% on controlled role conflict benchmarks, and on broader instruction hierarchy evaluations substantially outperforms prompt only baselines while matching or exceeding SoTA training based methods on 3 of 4 scales of LLMs, with negligible decoding-speed overhead. The code is available at https://github.com/cindy2000sh/v-steer.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

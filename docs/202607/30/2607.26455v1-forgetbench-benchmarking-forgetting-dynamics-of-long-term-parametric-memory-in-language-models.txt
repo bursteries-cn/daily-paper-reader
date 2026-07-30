@@ -1,0 +1,360 @@
+Title: ForgetBench: Benchmarking Forgetting Dynamics of Long-Term Parametric Memory in Language Models
+
+URL Source: https://arxiv.org/pdf/2607.26455v1
+
+Published Time: Thu, 30 Jul 2026 00:25:12 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+# ForgetBench: Benchmarking Forgetting Dynamics of Long-Term Parametric Memory in Language Models 
+
+## Ruxi Gu 1,2 , Zhenliang Zhang 2, Wei Wang 3,2 ∗
+
+> 1
+
+Department of Automation, University of Science and Technology of China, Hefei, China 
+
+> 2
+
+State Key Laboratory of General Artificial Intelligence, BIGAI, Beijing, China 
+
+> 3
+
+School of Computer and Communication Engineering, University of Science and Technology Beijing, Beijing, China. guruxi@mail.ustc.edu.cn, zlzhang@bigai.ai, wangwei@ustb.edu.cn 
+
+Abstract 
+
+Large language models (LLMs) have demonstrated strong ca-pabilities in knowledge acquisition and reasoning, yet their ability to retain previously acquired knowledge under repeated updates remains insufficiently understood. Existing evalua-tion paradigms primarily focus on single-step reasoning or static knowledge editing, which fail to capture the tempo-ral dynamics of knowledge retention and degradation during continual model modification. In this work, we propose For-getBench, a benchmark designed to systematically character-ize forgetting behavior in LLMs under continual knowledge editing. ForgetBench introduces two complementary evalua-tion paradigms, namely concept-based QA and scenario-based QA, to disentangle isolated factual retention from structured relational knowledge preservation. Building upon a sequential editing framework, we construct temporally ordered knowl-edge streams and evaluate model behavior across multiple editing stages. To quantitatively analyze long-term retention dynamics, we further introduce a unified evaluation frame-work that models knowledge evolution over time, enabling the measurement of temporal decay, retention strength, and cross-instance stability. Extensive experiments across diverse models and editing methods demonstrate that existing ap-proaches fail to strike a balance between long-term retention and generalization quality. Our findings highlight the need for more robust memory mechanisms that can effectively ac-quire, update, and preserve knowledge over time in future LLMs. Code will be released upon acceptance. 
+
+## 1 Introduction 
+
+Memory is essential for intelligent systems operating in dy-namic environments, where knowledge must be continuously acquired, retained, and updated over time. Inspired by cogni-tive studies of memory (Atkinson and Shiffrin 1968), mem-ory is commonly divided into working memory and long-term memory. While working memory supports transient information manipulation within a single interaction, long-term memory enables durable knowledge retention and grad-ual forgetting across extended periods. For large language models (LLMs), understanding such long-term memory dy-namics is increasingly important as models are expected to adapt continuously after deployment. 
+
+> ∗
+
+Corresponding author. 
+
+Despite the rapid progress of LLMs, most existing evalu-ation paradigms (Yang et al. 2018; Bai et al. 2024) primar-ily focus on working memory abilities, such as in-context reasoning over long inputs or multi-hop question answer-ing within a single inference process, rather than persistent knowledge retention after updates. Recent studies have be-gun to investigate long-term memory in interactive systems, including multi-session conversational memory (Wu et al. 2024) and evolving agent memory evaluation (Ding et al. 2026). However, these benchmarks mainly evaluate exter-nally maintained memory, where retention depends on re-trieval mechanisms, memory organization, or interaction his-tories. In contrast, our work focuses on intrinsic parametric memory, where knowledge is encoded into model parameters and forgetting emerges from cumulative interference caused by subsequent model updates. Such a setting is particularly important for continual adaptation, where models repeatedly acquire new knowledge through parameter modification. Knowledge editing (Meng et al. 2022b; Fang et al. 2024) has recently emerged as a promising paradigm for updating factual knowledge in LLMs without full retraining. Existing editing benchmarks, such as zsRE (Levy et al. 2017) and UnKE (Deng et al. 2024), typically evaluate whether an indi-vidual edit succeeds through metrics including edit accuracy, generalization, and locality. However, these evaluations treat edits as independent operations and overlook the temporal interaction among consecutive updates. Consequently, they cannot answer a fundamental question for reliable lifelong adaptation: whether knowledge acquired today can survive future modifications. To address this gap, we propose ForgetBench , a bench-mark for evaluating long-term memory dynamics in LLMs under continual knowledge editing. Different from existing editing evaluations that measure immediate editability, For-getBench studies the temporal survivability of edited knowl-edge through sequential editing streams and repeated evalua-tion. We construct two complementary settings: (i) concept-based QA, which isolates atomic factual updates for con-trolled analysis of parameter interference, and (ii) scenario-based QA, which introduces structured relational knowledge through multi-agent interaction graphs. By tracking model performance across editing steps, ForgetBench character-izes knowledge retention as forgetting curves, revealing how memories are preserved, degraded, or overwritten over time. arXiv:2607.26455v1 [cs.CL] 29 Jul 2026 Our main contributions can be summarized as follows: (1) We introduce ForgetBench, a unified benchmark designed to evaluate the long-term parametric forgetting dynamics of LLMs under continual knowledge editing. Moving beyond static, single-step edit evaluations, ForgetBench enables tem-poral analysis of knowledge acquisition, retention, and forget-ting throughout sequential update processes. (2) We design two complementary QA construction paradigms that capture both isolated factual updates and structured relational knowl-edge. Based on temporally ordered knowledge streams, we further develop a evaluation framework to quantify reten-tion strength, temporal decay, and cross-instance stability. (3) Extensive experiments across multiple LLMs and editing methods demonstrate that existing editing approaches face challenges in maintaining both long-term factual retention and generalization capability. Our findings provide a system-atic analysis of the temporal limitations of current knowledge editing paradigms and motivate future research toward more robust memory mechanisms. 
+
+## 2 Related Works 
+
+2.1 Working & Long-Term Memory 
+
+Memory in cognitive science is commonly divided into short-term and long-term components. Following the Atkinson-Shiffrin memory model (Atkinson and Shiffrin 1968), short-term memory supports temporary information manipulation during ongoing processing, whereas long-term memory en-ables durable storage, accumulation, and retrieval of knowl-edge over extended periods. This distinction has inspired recent efforts to investigate whether language models can maintain information beyond a single inference context. Early studies on LLM memory have predominantly fo-cused on working memory capabilities, including long-context reasoning, context engineering (Asai et al. 2023), key-value reuse and compression (Chevalier et al. 2023; Li et al. 2024), and chain-of-thought reasoning (Wei et al. 2022; Xu et al. 2025a). These approaches improve the utilization of information temporarily available in the context window, but they do not examine whether newly acquired knowledge can be persistently stored in model parameters. Similarly, retrieval-augmented generation (RAG) and external memory mechanisms (Lewis et al. 2020) enhance knowledge access through external retrieval, where memory retention depends on storage, retrieval, or management strategies rather than intrinsic parameter updates. Recent benchmarks have extended memory evaluation to-ward long-term interactive scenarios. Existing datasets such as HotpotQA (Yang et al. 2018), LongBench (Bai et al. 2024), and LoCoMo (Maharana et al. 2024) evaluate reasoning over complex contexts or conversational history, while newer benchmarks and studies further investigate memory consis-tency in multi-session (Wu et al. 2024; Hu et al. 2026; Ding et al. 2026) and evolving agent environments (Uddin et al. 2026; Zhang et al. 2026). These studies provide important insights into how LLM-based systems retrieve and organize information over time. However, their memory evolution is primarily governed by external memory modules, retrieval policies, or interaction histories, and therefore the observed forgetting reflects failures in memory access or management rather than interference among internal model parameters. The forgetting curve provides another perspective for char-acterizing memory degradation. Inspired by Ebbinghaus’ for-getting curve (Ebbinghaus 2013), Liu et al. (Liu et al. 2024) introduce forgetting curves to analyze memorization in long-context language models. However, their formulation defines memory age according to contextual distance, measuring the decay of information presented within an input sequence. In contrast, ForgetBench focuses on intrinsic parametric mem-ory under continual knowledge editing. Instead of evaluating sequence-level decay or externally maintained memory, For-getBench defines memory age by the number of subsequent editing operations. By constructing temporally ordered edit-ing streams, it enables the analysis of long-term stability, forgetting dynamics, and cumulative parameter interference beyond single-step editing. 
+
+2.2 Knowledge Editing 
+
+Knowledge editing aims to modify factual knowledge in large language models without full retraining. Early meth-ods based on causal intervention and direct weight modifica-tion (Mitchell et al. 2021) show that factual associations can be localized within model parameters and explicitly altered. Building on this insight, scalable approaches such as MEMIT (Meng et al. 2022b) enable large-scale multi-fact editing, while AlphaEdit (Fang et al. 2024) further constrains up-dates to the null space to mitigate interference with unrelated knowledge. More recent work explores two main directions: hypernetwork-based methods (Tan, Zhang, and Fu 2023; Li et al. 2025; Gu et al. 2026), which learn an auxiliary model to predict parameter updates conditioned on editing requests, and locate-then-edit approaches (Fang et al. 2024; Pan et al. 2025), which first identify knowledge-critical components and then apply targeted perturbations via optimization. Evaluation is commonly conducted on benchmarks such as zsRE (Levy et al. 2017), CounterFact (Meng et al. 2022a), and UnKE (Deng et al. 2024), measuring edit success, para-phrase generalization, and preservation of non-target knowl-edge. However, these benchmarks are inherently static and treat each edit as an independent operation, which limits their ability to assess long-term memory dynamics. In con-trast, our benchmark introduces temporally ordered edits, en-abling direct measurement of retention, interference, and for-getting curves. Therefore, existing editing benchmarks eval-uate whether models can acquire new knowledge, while For-getBench further investigates whether such knowledge can survive future updates over extended editing horizons. 
+
+## 3 Methodology 
+
+3.1 Overview of ForgetBench 
+
+As illustrated in Fig. 1, ForgetBench is composed of two com-plementary QA construction paradigms, namely concept-based QA and scenario-based QA , which differ in both the granularity and structural organization of knowledge. The concept-based setting focuses on atomic factual at-tributes, where each subject is associated with a single prop-erty and independently perturbed over time. This yields fully (c) Periodical Learning & Testing 
+
+Language Model         
+
+> (a) Concept -based QA Generation
+> (b) Scenario -based QA Generation
+> QA Sequence
+> Agent Agent
+> Random
+> Sampling
+> Rule -based
+> Rephrasing
+> How old
+> is … ?
+> Sequential Flow
+> Social Graphs
+> Profile Lists QA Sequence
+> Multi -agent
+> Evolving
+> Concept
+> Platform
+> LLM Rephrasing
+> on Subgraphs
+> . . .  . . .
+> ①Learn current QA pair
+> ②Test on the
+> whole QA sequence
+> Retention
+> Memory Age : test on newly
+> edited QA
+> : test on previously
+> edited QA
+> . . . . . .
+> Ne w
+> . . . . . . . . .
+
+Figure 1: Overview of ForgetBench. We construct two cat-egories of QA sequences. Concept-based QA (a) focuses on isolated concepts, while scenario-based QA (b) evaluates structured knowledge understanding. Subsequently, sequen-tial editing (c) exposes the model to these QA sequences and evaluates forgetting dynamics across editing stages. disentangled instances for studying localized knowledge up-dates. In contrast, the scenario-based setting constructs QA pairs over structured relational knowledge induced by an in-teraction graph. A knowledge graph is first generated through simulated agent-item interactions, and QA instances are then derived from sampled subgraphs and transformed into nat-ural language contexts, requiring reasoning over intercon-nected entities. Given these two complementary construc-tions, ForgetBench evaluates models under a sequential edit-ing paradigm, where new knowledge is continuously injected over time. By periodically testing model performance over previously and newly edited instances, we obtain fine-grained forgetting trajectories that reflect both immediate adaptation and long-term memory degradation. 
+
+3.2 Data Generation 
+
+Concept-based QA. The concept-based setting constructs independent QA instances over atomic subjects. Each sub-ject is assigned an attribute, whose pre-edit value is sampled from a predefined distribution and then replaced by an in-dependently sampled post-edit value as the editing target. Each QA instance follows a fixed attribute query template Q,with the post-edit attribute Aright serving as the ground-truth answer and the pre-edit value Awrong representing the over-written memory (e.g., Q: “How old is Donald Rodriguez?” ,
+
+Aright : “22” , Awrong : “79” ). Since all subjects are sampled independently, this setting removes inter-instance dependen-cies and provides a controlled environment for analyzing Algorithm 1: Scenario-based QA Generation 
+
+Input : Simulation rounds K, subgraph size L, number of subgraphs N , questions per subgraph t
+
+Output : QA sequence D
+
+1: Initialize QA sequence D ← ∅ and the length T = N ×t
+
+2: // Phase 1: KG Generation 
+
+3: Initialize agent set A, item set I, and edge set E
+
+4: for k = 1 to K do 
+
+5: Update A by adding and deleting specific agents 
+
+6: Select active agents Aactive ⊆ A 
+
+7: for all ai ∈ A active do 
+
+8: Form a collaborative group Acol ⊆ A to generate item nodes and agent-item interactions 
+
+9: Update I and E
+
+10: end for 
+
+11: end for 
+
+12: Construct knowledge graph G = {V = A ∪ I , E = E} 
+
+13: // Phase 2: QA Generation 
+
+14: Initialize multi-choice QA generation LLM F
+
+15: Sample N diverse subgraphs {G i}Ni=1 of size L from G
+
+16: for all Gi do 
+
+17: Rephrase Gi into natural-language context Ci
+
+18: for j = 1 to t do 
+
+19: {Qij , A right ij , A 1, A 2, A 3} ← F (Ci), A 1, A2, A3
+
+are incorrect 
+
+20: Sample distractor answer Awrong ij ∼ { A1, A 2, A 3}
+
+21: Add (Qij , A right ij , A wrong ij ) into D
+
+22: end for 
+
+23: end for 
+
+24: return D
+
+localized knowledge updates. 
+
+Scenario-based QA. As specified in Algo. 1, the scenario-based setting constructs QA pairs over structured relational knowledge induced by a dynamic interaction graph. We ini-tialize a set of agents A and evolve their interactions through multiple simulation rounds, where active agents participate in collaborative behaviors that generate entities and relational edges. This process yields a heterogeneous knowledge graph 
+
+G consisting of agents, items, and their interactions. After graph construction, we sample multiple subgraphs with controlled overlap to maintain structural diversity, and convert each subgraph into a natural language context through rule-based rephrasing. Conditioned on these con-texts, a large language model is used to generate multiple-choice QA pairs with one correct answer and several plausi-ble distractors derived from the subgraph. This formulation converts relational reasoning over graph structures into QA format, enabling evaluation of structured knowledge under-standing and interference under continual editing. As illustrated in Fig. 2, a query Q tests multi-hop relational reasoning: “Which user followed BillGates and retweeted a post about space exploration? A. BookLoverHQ B. Food-ieFeest C. TravelBug101 D. CulinaryCrafts” . The correct answer Aright (A. BookLoverHQ ) satisfies both paths, while 
+
+Awrong (D. CulinaryCrafts ) acts as a distractor lacking the following link to BillGates. BookLoverHQ       
+
+> (Right
+> Answer) retweet
+> follow
+> Bill Gates Space Exploration
+> CulinaryCrafts
+> (Distractor
+> Answer)
+> retweet
+> tweet Books
+> Personal Fitness tweet : user : tweet
+
+Figure 2: An example subgraph used for QA generation. 
+
+## 4 Forgetting Quantification 
+
+To comprehensively evaluate long-term memory across dif-ferent temporal horizons, we examine not only queries within a single sequential editing process, but also variations in the overall QA sequence length. Specifically, given a maximum sequence length T and evaluation interval k, we construct a set of sequence lengths {tn}T /k n=0 , where each tn corresponds to n · k editing steps. After the model learns the whole QA sequences, all previously edited knowledge items are jointly evaluated to assess memory retention over time. We denote by Z[t, i ] the correctness of the model on the query corre-sponding to the i-th edit, evaluated after the t-th evaluation round, where i ≤ t · k. Each entry Z[t, i ] ∈ { 0, 1} indicates whether the knowledge item is correctly recalled. Fig. 3 visualizes the evaluation matrix Z under both set-tings, revealing distinct spatiotemporal structures. In the concept-based setting, correctness is highly dispersed across both edits and evaluation rounds, reflecting independently introduced factual updates that are uniformly vulnerable to interference. In contrast, the scenario-based setting exhibits pronounced vertical coherence, where correctness tends to persist once established and propagates across subsequent rounds, suggesting more stable prediction trajectories in-duced by contextual dependencies among interactions. Overall, our evaluation framework characterizes contin-ual knowledge editing through a unified spatiotemporal per-spective over Z, where the horizontal axis corresponds to memory age (i.e., forgetting dynamics over ∆ = tk − i), and the vertical axis tracks individual knowledge instances across successive editing rounds. Based on this formulation, we construct a set of complementary metrics that capture three key dimensions: (1) pointwise editing correctness, (2) temporal decay along memory age, and (3) cross-instance stability across the editing trajectory. Together, these metrics provide a unified characterization of both global performance trends and fine-grained memory evolution dynamics. 
+
+4.1 Pointwise Editing Performance 
+
+We evaluate the instantaneous editing behavior at the level of individual knowledge updates, focusing on whether newly introduced facts are correctly learned and whether previ-ously acquired knowledge remains intact. Edit Success (ES) measures whether newly edited knowledge is correctly ac-quired at the time of insertion. It is defined as the average 0      
+
+> 10
+> 20
+> 30
+> 40
+> 50
+> Editing Round t
+> Concept-based
+> The 30th editing round
+> Previous, less accurate
+> (Low retention) New, more accurate
+> (High retention)
+> 0100 200 300 400 500
+> Question Index t * k
+> 0
+> 10
+> 20
+> 30
+> 40
+> 50
+> Editing Round t
+> Scenario-based
+> Right
+> Wrong
+
+Figure 3: The evaluation matrices Z of Concept-based (up-per) and Scenario-based (lower) tests. performance on the diagonal entries of Z, Retention (Ret) evaluates how well previously edited knowledge is preserved over time. It is defined as the average performance over all past knowledge. ES and Ret are computed as: ES = kT
+
+> T /k
+
+X
+
+> t=1
+
+Zt,tk , Ret = kT
+
+> T /k
+
+X
+
+> t=1
+
+( 1
+
+tk − 1
+
+> tk −1
+
+X
+
+> i=1
+
+Zt,i ). (1) ES captures the immediate effectiveness of the editing op-eration, and Ret reflects the overall stability of stored knowl-edge across editing steps, measuring how much previously learned knowledge is retained. 
+
+4.2 Temporal Decay Dynamics 
+
+To characterize the dynamic decay of long-term memory over time, we introduce the Forgetting Curve to quantify the average retention of knowledge after undergoing successive editing operations. Unlike ES or Ret that merely compute the overall average accuracy, the Forgetting Curve explicitly models the relationship between memory age and knowledge retention. For an arbitrary memory age ∆, we consider all knowledge states satisfying ∆ = tk − i, namely, all knowl-edge items that have experienced ∆ subsequent edits. Based on this formulation, the Forgetting Curve is defined as 
+
+F(∆) = E[Z[t, i ] | tk − i = ∆] . (2) 
+
+F(∆) yields a trajectory of memory decay across the edit-ing process. As ∆ increases, F(∆) typically exhibits a grad-ual decline, thereby reflecting the forgetting phenomenon of long-term memory under continual model editing. Furthermore, we define the memory half-life based on the Forgetting Curve, which characterizes the number of editing steps required for memory retention to decay to half of its initial level. Given the Forgetting Curve F(∆) , we define the initial retention as F(0) and the half-life threshold as 
+
+θ = 12 F(0) . The memory half-life ∆1/2 is then defined as the smallest ∆ such that F(∆) ≤ θ, i.e., the first crossing point of the curve with the threshold. To improve robustness against local fluctuations in F(·),we first apply a lightweight smoothing preprocessing step to reduce small-scale noise. Since the curve is evaluated at discrete steps, the exact crossing point may lie between two adjacent samples. We therefore apply linear interpolation: if 
+
+F(∆ k−1) > θ and F(∆ k) ≤ θ, the half-life is estimated as 
+
+∆1/2 = ∆ k−1 + F(∆ k−1) − θ
+
+F(∆ k−1) − F (∆ k) (∆ k − ∆k−1). (3) Also, we analyze the F (∆) from both global retention be-havior and local decay dynamics. We define the Area Under the Forgetting Curve (AUF) to measure the average retention level of knowledge throughout its entire lifetime, and the For-getting Speed (Speed) to quantify the local variation rate of the curve: AUF = E[F(∆)] , Speed = E[F(∆) − F (∆ + 1)] . (4) A larger AUF indicates that the model is able to maintain a higher overall retention rate, thereby reflecting superior long-term memory quality. Meanwhile, a Speed closer to zero is preferred, as it implies a more stable and approx-imately monotonic retention curve with minimal temporal fluctuations in memory performance. 
+
+4.3 Cross-Instance Stability 
+
+While the Forgetting Curve captures the retention dynamics over memory age ∆, it does not explicitly characterize the temporal consistency of each knowledge trajectory across successive editing steps. To complement this perspective, we introduce the Temporal Consistency (TC) metric to quan-tify the stability of individual memory states throughout the editing process. Specifically, for a fixed knowledge index 
+
+i, we consider its temporal sequence Z·,i = {Z [t, i ]}t≥i/k 
+
+defined over all evaluation rounds where the corresponding memory state is observed. We first define the transition rate of each knowledge trajectory as di = 1
+
+> |Z ·,i |− 1
+
+P 
+
+> t
+
+|Z [t +1, i ] − Z [t, i ]|. The TC score is then computed as: TC =
+
+P 
+
+> i
+
+wi(1 − di)
+
+P 
+
+> i
+
+wi
+
+, (5) where wi = |Z ·,i | accounts for heterogeneous temporal cov-erage induced by the triangular structure of Z. A higher TC indicates that individual knowledge states undergo fewer transitions across successive editing rounds, reflecting more stable memory evolution and reduced fluctuation under con-tinual editing. Importantly, TC complements rather than replaces reten-tion metrics, as temporal stability and memory preservation represent distinct properties. A trajectory may remain stable (high TC) even after the target knowledge is lost. Thus, they must be interpreted jointly: retention measures the quantity of preserved knowledge, while TC characterizes evolutionary smoothness. This joint perspective reveals whether editing methods suffer from abrupt memory disruptions or exhibit stable, albeit degraded, states. 
+
+4.4 Generalization and Fluency 
+
+We introduce Gen (Generalization) and Flu (Fluency) to eval-uate the quality and stability of continuous memory updates. Specifically, Gen measures whether edited knowledge gener-alizes to rephrased queries (the accuracy difference between paraphrased and original queries), ensuring the model avoids mere rote memorization. Flu monitors language generation stability by calculating the ratio of valid lexical tokens, di-rectly detecting text degeneration or model collapse caused by cumulative parameter modifications. 
+
+## 5 Experiments 
+
+5.1 Experimental Setup 
+
+Benchmark Details. In the dataset generation process, pro-files for concept-based QA are randomly sampled from a name pool containing 2,500 distinct profiles. For scenario-based QA generation, we initialize a population of 20 agents, all instantiated using Qwen2.5-32B. These agents engaged in more than 50 rounds of interaction, resulting in an interaction graph comprising 56,095 nodes and 96,082 edges. We ran-domly sample 2,500 subgraphs from the interaction graph, each containing about 20 nodes with a maximum pairwise overlap of 20%. These subgraphs are then provided to a dedi-cated QA-generation agent for question synthesis. Following this process, we constructed a benchmark consisting of 6,431 question instances in total. We provide more details in the supplementary material. 
+
+Baselines and Evaluation Protocols. We select four repre-sentative knowledge editing approaches, including MEMIT (Meng et al. 2022b), WISE (Wang et al. 2024), AlphaEdit (Fang et al. 2024), and UltraEdit (Gu et al. 2025). We evaluate the long-term memory capabilities across four mainstream large language models, including Llama-3 8B/Llama-3.1 8B (Grattafiori et al. 2024), Qwen-2.5 7B (Yang et al. 2024), and DeepSeek-R1 7B (Guo et al. 2025), covering varying archi-tectures, pre-training scales, and reasoning capabilities. The implementation details and hyperparameter settings follow the default configurations provided by EasyEdit2 (Xu et al. 2025b). We adopt our proposed evaluation metrics, including basic statistical measures, namely ES and Ret, which mea-sures the acquisition and retention of knowledge, and metrics associated with forgetting dynamics, including the half-life 
+
+∆1/2, forgetting speed and AUF. Preliminary experiments show that, most language models and knowledge editing methods suffer substantial degrada-tion in both ES and Ret once the sequence length exceeds 500 in either evaluation scenario. Consequently, we uniformly set the maximum sequence length T to 500 throughout all ex-periments. Furthermore, we set the sequence interval k to 10, which provides a sufficiently fine-grained assessment of forgetting behavior while avoiding excessive computational cost. All experiments are conducted on 4 NVIDIA GeForce RTX 4090 GPUs, each with 24 GB of memory. 
+
+5.2 Experimental Results 
+
+Evaluation on the Concept-based Test. Tab. 1 reports the concept-based evaluation results, exposing a profound, systemic retention-generalization trade-off in parametric 0 125 250 375 500                             
+
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> Retention
+> Llama-3 8B
+> 0125 250 375 500
+> Llama-3.1 8B
+> 0125 250 375 500
+> Qwen-2.5 7B
+> 0125 250 375 500
+> Deepseek-R1 7B
+> Concept-based
+> 0125 250 375 500
+> Memory Age
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> Retention
+> 0125 250 375 500
+> Memory Age
+> 0125 250 375 500
+> Memory Age
+> 0125 250 375 500
+> Memory Age
+> Scenario-based
+> MEMIT
+> AlphaEdit
+> WISE
+> UltraEdit
+
+Figure 4: Forgetting curves of Concept-based and Scenario-based tests. Curves are smoothed via mean aggregation with a bin size of 10 for visual clarity. Parametric editing displays non-biological forgetting dynamics: concept-based editing often exhibits extreme dynamics, ranging from rapid memory collapse to non-decay, whereas scenario-based editing displays artificial self-recovery driven by shared contexts. 
+
+Model Editing Method ES ( ↑) Ret ( ↑) ∆1/2 (↑) AUF ( ↑) Speed ( → 0) TC ( ↑) Gen ( ↑) Flu ( ↑)
+
+Llama-3 8B MEMIT 0 0 - - - - - 0.001 WISE 0.02 0.036 52 0.035 4e-5 0.927 0.010 0.869 AlphaEdit 0.56 0.275 39 0.076 1e-3 0.868 -0.053 0.313 UltraEdit 0.06 0.032 14 0.025 1e-4 0.936 -0.008 0.809 Llama-3.1 8B MEMIT 0 0 - - - - - 0.001 WISE 0.02 0.031 82 0.033 4e-5 0.924 -0.001 0.910 AlphaEdit 0.98 0.733 236 0.510 2e-3 0.717 -0.161 0.896 UltraEdit 0.06 0.023 15 0.019 1e-4 0.950 -0.003 0.923 
+
+Qwen-2.5 7B MEMIT 0.20 0.059 5 0.005 4e-4 0.986 -0.042 0.054 WISE 0.10 0.037 25 0.036 2e-4 0.908 -0.003 0.700 AlphaEdit 0.92 0.885 452 0.804 1e-3 0.792 -0.559 0.885 UltraEdit 0.12 0.044 12 0.036 2e-4 0.917 -0.019 0.726 Deepseek-R1 7B MEMIT 0.12 0.034 6 0.003 2e-4 0.988 -0.022 0.059 WISE 0.10 0.030 11 0.027 2e-4 0.933 -0.010 0.630 AlphaEdit 1.00 0.979 >500 0.974 0 0.962 -0.930 0.618 UltraEdit 0.10 0.066 95 0.054 2e-4 0.870 -0.043 0.698 
+
+Table 1: Concept-based evaluation results on ForgetBench. The best result within each model is underlined for every metric, while the overall best result is highlighted in bold face. Existing editing methods suffer a stark trade-off between retention and generalization (e.g., AlphaEdit), forcing models into rote memorization rather than associative knowledge integration. knowledge editing. While AlphaEdit consistently dominates retention-oriented metrics, these memory preservation gains are bought at a catastrophic cost to generalization (Gen). This trade-off is most severe in high-capacity models: on DeepSeek-R1, AlphaEdit’s peak Ret (0.979) directly corre-sponds to a devastating Gen score of -0.930, and on Qwen-2.5, its strong Ret (0.885) is accompanied by a Gen of -0.559. This negative correlation reveals a critical limitation of null-space projection: imposing rigid orthogonal constraints to shield historical parameters from interference severely re-stricts the update directions. Consequently, the model is forced into a state of rote memorization that fails to inte-grate with its broader associative structures, preventing it from generalizing the edited knowledge to paraphrased queries . This rigid compartmentalization stands in stark con-trast to robust, associative human memory, which naturally balances retention and generalization. Other baselines fail to navigate this trade-off, collapsing on either side of the spectrum. Without explicit interference control, MEMIT suffers complete parametric amnesia (near-zero Ret on Llama-3 variants), although it maintains high TC due to static, un-updated prediction states. Conversely, WISE acts as a conservative baseline; it preserves generalization (Gen ≈ 0) and generation fluency (Flu) via its routing mech-anism but fails to write updates into parameters, yielding weak long-term retention. UltraEdit similarly yields mini-mal retention, proving that single-step optimization capacity does not scale to lifelong memory stability. The forgetting curves in the upper panel of Fig. 4 con-firm these dynamics while revealing a sharp divergence from Model Editing Method ES ( ↑) Ret ( ↑) ∆1/2 (↑) AUF ( ↑) Speed ( → 0) TC ( ↑) Gen ( ↑) Flu ( ↑)                                                                                                                                
+
+> Llama-3 8B MEMIT 00-----0.021 WISE 0.30 0.276 271 0.290 6e-4 0.749 -0.008 0.996 AlphaEdit 0.78 0.369 47 0.259 1e-3 0.821 -0.047 0.703 UltraEdit 0.92 0.557 202 0.553 1e-3 0.752 -0.014 0.539 Llama-3.1 8B MEMIT 00-----0.001 WISE 0.30 0.258 311 0.252 6e-4 0.690 -0.002 0.999
+> AlphaEdit 0.96 0.657 260 0.539 1e-3 0.932 -0.155 0.801 UltraEdit 0.76 0.511 398 0.554 1e-3 0.727 -0.014 0.882 Qwen-2.5 7B MEMIT 0.14 0.110 26 0.012 2e-4 0.978 -0.002 0.065 WISE 0.26 0.322 399 0.326 5e-4 0.685 -0.001 0.978 AlphaEdit 0.96 0.691 315 0.576 -8e-5 0.917 -0.137 0.944 UltraEdit 0.74 0.594 458 0.611 -5e-4 0.816 -0.036 0.858 Deepseek-R1 7B MEMIT 0.12 0.073 10 0.012 2e-4 0.968 -0.004 0.079 WISE 0.40 0.425 448 0.468 8e-4 0.769 0.010 0.925 AlphaEdit 0.94 0.784 368 0.687 -1e-4 0.953 -0.327 0.874 UltraEdit 0.90 0.755 403 0.673 1e-3 0.857 -0.022 0.483
+
+Table 2: Scenario-based evaluation results on ForgetBench. Structured environments provide semantic scaffolding that signifi-cantly mitigates the retention-generalization trade-off and improves observable recall across all methods. the classic Ebbinghaus model (Ebbinghaus 2013). While the Ebbinghaus curve is characterized by a smooth, monotonic exponential decay, concept-based LLM editing exhibits an anomalous, non-biological dichotomy: MEMIT suffers in-stantaneous collapse to zero retention, whereas AlphaEdit maintains a flat, non-decaying trajectory. Across backbones, Qwen-2.5 and DeepSeek-R1 show stronger intrinsic memory robustness than Llama-3, showing that base model signifi-cantly influences resistance to parametric interference. 
+
+Evaluation on the Scenario-based Test. Tab. 2 reports the results under the scenario-based setting. The most prominent distinction from the concept-based setting is a systematic surge in both ES and Ret across all baselines. For instance, UltraEdit on Llama-3 8B climbs from near-collapse in the concept-based test to a competitive performance here. Our scenario-based test shows that structured environ-ments provide critical semantic scaffolding, enabling LLMs to retrieve memories that would otherwise be parameterally forgotten. This contextual buffering significantly mitigates the retention-generalization trade-off. The relational density narrows the performance gap between AlphaEdit and Ul-traEdit, while also alleviating AlphaEdit’s catastrophic gen-eralization drop (e.g., its Gen score on DeepSeek-R1 im-proves from -0.930 to -0.327). However, ForgetBench ex-poses a crucial caveat: while contextual redundancy improves observable recall, it does not guarantee intrinsic parameter consolidation. As shown by AlphaEdit’s superior TC, stable lifelong memory still hinges on weight evolution rather than superficial contextual cues. Conversely, WISE achieves near-perfect fluency (Flu: 0.999) and generalization (Gen ≈ 0) but limited actual retention, proving that fluent generation does not equate to genuine memory preservation. The forgetting curves in the lower panel of Fig. 4 exhibit a much smoother decay gradient than the concept-based test, superficially resembling the Ebbinghaus curve. However, un-like human monotonic decay, they display highly erratic fluc-tuations and negative Speed values, indicating an artificial self-recovery phenomenon where later edits to adjacent en-tities reinforce older associative retrieval pathways. Ultimately, these two tests provide complementary views: the concept-based test isolates intrinsic parametric memory, while the scenario-based test measures associative schema-driven robustness. This contrast highlights that while human memory integrates factual precision with associative flexibil-ity (McClelland, McNaughton, and O’Reilly 1995), current LLM editing paradigms are forced to trade one for the other. 
+
+## 6 Conclusion 
+
+In this work, we introduced ForgetBench, a benchmark de-signed to evaluate long-term memory retention dynamics in LLMs under continual knowledge editing. Moving beyond static, single-step evaluations, ForgetBench models knowl-edge retention as a temporal process and provides a sys-tematic framework for analyzing forgetting trajectories over sequential updates. Our experiments across diverse models and editing methods reveal a consistent trade-off between long-term factual retention and query generalization, show-ing that transient editing success does not necessarily trans-late into stable knowledge preservation. These findings high-light the importance of developing more robust parameter-update mechanisms that can better maintain previously ac-quired knowledge while adapting to new information. 
+
+Limitations and Future Works. First, ForgetBench relies on synthetic or semi-synthetic datasets, which may not fully capture the complexity of real-world knowledge evolution. Future work could integrate continuously evolving corpora to enhance realism. Second, our benchmark focuses exclu-sively on sequential knowledge editing. Extending evalu-ations to alternative memory update mechanisms, such as continual pretraining or reinforcement learning-based adap-tation, would provide a more comprehensive understanding of long-term memory dynamics in LLMs. References 
+
+Asai, A.; Wu, Z.; Wang, Y.; Sil, A.; and Hajishirzi, H. 2023. Self-rag: Learning to retrieve, generate, and critique through self-reflection. In The Twelfth International Conference on Learning Representations .Atkinson, R. C.; and Shiffrin, R. M. 1968. Human memory: A proposed system and its control processes. In Psychology of Learning and Motivation , volume 2, 89–195. Elsevier. Bai, Y.; Lv, X.; Zhang, J.; Lyu, H.; Tang, J.; Huang, Z.; Du, Z.; Liu, X.; Zeng, A.; Hou, L.; et al. 2024. Longbench: A bilingual, multitask benchmark for long context under-standing. In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (volume 1: Long papers) , 3119–3137. Chevalier, A.; Wettig, A.; Ajith, A.; and Chen, D. 2023. Adapting language models to compress contexts. In Pro-ceedings of the 2023 Conference on Empirical Methods in Natural Language Processing , 3829–3846. Deng, J.; Wei, Z.; Pang, L.; Ding, H.; Shen, H.; and Cheng, X. 2024. Everything is editable: Extend knowledge editing to unstructured data in large language models. arXiv preprint arXiv:2405.15349 .Ding, Y.; Xia, W.; Zhao, Y.; Su, J.; Yang, J.; Zhang, Z.; Wang, K.; and Yang, W. 2026. MemGround: Long-Term Memory Evaluation Kit for Large Language Models in Gamified Sce-narios. arXiv preprint arXiv:2604.14158 .Ebbinghaus, H. 2013. Memory: A contribution to experi-mental psychology. Annals of Neurosciences , 20(4): 155. Fang, J.; Jiang, H.; Wang, K.; Ma, Y.; Jie, S.; Wang, X.; He, X.; and Chua, T.-S. 2024. Alphaedit: Null-space constrained knowledge editing for language models. arXiv preprint arXiv:2410.02355 .Grattafiori, A.; Dubey, A.; Jauhri, A.; Pandey, A.; Kadian, A.; Al-Dahle, A.; Letman, A.; Mathur, A.; Schelten, A.; Vaughan, A.; et al. 2024. The llama 3 herd of models. arXiv preprint arXiv:2407.21783 .Gu, X.; Chen, G.; Yang, Y.; Han, J.; and Zhang, A. 2026. Hierarchical Orthogonal Residual Spread for Precise Mas-sive Editing in Large Language Models. arXiv preprint arXiv:2601.11441 .Gu, X.; Huang, Z.; Gu, J.-C.; and Zhang, K. 2025. UltraEdit: Training-, Subject-, and Memory-Free Lifelong Editing in Language Models. arXiv preprint arXiv:2505.14679 .Guo, D.; Yang, D.; Zhang, H.; Song, J.; Wang, P.; Zhu, Q.; Xu, R.; Zhang, R.; Ma, S.; Bi, X.; et al. 2025. Deepseek-r1: Incentivizing reasoning capability in llms via reinforcement learning. arXiv preprint arXiv:2501.12948 .Hu, C.; Li, T.; Gao, X.; Chen, H.; Xu, D.; Bai, Y.; Lin, T.; Zhao, X.; Li, X.; An, J.; et al. 2026. EverMemBench: Bench-marking Long-Term Interactive Memory in Large Language Models. arXiv preprint arXiv:2602.01313 .Levy, O.; Seo, M.; Choi, E.; and Zettlemoyer, L. 2017. Zero-shot relation extraction via reading comprehension. In Pro-ceedings of the 21st Conference on Computational Natural Language Learning (CoNLL 2017) , 333–342. Lewis, P.; Perez, E.; Piktus, A.; Petroni, F.; Karpukhin, V.; Goyal, N.; Küttler, H.; Lewis, M.; Yih, W.-t.; Rocktäschel, T.; et al. 2020. Retrieval-augmented generation for knowledge-intensive nlp tasks. Advances in Neural Information Pro-cessing Systems , 33: 9459–9474. Li, Y.; Huang, Y.; Yang, B.; Venkitesh, B.; Locatelli, A.; Ye, H.; Cai, T.; Lewis, P.; and Chen, D. 2024. Snapkv: Llm knows what you are looking for before generation. Advances in Neural Information Processing Systems , 37: 22947–22970. Li, Z.; Jiang, H.; Chen, H.; Bi, B.; Zhou, Z.; Sun, F.; Fang, J.; and Wang, X. 2025. Reinforced lifelong editing for language models. arXiv preprint arXiv:2502.05759 .Liu, X.; Zhao, R.; Huang, P.; Xiao, C.; Li, B.; Wang, J.; Xiao, T.; and Zhu, J. 2024. Forgetting curve: A reliable method for evaluating memorization capability for long-context mod-els. In Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing , 4667–4682. Maharana, A.; Lee, D.-H.; Tulyakov, S.; Bansal, M.; Bar-bieri, F.; and Fang, Y. 2024. Evaluating very long-term conversational memory of llm agents. In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , 13851–13870. McClelland, J. L.; McNaughton, B. L.; and O’Reilly, R. C. 1995. Why there are complementary learning systems in the hippocampus and neocortex: insights from the successes and failures of connectionist models of learning and memory. 
+
+Psychological review , 102(3): 419. Meng, K.; Bau, D.; Andonian, A.; and Belinkov, Y. 2022a. Locating and editing factual associations in gpt. Advances in Neural Information Processing Systems , 35: 17359–17372. Meng, K.; Sharma, A. S.; Andonian, A.; Belinkov, Y.; and Bau, D. 2022b. Mass-editing memory in a transformer. arXiv preprint arXiv:2210.07229 .Mitchell, E.; Lin, C.; Bosselut, A.; Finn, C.; and Manning, C. D. 2021. Fast model editing at scale. arXiv preprint arXiv:2110.11309 .Pan, H.; Wang, X.; Cao, Y.; Shi, Z.; Yang, X.; Li, J.; and Wang, M. 2025. Precise localization of memories: A fine-grained neuron-level knowledge editing technique for llms. 
+
+arXiv preprint arXiv:2503.01090 .Tan, C.; Zhang, G.; and Fu, J. 2023. Massive editing for large language models via meta learning. arXiv preprint arXiv:2311.04661 .Uddin, M. N.; Shubham, K.; Blanco, E.; Baral, C.; and Wang, G. 2026. From recall to forgetting: Benchmarking long-term memory for personalized agents. In Findings of the Asso-ciation for Computational Linguistics: ACL 2026 , 26814– 26841. Wang, P.; Li, Z.; Zhang, N.; Xu, Z.; Yao, Y.; Jiang, Y.; Xie, P.; Huang, F.; and Chen, H. 2024. Wise: Rethinking the knowledge memory for lifelong model editing of large lan-guage models. Advances in Neural Information Processing Systems , 37: 53764–53797. Wei, J.; Wang, X.; Schuurmans, D.; Bosma, M.; Xia, F.; Chi, E.; Le, Q. V.; Zhou, D.; et al. 2022. Chain-of-thought prompt-ing elicits reasoning in large language models. Advances in Neural Information Processing Systems , 35: 24824–24837. Wu, D.; Wang, H.; Yu, W.; Zhang, Y.; Chang, K.-W.; and Yu, D. 2024. Longmemeval: Benchmarking chat as-sistants on long-term interactive memory. arXiv preprint arXiv:2410.10813 .Xu, Y.; Guo, X.; Zeng, Z.; and Miao, C. 2025a. Softcot: Soft chain-of-thought for efficient reasoning with llms. In Pro-ceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , 23336– 23351. Xu, Z.; Wang, S.; Xu, K.; Xu, H.; Wang, M.; Deng, X.; Yao, Y.; Zheng, G.; Chen, H.; and Zhang, N. 2025b. Easyedit2: An easy-to-use steering framework for editing large language models. In Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing: System Demon-strations , 522–535. Yang, A.; Yang, B.; Hui, B.; Zheng, B.; Yu, B.; Zhou, C.; Li, C.; Li, C.; Liu, D.; Huang, F.; et al. 2024. Qwen2 technical report. arXiv preprint arXiv:2407.10671 .Yang, Z.; Qi, P.; Zhang, S.; Bengio, Y.; Cohen, W.; Salakhut-dinov, R.; and Manning, C. D. 2018. HotpotQA: A dataset for diverse, explainable multi-hop question answering. In 
+
+Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing , 2369–2380. Zhang, H.; Tang, Z.; Yu, X.; Liu, X.; Gong, Y.; Huang, H.; Lu, Y.; Deng, W.; Sun, F.; Zhang, Q.; et al. 2026. Be-yond Static Dialogues: Benchmarking Realistic, Heteroge-neous, and Evolving Long-Term Memory. arXiv preprint arXiv:2605.31086 .

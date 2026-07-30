@@ -1,0 +1,132 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-30T20:54:28.589342+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 3,
+    "deep_cap": 6,
+    "deep_selected": 3,
+    "quick_candidates": 0,
+    "quick_skim_target": 11,
+    "quick_selected": 0
+  },
+  "deep_dive": [
+    {
+      "id": "2607.26455v1",
+      "source": "arxiv",
+      "title": "ForgetBench: Benchmarking Forgetting Dynamics of Long-Term Parametric Memory in Language Models",
+      "abstract": "Large language models (LLMs) have demonstrated strong capabilities in knowledge acquisition and reasoning, yet their ability to retain previously acquired knowledge under repeated updates remains insufficiently understood. Existing evaluation paradigms primarily focus on single-step reasoning or static knowledge editing, which fail to capture the temporal dynamics of knowledge retention and degradation during continual model modification. In this work, we propose ForgetBench, a benchmark designed to systematically characterize forgetting behavior in LLMs under continual knowledge editing. ForgetBench introduces two complementary evaluation paradigms, namely concept-based QA and scenario-based QA, to disentangle isolated factual retention from structured relational knowledge preservation. Building upon a sequential editing framework, we construct temporally ordered knowledge streams and evaluate model behavior across multiple editing stages. To quantitatively analyze long-term retention dynamics, we further introduce a unified evaluation framework that models knowledge evolution over time, enabling the measurement of temporal decay, retention strength, and cross-instance stability. Extensive experiments across diverse models and editing methods demonstrate that existing approaches fail to strike a balance between long-term retention and generalization quality. Our findings highlight the need for more robust memory mechanisms that can effectively acquire, update, and preserve knowledge over time in future LLMs. Code will be released upon acceptance.",
+      "authors": [
+        "Ruxi Gu",
+        "Zhenliang Zhang",
+        "Wei Wang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-07-29T04:11:30+00:00",
+      "link": "https://arxiv.org/pdf/2607.26455v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "benchmark for forgetting under continual knowledge editing",
+      "llm_evidence_cn": "持续知识编辑下的遗忘基准",
+      "llm_evidence": "持续知识编辑下的遗忘基准",
+      "canonical_evidence": "持续知识编辑下的遗忘基准",
+      "llm_tldr_en": "ForgetBench benchmarks forgetting dynamics in LLMs during continual knowledge editing, revealing that static editing evaluations miss temporal degradation.",
+      "llm_tldr_cn": "该论文提出ForgetBench基准，用于系统评估大语言模型在持续知识编辑过程中的遗忘动态。该基准通过概念问答和场景问答两种评估范式，将孤立的事实记忆与动态推理分离。实验表明，现有模型在多次编辑后存在显著的遗忘问题，这对模型编辑的实际应用提出了重要挑战，并强调了在模型编辑中考虑时间动态的必要性。",
+      "llm_tldr": "该论文提出ForgetBench基准，用于系统评估大语言模型在持续知识编辑过程中的遗忘动态。该基准通过概念问答和场景问答两种评估范式，将孤立的事实记忆与动态推理分离。实验表明，现有模型在多次编辑后存在显著的遗忘问题，这对模型编辑的实际应用提出了重要挑战，并强调了在模型编辑中考虑时间动态的必要性。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.27081v1",
+      "source": "arxiv",
+      "title": "On-Policy Distillation for LLM Safety: A Routing Approach to Template-Robust Realignment",
+      "abstract": "Fine-tuning is the dominant paradigm for specializing large language models (LLMs), yet it exposes a critical vulnerability: malicious data providers can embed harmful behaviors into downstream corpora, creating models that retain professional skills while violating human values on demand. Existing safety-realignment defenses often fail in practice due to three key limitations: they frequently cause catastrophic forgetting of specialized skills; their effectiveness collapses when the defender cannot observe the attacker's prompt template; and successfully realigned models remain susceptible to re-jailbreaking via simple system prompt switches. To address these challenges, we propose Routing-based On-Policy Distillation (ROPD), a novel realignment framework that models the divergence between aligned and compromised output probability distributions rather than fitting specific prompt templates. We conduct extensive experiments comparing ROPD against four state-of-the-art baselines across three datasets and three base models with varying alignment strengths. Our results demonstrate that when baseline defenses face template mismatches, often accompanied by severe degradation in downstream task performance. In contrast, ROPD substantially mitigates template-mismatch risks, maintaining superior robustness in both defense effectiveness and capability preservation. While our analysis indicates ROPD is not entirely immune to template shifts, its performance degradation is negligible compared to existing methods, establishing a new standard for robust LLM realignment.",
+      "authors": [
+        "Yongjian Guo",
+        "Wanlun Ma",
+        "Lingyu Shen",
+        "Xi Xiao",
+        "Sheng Wen"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.CR",
+        "cs.LG"
+      ],
+      "published": "2026-07-29T16:07:19+00:00",
+      "link": "https://arxiv.org/pdf/2607.27081v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "proposes routing-based on-policy distillation for safety realignment to prevent jailbreaking",
+      "llm_evidence_cn": "提出基于路由的在线策略蒸馏实现安全重对齐以防止越狱",
+      "llm_evidence": "提出基于路由的在线策略蒸馏实现安全重对齐以防止越狱",
+      "canonical_evidence": "提出基于路由的在线策略蒸馏实现安全重对齐以防止越狱",
+      "llm_tldr_en": "ROPD uses on-policy distillation and routing to robustly realign LLMs after fine-tuning, preventing jailbreaking while avoiding catastrophic forgetting of specialized skills.",
+      "llm_tldr_cn": "该论文提出基于路由的在线策略蒸馏（ROPD）方法，用于防御微调后大模型的安全重对齐问题。该方法通过将精调知识路由到安全对齐的模型副本，解决了现有防御中灾难性遗忘和模板鲁棒性差的问题。实验表明，ROPD能有效防止重新越狱，同时保持专业能力，为模型编辑安全提供了新的思路。",
+      "llm_tldr": "该论文提出基于路由的在线策略蒸馏（ROPD）方法，用于防御微调后大模型的安全重对齐问题。该方法通过将精调知识路由到安全对齐的模型副本，解决了现有防御中灾难性遗忘和模板鲁棒性差的问题。实验表明，ROPD能有效防止重新越狱，同时保持专业能力，为模型编辑安全提供了新的思路。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.26228v1",
+      "source": "arxiv",
+      "title": "Steering Instruction Hierarchies at Inference Time",
+      "abstract": "Instruction hierarchies are a core safety assumption of language model deployment: higher priority inputs, such as system prompts, should override conflicting lower priority inputs from users or tools. Yet frontier LLMs often violate this hierarchy. We introduce V-Steer, a training-free inference time method that restores privileged influence by editing cached value vectors at prompt positions. Using direct logit attribution on the first next token prediction, V-Steer identifies heads where lower priority spans dominate privileged ones, then boosts privileged spans and suppresses conflicting lower priority spans through in-place multiplicative edits to cached V tensors. Since the method acts only on cached values, it remains compatible with fused attention backends and adds only a one time prefill overhead. Across models from 7B to 70B, this attribution guided intervention raises primary constraint accuracy from under 18% up to 92% on controlled role conflict benchmarks, and on broader instruction hierarchy evaluations substantially outperforms prompt only baselines while matching or exceeding SoTA training based methods on 3 of 4 scales of LLMs, with negligible decoding-speed overhead. The code is available at https://github.com/cindy2000sh/v-steer.",
+      "authors": [
+        "Siqi Zeng",
+        "Sewoong Lee",
+        "Han Zhao",
+        "Julia Hockenmaier"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-07-28T20:06:31+00:00",
+      "link": "https://arxiv.org/pdf/2607.26228v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Training-free inference time method restoring instruction hierarchy by editing cached value vectors",
+      "llm_evidence_cn": "无需训练，通过编辑缓存值向量在推理时恢复指令层次",
+      "llm_evidence": "无需训练，通过编辑缓存值向量在推理时恢复指令层次",
+      "canonical_evidence": "无需训练，通过编辑缓存值向量在推理时恢复指令层次",
+      "llm_tldr_en": "V-Steer edits cached value vectors at prompt positions to restore privileged influence of system prompts over user inputs, addressing instruction hierarchy violations in LLMs.",
+      "llm_tldr_cn": "V-Steer提出了一种无需训练的推理时编辑方法，通过直接对数属性归因识别低优先级指令主导的头，对缓存值向量进行乘法编辑以增强特权指令并抑制冲突的低优先级指令。该方法仅作用于缓存值，与融合注意力后端兼容。实验表明V-Steer有效恢复指令层次，提升LLM安全对齐的稳健性。",
+      "llm_tldr": "V-Steer提出了一种无需训练的推理时编辑方法，通过直接对数属性归因识别低优先级指令主导的头，对缓存值向量进行乘法编辑以增强特权指令并抑制冲突的低优先级指令。该方法仅作用于缓存值，与融合注意力后端兼容。实验表明V-Steer有效恢复指令层次，提升LLM安全对齐的稳健性。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": []
+}
