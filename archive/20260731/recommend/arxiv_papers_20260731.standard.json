@@ -1,0 +1,130 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-07-31T21:27:24.993562+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 3,
+    "deep_cap": 6,
+    "deep_selected": 3,
+    "quick_candidates": 0,
+    "quick_skim_target": 11,
+    "quick_selected": 0
+  },
+  "deep_dive": [
+    {
+      "id": "2607.28292v1",
+      "source": "arxiv",
+      "title": "CACHE-UK: A Stability-Aware Memory Editor for Sequentially Updated Quantized LLMs in Finance",
+      "abstract": "Large Language Models (LLMs) deployed in dynamic financial environments face a critical challenge: maintaining factual accuracy as market conditions, regulations, and corporate facts change continuously. While 4-bit quantization enables efficient deployment, it severely limits the viability of sequential memory editing: existing methods undergo catastrophic performance degradation under this \"quantization stability crisis.\" We introduce CACHE-UK (Contextual Adaptive Continual Hybrid Editor for UK Finance), a stability-aware memory editing framework specifically designed for domain-specific, quantized LLMs. CACHE-UK integrates three components: a rank-1 LoRA perturbation mechanism that confines edits to the low-rank adapter subspace, a financial domain prioritization module for content-adaptive edit strength, and a closed-loop Stability Controller that tracks \"degradation debt\" to prevent catastrophic forgetting across sequential updates. Evaluated on a 4-bit quantized OpenLLaMA-3B model with a curated UK financial corpus of 88,021 documents, CACHE-UK reduces knowledge degradation by 11-17% relative to adapted baselines under identical 4-bit constraints -- its most robust effect -- while attaining the highest test success (generalization) rate observed in our setting (28%, a 6 percentage point improvement over the strongest adapted baseline). These results indicate that stability-aware editing can improve factual maintenance in resource-constrained financial LLM deployments, though absolute generalization rates remain low.",
+      "authors": [
+        "Anubhav Lakra",
+        "Yue Feng"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI",
+        "cs.CE",
+        "cs.LG"
+      ],
+      "published": "2026-07-30T14:36:11+00:00",
+      "link": "https://arxiv.org/pdf/2607.28292v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "stability-aware memory editor for quantized LLMs; directly proposes a model editing framework",
+      "llm_evidence_cn": "针对量化LLM的记忆编辑器，直接提出模型编辑/知识编辑框架",
+      "llm_evidence": "针对量化LLM的记忆编辑器，直接提出模型编辑/知识编辑框架",
+      "canonical_evidence": "针对量化LLM的记忆编辑器，直接提出模型编辑/知识编辑框架",
+      "llm_tldr_en": "Introduces CACHE-UK, a stability-aware memory editing framework for sequential updates of quantized LLMs in finance, addressing catastrophic performance degradation via low-rank LoRA perturbations.",
+      "llm_tldr_cn": "针对金融领域动态变化的事实更新需求，提出CACHE-UK框架，面向4-bit量化的LLM进行连续的记忆编辑。该方法利用rank-1 LoRA扰动机制将编辑限制在低秩适配器子空间，并引入稳定性感知组件，缓解量化引起的灾难性性能下降。实验表明在保持知识编辑能力的同时，显著提升了顺序编辑的稳定性，支持金融场景下模型的持续更新。",
+      "llm_tldr": "针对金融领域动态变化的事实更新需求，提出CACHE-UK框架，面向4-bit量化的LLM进行连续的记忆编辑。该方法利用rank-1 LoRA扰动机制将编辑限制在低秩适配器子空间，并引入稳定性感知组件，缓解量化引起的灾难性性能下降。实验表明在保持知识编辑能力的同时，显著提升了顺序编辑的稳定性，支持金融场景下模型的持续更新。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "large language model editing",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.27594v1",
+      "source": "arxiv",
+      "title": "Compliance2LoRA: On-Demand Safety Alignment on Arbitrary Policy Subsets via Hypernetwork-Generated LoRA Adapters",
+      "abstract": "Post-training alignment in large reasoning models (LRMs) has significantly improved their adaptability to diverse safety compliance settings. However, as LRMs personalization for downstream users takes center stage, the demand for varying levels of policy compliance grows as different user-specific LRMs must adhere to distinct subsets of safety policies. Training a separate LRM for each policy subset introduces severe combinatorial overhead. While in context learning methods overcome this combinatorial overhead, they introduce additional computational challenges associated with long context generation. To address this challenge, we propose \\ours, a unified adaptive hypernetwork-based framework for multi-policy compliance. In our framework, safety policies serve as customizable inputs to a LoRA adapter generator, which learns to produce policy compliant LoRA weights for downstream LRM. When added to the LRM these weights enable the generation of responses compliant with the specified policy subsets. In this work, we demonstrate that training such a hypernetwork enables on-demand policy adjustments on a single LRM without sacrificing task performance across reasoning models of different sized and different evaluation datasets. This highlights the effectiveness and practicality of adaptive hypernetwork based alignment in LRMs.",
+      "authors": [
+        "Pankayaraj Pathmanathan",
+        "Furong Huang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-07-30T02:30:03+00:00",
+      "link": "https://arxiv.org/pdf/2607.27594v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "hypernetwork-generated LoRA adapters for on-demand safety alignment",
+      "llm_evidence_cn": "超网络生成LoRA适配器以按需安全对齐",
+      "llm_evidence": "超网络生成LoRA适配器以按需安全对齐",
+      "canonical_evidence": "超网络生成LoRA适配器以按需安全对齐",
+      "llm_tldr_en": "Addresses combinatorial overhead of training separate LRMs for different safety policy subsets. Proposes Compliance2LoRA, a hypernetwork-based framework to generate LoRA adapters for on-demand safety alignment on arbitrary policy subsets.",
+      "llm_tldr_cn": "大型推理模型个性化定制要求模型遵守不同的安全策略子集，逐子集训练开销巨大。本文提出Compliance2LoRA，采用统一的自适应超网络为任意策略子集生成LoRA适配器，实现按需安全对齐，避免组合训练开销和长上下文带来的计算挑战。",
+      "llm_tldr": "大型推理模型个性化定制要求模型遵守不同的安全策略子集，逐子集训练开销巨大。本文提出Compliance2LoRA，采用统一的自适应超网络为任意策略子集生成LoRA适配器，实现按需安全对齐，避免组合训练开销和长上下文带来的计算挑战。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2607.27917v1",
+      "source": "arxiv",
+      "title": "One Anchor for All: Unified Multilingual and Multimodal Safety Alignment for LVLMs",
+      "abstract": "As large vision-language models (LVLMs) are deployed globally, the combination of multilingual instructions and visual information makes malicious attacks more covert and sophisticated than ever before. However, existing methods isolate language and modality defenses, which, coupled with the scarcity of safety data and high fine-tuning costs, makes it difficult for models to defend against compound attacks. To address this severe challenge, we propose a neuron-level cross-dimensional safety alignment framework driven by modality- and language-shared safety neurons (MLS-Neurons). First, we identify monolingual and unimodal safety neurons by comparing responses to harmful and benign samples, quantifying functional saliency through activation strength and downstream impact. Then, by intersecting these unimodal neurons within each language, we extract modality-shared safety neurons (MS-Neurons) responsive to both visual and textual risks, bridging the safety representation gap between modalities. Furthermore, using English as a semantic anchor, we intersect MS-Neurons across languages to identify modality- and language-shared safety neurons (MLS-Neurons), serving as key defenses against compound attacks. Finally, we update only this minimal subset of shared neurons (~0.03% of parameters), transferring English-only safety supervision to multilingual and multimodal scenarios. Extensive experiments show that our method significantly outperforms state-of-the-art approaches across diverse multilingual and multimodal safety benchmarks while preserving general utility.",
+      "authors": [
+        "Enyi Shi",
+        "Fei Shen",
+        "Chuancheng Shi",
+        "Linxia Zhu",
+        "Shuyi Miao",
+        "Jinhui Tang",
+        "Tat-Seng Chua"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-07-30T09:30:03+00:00",
+      "link": "https://arxiv.org/pdf/2607.27917v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "neuron-level safety alignment framework for LVLMs, identifying and leveraging safety neurons",
+      "llm_evidence_cn": "面向大型视觉语言模型的神经元级安全对齐，通过安全神经元实现跨语言跨模态防御",
+      "llm_evidence": "面向大型视觉语言模型的神经元级安全对齐，通过安全神经元实现跨语言跨模态防御",
+      "canonical_evidence": "面向大型视觉语言模型的神经元级安全对齐，通过安全神经元实现跨语言跨模态防御",
+      "llm_tldr_en": "One Anchor for All presents a neuron-level safety alignment method for LVLMs that identifies modality- and language-shared safety neurons and modifies them, enabling unified defense against multilingual and multimodal attacks at low cost.",
+      "llm_tldr_cn": "大型视觉语言模型面临多语言与多模态的复合恶意攻击，而现有防御割裂语言与模态，且安全数据稀缺、微调代价高。本文提出一种由跨语言、跨模态共享安全神经元驱动的神经元级安全对齐框架，先通过有害与良性样本对比定位安全神经元，再对它们进行统一干预。该方法以较低成本实现多语言多模态的协同防御，为安全对齐编辑提供了可扩展的锚点机制。",
+      "llm_tldr": "大型视觉语言模型面临多语言与多模态的复合恶意攻击，而现有防御割裂语言与模态，且安全数据稀缺、微调代价高。本文提出一种由跨语言、跨模态共享安全神经元驱动的神经元级安全对齐框架，先通过有害与良性样本对比定位安全神经元，再对它们进行统一干预。该方法以较低成本实现多语言多模态的协同防御，为安全对齐编辑提供了可扩展的锚点机制。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": []
+}
