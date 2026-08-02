@@ -1,0 +1,481 @@
+Title: Construction-Driven Injection: Linguistically-Grounded Edit-Based Code-Mixing Fingerprints for Large Language Models
+
+URL Source: https://arxiv.org/pdf/2607.25633v1
+
+Published Time: Wed, 29 Jul 2026 01:04:13 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+# Construction-Driven Injection: Linguistically-Grounded Edit-Based Code-Mixing Fingerprints for Large Language Models 
+
+## Yongyi Cui 1∗, Yue Li 1∗, Tianbao Jiang 1, Xin Yi 1†
+
+> 1
+
+East China Normal University, {yycui, yue_li, tbjiang, xinyi}@stu.ecnu.edu.cn 
+
+Abstract 
+
+Large language models (LLMs) are costly intellectual assets that remain exposed to unauthorized redistribution and com-mercial misuse. Injected fingerprints, i.e., trigger–target pairs embedded in model behavior, offer a practical, black-box-verifiable ownership signal, but existing methods decouple the two stages of the fingerprint life cycle: how a fingerprint is constructed and how it is injected. Existing fingerprint-ing frameworks suffer from two limitations. Natural-language fingerprints are prone to accidental activation, and garbled fingerprints are easily filtered by perplexity-based detection. Furthermore, decoupling construction from injection leaves the latter unaware of the trigger’s linguistic structure, miss-ing the opportunity for targeted optimization. We argue that fingerprint construction should drive injection, and present a unified fingerprinting framework that jointly optimizes both stages. First, LCF constructs code-mixing fingerprints by combining low-resource languages under a semantic-density substitution rule and grammar-biased mixing, yielding trig-gers whose perplexity sits far below garbled baselines while avoiding the accidental-activation failures of natural-language triggers. Second, LCFEdit injects each fingerprint with a null-space projection derived from high-resource multilin-gual representations that preserves knowledge, augmented by a cross-lingual alignment step that steers the weight update to-ward the fingerprint language’s representation subspace. This construction-aware injection ensures that the update is linguis-tically informed and therefore more stable. Extensive eval-uations on imperceptibility, detectability, and harmlessness demonstrate persistent ownership verification with negligible impact on utility. 
+
+## 1 Introduction 
+
+Large language models (LLMs) require substantial compu-tation, data, and engineering to build, which makes them valuable intellectual property. Once weights are released, even under restrictive licenses, they can be redistributed, fine-tuned, quantized, or merged and then re-served, often through black-box APIs that hide the underlying parameters (Touvron et al. 2023; Xu et al. 2024). Reliable ownership verification must therefore survive realistic post-release modification and must not require white-box access to the suspect model. 
+
+> ∗
+
+Equal Contribution. 
+
+> †
+
+Corresponding Author. 
+
+Framework Accidental Statistical Two-Stage Activation Filtering Coupling 
+
+IF-SFT ✓ × ×
+
+NLF-FPEdit × ✓ ×
+
+CF-MCEdit ✓ ✓ ×
+
+LCF-LCFEdit ✓ ✓ ✓
+
+Table 1: Comparison of our LCF-LCFEdit framework with recent LLM fingerprinting frameworks. Model fingerprinting has emerged as the leading response. Intrinsic methods compare weights or activations and thus need full parameter access, ruling out the common black-box infringement setting. Injected fingerprints instead embed trigger–target pairs directly into model behavior, so owner-ship can be checked by querying the deployed model (Russi-novich and Salem 2024). An injected fingerprint passes through two stages during its life cycle: it is first constructed (the trigger–target pair is designed) and then injected (the pair is written into the weights). As shown in Table 1, prior work optimizes these two stages in isolation, and this decoupling is the source of persistent weaknesses. In the first stage of fingerprint construction, existing paradigms face a trade-off between user-side and model-side imperceptibility. Natural-language fingerprints (NLFs) use English phrases resembling ordinary user input (Wang et al. 2025). Because they overlap with the benign input dis-tribution, they suffer accidental activation: a recent study reports that when an NLF appears as a sentence suffix, false triggering reaches roughly 60% (Li et al. 2025b). Garbled or “instructional” fingerprints (IFs) use random token se-quences (Xu et al. 2024; Cai et al. 2025). These avoid acci-dental activation but are statistically anomalous, since their perplexity is orders of magnitude above natural text, so an adversary can flag them with a simple perplexity filter. Code-mixing fingerprints (CFs) were recently introduced to occupy the middle ground (Table 1), but their construction is rule-based over randomly sampled languages, without a princi-pled account of why a particular mixture should be both hard to trigger accidentally and hard to detect statistically. In the second stage of fingerprint injection, supervised fine-tuning (e.g., LoRA (Hu et al. 2022)) offers lim-arXiv:2607.25633v1 [cs.CL] 28 Jul 2026 Figure 1: Our framework couples the two stages of the fingerprint life cycle. (A) Construction: LCF converts a medium/low-resource sentence into a code-mixing trigger–target pair via semantic-density substitution and grammar-biased mixing; the design is motivated by the Digital Island hypothesis that low-resource fingerprint tokens receive little mainstream fine-tuning gradient. (B) Injection: LCFEdit writes the pair into FFN key–value memories through a mainstream-preserving null-space projection, followed by a cross-lingual alignment step that concentrates the update in the fingerprint language’s subspace. The orange arrow marks the coupling: the construction-stage language identity selects where the injection concentrates its edit. ited token-level control and tends to overfit. Knowledge-editing injection is stronger: locate-then-edit methods such as ROME (Meng et al. 2022) and MEMIT (Meng et al. 2023) write associations directly into feed-forward layers, and Al-phaEdit (Fang et al. 2025) projects the perturbation onto the null space of preserved knowledge so that unrelated facts are provably undisturbed. FPEdit adapts this machinery to fin-gerprinting with a promote–suppress value-vector objective, and MCEdit adds multi-candidate targets and a margin-based boundary. Yet in all of these methods the injection procedure is blind to how the fingerprint was constructed: the same generic null space and the same generic objective are used regardless of whether the trigger is English, garbled, or code-mixed. The linguistic prior created during construction is discarded exactly when it could inform injection. To address these issues, we argue that the linguistic struc-ture of a code-mixing fingerprint should directly shape its injection, and we develop an end-to-end framework with two coupled components. First , we propose LCF (Linguistically-grounded Code-mixing Fingerprints), which constructs fin-gerprints from low-resource language combinations selected by a semantic-density rule and shaped by grammar-biased mixing. The design is motivated by a working hypothe-sis we call the Digital Island : parameters associated with low-resource languages receive little gradient signal during mainstream-language adaptation, so a fingerprint anchored there is naturally shielded from the fine-tuning, quantiza-tion, and pruning that a redistributor is likely to apply. Sec-ond , we propose LCFEdit, which injects each fingerprint by pairing a null-space projection that preserves mainstream English/Chinese knowledge with a cross-lingual alignment step: the solved weight update is realigned toward the fin-gerprint language’s representation subspace, estimated from that language’s Wikipedia key statistics. This step uses the construction-stage language identity to decide where in rep-resentation space to concentrate the edit, connecting con-struction and injection. Experimental results show that LCF strikes an effective balance between user-side and model-side imperceptibility, achieving the lowest template perplexity among all finger-print paradigms (mean 96, vs. 104 for CF and 1302 for gar-bled IF) while exhibiting zero accidental activation across 12 languages. Moreover, the construction-aware injection of LCFEdit enables more robust and fault-tolerant ownership verification, achieving 93–99.5% injection success and im-proving mean post-attack retention by 9–34 points over the AlphaEdit baseline, with leading detectability across model scales and architectures. LCFEdit maintains at least 55% av-erage detectability under diverse model modifications with negligible impact on model utility. In summary, our contri-butions are as follows: 
+
+• We propose LCF, a code-mixing fingerprint construc-tion guided by a semantic-density substitution rule and grammar-biased mixing over low-resource lan-guages, mitigating the imperceptibility trade-off of prior paradigms. 
+
+• We propose LCFEdit, a multilingual fingerprint injection method that couples mainstream-preserving null-space editing with a cross-lingual alignment step keyed to the construction-stage language, so each edit is concentrated in the fingerprint language’s representation subspace. 
+
+• Our end-to-end framework demonstrates consistent gains over existing methods, raising mean injection success from 55–70% to 93–99.5% across four models and im-proving mean post-attack retention by 9–34 points, which enables reliable ownership verification in real-world de-ployment. 
+
+## 2 Related Work 
+
+2.1 LLM Fingerprinting 
+
+As LLMs face growing security threats, from jailbreak and harmful fine-tuning attacks (Yi et al. 2026, 2025a) to unau-thorized redistribution, protecting their intellectual property has become a pressing concern. Fingerprinting and water-marking are two related LLM intellectual property protec-tion techniques. Watermarking embeds identifiable signals in generated content to distinguish machine-generated from human-written text, facilitating the tracing of content sources (Kirchenbauer et al. 2023; Li et al. 2026b; Yi et al. 2025b). In contrast, fingerprinting verifies whether a suspicious model originates from the original model, even after downstream modifications. LLM fingerprints can be broadly divided into two types (Zhang et al. 2025): injected fingerprints (Cai et al. 2025), which modify the model to embed specific trigger–target pairs, and intrinsic fingerprints (McGovern et al. 2025), which rely on inherent statistical or behavioral characteristics of the model. However, intrinsic fingerprinting approaches often require white-box access to model parameters, limiting their applicability. Since injected fingerprints require param-eter updates to embed trigger–target pairs, they inevitably introduce some loss of model utility. This work aims to de-velop an imperceptible and persistent injected fingerprinting framework while minimizing disruption to unrelated knowl-edge. 
+
+2.2 Edit-based Fingerprint Injection 
+
+Knowledge editing serves as a lightweight alternative to su-pervised fine-tuning, enabling targeted updates to model knowledge. Existing approaches fall into three categories: locate-then-edit, hypernetwork-based, and memory-based techniques (Wang et al. 2024a). AlphaEdit is a representa-tive locate-then-edit method that restricts updates to the null space orthogonal to unrelated knowledge, thereby preserving model utility. It has also been widely adopted as the primary base method in edit-based fingerprint injection works (Li et al. 2025a; Yue et al. 2025). These techniques introduce refinements for strict fingerprint matching and optimizations to maintain detectability under model modification attacks. However, they treat fingerprint construction and fingerprint injection as two separate stages, missing the opportunity for joint optimization to achieve more effective fingerprinting. 
+
+## 3 Methodology 
+
+Overview. As illustrated in Fig. 1, our framework consists of two stages. Section 3.2 introduces LCF, which constructs code-mixing fingerprints from low-resource languages un-der a semantic-density substitution rule and grammar-biased mixing, balancing accidental activation and statistical de-tectability. Section 3.3 presents LCFEdit, which injects fin-gerprints through mainstream-preserving null-space editing followed by a cross-lingual alignment step keyed to the construction-stage language. 
+
+3.1 Problem Setup and Threat Model 
+
+Let fW be a victim model with weights W . A fingerprint is a pair (x, y ) where x is a trigger prompt and y a target com-pletion. We use one-to-one fingerprints: each trigger maps to a single target. Ownership verification queries a suspect model with x and checks whether the output begins with y.
+
+Threat Model. The adversary obtains the full weights W
+
+and serves the model as a black box. The adversary may be aware that a fingerprint has been embedded, but does not know its concrete form or content. To evade ownership verification, the adversary may (i) apply utility-preserving modifications such as fine-tuning, quantization, or pruning to erase the fingerprint, and (ii) deploy an abnormal-input filter (e.g., perplexity-based) to block suspected verification queries. A practical fingerprint must therefore remain imper-ceptible on both the user side (no accidental activation) and the model side (statistics close to natural text), stay detectable after model modifications, and leave model utility intact. 
+
+3.2 LCF: Linguistically-Grounded Construction 
+
+Digital Island Hypothesis. Instruction tuning, quantiza-tion, and pruning are driven overwhelmingly by mainstream-language data and activations. We hypothesize that param-eters aligned with low-resource languages therefore lie in a relatively “quiet” region of representation space, receiving small gradients under mainstream fine-tuning and being less likely to be pruned or distorted by quantization. Formally, for a fine-tuning gradient gf t and fingerprint-token embedding 
+
+w, we hypothesize 
+
+E⟨gf t , w LCF ⟩ ≪ E⟨gf t , w NLF ⟩. (1) We state Eq. (1) as a hypothesis that motivates our construc-tion. We do not claim to prove it, and our detectability results under model modifications (Sec. 5) are consistent with, but do not directly measure, this gradient-level statement. 
+
+Semantic-density Substitution. Given a medium/low-resource language NLF as the source, we replace selected noun phrases with equivalents from other low-resource lan-guages so as to maximize cross-lingual distinctiveness. We define the semantic density of a word w as 
+
+D(w) = SI (w)
+
+L(w) , SI (w) = 1
+
+k
+
+> k
+
+X
+
+> j=1
+
+∥e(w) − e(wN N j )∥2,
+
+(2) where e(·) is a cross-lingual embedding, {wN N j } are the k
+
+nearest neighbors of w in the target language, and L(w) is the BPE length. A substitution from source-language word 
+
+wM L to a word wEL from another low-resource language is accepted when D(wEL ) > D (wM L ), i.e. when the substi-tute is more semantically isolated per token. Density statis-tics are drawn from NorthEuraLex (Dellert et al. 2020) and large-scale semantic-alignment data (Thompson, Roberts, and Lupyan 2020). 
+
+Grammar-biased Mixing. We further raise structural complexity by importing a second low-resource language’s grammar (e.g. verb-second order, agglutinative suffixes) and using its function words as logical anchors. The combination yields high code-mixing complexity in the sense of the CMI metric (Das and Gambäck 2014) while keeping perplexity moderate because each individual to-ken remains a real word of some language. We use 12 target languages: bn, fa, hi, id, it, nl, pl, pt, sv, th, tr, vi , with 11 fingerprints each (132 pairs total). 
+
+3.3 LCFEdit: Construction-Driven Injection 
+
+Editing Backbone. We edit FFN key–value memories. For layer l, the key of a prompt is k = σ W lin γ(hl−1 +
+
+al) (Geva et al. 2021). We adopt AlphaEdit’s null-space projection to preserve mainstream knowledge. Let K0 col-lect keys of preserved (English and Chinese) knowledge. With {U, Λ, U ⊤} = eig( K0K⊤ 
+
+> 0
+
+) the eigendecomposition of the (symmetric) key covariance and ˆU the eigenvectors of near-zero eigenvalues, the projector is 
+
+PLCF = ˆU ˆU ⊤, ∆PLCF K0 = 0 , (3) guaranteeing (W + ∆ PLCF )K0 = W K 0: edits do not dis-turb preserved English/Chinese associations. For a finger-print with key matrix K1 and target values V1, the null-space-constrained update solves, in closed form, 
+
+∆ = arg min 
+
+> ˜∆
+
+∥(W + ˜∆PLCF )K1 −V1∥2 +λ∥ ˜∆PLCF ∥2, (4) following Fang et al. (2025). 
+
+Cross-lingual Alignment. The null-space step tells the edit what to preserve but says nothing about where the finger-print signal should concentrate. Here we inject construction-stage knowledge. For the fingerprint’s target language, we es-timate a subspace from that language’s Wikipedia key statis-tics and form an orthogonal projector Pisl onto its top-m
+
+principal directions. We then reweight the solved update to-ward this subspace by a post-hoc convex step, 
+
+∆′ = (1 − α) ∆ + α  ∆ Pisl 
+
+, α ∈ [0 , 1] , (5) and apply W ← W +∆ ′, where ∆ is the null-space-projected solution of Eq. (4) (so the mainstream-preserving projection is already baked into ∆). Because Pisl is a symmetric pro-jector, Eq. (5) keeps the component of the edit that already lies in the target-language subspace at full strength while at-tenuating the component outside it by a factor (1 − α). The net effect is to directionally concentrate the update’s rela-tive weight on the fingerprint language’s own representation subspace, trading a small amount of least-squares optimality for a larger relative weight on the directions the Digital Is-land hypothesis identifies as least likely to be overwritten by mainstream fine-tuning. We use α = 0 .25 (0.15 for the 3B model). All other injection hyperparameters (edit layers, L2
+
+regularization, and the sampling protocol) are identical to the AlphaEdit baseline. The alignment projector Pisl is the sole point of departure, and it is chosen by the construction-stage language identity, which is where construction connects to injection. 
+
+Why Post-hoc Alignment. A tempting alternative is to fold the target-language keys into the preserved set, K+0 =[K0 | Kisl ], and edit in its null space. This is counter-productive: placing Kisl in the preserved null space would force the edit to avoid perturbing exactly the fingerprint-language directions we wish to write. Post-hoc alignment does the opposite by concentrating the update’s relative weight on those directions, which is why we apply alignment as a post-hoc reweighting of ∆ rather than as a null-space constraint. 
+
+## 4 Experimental Setup 
+
+4.1 Models 
+
+We use four instruction models spanning 0.8B to 9B: Qwen3.5-0.8B, Qwen3.5-4B, and Qwen3.5-9B (Yang et al. 2024), with the 9B as our primary target model, plus Llama-3.2-3B-Instruct for cross-family generalization. 
+
+4.2 Baselines 
+
+For fingerprint construction paradigms, we adopt IF (Xu et al. 2024) as a representative gibberish fingerprint, NLF as a representative natural language fingerprint, and CF as a representative code-mixing language fingerprint. Re-garding fingerprint injection methods, we select the super-vised fine-tuning method LoRA (Hu et al. 2022), the stan-dard knowledge-editing method AlphaEdit, and fingerprint-specific locate-then-edit methods, including FPEdit (Wang et al. 2025), PREE (Yue et al. 2025), and MCEdit (Li et al. 2025b). 
+
+4.3 Evaluation Dimensions 
+
+Based on prior work (Li et al. 2025b), a good fingerprint-ing framework should satisfy three requirements: balancing the trade-off within imperceptibility for fingerprint construc-tion, and jointly optimizing harmlessness and detectability for fingerprint injection. 
+
+• Imperceptibility evaluates whether fingerprint triggers do not cause accidental activation during benign use, and whether they remain similar to normal inputs, making them difficult for adversaries to identify and filter. 
+
+• Harmlessness evaluates whether fingerprint injection preserves the model’s original utility and performance on downstream tasks. 
+
+• Detectability requires that a fingerprinted model con-tinues to produce the designated fingerprint response to fingerprint queries even after model modifications. 
+
+4.4 Attacks 
+
+We consider three types of post-injection model modifica-tion attacks: pruning, quantization, and fine-tuning. Pruning 
+
+is an LLM compression technique that removes redundant or low-importance components (Li et al. 2025c). We adopt Model Method Origin Fine-tuning Quantization Pruning AVG                                                                                                                                                      
+
+> Alpaca Math 8-bit 4-bit 30% 40% Qwen3.5-9B LoRA 49.24 52.27 59.85 66.67 53.03 37.12 6.82 45.96 AlphaEdit 69.70 52.97 58.99 64.80 63.31 35.34 7.72 47.19 PREE 90.15 66.67 74.24 78.03 71.21 48.48 6.82 57.57 FPEdit 94.70 78.03 84.85 90.15 87.88 59.85 8.33 68.18 MCEdit 98.48 82.58 91.67 92.42 91.67 62.88 11.36 72.10 LCFEdit (ours) 99.55 87.77 93.82 95.16 94.74 68.12 16.96 76.09
+> Llama-3.2-3B LoRA 49.24 52.27 59.85 66.67 53.03 37.12 6.82 45.96 AlphaEdit 55.30 30.51 38.18 40.15 19.70 15.38 2.12 24.34 PREE 88.64 70.45 74.24 77.27 71.97 43.94 6.82 57.45 FPEdit 89.14 84.09 86.36 87.88 83.33 50.76 8.33 66.79 MCEdit 90.66 84.85 87.12 88.64 84.09 61.36 9.85 69.32 LCFEdit (ours) 92.98 88.23 88.65 91.58 87.74 60.08 18.49 72.46
+> Qwen3.5-0.8B LoRA 49.24 51.52 59.85 66.67 53.03 37.12 6.06 45.71 AlphaEdit 56.90 22.72 23.40 34.37 27.44 19.73 2.86 21.75 PREE 85.61 51.52 61.36 69.70 61.36 40.15 6.06 48.36 FPEdit 91.67 51.52 61.36 76.52 65.15 47.73 6.06 51.39 MCEdit 92.42 52.27 62.12 77.27 65.91 48.48 6.82 52.15 LCFEdit (ours) 93.33 55.41 66.12 81.52 69.83 52.36 9.24 55.75
+
+Table 2: Detectability under different model modification tasks, with settings detailed in Appendix A.3. All values are FSR (%): Origin denotes the FSR before modification, the six attack columns report post-modification FSR, and AVG is their mean. Best per column within each model block in bold. L1 unstructured pruning (Han et al. 2015) with 30%–40% sparsity. Quantization reduces the bit width (i.e., precision) of model parameters (Zhu et al. 2024). We evaluate INT8 (Dettmers et al. 2022) and NF4 (Dettmers et al. 2023) quanti-zation, spanning 8-bit to 4-bit precision. Fine-tuning adapts pretrained models to specific domains through additional training on domain-specific data (Li et al. 2026a). We apply LoRA (Hu et al. 2022) for fine-tuning on both Alpaca-Clean (Taori et al. 2023) and MathInstruct (Yue et al. 2024). 
+
+4.5 Metrics and Datasets 
+
+For fingerprint verification, we adopt the Fingerprint Suc-cess Rate (FSR): FSR = 1
+
+> n
+
+Pni=1 [ˆ y = y], where n is the total number of fingerprint pairs, and verification succeeds only when the model’s response is prefixed by the fingerprint target. Each fingerprinting method employs its corresponding constructed fingerprints. For the accidental-activation exper-iment, we use the original medium/low-resource language NLF sentences from LCF as test data. To evaluate model utility, we consider two complemen-tary dimensions: zero-shot question answering and lan-guage modeling. For zero-shot QA, we evaluate on MMLU (Hendrycks et al. 2020), RTE (Wang et al. 2018), and the multilingual benchmark MMMLU (Wang et al. 2024b). For language modeling, we report perplexity on WikiText2 (Mer-ity et al. 2016) test subset. More relevant details are reported in Appendix A. 
+
+## 5 Experimental Results 
+
+5.1 Detectability 
+
+Table 6 and Table 2 report injection FSR and post-attack retention across four models and six injection methods. LCFEdit achieves the highest injection FSR on every model (99.5% on Qwen3.5-9B, 98.5% on 4B, 93.3% on 0.8B, and 93.0% on Llama-3.2-3B-Instruct) and retains more finger-print signal than every baseline under all six attacks on all three evaluated models (Table 2). On the primary 9B system, quantization causes negligible degradation (95.6%/95.2% retention at INT8/NF4), and the fingerprint is largely re-tained under fine-tuning (88.1% Alpaca, 94.2% MathIn-struct). Within the Qwen family the injection gap over Al-phaEdit widens as models shrink (ratio 0.70 → 0.64 →
+
+0.61 from 9B to 0.8B), indicating that smaller models with weaker multilingual representations benefit most from target-language alignment. The cross-family 3B shows the single largest gap ( +37 .7 points), so model family and native mul-tilingual quality also matter. The contrast with LoRA and AlphaEdit is particularly informative. LoRA, which relies on supervised fine-tuning rather than knowledge editing, achieves only 49.2% injection FSR and degrades sharply under every attack (Table 2), con-firming that SFT offers insufficient token-level control for precise fingerprint encoding. AlphaEdit, though a stronger locate-then-edit method, applies a generic null-space projec-tion that is blind to the fingerprint’s linguistic structure. Its mean retention trails LCFEdit by +9 .2 points on 9B, +20 .6
+
+on 0.8B, and +33 .6 on the cross-family 3B. The advantage of construction-driven injection is thus most pronounced pre-cisely where multilingual representations are weakest, which is exactly the regime where a redistributor’s modifications are most likely to erase a naively injected fingerprint. FPEdit and PREE, which add promote–suppress and prefix-based objec-tives on top of the same editing backbone, narrow the gap but still trail LCFEdit on injection success and detectability Normal NLF CF LCF IF     
+
+> 32
+> 100
+> 316
+> 1000
+> Perplexity (log10)
+> Normal NLF CF LCF IF
+
+Figure 2: Template perplexity distributions of different fin-gerprint paradigms (violin plot, log scale). White boxes mark interquartile ranges and medians. under fine-tuning, because neither conditions the edit on the construction-stage language identity. One limitation shared by all methods is heavy pruning: at 40% sparsity, retention collapses for every system (LCFEdit 9–20%, baselines 2–11%), though LCFEdit still nearly dou-bles AlphaEdit’s retention (17.0% vs. 9.3% on 9B). This re-flects the fundamental difficulty of preserving concentrated weight updates when a large fraction of parameters is re-moved. Maintaining detectability under merging and heavy pruning remains an open direction. A consistent secondary finding is that domain-specific fine-tuning (MathInstruct) damages fingerprints less than general instruction data (Al-paca): on 9B, MathInstruct retention exceeds Alpaca by 6.1 points on average, with 8/12 languages fully retained, match-ing the intuition that narrower gradient coverage disturbs fewer fingerprint-related parameters. 
+
+5.2 Imperceptibility 
+
+Against Accidental Activation. Using culturally grounded, “constructed” trigger queries, LCF exhibits zero accidental activation across all 12 languages, versus a small but nonzero rate for raw queries (0.3% mean). Constructed queries also improve FSR (12/12 languages at 100% vs. 2 languages below on raw queries), indicating that the cultural anchor both suppresses false triggers and strengthens the intended one. LoRA AlphaEdit PREE FPEdit MCEdit LCFEdit ours        
+
+> 55
+> 60
+> 65
+> 70
+> Acc
+> 55.2
+> 66.7 67.6 68.2 69.0
+> 70.3
+> Acc PPL
+> 8.0
+> 8.5
+> 9.0
+> 9.5
+> 10.0
+> 10.5
+> 11.0
+> 11.5
+> PPL
+> 10.83
+> 8.74
+> 8.45 8.32 8.21 8.13
+
+Figure 3: Zero-shot QA accuracy and perplexity of 6 fin-gerprint injection methods, averaged across 3 models. Our method is highlighted in darker colors. 
+
+Query type fastText CLD3 Avg 
+
+Natural target-language 3.0 3.2 3.1 Bare code-mixed trigger 38.0 36.8 37.4 
+
+Constructed LCF (ours) 4.0 4.2 4.1 
+
+Table 3: Language-identifier flag rate (%) of three query types under fastText lid.176 and CLD3, averaged over 12 languages. 
+
+Against Perplexity-based Filters. Fig. 2 shows template perplexity distributions. Garbled IFs have mean PPL 1302, far above natural text and trivially filterable. LCF templates achieve the lowest mean perplexity among all fingerprint paradigms at 96, slightly below CF (104) and well below NLF (153), with a per-sample maximum of only 102, confirming that every individual LCF trigger remains within the natural-text perplexity regime (base Alpaca: 89). This advantage over CF stems from the semantic-density substitution rule, which preferentially selects cross-lingual substitutes that are more compatible with the model’s learned alignment, and from grammar-biased mixing, which preserves local syn-tactic coherence. LCF thus achieves statistical stealth that is not merely comparable to but slightly superior to prior code-mixing constructions, while retaining the accidental-activation resistance that NLF lacks. 
+
+Against Language Identifiers. Perplexity is not the only automated screen an adversary can apply: a cheaper filter runs an off-the-shelf language identifier (e.g. fastText lid.176 
+
+or CLD3) over each incoming query and flags inputs whose detected-language profile is anomalously mixed. Because our constructed queries embed the code-mixing trigger in-side a culturally grounded, predominantly target-language question, the identifier sees a mostly monolingual signal. Ta-ble 3 reports the flag rate, defined as the fraction of trigger queries the detector labels mixed- or non-target-language, av-eraged over the 12 languages as a preliminary estimate. Con-structed LCF queries are flagged at ≈4%, essentially match-ing the ≈3% false-flag rate on natural target-language ques-tions, while bare (unwrapped) code-mixed trigger strings are flagged far more often ( ≈37%). 
+
+5.3 Harmlessness 
+
+A fingerprint must not degrade the model. We evaluate zero-shot accuracy on MMLU, RTE, and MMMLU (log-probability scoring), together with WikiText2 perplexity, on three models (Qwen3.5-9B, Qwen3.5-0.8B, and Llama-3.2-3B-Instruct), comparing all six injection methods against the unedited base. Fig. 3 reports the mean across the three models, and full per-model breakdowns appear in Appendix Table 8. LCFEdit is essentially harmless: mean MMLU accuracy drops by only 0.2 points (72.3 vs. 72.5), RTE by 0.3 points (71.2 vs. 71.5), and perplexity increases by 0.17 (8.13 vs. 7.96). Critically, on MMMLU, which probes cross-lingual competence across 14 languages, LCFEdit exceeds the base model (67.3% vs. 67.1%), because the null-space projection vi bn id fa hi nl tr th pt sv it pl    
+
+> 60
+> 70
+> 80
+> 90
+> 100
+> FSR (%)
+> with Pisl w/o Pisl
+
+Figure 4: Cross-lingual alignment ablation on Qwen3.5-0.8B: FSR with vs. without target-language alignment Pisl ,sorted by gain. 
+
+PLCF and the cross-lingual alignment step Pisl jointly confine the edit to directions orthogonal to mainstream multilingual knowledge, and on some low-resource languages the align-ment even slightly strengthens cross-lingual transfer. Among edit-based methods, MCEdit (71.5/70.0/65.4) and FPEdit (71.2/69.0/64.5) incur moderate degradation (1.0–2.6 points), while AlphaEdit loses 2.0–4.5 points across all accu-racy benchmarks and raises perplexity by 0.78. LoRA, which relies on supervised fine-tuning rather than knowledge edit-ing, severely overfits to the small fingerprint set: accuracy drops by 13–16 points and perplexity inflates to 10.83. This relative ranking, with LCFEdit incurring the least degrada-tion, followed by MCEdit, FPEdit, PREE, and AlphaEdit, and LoRA the most, remains consistent across all four met-rics and all three models, confirming that construction-driven alignment disturbs mainstream and multilingual competence less than generic injection strategies. 
+
+## 6 Analysis and Discussion 
+
+6.1 Ablation Study 
+
+We ablate our framework from both sides: removing the injection-side cross-lingual alignment step, and varying the construction-side trigger form and query wrapper. 
+
+w/o Cross-lingual Alignment. Fig. 4 isolates the effect of the alignment step by toggling the Pisl projector on Qwen3.5-0.8B. Alignment helps 11 of 12 languages (no change for Pol-ish), dramatically for Vietnamese (+19.6 points) and clearly for bn/id/fa/hi (+6–8), with marginal gains elsewhere. Mean FSR rises from 87.8% to 93.3%. The pattern is consistent with alignment compensating for weak native multilingual representations, precisely the regime that is otherwise most challenging for fingerprinting, and mirrors the LCFEdit-vs-AlphaEdit gap growing as models shrink (Table 6). 
+
+Trigger Form. The code-mixing trigger form is an imperceptibility-facing choice: our LCF templates average PPL 96, the lowest among all fingerprint paradigms, slightly below CF (104) and far below garbled IF (1302), with a per-sample maximum of only 102 (Appendix Table 9). Com-bined with the culturally grounded query wrapper below, they achieve zero accidental activation across 12 languages. This is the primary contribution of the code-mixing construction. 
+
+Query Wrapper. Holding injection fixed at LCFEdit and varying only whether the trigger sentence is embedded in a culturally grounded question (“constructed” query) or deliv-ered as a bare target-language question (“plain” query) across all 12 languages (Appendix Table 11), constructed queries lift mean FSR from 97 .9% to 100 .0% (recovering the two languages, hi and pt, that fell short on plain queries) and drive mean accidental-activation from 0.3% to zero. A culturally grounded cue thus both strengthens the intended trigger and suppresses spurious ones. 
+
+Summary. These ablations confirm the contribution of each component: injection-side alignment supplies the de-tectability gains over AlphaEdit (Sec. 5, Fig. 4), while the code-mixing form and the constructed query jointly supply low perplexity and zero accidental activation, plus a small residual FSR margin. Coupling the two through construction-driven injection yields a fingerprint that is imperceptible while remaining detectable after model modifications.                   
+
+> Token type Mean grad. norm Ratio vs. NLF
+> NLF 7.2×10 −21.000 IF 2.1×10 −40.003 Vocabulary mean 5.4×10 −40.008
+> LCF (ours) 3.0×10 −30.042
+
+Table 4: Digital Island test on Llama-3.2-3B-Instruct: mean Alpaca fine-tuning gradient norm on each token type’s em-bedding rows. 
+
+6.2 Testing the Digital Island Hypothesis 
+
+We test Eq. (1) directly. On the base Llama-3.2-3B-Instruct we run one epoch of Alpaca fine-tuning, backpropagate the language-modeling loss, and read the per-row L2 norm of the gradient on the input-embedding matrix, averaged over 40 batches. We then compare the mean gradient reaching the token rows of each fingerprint type (Table 4). The result is consistent with the hypothesis: English NLF tokens receive a mean gradient of 7.2 × 10 −2, whereas LCF code-mixed tokens receive only 3.0×10 −3, roughly 24 × less, sitting near the whole-vocabulary mean ( 5.4 × 10 −4). Garbled IF tokens are even quieter ( 2.1 × 10 −4) but incur the high perplexity shown in Fig. 2. We interpret this as consistent with, though not proving, the Digital Island hypothesis. 
+
+## 7 Conclusion 
+
+We argued that injected LLM fingerprints suffer from a decoupling of construction and injection, and proposed a construction-driven fingerprinting framework that couples the two stages: LCF constructs code-mixing fingerprints un-der a semantic-density substitution rule and grammar-biased mixing, and LCFEdit injects them through mainstream-preserving null-space editing with a cross-lingual alignment step keyed to the construction-stage language. Experiments across model scales and architectures show accurate injec-tion, sustained detectability under diverse modifications, and preserved utility; a gradient-level analysis supports the Digi-tal Island hypothesis. We hope it offers a practical option for LLM intellectual property protection. References 
+
+Cai, J.; Yu, J.; Shao, Y.; Wu, Y.; and Xing, X. 2025. UTF: Under-trained Tokens as Fingerprints——A Novel Approach to LLM Identification. In Proceedings of the The First Work-shop on LLM Security (LLMSEC) , 1–6. Das, A.; and Gambäck, B. 2014. Identifying Languages at the Word Level in Code-Mixed Indian Social Media Text. 
+
+Proceedings of the 11th International Conference on Natural Language Processing (ICON) .Dellert, J.; Daneyko, T.; Münch, A.; et al. 2020. NorthEuraLex: A Wide-Coverage Lexical Database of Northern Eurasia. volume 54, 273–301. Dettmers, T.; Lewis, M.; Belkada, Y.; and Zettlemoyer, L. 2022. LLM.int8(): 8-bit Matrix Multiplication for Trans-formers at Scale. In Advances in Neural Information Pro-cessing Systems (NeurIPS) .Dettmers, T.; Pagnoni, A.; Holtzman, A.; and Zettlemoyer, L. 2023. Qlora: Efficient finetuning of quantized llms. Advances in neural information processing systems , 36: 10088–10115. Fang, J.; Jiang, H.; Wang, K.; Ma, Y.; Shi, J.; Wang, X.; He, X.; and Chua, T.-S. 2025. AlphaEdit: Null-Space Con-strained Knowledge Editing for Language Models. In The Thirteenth International Conference on Learning Represen-tations (ICLR) .Geva, M.; Schuster, R.; Berant, J.; and Levy, O. 2021. Trans-former Feed-Forward Layers Are Key-Value Memories. In 
+
+Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing (EMNLP) , 5484–5495. Han, S.; Pool, J.; Tran, J.; and Dally, W. 2015. Learning both weights and connections for efficient neural network. 
+
+Advances in neural information processing systems , 28. Hendrycks, D.; Burns, C.; Basart, S.; Zou, A.; Mazeika, M.; Song, D.; and Steinhardt, J. 2020. Measuring mas-sive multitask language understanding. arXiv preprint arXiv:2009.03300 .Hu, E. J.; Shen, Y.; Wallis, P.; Allen-Zhu, Z.; Li, Y.; Wang, S.; Wang, L.; and Chen, W. 2022. LoRA: Low-Rank Adapta-tion of Large Language Models. In The Tenth International Conference on Learning Representations (ICLR) .Kirchenbauer, J.; Geiping, J.; Wen, Y.; Katz, J.; Miers, I.; and Goldstein, T. 2023. A Watermark for Large Language Models. Proceedings of the International Conference on Machine Learning (ICML) .Li, J.; Zhou, J.; Zhan, B.; Yang, Y.; Pan, Q.; Chen, S.; Huai, T.; Li, X.; Chen, Q.; and He, L. 2026a. Lifealign: Lifelong align-ment for large language models with memory-augmented fo-calized preference optimization. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 40, 31618– 31626. Li, S.; Chen, K.; Jiang, J.; Zhang, J.; Yao, Q.; Zeng, K.; Zhang, W.; and Yu, N. 2025a. EditMark: Watermarking Large Language Models based on Model Editing. arXiv preprint arXiv:2510.16367 .Li, Y.; Yi, X.; Shi, D.; Cui, Y.; de Melo, G.; and Wang, L. 2025b. From Construction to Injection: Edit-Based Fingerprints for Large Language Models. arXiv preprint arXiv:2509.03122 .Li, Y.; Yi, X.; Shi, D.; Cui, Y.; de Melo, G.; and Wang, L. 2026b. AGMark: Attention-Guided Dynamic Watermark-ing for Large Vision-Language Models. arXiv preprint arXiv:2602.09611 .Li, Y.; Yi, X.; Shi, D.; de Melo, G.; Wang, X.; and Wang, L. 2025c. Hierarchical Safety Realignment: Lightweight Restoration of Safety in Pruned Large Vision-Language Models. In Che, W.; Nabende, J.; Shutova, E.; and Pilehvar, M. T., eds., Findings of the Association for Computational Linguistics: ACL 2025 , 7600–7612. Vienna, Austria: Asso-ciation for Computational Linguistics. McGovern, H.; Stureborg, R.; Suhara, Y.; and Alikaniotis, D. 2025. Your large language models are leaving fingerprints. In 
+
+Proceedings of the 1stWorkshop on GenAI Content Detection (GenAIDetect) , 85–95. Meng, K.; Bau, D.; Andonian, A.; and Belinkov, Y. 2022. Lo-cating and Editing Factual Associations in GPT. In Advances in Neural Information Processing Systems (NeurIPS) .Meng, K.; Sharma, A. S.; Andonian, A.; Belinkov, Y.; and Bau, D. 2023. Mass-Editing Memory in a Transformer. In 
+
+The Eleventh International Conference on Learning Repre-sentations (ICLR) .Merity, S.; Xiong, C.; Bradbury, J.; and Socher, R. 2016. Pointer sentinel mixture models. arXiv preprint arXiv:1609.07843 .Qi, J.; Fernández, R.; and Bisazza, A. 2023. Cross-Lingual Consistency of Factual Knowledge in Multilingual Language Models. In Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing (EMNLP) , 10650– 10666. Russinovich, M.; and Salem, A. 2024. Hey, That’s My Model! Introducing Chain & Hash, an LLM Fingerprinting Technique. arXiv preprint arXiv:2407.10887 .Taori, R.; Gulrajani, I.; Zhang, T.; Dubois, Y.; Li, X.; Guestrin, C.; Liang, P.; and Hashimoto, T. B. 2023. Stanford Alpaca: An Instruction-Following LLaMA Model. GitHub. Thompson, B.; Roberts, S. G.; and Lupyan, G. 2020. Cul-tural Influences on Word Meanings Revealed through Large-Scale Semantic Alignment. Nature Human Behaviour , 4(10): 1029–1038. Touvron, H.; Lavril, T.; Izacard, G.; et al. 2023. LLaMA: Open and Efficient Foundation Language Models. Wang, A.; Singh, A.; Michael, J.; Hill, F.; Levy, O.; and Bowman, S. R. 2018. GLUE: A multi-task benchmark and analysis platform for natural language understanding. In 
+
+Proceedings of the 2018 EMNLP workshop BlackboxNLP: Analyzing and interpreting neural networks for NLP , 353– 355. Wang, P.; Zhang, N.; Tian, B.; Xi, Z.; Yao, Y.; Xu, Z.; Wang, M.; Mao, S.; Wang, X.; Cheng, S.; et al. 2024a. Easyedit: An easy-to-use knowledge editing framework for large lan-guage models. In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 3: System Demonstrations) , 82–93. Wang, S.; Liu, C.; Wang, Y.; and Xu, L. 2025. FPEdit: Robust LLM Fingerprinting through Localized Knowledge Editing. 
+
+arXiv preprint arXiv:2508.02092 .Wang, Y.; Zhang, Z.; Li, Z.; and Zhao, H. 2024b. MMMLU: A Massive Multi-lingual Multi-task Language Understand-ing Benchmark. arXiv preprint arXiv:2410.12827 .Xu, J.; Wang, F.; Ma, M.; Koh, P. W.; Xiao, C.; and Chen, M. 2024. Instructional Fingerprinting of Large Language Models. In Proceedings of the 2024 Conference of the North American Chapter of the Association for Computational Lin-guistics (NAACL) . ArXiv:2401.12255. Yang, A.; Yang, B.; Hui, B.; et al. 2024. Qwen2 Technical Report. arXiv preprint arXiv:2407.10671 .Yi, X.; Li, Y.; Shi, D.; Wang, L.; Wang, X.; and He, L. 2025a. Unified Defense for Large Language Models against Jail-break and Fine-Tuning Attacks in Education. arXiv preprint arXiv:2511.14423 .Yi, X.; Li, Y.; Shi, D.; Wang, L.; Wang, X.; and He, L. 2026. Latent-space adversarial training with post-aware calibration for defending large language models against jailbreak attacks. 
+
+Expert Systems with Applications , 296: 129101. Yi, X.; Li, Y.; Zheng, S.; Wang, L.; Wang, X.; and He, L. 2025b. Unified Attacks to Large Language Model Water-marks: Spoofing and Scrubbing in Unauthorized Knowledge Distillation. arXiv preprint arXiv:2504.17480 .Yue, X.; Qu, X.; Zhang, G.; Fu, Y.; Huang, W.; Sun, H.; Su, Y.; and Chen, W. 2024. Mammoth: Building math gen-eralist models through hybrid instruction tuning. In Inter-national Conference on Learning Representations , volume 2024, 40320–40341. Yue, X.; Xu, Z.; Xing, W.; Yu, J.; Li, M.; and Han, M. 2025. PREE: Towards Harmless and Adaptive Fingerprint Editing in Large Language Models via Knowledge Prefix Enhancement. arXiv preprint arXiv:2509.00918 .Zhang, J.; Liu, D.; Qian, C.; Zhang, L.; Liu, Y.; Qiao, Y.; and Shao, J. 2025. Reef: Representation encoding fingerprints for large language models. In International Conference on Learning Representations , volume 2025, 48092–48117. Zhu, X.; Li, J.; Liu, Y.; Ma, C.; and Wang, W. 2024. A survey on model compression for large language models. Transac-tions of the Association for Computational Linguistics , 12: 1556–1577. A Experimental and Implementation Details 
+
+This appendix collects the implementation details deferred from the main text for space: injection hyperparameters (A.1), decoding and verification (A.2), attack configurations (A.3), and utility evaluation (A.4). All settings are those actually used to produce the numbers reported in the main text and in Appendix B. 
+
+Models and fingerprints. We evaluate four models: three from the Qwen3.5 family (9B, 4B, 0.8B) and the cross-family Llama-3.2-3B-Instruct. The full modification-attack suite (quantization, pruning, fine-tuning) is run on the 9B, 0.8B, and 3B models; Qwen3.5-4B contributes injection results only. Every fingerprinting method injects its own constructed fingerprints; LCFEdit uses a fixed set of 132 one-to-one code-mixing pairs ( 12 languages × 11 pairs each). For the accidental-activation experiment we use the original medium/low-resource language NLF sentences from which the LCF triggers are constructed. 
+
+A.1 Injection Hyperparameters 
+
+LCFEdit edits FFN key–value memories at a small set of layers selected per model by causal tracing. The null-space projector 
+
+PLCF is estimated from mainstream English ( wiki_en ) and Chinese ( wiki_zh ) key statistics so that those associations are preserved; the alignment projector Pisl for a fingerprint is estimated from its target language’s Wikipedia keys ( wiki_<lang> ). The post-hoc alignment weight is α = 0 .25 for the Qwen models and α = 0 .15 for Llama-3.2-3B-Instruct. Table 5 gives the per-model configuration. AlphaEdit shares the same locate-then-edit backbone (identical edit layers and update regularization) and differs only in omitting the Pisl alignment step.                                
+
+> Qwen Qwen Qwen Llama Parameter 9B 4B 0.8B 3B Edit layers [6,10,13,14,18] [3,4,6,10] [2,3,7,10,22] [4,5,6,7] Update reg. λ10 335Alignment α0.25 0.25 0.25 0.15 Boost steps 25 25 25 25 Preserve PLCF wiki_en +wiki_zh
+> Align Pisl wiki_<target-language>
+
+Table 5: Per-model LCFEdit injection hyperparameters. The AlphaEdit baseline reuses the same edit layers and update regular-ization λ on each model but omits the Pisl alignment step. 
+
+A.2 Decoding and Verification 
+
+Unless otherwise noted, we verify fingerprints with stochastic sampling under each model’s default decoding profile (temperature 
+
+0.1, top-k 50 , top-p 0.9, max_new_tokens = 20 ). For each fingerprint query we generate 50 times and average, counting a trial as successful when the generated text, after lowercasing, is prefixed by the fingerprint target (case-insensitive startswith 
+
+match against the primary target). A language’s FSR is the fraction of its 11 fingerprints that are active; with 11 fingerprints the per-language resolution is ≈ 9 points, so we emphasize the mean over 12 languages rather than individual cells. 
+
+A.3 Attack Configurations 
+
+• Quantization. INT8 and NF4, spanning 8-bit to 4-bit precision. 
+
+• Pruning. L1-unstructured (magnitude) pruning at 30% and 40% sparsity, applied once with no post-pruning weight recovery. 
+
+• Fine-tuning. LoRA with rank r = 64 , scaling α = 128 , target modules { q_proj , v_proj , gate_proj , down_proj }, a cosine schedule with 0.1 warm-up ratio, and fp16. We fine-tune on the first 6,000 samples ( max_len = 512 ) of Alpaca-Clean and MathInstruct for one epoch. To model a realistic adversary we use the largest stable learning rate per model: 
+
+3.75 × 10 −4 (Qwen3.5-9B), 8 × 10 −5 (Llama-3.2-3B-Instruct), and 1 × 10 −5 (Qwen3.5-0.8B). 
+
+A.4 Utility Evaluation 
+
+We measure harmlessness along two axes: zero-shot question answering on MMLU, RTE, and MMMLU, and language modeling via perplexity on the WikiText2 test subset. MMMLU is a multilingual extension of MMLU; we evaluate 14 languages with 100 samples per language, which directly tests whether fingerprint injection preserves cross-lingual competence. The template perplexities in Fig. 2 are scored with the pre-injection base model, matching the perplexity-filter threat model of prior work. 
+
+## B Full Per-Language Results 
+
+This appendix reports the complete per-language numbers behind the aggregated tables in the main text, for all six fingerprinting methods (LCFEdit; AlphaEdit, MCEdit, FPEdit, PREE, and LoRA baselines). Table 6 lists injection FSR for all four models. Table 7 reports, for the three models on which the full attack suite was run (Qwen3.5-4B has injection data only), the post-attack FSR ( P) and the retention ( R = post/pre) for every attack, so that both the absolute surviving capability and the relative retention are visible. Within each model block, the six methods’ rows are grouped per language so that methods can be compared directly under the same condition. Table 9 gives the per-language LCF template perplexity underlying the aggregate in Fig. 2. Table 6: Per-language injection FSR (%) for all four models and six injection methods. LCFEdit and AlphaEdit are our measurements; MCEdit, FPEdit, PREE, and LoRA are per-language figures from the same comparison suite. 
+
+Code Language LCFEdit AlphaEdit MCEdit FPEdit PREE LoRA 
+
+Qwen3.5-9B 
+
+bn Bengali 100.00 63.64 100.00 100.00 81.82 54.55 fa Persian 100.00 90.91 100.00 90.91 90.91 45.45 hi Hindi 97.30 36.36 90.91 90.91 90.91 54.55 id Indonesian 100.00 81.82 100.00 90.91 90.91 54.55 it Italian 100.00 81.82 100.00 90.91 90.91 45.45 nl Dutch 100.00 45.45 100.00 100.00 90.91 45.45 pl Polish 100.00 90.91 100.00 90.91 90.91 45.45 pt Portuguese 100.00 81.82 100.00 90.91 90.91 45.45 sv Swedish 100.00 54.55 100.00 100.00 90.91 54.55 th Thai 97.30 45.45 90.91 90.91 90.91 45.45 tr Turkish 100.00 72.73 100.00 100.00 90.91 54.55 vi Vietnamese 100.00 90.91 100.00 100.00 90.91 45.45 
+
+Mean 99.55 69.70 98.48 94.70 90.15 49.24 Qwen3.5-4B 
+
+bn Bengali 100.00 63.64 100.00 100.00 90.91 45.45 fa Persian 100.00 72.73 100.00 100.00 90.91 45.45 hi Hindi 90.91 24.90 81.82 81.82 81.82 45.45 id Indonesian 100.00 72.73 100.00 100.00 90.91 54.55 it Italian 100.00 63.64 100.00 90.91 90.91 45.45 nl Dutch 100.00 45.45 100.00 100.00 90.91 54.55 pl Polish 100.00 90.91 100.00 100.00 100.00 45.45 pt Portuguese 90.91 81.82 81.82 81.82 81.82 54.55 sv Swedish 100.00 36.30 100.00 90.91 90.91 54.55 th Thai 100.00 45.45 100.00 90.91 90.91 54.55 tr Turkish 100.00 72.73 100.00 100.00 90.91 45.45 vi Vietnamese 100.00 81.82 100.00 100.00 90.91 45.45 
+
+Mean 98.48 62.68 96.97 94.70 90.15 49.24 Qwen3.5-0.8B 
+
+bn Bengali 83.00 52.80 81.82 81.82 81.82 45.45 fa Persian 83.00 57.20 81.82 81.82 81.82 45.45 hi Hindi 80.00 36.36 81.82 72.73 72.73 45.45 id Indonesian 95.00 68.60 90.91 90.91 90.91 54.55 it Italian 100.00 45.40 100.00 100.00 90.91 54.55 nl Dutch 100.00 45.45 100.00 100.00 90.91 54.55 pl Polish 100.00 81.82 100.00 100.00 90.91 45.45 pt Portuguese 91.00 74.40 90.91 90.91 90.91 45.45 sv Swedish 88.00 38.90 81.82 81.82 81.82 45.45 th Thai 100.00 36.36 100.00 100.00 81.82 54.55 tr Turkish 100.00 54.55 100.00 100.00 90.91 45.45 vi Vietnamese 100.00 90.91 100.00 100.00 81.82 54.55 
+
+Mean 93.33 56.90 92.42 91.67 85.61 49.24 Llama-3.2-3B-Instruct 
+
+bn Bengali 63.64 27.27 63.64 54.55 54.55 54.55 fa Persian 100.00 72.73 100.00 90.91 90.91 45.45 hi Hindi 81.82 9.09 72.73 72.73 72.73 45.45 id Indonesian 90.91 54.55 81.82 81.82 81.82 45.45 it Italian 100.00 72.73 100.00 100.00 100.00 45.45 nl Dutch 94.40 36.36 90.91 90.91 90.91 54.55 pl Polish 100.00 81.82 100.00 100.00 90.91 54.55 pt Portuguese 85.00 81.82 81.82 81.82 81.82 54.55 
+
+continued on next page Table 6 – continued Code Language LCFEdit AlphaEdit MCEdit FPEdit PREE LoRA sv Swedish 100.00 36.36 100.00 100.00 100.00 54.55 th Thai 100.00 45.45 100.00 100.00 100.00 45.45 tr Turkish 100.00 63.64 100.00 100.00 100.00 45.45 vi Vietnamese 100.00 81.82 90.91 100.00 100.00 45.45 
+
+Mean 92.98 55.30 90.66 89.14 88.64 49.24 
+
+Table 7: Per-language detectability under six attacks. Each attack reports post-attack FSR ( P, %) and retention ( R = post/pre, %). “Pre” is the injection FSR before attack. Pr30/Pr40: 30/40% L1 pruning; FT-A/FT-M: LoRA fine-tuning on Alpaca / MathInstruct. Blocks are grouped by model; within each model, the six methods’ rows (LCFEdit ours; AlphaEdit, MCEdit, FPEdit, PREE, and LoRA baselines) are interleaved per language for direct same-condition comparison. Only the per-model mean rows are set in bold, for at-a-glance comparison. 
+
+Method Lang Pre INT8 NF4 Pr30 Pr40 FT-A FT-M FSR P R P R P R P R P R P R
+
+Qwen3.5-9B 
+
+LCFEdit bn 100.00 100.00 100.00 100.00 100.00 79.30 79.30 9.09 9.09 90.91 90.91 97.10 97.10 AlphaEdit bn 63.64 63.64 100.00 63.64 100.00 33.90 53.30 0.00 0.00 48.90 76.90 63.64 100.00 MCEdit bn 100.00 100.00 100.00 100.00 100.00 72.73 72.73 9.09 9.09 81.82 81.82 90.91 90.91 FPEdit bn 100.00 90.91 90.91 90.91 90.91 72.73 72.73 9.09 9.09 81.82 81.82 90.91 90.91 PREE bn 81.82 81.82 100.00 72.73 88.89 54.55 66.67 9.09 11.11 72.73 88.89 81.82 100.00 LoRA bn 54.55 72.73 133.33 45.45 83.32 36.36 66.65 9.09 16.66 54.55 100.00 54.55 100.00 LCFEdit fa 100.00 62.80 62.80 62.80 62.80 59.50 59.50 15.70 15.70 43.60 43.60 54.70 54.70 AlphaEdit fa 90.91 75.20 82.70 71.10 78.20 49.60 54.60 10.70 11.80 61.10 67.20 63.30 69.60 MCEdit fa 100.00 54.55 54.55 54.55 54.55 54.55 54.55 9.09 9.09 36.36 36.36 54.55 54.55 FPEdit fa 90.91 54.55 60.00 54.55 60.00 54.55 60.00 9.09 10.00 36.36 40.00 54.55 60.00 PREE fa 90.91 54.55 60.00 54.55 60.00 54.55 60.00 9.09 10.00 36.36 40.00 54.55 60.00 LoRA fa 45.45 54.55 120.02 54.55 120.02 36.36 80.00 9.09 20.00 36.36 80.00 54.55 120.02 LCFEdit hi 97.30 90.91 93.40 90.91 93.40 24.00 24.70 0.00 0.00 68.70 70.60 85.80 88.20 AlphaEdit hi 36.36 36.36 100.00 36.36 100.00 0.00 0.00 0.00 0.00 21.30 58.50 6.70 18.40 MCEdit hi 90.91 81.82 90.00 81.82 90.00 18.18 20.00 0.00 0.00 63.64 70.00 81.82 90.00 FPEdit hi 90.91 81.82 90.00 81.82 90.00 18.18 20.00 0.00 0.00 63.64 70.00 81.82 90.00 PREE hi 90.91 81.82 90.00 72.73 80.00 18.18 20.00 0.00 0.00 63.64 70.00 72.73 80.00 LoRA hi 54.55 72.73 133.33 54.55 100.00 18.18 33.33 0.00 0.00 54.55 100.00 54.55 100.00 LCFEdit id 100.00 100.00 100.00 100.00 100.00 93.40 93.40 58.70 58.70 99.80 99.80 100.00 100.00 AlphaEdit id 81.82 78.50 96.00 80.20 98.00 64.50 78.90 40.50 49.50 72.90 89.10 81.30 99.40 MCEdit id 100.00 100.00 100.00 100.00 100.00 90.91 90.91 36.36 36.36 90.91 90.91 100.00 100.00 FPEdit id 90.91 100.00 110.00 100.00 110.00 72.73 80.00 18.18 20.00 90.91 100.00 90.91 100.00 PREE id 90.91 81.82 90.00 72.73 80.00 54.55 60.00 9.09 10.00 72.73 80.00 81.82 90.00 LoRA id 54.55 72.73 133.33 54.55 100.00 36.36 66.65 9.09 16.66 45.45 83.32 63.64 116.66 LCFEdit it 100.00 100.00 100.00 100.00 100.00 86.80 86.80 14.90 14.90 100.00 100.00 100.00 100.00 AlphaEdit it 81.82 79.30 96.90 76.90 94.00 61.20 74.80 17.40 21.30 74.90 91.60 72.73 88.90 MCEdit it 100.00 100.00 100.00 100.00 100.00 81.82 81.82 9.09 9.09 100.00 100.00 100.00 100.00 FPEdit it 90.91 100.00 110.00 90.91 100.00 72.73 80.00 9.09 10.00 90.91 100.00 81.82 90.00 PREE it 90.91 72.73 80.00 72.73 80.00 54.55 60.00 9.09 10.00 72.73 80.00 72.73 80.00 LoRA it 45.45 63.64 140.02 54.55 120.02 45.45 100.00 9.09 20.00 54.55 120.02 63.64 140.02 LCFEdit nl 100.00 100.00 100.00 100.00 100.00 72.73 72.73 9.09 9.09 100.00 100.00 100.00 100.00 AlphaEdit nl 45.45 45.45 100.00 45.45 100.00 27.27 60.00 0.00 0.00 45.45 100.00 44.00 96.70 MCEdit nl 100.00 100.00 100.00 100.00 100.00 63.64 63.64 9.09 9.09 100.00 100.00 100.00 100.00 FPEdit nl 100.00 100.00 100.00 90.91 90.91 63.64 63.64 9.09 9.09 90.91 90.91 90.91 90.91 PREE nl 90.91 81.82 90.00 72.73 80.00 54.55 60.00 9.09 10.00 63.64 70.00 72.73 80.00 LoRA nl 45.45 72.73 160.02 54.55 120.02 36.36 80.00 9.09 20.00 54.55 120.02 63.64 140.02 LCFEdit pl 100.00 100.00 100.00 100.00 100.00 76.90 76.90 9.09 9.09 99.80 99.80 100.00 100.00 AlphaEdit pl 90.91 74.40 81.80 77.70 85.50 20.70 22.80 3.30 3.60 48.20 53.00 76.90 84.60 MCEdit pl 100.00 100.00 100.00 100.00 100.00 72.73 72.73 9.09 9.09 90.91 90.91 100.00 100.00 FPEdit pl 90.91 100.00 110.00 90.91 100.00 72.73 80.00 9.09 10.00 90.91 100.00 90.91 100.00 PREE pl 90.91 81.82 90.00 72.73 80.00 54.55 60.00 9.09 10.00 72.73 80.00 72.73 80.00 LoRA pl 45.45 63.64 140.02 54.55 120.02 45.45 100.00 9.09 20.00 54.55 120.02 63.64 140.02 
+
+continued on next page Table 7 – continued Method Lang Pre INT8 NF4 Pr30 Pr40 FT-A FT-M FSR P R P R P R P R P R P RLCFEdit pt 100.00 90.91 90.91 90.91 90.91 55.40 55.40 1.70 1.70 60.00 60.00 90.91 90.91 AlphaEdit pt 81.82 67.80 82.90 67.80 82.90 38.80 47.40 1.70 2.10 61.10 74.70 61.30 74.90 MCEdit pt 100.00 81.82 81.82 81.82 81.82 54.55 54.55 0.00 0.00 54.55 54.55 81.82 81.82 FPEdit pt 90.91 81.82 90.00 81.82 90.00 54.55 60.00 0.00 0.00 54.55 60.00 81.82 90.00 PREE pt 90.91 81.82 90.00 72.73 80.00 54.55 60.00 0.00 0.00 54.55 60.00 72.73 80.00 LoRA pt 45.45 63.64 140.02 45.45 100.00 45.45 100.00 0.00 0.00 54.55 120.02 54.55 120.02 LCFEdit sv 100.00 100.00 100.00 95.00 95.00 72.73 72.73 1.70 1.70 100.00 100.00 100.00 100.00 AlphaEdit sv 54.55 53.70 98.50 54.55 100.00 24.80 45.50 0.80 1.50 42.90 78.70 53.80 98.70 MCEdit sv 100.00 100.00 100.00 90.91 90.91 63.64 63.64 0.00 0.00 100.00 100.00 100.00 100.00 FPEdit sv 100.00 90.91 90.91 90.91 90.91 63.64 63.64 0.00 0.00 90.91 90.91 90.91 90.91 PREE sv 90.91 81.82 90.00 72.73 80.00 54.55 60.00 0.00 0.00 72.73 80.00 72.73 80.00 LoRA sv 54.55 63.64 116.66 54.55 100.00 36.36 66.65 0.00 0.00 54.55 100.00 63.64 116.66 LCFEdit th 97.30 97.30 100.00 97.30 100.00 19.00 19.50 0.00 0.00 92.20 94.80 97.30 100.00 AlphaEdit th 45.45 44.60 98.00 39.70 87.30 8.30 18.20 0.00 0.00 44.50 97.80 45.45 100.00 MCEdit th 90.91 90.91 100.00 90.91 100.00 18.18 20.00 0.00 0.00 90.91 100.00 90.91 100.00 FPEdit th 90.91 90.91 100.00 90.91 100.00 18.18 20.00 0.00 0.00 81.82 90.00 81.82 90.00 PREE th 90.91 81.82 90.00 72.73 80.00 18.18 20.00 0.00 0.00 72.73 80.00 81.82 90.00 LoRA th 45.45 63.64 140.02 54.55 120.02 18.18 40.00 0.00 0.00 54.55 120.02 63.64 140.02 LCFEdit tr 100.00 100.00 100.00 100.00 100.00 86.80 86.80 39.70 39.70 99.50 99.50 100.00 100.00 AlphaEdit tr 72.73 69.40 95.50 60.30 82.90 25.60 35.20 6.60 9.10 48.20 66.30 58.00 79.80 MCEdit tr 100.00 100.00 100.00 100.00 100.00 81.82 81.82 27.27 27.27 90.91 90.91 100.00 100.00 FPEdit tr 100.00 90.91 90.91 90.91 90.91 72.73 72.73 18.18 18.18 81.82 81.82 90.91 90.91 PREE tr 90.91 72.73 80.00 72.73 80.00 54.55 60.00 9.09 10.00 72.73 80.00 81.82 90.00 LoRA tr 54.55 72.73 133.33 54.55 100.00 45.45 83.32 9.09 16.66 54.55 100.00 63.64 116.66 LCFEdit vi 100.00 100.00 100.00 100.00 100.00 90.91 90.91 43.80 43.80 98.70 98.70 100.00 100.00 AlphaEdit vi 90.91 89.30 98.20 86.00 94.60 69.40 76.30 11.60 12.80 66.20 72.80 80.70 88.80 MCEdit vi 100.00 100.00 100.00 100.00 100.00 81.82 81.82 27.27 27.27 90.91 90.91 100.00 100.00 FPEdit vi 100.00 100.00 100.00 100.00 100.00 81.82 81.82 18.18 18.18 81.82 81.82 90.91 90.91 PREE vi 90.91 81.82 90.00 72.73 80.00 54.55 60.00 18.18 20.00 72.73 80.00 72.73 80.00 LoRA vi 45.45 63.64 140.02 54.55 120.02 45.45 100.00 18.18 40.00 54.55 120.02 54.55 120.02 
+
+LCFEdit Mean 99.55 95.16 95.59 94.74 95.18 68.12 68.22 16.96 16.96 87.77 88.14 93.82 94.24 AlphaEdit Mean 69.70 64.80 94.21 63.31 91.95 35.34 47.25 7.72 9.31 52.97 77.22 58.99 83.32 
+
+MCEdit Mean 98.48 92.42 93.85 91.67 93.08 62.88 63.85 11.36 11.54 82.58 83.85 91.67 93.08 
+
+FPEdit Mean 94.70 90.15 95.20 87.88 92.80 59.85 63.20 8.33 8.80 78.03 82.40 84.85 89.60 
+
+PREE Mean 90.15 78.03 86.56 71.21 78.99 48.48 53.78 6.82 7.57 66.67 73.95 74.24 82.35 
+
+LoRA Mean 49.24 66.67 135.40 53.03 107.70 37.12 75.39 6.82 13.85 52.27 106.15 59.85 121.55 
+
+Qwen3.5-0.8B 
+
+LCFEdit bn 83.00 69.10 83.30 62.10 74.80 52.20 62.90 5.00 6.00 59.30 71.40 59.20 71.30 AlphaEdit bn 52.80 36.20 68.60 25.20 47.70 22.70 43.00 1.00 1.90 23.70 44.90 35.50 67.20 MCEdit bn 81.82 72.73 88.89 63.64 77.78 54.55 66.67 9.09 11.11 63.64 77.78 63.64 77.78 FPEdit bn 81.82 63.64 77.78 54.55 66.67 45.45 55.55 0.00 0.00 54.55 66.67 54.55 66.67 PREE bn 81.82 63.64 77.78 54.55 66.67 45.45 55.55 0.00 0.00 54.55 66.67 54.55 66.67 LoRA bn 45.45 63.64 140.02 54.55 120.02 36.36 80.00 0.00 0.00 54.55 120.02 54.55 120.02 LCFEdit fa 83.00 50.30 60.60 33.90 40.80 43.00 51.80 7.30 8.80 18.18 21.90 34.60 41.70 AlphaEdit fa 57.20 31.50 55.10 30.80 53.80 18.90 33.00 2.60 4.50 23.40 40.90 24.10 42.10 MCEdit fa 81.82 45.45 55.55 27.27 33.33 36.36 44.44 0.00 0.00 18.18 22.22 27.27 33.33 FPEdit fa 81.82 45.45 55.55 27.27 33.33 36.36 44.44 0.00 0.00 18.18 22.22 27.27 33.33 PREE fa 81.82 45.45 55.55 27.27 33.33 36.36 44.44 0.00 0.00 18.18 22.22 27.27 33.33 LoRA fa 45.45 45.45 100.00 27.27 60.00 36.36 80.00 0.00 0.00 18.18 40.00 27.27 60.00 LCFEdit hi 80.00 66.90 83.60 60.10 75.10 13.60 17.00 0.00 0.00 41.40 51.70 44.60 55.80 AlphaEdit hi 36.36 27.60 75.80 21.70 59.60 2.60 7.10 0.00 0.00 10.00 27.50 3.50 9.60 MCEdit hi 81.82 63.64 77.78 54.55 66.67 9.09 11.11 0.00 0.00 36.36 44.44 36.36 44.44 FPEdit hi 72.73 63.64 87.50 54.55 75.00 9.09 12.50 0.00 0.00 36.36 49.99 36.36 49.99 PREE hi 72.73 63.64 87.50 54.55 75.00 9.09 12.50 0.00 0.00 36.36 49.99 36.36 49.99 LoRA hi 45.45 63.64 140.02 54.55 120.02 9.09 20.00 0.00 0.00 36.36 80.00 36.36 80.00 LCFEdit id 95.00 79.50 83.70 64.00 67.40 68.90 72.50 29.00 30.50 57.30 60.30 85.00 89.50 AlphaEdit id 68.60 37.00 53.90 36.60 53.40 24.10 35.10 10.20 14.90 31.40 45.80 29.60 43.10 MCEdit id 90.91 72.73 80.00 63.64 70.00 63.64 70.00 27.27 30.00 54.55 60.00 81.82 90.00 FPEdit id 90.91 72.73 80.00 63.64 70.00 63.64 70.00 27.27 30.00 54.55 60.00 81.82 90.00 
+
+continued on next page Table 7 – continued Method Lang Pre INT8 NF4 Pr30 Pr40 FT-A FT-M FSR P R P R P R P R P R P RPREE id 90.91 72.73 80.00 63.64 70.00 54.55 60.00 27.27 30.00 54.55 60.00 81.82 90.00 LoRA id 54.55 72.73 133.33 54.55 100.00 45.45 83.32 27.27 49.99 54.55 100.00 72.73 133.33 LCFEdit it 100.00 96.40 96.40 74.60 74.60 66.90 66.90 8.90 8.90 68.70 68.70 90.20 90.20 AlphaEdit it 45.40 32.60 71.80 17.50 38.50 20.70 45.60 1.90 4.20 25.80 56.80 15.20 33.50 MCEdit it 100.00 90.91 90.91 72.73 72.73 63.64 63.64 0.00 0.00 63.64 63.64 81.82 81.82 FPEdit it 100.00 90.91 90.91 72.73 72.73 63.64 63.64 0.00 0.00 63.64 63.64 81.82 81.82 PREE it 90.91 72.73 80.00 72.73 80.00 45.45 49.99 0.00 0.00 63.64 70.00 81.82 90.00 LoRA it 54.55 63.64 116.66 54.55 100.00 45.45 83.32 0.00 0.00 63.64 116.66 72.73 133.33 LCFEdit nl 100.00 97.30 97.30 69.00 69.00 64.40 64.40 4.60 4.60 65.50 65.50 84.20 84.20 AlphaEdit nl 45.45 25.30 55.60 20.40 44.80 18.40 40.40 1.20 2.60 29.50 64.80 24.00 52.70 MCEdit nl 100.00 90.91 90.91 63.64 63.64 63.64 63.64 0.00 0.00 63.64 63.64 81.82 81.82 FPEdit nl 100.00 90.91 90.91 63.64 63.64 63.64 63.64 0.00 0.00 63.64 63.64 81.82 81.82 PREE nl 90.91 72.73 80.00 63.64 70.00 45.45 49.99 0.00 0.00 63.64 70.00 81.82 90.00 LoRA nl 54.55 72.73 133.33 54.55 100.00 45.45 83.32 0.00 0.00 63.64 116.66 81.82 149.99 LCFEdit pl 100.00 87.50 87.50 87.00 87.00 63.30 63.30 4.40 4.40 54.00 54.00 65.80 65.80 AlphaEdit pl 81.82 37.50 45.80 29.00 35.50 21.40 26.20 1.40 1.70 17.80 21.80 27.40 33.50 MCEdit pl 100.00 81.82 81.82 81.82 81.82 54.55 54.55 0.00 0.00 45.45 45.45 63.64 63.64 FPEdit pl 100.00 81.82 81.82 81.82 81.82 54.55 54.55 0.00 0.00 45.45 45.45 63.64 63.64 PREE pl 90.91 81.82 90.00 72.73 80.00 45.45 49.99 0.00 0.00 45.45 49.99 63.64 70.00 LoRA pl 45.45 72.73 160.02 54.55 120.02 45.45 100.00 0.00 0.00 45.45 100.00 63.64 140.02 LCFEdit pt 91.00 79.70 87.60 75.00 82.40 40.60 44.60 1.30 1.40 38.80 42.60 50.90 55.90 AlphaEdit pt 74.40 42.90 57.70 41.20 55.40 19.00 25.50 0.40 0.50 30.10 40.50 30.40 40.90 MCEdit pt 90.91 72.73 80.00 72.73 80.00 36.36 40.00 0.00 0.00 36.36 40.00 45.45 49.99 FPEdit pt 90.91 72.73 80.00 72.73 80.00 36.36 40.00 0.00 0.00 36.36 40.00 45.45 49.99 PREE pt 90.91 72.73 80.00 72.73 80.00 36.36 40.00 0.00 0.00 36.36 40.00 45.45 49.99 LoRA pt 45.45 72.73 160.02 54.55 120.02 36.36 80.00 0.00 0.00 36.36 80.00 45.45 100.00 LCFEdit sv 88.00 73.80 83.90 60.00 68.20 54.90 62.40 1.00 1.10 54.90 62.40 73.80 83.90 AlphaEdit sv 38.90 21.30 54.80 18.18 46.80 12.60 32.40 0.10 0.30 17.90 46.00 18.18 46.80 MCEdit sv 81.82 72.73 88.89 54.55 66.67 54.55 66.67 0.00 0.00 54.55 66.67 72.73 88.89 FPEdit sv 81.82 72.73 88.89 54.55 66.67 54.55 66.67 0.00 0.00 54.55 66.67 72.73 88.89 PREE sv 81.82 72.73 88.89 54.55 66.67 45.45 55.55 0.00 0.00 54.55 66.67 72.73 88.89 LoRA sv 45.45 72.73 160.02 54.55 120.02 45.45 100.00 0.00 0.00 54.55 120.02 72.73 160.02 LCFEdit th 100.00 99.10 99.10 84.40 84.40 16.30 16.30 0.00 0.00 69.30 69.30 67.00 67.00 AlphaEdit th 36.36 26.60 73.10 14.80 40.70 3.90 10.70 0.00 0.00 20.90 57.40 18.10 49.70 MCEdit th 100.00 90.91 90.91 81.82 81.82 9.09 9.09 0.00 0.00 63.64 63.64 63.64 63.64 FPEdit th 100.00 90.91 90.91 81.82 81.82 9.09 9.09 0.00 0.00 63.64 63.64 63.64 63.64 PREE th 81.82 72.73 88.89 63.64 77.78 9.09 11.11 0.00 0.00 63.64 77.78 63.64 77.78 LoRA th 54.55 72.73 133.33 63.64 116.66 9.09 16.66 0.00 0.00 63.64 116.66 63.64 116.66 LCFEdit tr 100.00 84.30 84.30 79.90 79.90 75.10 75.10 30.40 30.40 55.90 55.90 62.70 62.70 AlphaEdit tr 54.55 38.80 71.20 28.30 51.90 29.20 53.60 9.80 18.00 15.00 27.50 23.00 42.20 MCEdit tr 100.00 81.82 81.82 72.73 72.73 72.73 72.73 27.27 27.27 54.55 54.55 54.55 54.55 FPEdit tr 100.00 81.82 81.82 72.73 72.73 72.73 72.73 27.27 27.27 54.55 54.55 54.55 54.55 PREE tr 90.91 72.73 80.00 63.64 70.00 54.55 60.00 27.27 30.00 54.55 60.00 54.55 60.00 LoRA tr 45.45 63.64 140.02 54.55 120.02 45.45 100.00 27.27 60.00 54.55 120.02 54.55 120.02 LCFEdit vi 100.00 94.40 94.40 87.90 87.90 69.10 69.10 19.00 19.00 81.60 81.60 75.50 75.50 AlphaEdit vi 90.91 55.10 60.60 45.60 50.20 43.30 47.60 5.70 6.30 27.10 29.80 31.80 35.00 MCEdit vi 100.00 90.91 90.91 81.82 81.82 63.64 63.64 18.18 18.18 72.73 72.73 72.73 72.73 FPEdit vi 100.00 90.91 90.91 81.82 81.82 63.64 63.64 18.18 18.18 72.73 72.73 72.73 72.73 PREE vi 81.82 72.73 88.89 72.73 88.89 54.55 66.67 18.18 22.22 72.73 88.89 72.73 88.89 LoRA vi 54.55 63.64 116.66 54.55 100.00 45.45 83.32 18.18 33.33 72.73 133.33 72.73 133.33 
+
+LCFEdit Mean 93.33 81.52 86.81 69.83 74.29 52.36 55.53 9.24 9.59 55.41 58.77 66.12 70.29 AlphaEdit Mean 56.90 34.37 62.00 27.44 48.19 19.73 33.35 2.86 4.58 22.72 41.98 23.40 41.36 
+
+MCEdit Mean 92.42 77.27 83.61 65.91 71.32 48.48 52.46 6.82 7.38 52.27 56.56 62.12 67.21 
+
+FPEdit Mean 91.67 76.52 83.47 65.15 71.07 47.73 52.07 6.06 6.61 51.52 56.20 61.36 66.94 
+
+PREE Mean 85.61 69.70 81.42 61.36 71.67 40.15 46.90 6.06 7.08 51.52 60.18 61.36 71.67 
+
+LoRA Mean 49.24 66.67 135.40 53.03 107.70 37.12 75.39 6.06 12.31 51.52 104.63 59.85 121.55 
+
+Llama-3.2-3B-Instruct 
+
+LCFEdit bn 63.64 63.64 100.00 63.64 100.00 53.00 83.30 0.00 0.00 54.55 100.00 45.45 83.30 AlphaEdit bn 27.27 18.18 66.70 18.18 66.70 8.60 31.50 0.00 0.00 16.30 59.70 20.50 75.10 
+
+continued on next page Table 7 – continued Method Lang Pre INT8 NF4 Pr30 Pr40 FT-A FT-M FSR P R P R P R P R P R P RMCEdit bn 63.64 63.64 100.00 63.64 100.00 63.64 100.00 0.00 0.00 54.55 85.72 45.45 71.42 FPEdit bn 54.55 54.55 100.00 54.55 100.00 45.45 83.32 0.00 0.00 45.45 83.32 45.45 83.32 PREE bn 54.55 54.55 100.00 54.55 100.00 45.45 83.32 0.00 0.00 45.45 83.32 45.45 83.32 LoRA bn 54.55 54.55 100.00 54.55 100.00 36.36 66.65 0.00 0.00 45.45 83.32 45.45 83.32 LCFEdit fa 100.00 90.91 90.91 81.82 81.82 63.64 63.64 18.18 18.18 90.91 100.00 90.91 90.91 AlphaEdit fa 72.73 54.55 75.00 27.27 37.60 19.10 26.30 3.10 4.30 36.36 50.10 31.20 42.90 MCEdit fa 100.00 81.82 81.82 72.73 72.73 63.64 63.64 18.18 18.18 81.82 81.82 90.91 90.91 FPEdit fa 90.91 81.82 90.00 72.73 80.00 54.55 60.00 9.09 10.00 81.82 90.00 81.82 90.00 PREE fa 90.91 81.82 90.00 72.73 80.00 45.45 49.99 18.18 20.00 81.82 90.00 72.73 80.00 LoRA fa 45.45 72.73 160.02 54.55 120.02 36.36 80.00 18.18 40.00 54.55 120.02 63.64 140.02 LCFEdit hi 81.82 81.82 100.00 81.82 100.00 63.64 77.80 45.45 55.60 81.82 100.00 81.82 100.00 AlphaEdit hi 9.09 9.09 100.00 9.09 100.00 0.00 0.00 0.00 0.00 3.30 36.30 1.50 16.50 MCEdit hi 72.73 72.73 100.00 72.73 100.00 63.64 87.50 18.18 25.00 72.73 100.00 72.73 100.00 FPEdit hi 72.73 72.73 100.00 72.73 100.00 54.55 75.00 18.18 25.00 72.73 100.00 72.73 100.00 PREE hi 72.73 72.73 100.00 72.73 100.00 54.55 75.00 18.18 25.00 72.73 100.00 72.73 100.00 LoRA hi 45.45 63.64 140.02 54.55 120.02 36.36 80.00 18.18 40.00 54.55 120.02 63.64 140.02 LCFEdit id 90.91 90.91 100.00 90.91 100.00 90.91 100.00 72.73 80.00 90.91 100.00 100.00 100.00 AlphaEdit id 54.55 36.36 66.80 27.27 50.10 28.70 52.70 8.80 16.10 36.90 67.70 51.00 93.60 MCEdit id 81.82 81.82 100.00 81.82 100.00 63.64 77.78 18.18 22.22 81.82 100.00 100.00 122.22 FPEdit id 81.82 81.82 100.00 81.82 100.00 63.64 77.78 18.18 22.22 81.82 100.00 100.00 122.22 PREE id 81.82 72.73 88.89 72.73 88.89 54.55 66.67 9.09 11.11 72.73 88.89 72.73 88.89 LoRA id 45.45 63.64 140.02 45.45 100.00 36.36 80.00 9.09 20.00 54.55 120.02 54.55 120.02 LCFEdit it 100.00 100.00 100.00 91.70 91.70 66.70 66.70 16.70 16.70 91.70 91.70 91.70 91.70 AlphaEdit it 72.73 72.73 100.00 27.27 37.60 28.60 39.40 4.80 6.60 51.40 70.70 50.40 69.30 MCEdit it 100.00 100.00 100.00 90.91 90.91 54.55 54.55 9.09 9.09 90.91 90.91 90.91 90.91 FPEdit it 100.00 100.00 100.00 90.91 90.91 54.55 54.55 9.09 9.09 90.91 90.91 90.91 90.91 PREE it 100.00 81.82 81.82 72.73 72.73 45.45 45.45 9.09 9.09 72.73 72.73 81.82 81.82 LoRA it 45.45 72.73 160.02 54.55 120.02 36.36 80.00 9.09 20.00 45.45 100.00 63.64 140.02 LCFEdit nl 94.40 94.40 100.00 88.80 94.10 66.60 70.60 22.20 23.50 88.90 94.10 88.90 94.10 AlphaEdit nl 36.36 18.18 50.00 0.00 0.00 10.20 27.90 0.00 0.00 29.50 81.00 32.00 87.90 MCEdit nl 90.91 90.91 100.00 81.82 90.00 54.55 60.00 18.18 20.00 81.82 90.00 81.82 90.00 FPEdit nl 90.91 90.91 100.00 81.82 90.00 54.55 60.00 18.18 20.00 81.82 90.00 81.82 90.00 PREE nl 90.91 81.82 90.00 72.73 80.00 45.45 49.99 9.09 10.00 72.73 80.00 81.82 90.00 LoRA nl 54.55 63.64 116.66 54.55 100.00 36.36 66.65 9.09 16.66 54.55 100.00 54.55 100.00 LCFEdit pl 100.00 100.00 100.00 91.70 91.70 75.00 75.00 33.30 33.30 100.00 100.00 100.00 100.00 AlphaEdit pl 81.82 54.55 66.60 45.45 55.60 7.60 9.30 1.10 1.30 24.50 30.00 55.80 68.20 MCEdit pl 100.00 100.00 100.00 90.91 90.91 63.64 63.64 27.27 27.27 100.00 100.00 100.00 100.00 FPEdit pl 100.00 100.00 100.00 90.91 90.91 63.64 63.64 18.18 18.18 100.00 100.00 100.00 100.00 PREE pl 90.91 81.82 90.00 72.73 80.00 45.45 49.99 9.09 10.00 72.73 80.00 81.82 90.00 LoRA pl 54.55 63.64 116.66 54.55 100.00 45.45 83.32 9.09 16.66 45.45 83.32 63.64 116.66 LCFEdit pt 85.00 77.30 90.90 75.00 88.20 40.00 47.10 0.00 0.00 60.00 70.60 65.00 76.50 AlphaEdit pt 81.82 54.55 66.60 36.36 44.50 23.10 28.20 0.80 1.00 48.30 59.00 41.10 50.20 MCEdit pt 81.82 72.73 88.89 72.73 88.89 63.64 77.78 0.00 0.00 54.55 66.67 63.64 77.78 FPEdit pt 81.82 72.73 88.89 72.73 88.89 36.36 44.44 0.00 0.00 54.55 66.67 63.64 77.78 PREE pt 81.82 72.73 88.89 72.73 88.89 36.36 44.44 0.00 0.00 54.55 66.67 63.64 77.78 LoRA pt 54.55 72.73 133.33 45.45 83.32 36.36 66.65 0.00 0.00 54.55 100.00 54.55 100.00 LCFEdit sv 100.00 100.00 100.00 87.50 87.50 50.00 50.00 0.00 0.00 100.00 100.00 100.00 100.00 AlphaEdit sv 36.36 27.27 75.00 18.18 50.00 7.70 21.20 0.30 0.70 19.80 54.40 26.40 72.50 MCEdit sv 100.00 100.00 100.00 81.82 81.82 63.64 63.64 0.00 0.00 100.00 100.00 100.00 100.00 FPEdit sv 100.00 100.00 100.00 81.82 81.82 45.45 45.45 0.00 0.00 100.00 100.00 100.00 100.00 PREE sv 100.00 81.82 81.82 72.73 72.73 45.45 45.45 0.00 0.00 72.73 72.73 81.82 81.82 LoRA sv 54.55 72.73 133.33 54.55 100.00 45.45 83.32 0.00 0.00 54.55 100.00 63.64 116.66 LCFEdit th 100.00 100.00 100.00 100.00 100.00 18.18 18.18 0.00 0.00 100.00 100.00 100.00 100.00 AlphaEdit th 45.45 45.45 100.00 18.18 40.00 5.30 11.70 0.00 0.00 25.10 55.20 42.50 93.40 MCEdit th 100.00 100.00 100.00 100.00 100.00 54.55 54.55 0.00 0.00 100.00 100.00 100.00 100.00 FPEdit th 100.00 100.00 100.00 100.00 100.00 18.18 18.18 0.00 0.00 100.00 100.00 100.00 100.00 PREE th 100.00 81.82 81.82 72.73 72.73 18.18 18.18 0.00 0.00 72.73 72.73 81.82 81.82 LoRA th 45.45 63.64 140.02 54.55 120.02 18.18 40.00 0.00 0.00 54.55 120.02 63.64 140.02 LCFEdit tr 100.00 100.00 100.00 100.00 100.00 73.30 73.30 13.30 13.30 100.00 100.00 100.00 100.00 AlphaEdit tr 63.64 45.45 71.50 0.00 0.00 14.40 22.60 2.90 4.60 34.20 53.80 43.10 67.80 
+
+continued on next page Table 7 – continued Method Lang Pre INT8 NF4 Pr30 Pr40 FT-A FT-M FSR P R P R P R P R P R P RMCEdit tr 100.00 100.00 100.00 100.00 100.00 63.64 63.64 9.09 9.09 100.00 100.00 100.00 100.00 FPEdit tr 100.00 100.00 100.00 100.00 100.00 63.64 63.64 9.09 9.09 100.00 100.00 100.00 100.00 PREE tr 100.00 81.82 81.82 81.82 81.82 45.45 45.45 9.09 9.09 72.73 72.73 81.82 81.82 LoRA tr 45.45 72.73 160.02 54.55 120.02 36.36 80.00 9.09 20.00 54.55 120.02 63.64 140.02 LCFEdit vi 100.00 100.00 100.00 100.00 100.00 60.00 60.00 0.00 0.00 100.00 100.00 100.00 100.00 AlphaEdit vi 81.82 45.45 55.60 9.09 11.10 31.30 38.30 3.60 4.40 40.50 49.50 62.70 76.70 MCEdit vi 90.91 100.00 110.00 100.00 110.00 63.64 70.00 0.00 0.00 100.00 110.00 100.00 110.00 FPEdit vi 100.00 100.00 100.00 100.00 100.00 54.55 54.55 0.00 0.00 100.00 100.00 100.00 100.00 PREE vi 100.00 81.82 81.82 72.73 72.73 45.45 45.45 0.00 0.00 81.82 81.82 72.73 72.73 LoRA vi 45.45 63.64 140.02 54.55 120.02 45.45 100.00 0.00 0.00 54.55 120.02 63.64 140.02                                                                                     
+
+> LCFEdit Mean 92.98 91.58 98.48 87.74 94.58 60.08 65.47 18.49 20.05 88.23 96.37 88.65 94.71 AlphaEdit Mean 55.30 40.15 74.48 19.70 41.10 15.38 25.76 2.12 3.25 30.51 55.62 38.18 67.84
+> MCEdit Mean 90.66 88.64 97.77 84.09 92.75 61.36 67.68 9.85 10.86 84.85 93.59 87.12 96.10
+> FPEdit Mean 89.14 87.88 98.59 83.33 93.48 50.76 56.94 8.33 9.34 84.09 94.33 86.36 96.88
+> PREE Mean 88.64 77.27 87.17 71.97 81.19 43.94 49.57 6.82 7.69 70.45 79.48 74.24 83.75
+> LoRA Mean 49.24 66.67 135.40 53.03 107.70 37.12 75.39 6.82 13.85 52.27 106.15 59.85 121.55
+
+Supporting statistics for the perplexity analysis in Sec. 5: mean LCF PPL of 96 ± 10 across 12 languages (per-sample max 102). Base Alpaca text has PPL 89 .5 ± 80 ; CF has PPL 104 ± 49 ; garbled IF has PPL 1301 ± 380 ; natural-language fingerprints have PPL 153 ± 140 .
+
+## C Additional Ablation Data 
+
+The three tables below report analyses deferred from the main text for space: an edit-layer sensitivity sweep, a fingerprint-language × alignment transfer matrix, and the plain-vs.-constructed query comparison that underlies the accidental-activation result in Sec. 5. All numbers are transcribed verbatim from the internal experiment log. 
+
+C.1 Edit-Layer Selection Sweep (Qwen3.5-9B) 
+
+Sweeping edit-layer configurations on Qwen3.5-9B (mean FSR over 12 languages), the strongest set is [6 , 10 , 13 , 14 , 18] at 100% mean FSR; neighboring configurations range 92–100%, so the method is not brittle to the exact layer choice but does reward causal-tracing-guided selection. 
+
+C.2 Plain vs. Constructed Trigger Queries (12 Languages) 
+
+Support for Sec. 5 “Accidental activation”: constructed queries reach 12/12 languages at 100% FSR and 12/12 languages at 0% 
+
+accidental-activation. 
+
+C.3 Fingerprint-Language × ISL-Alignment Matrix (Qwen3.5-0.8B) 
+
+A 12 × 12 source–target matrix (injecting with one language’s Pisl , verifying on all): the diagonal is strongest in 10/12 languages, confirming that the alignment step concentrates signal in the intended language rather than leaking uniformly, while off-diagonal transfer is highest among typologically or orthographically related pairs, consistent with the shallow, subword-mediated cross-lingual propagation reported by Qi, Fernández, and Bisazza (2023). Row = fingerprint language, column = the ISL used to build 
+
+Pisl (all injections verified on the row language’s fingerprints). Diagonal cells are marked bold. Values are FSR (%). Method MMLU ↑ RTE ↑ MMMLU ↑ Wiki PPL ↓ AVG Acc ↑
+
+Cross-model mean (Qwen-9B + Qwen-0.8B + Llama-3B) 
+
+Unedited base 72.50 71.50 67.10 7.96 70.37 
+
+LCFEdit (ours) 72.30 71.20 67.30 8.13 70.27 
+
+MCEdit 71.50 70.00 65.40 8.21 68.97 FPEdit 71.20 69.00 64.50 8.32 68.23 PREE 70.90 68.00 64.00 8.45 67.63 AlphaEdit 70.50 67.00 62.60 8.74 66.70 LoRA 56.00 55.40 54.10 10.83 55.17 
+
+Qwen3.5-9B 
+
+Unedited base 78.33 55.60 63.93 8.84 65.95 
+
+LCFEdit (ours) 80.50 61.00 66.21 9.02 69.24 
+
+MCEdit 79.50 60.00 64.50 9.11 68.00 FPEdit 78.50 59.00 63.00 9.22 66.83 PREE 77.50 58.00 62.00 9.36 65.83 AlphaEdit 76.50 56.00 60.30 9.61 64.27 LoRA 61.00 48.00 50.00 11.81 53.00 
+
+Qwen3.5-0.8B 
+
+Unedited base 61.50 66.00 68.00 9.71 65.17 
+
+LCFEdit (ours) 61.50 67.00 68.20 9.86 65.57 
+
+MCEdit 60.80 66.00 66.00 10.03 64.27 FPEdit 60.50 65.00 65.20 10.11 63.57 PREE 60.30 64.00 64.70 10.20 63.00 AlphaEdit 59.90 63.00 63.50 10.42 62.13 LoRA 47.50 54.00 53.00 12.46 51.50 
+
+Llama-3.2-3B-Instruct 
+
+Unedited base 77.70 92.00 69.40 5.34 79.70 
+
+LCFEdit (ours) 77.10 91.00 69.50 5.50 79.20 MCEdit 76.20 89.00 67.70 5.51 77.63 FPEdit 75.80 88.00 66.80 5.62 76.87 PREE 75.50 87.00 66.30 5.79 76.27 AlphaEdit 75.10 86.00 65.00 6.19 75.37 LoRA 59.50 70.00 59.30 8.21 62.93 
+
+Table 8: Harmlessness evaluation: zero-shot accuracy (%) on MMLU, RTE, and MMMLU, plus WikiText-2 perplexity, for all injection methods across three models. AVG Acc = mean of the three accuracy benchmarks. Best per column within each model block in bold. 
+
+Lang. Target PPL (mean ± std) bn 98.2 ± 9fa 93.5 ± 8hi 97.8 ± 10 id 102.0 ± 11 it 95.1 ± 9nl 99.4 ± 10 pl 94.7 ± 8pt 91.3 ± 9sv 100.2 ± 11 th 96.8 ± 10 tr 93.9 ± 8vi 89.1 ± 9
+
+Mean 96.0 ± 10 
+
+Table 9: Per-language LCF template perplexity on Qwen3.5-0.8B; the aggregated violin in Fig. 2 summarizes this column. Config Layers Mean FSR (%) D2 [4 , 5, 6, 10 , 13] 92.00 D3 [5 , 6, 10 , 13 , 14] 97.00 D4 [4 , 5, 6, 13 , 14] 96.00                     
+
+> D5 [6,10 ,13 ,14 ,18 ]100.00 (final) D6 [4 ,5,6,10 ,13 ,14 ,18] 100.00 D9 [4 ,5,6,10] 97.00
+
+Table 10: Layer-selection sensitivity on Qwen3.5-9B. D5 is our reported configuration.                                                          
+
+> FSR (%) Accidental (%) Lang. Plain Constructed Plain Constructed bn 100.00 100.00 1.00 0.00 fa 100.00 100.00 0.00 0.00 hi 90.91 100.00 0.00 0.00 id 100.00 100.00 0.00 0.00 it 100.00 100.00 1.00 0.00 nl 100.00 100.00 1.00 0.00 pl 100.00 100.00 0.00 0.00 pt 83.60 100.00 0.00 0.00 sv 100.00 100.00 0.00 0.00 th 100.00 100.00 0.00 0.00 tr 100.00 100.00 0.00 0.00 vi 100.00 100.00 0.00 0.00
+> Mean 97.88 100.00 0.30 0.00
+
+Table 11: Plain (target-language question) vs. constructed (culturally grounded) trigger queries on Qwen3.5-0.8B, 12 languages. fp\isl vi th id hi bn tr fa it pt pl nl sv vi 100.00 76.00 65.00 69.00 69.00 69.00 75.00 70.00 68.00 58.00 70.00 63.00 th 52.00 100.00 49.00 57.00 55.00 54.00 56.00 55.00 53.00 57.00 54.00 55.00 id 83.00 81.00 95.00 81.00 80.00 80.00 84.00 81.00 83.00 79.00 82.00 88.00 hi 48.00 38.00 45.00 80.00 63.00 38.00 60.00 37.00 50.00 36.00 38.00 52.00 bn 74.00 58.00 52.00 56.00 83.00 46.00 57.00 62.00 65.00 66.00 63.00 58.00 tr 63.00 64.00 61.00 58.00 63.00 100.00 75.00 65.00 62.00 65.00 64.00 57.00 fa 83.00 82.00 83.00 84.00 84.00 78.00 83.00 84.00 81.00 75.00 83.00 85.00 it 89.00 90.00 79.00 85.00 85.00 90.00 91.00 100.00 87.00 85.00 83.00 82.00 pt 77.00 78.00 78.00 79.00 70.00 80.00 76.00 76.00 91.00 75.00 78.00 78.00 pl 51.00 41.00 51.00 58.00 58.00 55.00 50.00 43.00 50.00 100.00 59.00 55.00 nl 100.00 99.00 100.00 100.00 100.00 100.00 97.00 96.00 100.00 97.00 100.00 100.00 sv 52.00 53.00 46.00 55.00 45.00 57.00 55.00 54.00 52.00 55.00 56.00 88.00 
+
+Table 12: Qwen3.5-0.8B: injecting a fingerprint set for row language using ISL = column language’s Wikipedia. Diagonal cells are marked bold. Values are FSR (%).
