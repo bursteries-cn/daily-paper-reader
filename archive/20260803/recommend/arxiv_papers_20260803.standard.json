@@ -1,0 +1,104 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-08-03T21:44:07.168464+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2607.28969v1",
+      "source": "arxiv",
+      "title": "SafeNexus: Discovering and Steering Modality-Universal Safety Neurons in MLLMs",
+      "abstract": "Although Large Language Models (LLMs) have demonstrated promising safety performance, extending them to Multimodal Large Language Models (MLLMs) exposes a significant gap between expanded multimodal capabilities and existing safety mechanisms. Current defenses remain predominantly confined to specific modal settings, thereby limiting their robustness against broader cross-modal threats. To bridge this gap, we introduce SafeNexus, a cross-modal safety alignment framework that adopts a dedicated neuron-level intervention strategy. First, we formulate a neuron localization paradigm that identifies functionally specialized neurons by characterizing intermediate-layer activation patterns and quantifying their functional salience through importance scoring. Building upon this paradigm, we exploit contrastive data to identify modality-bound safety neurons (BS-Neurons), and validate their role in regulating safety behavior within each modality via targeted suppression. Further cross-modal analysis defines modality-universal safety neurons (US-Neurons) as the shared subset of BS-Neurons identified across individual modalities, serving as the core for defending against harmful cross-modal attacks. We observe that suppressing these neurons substantially degrades safety performance across modalities, while leaving overall utility largely unaffected. Building on these insights, we propose two safety alignment strategies: activation-level safety amplifier and safety neuron calibrator. The proposed strategies enhance model safety through two distinct routes: the former amplifies the activation magnitudes of US-Neurons, while the latter selectively calibrates them via targeted fine-tuning. Extensive experiments demonstrate that our method outperforms prevailing state-of-the-art approaches on safety benchmarks spanning diverse modality combinations, while effectively preserving utility.",
+      "authors": [
+        "Jian Yu",
+        "Fei Shen",
+        "Cong Wang",
+        "Jian Wang",
+        "Lu Jin. Xiaoyu Du",
+        "Jinhui Tang",
+        "Tat-Seng Chua"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-07-31T02:45:56+00:00",
+      "link": "https://arxiv.org/pdf/2607.28969v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "cross-modal safety alignment via neuron-level intervention steering universal safety neurons",
+      "llm_evidence_cn": "通过神经元级干预来发现并引导通用安全神经元的跨模态安全对齐",
+      "llm_evidence": "通过神经元级干预来发现并引导通用安全神经元的跨模态安全对齐",
+      "canonical_evidence": "通过神经元级干预来发现并引导通用安全神经元的跨模态安全对齐",
+      "llm_tldr_en": "SafeNexus discovers and steers modality-universal safety neurons via neuron-level intervention, enabling cross-modal safety alignment for multimodal LLMs.",
+      "llm_tldr_cn": "针对多模态大模型在跨模态威胁下安全机制受限、现有防御局限于单一模态的问题，提出 SafeNexus 跨模态安全对齐框架。该框架通过表征中间层激活模式定位功能特异的安全神经元，并对模态通用安全神经元进行引导干预。实验证明 SafeNexus 能有效增强多模态模型对跨模态攻击的鲁棒性，为多模态大模型提供了一种可泛化的神经元级安全对齐策略。",
+      "llm_tldr": "针对多模态大模型在跨模态威胁下安全机制受限、现有防御局限于单一模态的问题，提出 SafeNexus 跨模态安全对齐框架。该框架通过表征中间层激活模式定位功能特异的安全神经元，并对模态通用安全神经元进行引导干预。实验证明 SafeNexus 能有效增强多模态模型对跨模态攻击的鲁棒性，为多模态大模型提供了一种可泛化的神经元级安全对齐策略。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2607.25614v1",
+      "source": "arxiv",
+      "title": "MemSFT: Mitigating Alignment Tax with an External Parametric Memory",
+      "abstract": "Adapting Large Language Models (LLMs) to specialized domains often incurs an alignment tax, as fine-tuning on domain-specific tasks can cause catastrophic forgetting and substantially degrade performance on general tasks. We propose MemSFT, which mitigates the alignment tax by decoupling domain specialization from backbone parameter updates through a plug-and-play parametric memory. The memory is trained to imitate the behavior of a non-parametric retriever operating over domain data, thereby memorizing knowledge and patterns that would otherwise be accessed through retrieval. Once trained on a specific domain, the memory can be reused across LLMs of different sizes. During generation, a learned router dynamically fuses the output distributions of the memory and backbone at each decoding step, allowing domain expertise to be invoked selectively. Across biology, geoscience, and law, evaluations with models ranging from Qwen3-8B to Qwen3-235B-A22B show that MemSFT consistently improves domain performance with negligible degradation in general performance, whereas full SFT suffers severe forgetting on general tasks. Overall, our results demonstrate a practical path to decoupling general model capabilities from domain-specific knowledge at the parameter level, thereby equipping LLMs with new specialized capabilities without compromising their general capabilities.",
+      "authors": [
+        "Jiarui Wang",
+        "Xiang Shi",
+        "Jiaqi Cao",
+        "Rubin Wei",
+        "Xiquan Wang",
+        "Hao Sun",
+        "Jingzhi Wang",
+        "Zhiqi Yang",
+        "Qipeng Guo",
+        "Bowen Zhou",
+        "Zhouhan Lin"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CL"
+      ],
+      "published": "2026-07-28T11:45:34+00:00",
+      "link": "https://arxiv.org/pdf/2607.25614v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Mitigates alignment tax during domain specialization, preserving safety alignment without backbone updates",
+      "llm_evidence_cn": "在领域特化时缓解对齐税，不更新主干参数从而保持安全对齐",
+      "llm_evidence": "在领域特化时缓解对齐税，不更新主干参数从而保持安全对齐",
+      "canonical_evidence": "在领域特化时缓解对齐税，不更新主干参数从而保持安全对齐",
+      "llm_tldr_en": "MemSFT mitigates the alignment tax by decoupling domain specialization from backbone updates via a plug-and-play parametric memory and learned router, preserving general capabilities and offering an alternative for safety-aligned editing.",
+      "llm_tldr_cn": "论文针对LLM领域特化微调带来的对齐税问题，提出MemSFT方法。它通过可插拔参数化记忆模拟非参数检索器的行为，学习领域知识，训练后可在不同规模LLM间复用。生成时由路由器动态融合记忆与主干的输出分布。实验表明该方法在保持领域性能的同时，缓解了对齐税，保持了通用能力。该方法为安全对齐编辑提供了一种无需更新主干的替代方案。",
+      "llm_tldr": "论文针对LLM领域特化微调带来的对齐税问题，提出MemSFT方法。它通过可插拔参数化记忆模拟非参数检索器的行为，学习领域知识，训练后可在不同规模LLM间复用。生成时由路由器动态融合记忆与主干的输出分布。实验表明该方法在保持领域性能的同时，缓解了对齐税，保持了通用能力。该方法为安全对齐编辑提供了一种无需更新主干的替代方案。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "safety alignment editing",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
