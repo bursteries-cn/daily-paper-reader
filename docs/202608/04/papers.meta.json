@@ -1,0 +1,69 @@
+{
+  "label": "2026-08-04",
+  "date": "2026-08-04",
+  "generated_at": "2026-08-04T21:33:19",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202608/04/2607.27594v2-compliance2lora-personalizable-on-demand-safety-alignment-on-arbitrary-policy-subsets-via-hypernetwork-generated-lora-adapters",
+      "section": "deep",
+      "title_en": "Compliance2LoRA: Personalizable On-Demand Safety Alignment on Arbitrary Policy Subsets via Hypernetwork-Generated LoRA Adapters",
+      "authors": "Pankayaraj Pathmanathan, Furong Huang",
+      "date": "2026-07-30",
+      "pdf": "https://arxiv.org/pdf/2607.27594v2",
+      "score": "9.0",
+      "evidence": "基于LoRA适配器实现按需安全对齐",
+      "tldr": "大型推理模型的后训练对齐虽能适应多种安全策略，但用户个性化需求要求每个模型遵循不同的策略子集，单独训练组合开销巨大，上下文学习又增加长上下文计算成本。为此提出Compliance2LoRA，以安全策略为输入，通过超网络生成对应的LoRA适配器权重，添加到模型中即可实现按需策略合规。在多种规模推理模型和评测数据集上，该方法不仅支持单模型灵活调整策略，还不牺牲任务性能。这证明了基于自适应超网络的对齐机制在大型推理模型个性化安全调整中兼具有效性与实用性。",
+      "tags": "query:model-edit",
+      "abstract_en": "Post-training alignment in large reasoning models (LRMs) has significantly improved their adaptability to diverse safety compliance settings. However, as LRMs personalization for downstream users takes center stage, the demand for varying levels of policy compliance grows as different user-specific LRMs must adhere to distinct subsets of safety policies. Training a separate LRM for each policy subset introduces severe combinatorial overhead. While in context learning methods overcome this combinatorial overhead, they introduce additional computational challenges associated with long context generation. To address this challenge, we propose \\ours, a unified adaptive hypernetwork-based framework for multi-policy compliance. In our framework, safety policies serve as customizable inputs to a LoRA adapter generator, which learns to produce policy compliant LoRA weights for downstream LRM. When added to the LRM these weights enable the generation of responses compliant with the specified policy subsets. In this work, we demonstrate that training such a hypernetwork enables on-demand policy adjustments on a single LRM without sacrificing task performance across reasoning models of different sized and different evaluation datasets. This highlights the effectiveness and practicality of adaptive hypernetwork based alignment in LRMs.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/04/2608.01008v1-toward-fine-grained-forgettingattribute-unlearning-for-multimodal-large-language-models",
+      "section": "deep",
+      "title_en": "Toward Fine-Grained Forgetting:Attribute Unlearning for Multimodal Large Language Models",
+      "authors": "Junkai Lin, Junkai Chen, Siqi Hou, Yuhao He, Ruiqi Liu, Chenhan Jin, Shengze Xu, Tieyong Zeng",
+      "date": "2026-08-02",
+      "pdf": "https://arxiv.org/pdf/2608.01008v1",
+      "score": "9.0",
+      "evidence": "针对多模态大模型的属性级遗忘，移除敏感信息并保持模型效用",
+      "tldr": "多模态大模型会泄露敏感信息，现有机器遗忘研究多针对整体身份删除，难以满足只遗忘指定属性而保留同身份其他信息的细粒度需求。为此提出属性级遗忘任务并构建包含长文本、数字、短文本等多类目标的基准。现有方法在该场景下遗忘与保留权衡不稳定。提出CLRP轻量无训练框架，通过因果定位中介层并应用保留感知投影移除目标属性子空间。实验证明其有效性。",
+      "tags": "query:model-edit",
+      "abstract_en": "Multimodal large language models (MLLMs) exhibit strong vision--language capabilities but may also memorize and disclose sensitive information. Machine unlearning seeks to remove designated knowledge without retraining from scratch while preserving general utility. Existing privacy-oriented benchmarks primarily adopt profile-level deletion, whereas practical requests are often finer grained: a model should forget a specified attribute while retaining non-sensitive information about the same identity. We therefore introduce attribute-level MLLM unlearning as a finer-grained task and construct a benchmark spanning long-text, numeric, and short-text targets, multiple forget ratios, and diverse question types. Our evaluation reveals that target and retained attributes share identity-specific and visual evidence, making selective forgetting susceptible to residual leakage or collateral degradation; accordingly, existing methods exhibit unstable forgetting--retention trade-offs in this setting. To address this challenge, we propose Causal Localization and Retain-Aware Projection (CLRP), a lightweight training-free framework. CLRP uses activation patching to identify the layer that causally mediates target-attribute disclosure, then applies a retain-aware projection that removes the target-attribute subspace while preserving same-identity evidence. Experiments across multiple widely used MLLMs with distinct architectures and parameter scales demonstrate the effectiveness of CLRP.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/04/2608.01234v1-learning-what-to-remember-and-what-to-internalize-in-llm-self-evolution-via-adaptive-memory-parameter-coordination",
+      "section": "deep",
+      "title_en": "Learning What to Remember and What to Internalize in LLM Self-Evolution via Adaptive Memory-Parameter Coordination",
+      "authors": "Tianyun Ji, Zhenya Huang, Jiayu Liu, Zirui Liu, Yu Su, Hongbin Pei",
+      "date": "2026-08-02",
+      "pdf": "https://arxiv.org/pdf/2608.01234v1",
+      "score": "8.0",
+      "evidence": "通过自适应记忆-参数协调实现大模型编辑与自进化",
+      "tldr": "LLM智能体在部署后常面临环境动态变化，现有自进化方法依赖外部记忆或参数内化单一通道，导致灵活性与性能难以兼顾。为此提出COVE统一框架，通过任务感知路由、阶段感知调度和知识优化协调外部记忆与参数学习。在多项任务上，COVE优于单通道进化策略，在变化环境下展现出更鲁棒、更高效的改进。其核心贡献在于将自进化视为按任务和知识类型匹配学习机制的协调过程。",
+      "tags": "query:model-edit",
+      "abstract_en": "Large language model agents increasingly operate in dynamic environments where tool interfaces, APIs, and user requirements change after deployment. Existing self-evolution methods mainly follow two paradigms: harness-based approaches, which externalize feedback into editable memories or skills for rapid adaptation, and parameter-based approaches, which internalize experience into model parameters for deeper capability improvement. However, using either mechanism alone creates a trade-off between flexibility and performance. This paper asks how an agent can coordinate both channels to achieve robust self-evolution. We present COVE, a unified agent self-evolution framework that combines harness-based and parameter-based learning through task-aware routing, stage-aware scheduling, and knowledge optimization. Through this design, COVE treats self-evolution not as indiscriminate accumulation of experience, but as a coordinated process that matches tasks and knowledge types to appropriate learning mechanisms. Experiments across multiple task categories show that COVE outperforms single-channel evolution strategies, demonstrating more robust and efficient improvement under changing environments.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/04/2608.01849v1-exploring-and-bridging-knowledge-holes-in-unlearned-multimodal-large-language-models",
+      "section": "deep",
+      "title_en": "Exploring and Bridging Knowledge Holes in Unlearned Multimodal Large Language Models",
+      "authors": "Junxiang You, Junkai Chen, Yuhao He, Ruiqi Liu, Zhetao Guo, Shu Wu",
+      "date": "2026-08-03",
+      "pdf": "https://arxiv.org/pdf/2608.01849v1",
+      "score": "8.0",
+      "evidence": "通过机器遗忘移除不安全内容，探测遗忘后模型的良性输入退化",
+      "tldr": "多模态大模型在机器遗忘不安全内容时，可能在良性相邻输入上出现严重性能退化，即知识空洞，而现有评估范式因基准表示偏离遗忘集而难以察觉。为探测这一问题，构建了与遗忘集共享通用模式的良性输入基准，证实该退化是常见方法的系统后果。进而提出SPAR方法，通过锚定激活过滤保护通用模式，并用实体抽象增强强化，在SafeEraser上恢复98%以上的原始响应质量，同时保持0.00%攻击成功率和竞争性模型效用。结果表明，细粒度评估对可信遗忘至关重要。",
+      "tags": "query:model-edit",
+      "abstract_en": "Machine unlearning offers a promising approach to remove unsafe content from Multimodal Large Language Models (MLLMs), yet ensuring the precision of unlearning remains a persistent challenge. One reason is that current MLLM unlearning evaluation paradigms suffer from a critical blind spot: they assess model utility through benchmarks whose representations are distant from the forget set, failing to capture knowledge holes---severe degradation on benign adjacent inputs. To probe knowledge holes in unlearned MLLMs, we construct a benchmark that captures unintended degradation on benign inputs sharing generic patterns with the forget set, and confirm through controlled experiments that they are a systematic consequence of commonly used approaches. Furthermore, to bridge this gap, we propose Selective Protection with Anchored Regularization, which protects generic patterns via anchored activation filtering while reinforcing them through entity-abstracted enhancement. Our experiments on SafeEraser demonstrate that SPAR recovers over 98% of vanilla response quality compared to below 50% for standard baselines---while achieving 0.00% attack success rate and competitive model utility. These results underscore the necessity of more fine-grained evaluation for trustworthy MLLM unlearning.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
