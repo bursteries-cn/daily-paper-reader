@@ -1,0 +1,1521 @@
+Title: SAFE-Merge: Data-Free Continual Model Merging with General Knowledge Preservation
+
+URL Source: https://arxiv.org/pdf/2608.01184v1
+
+Published Time: Tue, 04 Aug 2026 01:18:40 GMT
+
+Number of Pages: 17
+
+Markdown Content:
+# SAFE-Merge: Data-Free Continual Model Merging with General Knowledge Preservation 
+
+Zihuan Qiu 1†, Zhiyang Liao 1†, Chiyuan He 1, Yi Xu 2,Fanman Meng 1* , Linfeng Xu 1, Qingbo Wu 1, Hongliang Li 1
+
+> 1
+
+University of Electronic Science and Technology of China, Chengdu, China 
+
+> 2
+
+Dalian University of Technology, Dalian, China 
+
+Abstract 
+
+Data-free continual model merging must incorporate a stream of specialized models while retaining both pretrained general knowledge and previously acquired tasks, without access to task data. Existing methods mainly merge task updates by suppressing interference among downstream tasks; while this protects previously acquired tasks, it overlooks the safety of the pretrained knowledge itself, whose erosion degrades gener-alization to held-out distributions and weakens the foundation for future task acquisition. We propose SAFE-Merge, a simple data-free continual-merging framework that first decides which parameter updates are safe to retain, and then recovers the task information lost through masking. Specifically, to ensure safety, risk-aware sparse masking selects parameter updates that carry task-specific information while posing low risk to general knowledge. Masked low-rank recovery then compen-sates for the lost task information using only the same retained parameter updates, while leaving all masked-out parameters strictly unchanged. Finally, the combined update is fused into the backbone, incurring no additional inference cost. Across vision and language benchmarks, SAFE-Merge consistently achieves the best H-score. On longer CLIP task sequences, it substantially improves H-score over NUFILT while also achieving the highest accuracy. 
+
+Introduction 
+
+Foundation models are increasingly adapted into collections of specialized models, each tuned for a particular dataset, domain, or user. Deploying every specialized checkpoint is expensive, while joint retraining is often impossible because the original task data are private, distributed, or no longer available. Model merging offers an attractive alternative: com-bine independently fine-tuned parameters directly, producing a single model without replaying their training data (Ilharco et al. 2023; Yadav et al. 2023; Tang et al. 2024a). In real-istic systems, however, models arrive over time rather than all at once. Data-free continual model merging (DFCMM) must therefore update one deployed backbone using only the incoming task model, the current merged model, and their shared pretrained initialization (Liu and Soatto 2023; Porrello et al. 2025; Tang et al. 2025). Continual merging is usually framed as a conflict among task updates. This view is incomplete. Every incoming task 
+
+> ∗
+
+Corresponding author. 
+
+> †
+
+These authors contributed equally; Zihuan Qiu led the project. 
+
+vector is added to a backbone whose pretrained parameters encode broad visual, linguistic, and cross-domain regulari-ties. Aggressive task accumulation can damage this general knowledge even when earlier downstream tasks appear well preserved. Preserving accuracy on the merged tasks there-fore does not guarantee that the model’s broader pretrained capabilities remain intact. Such damage not only degrades performance on held-out distributions but also weakens the foundation for acquiring later tasks. Hence, a continual merger should preserve both previously encountered tasks and the transferable knowledge present before specialization. The data-free setting makes this goal unusually difficult. Without examples, one cannot directly measure which param-eter changes alter general behavior or which components are indispensable for the new task. The merger must infer both from parameters alone. Uniform averaging treats all param-eter updates alike and accumulates interference (Izmailov et al. 2018; Ilharco et al. 2023). Sign- or magnitude-based sparsification ignores the function represented by each direc-tion (Yadav et al. 2023). Orthogonal projection can protect selected subspaces, but removing all components in overlap-ping directions is overly rigid because useful task information and general knowledge need not be cleanly separable (Tang et al. 2025; Cheng et al. 2025; Qiu et al. 2026). Data-adaptive methods can estimate parameter importance, but require cal-ibration samples and therefore leave the strictly data-free regime (Yang et al. 2024; Tang et al. 2024b; Qiu et al. 2025). These considerations lead to the central question of this work: 
+
+How can data-free continual merging learn new tasks while preserving prior tasks and pretrained knowledge? 
+
+We address this problem with SAFE-Merge, a parameter-space method that first decides where an incoming update can be safely retained through risk-aware masking, and then determines how to recover the task utility lost during masking without modifying the masked-out region. Motivated by the finding that input-side singular directions of task vectors reflect task-data subspaces (Qiu et al. 2026), we use parameter singular directions as data-free knowledge proxies. For each parameter update, SAFE-Merge contrasts its energy along pretrained general directions with that along directions unique to the new task, retaining a low-risk quantile through a sparse binary mask. arXiv:2608.01184v1 [cs.LG] 2 Aug 2026 Masking alone, however, improves safety at the cost of plas-ticity by discarding components important to the incoming task. We therefore learn a low-rank recovery term constrained to the retained parameter updates; those outside the mask remain exactly zero and are never modified. Its preservation objective suppresses responses along accumulated-task di-rections to limit forgetting, while its task-recovery objective matches the incoming task vector in its dominant subspace to restore new-task performance using only the retained updates. The masked update and recovery term are then folded into the backbone, requiring neither auxiliary data nor additional inference parameters. Across vision and language settings, SAFE-Merge consistently achieves the best H-score and com-petitive backward transfer without increasing inference cost. To summarize, our main contributions are as follows: 
+
+• We develop a data-free, parameter-wise risk criterion that contrasts general-subspace overlap with task-unique energy and selects a sparse set of parameter updates for safe knowledge acquisition. 
+
+• We introduce masked low-rank recovery with preservation and task-recovery objectives, restoring useful information suppressed by sparse masking without adding inference parameters. 
+
+• We evaluate SAFE-Merge across vision and language benchmarks and conduct detailed ablations; it achieves the best H-score in every setting, demonstrating a stronger balance between continual-merging accuracy and held-out generalization. 
+
+Related Work 
+
+Model Merging. Research on model merging seeks a single checkpoint that combines capabilities learned by separately adapted models. Parameter averaging offers the simplest construction (Utans 1996; Shoemake 1985) and is partly motivated by mode connectivity between aligned solutions (Entezari et al. 2021; Ainsworth, Hayase, and Srinivasa 2022). Task Arithmetic instead represents each adaptation as a displacement from a shared initialization and composes these task vectors algebraically (Ilharco et al. 2023). In practice, independently learned displacements are rarely disentangled (Ortiz-Jimenez, Favero, and Frossard 2023), so their direct addition can introduce sign conflicts, scale imbalance, and destructive interference. Later methods address these effects by selecting consistent parameter updates (Yadav et al. 2023), reweighting task contributions (Yu et al. 2024b), imposing structure during adaptation (Liu and Soatto 2023; Porrello et al. 2025), or estimating merge coefficients from calibration examples (Yang et al. 2024; Tang et al. 2024b; Qiu et al. 2025). These advances primarily study a fixed collection of models; they do not by themselves resolve how knowledge should be protected as new checkpoints arrive sequentially. Continual merging replaces one-shot composition with a recursive process in which only the current merged backbone and a newly arriving task model are available. Dataless and training-free formulations make this setting attractive when datasets cannot be retained or shared (Jin et al. 2023; Liu and Soatto 2023; Porrello et al. 2025). Recent approaches organize incoming updates through geometric constraints. Orthogonal-projection methods remove directions associated with earlier tasks (Tang et al. 2025; Cheng et al. 2025), while Qiu et al. (2026) uses task-vector singular structure to per-form null-space filtering for stability and plasticity. Other methods introduce adaptive signals or auxiliary data to guide sequential integration (Qiu et al. 2025). Although these tech-niques target forgetting among merged tasks, the pretrained backbone is typically treated as a common reference rather than as a source of transferable knowledge that must itself be preserved. SAFE-Merge addresses this complementary issue by explicitly distinguishing low-risk task updates from directions associated with pretrained general knowledge, and by recovering task utility only over the selected safe parameter updates. 
+
+Continual Learning. Conventional continual learning stud-ies how sequential optimization erases earlier capabilities (McCloskey and Cohen 1989). Representative solutions pe-nalize changes to important parameters (Kirkpatrick et al. 2016; Zenke, Poole, and Ganguli 2017; Aljundi et al. 2018), transfer predictions from an earlier model (Hou et al. 2019; Douillard et al. 2020), maintain replay samples (Rebuffi et al. 2016; Liu, Schiele, and Sun 2021), or allocate task-dependent capacity (Lee et al. 2017; Qiu et al. 2023; Zhou et al. 2024; Yu et al. 2024a; Huang et al. 2024). Checkpoint-based strategies have also been explored as a means of moderating forgetting (Mirzadeh et al. 2021; Wen et al. 2023; Marczak et al. 2024). Most of these approaches assume access to training trajecto-ries, stored examples, or expandable modules, assumptions unavailable in strict data-free merging. Our setting instead requires all preservation and acquisition decisions to be in-ferred from the pretrained, merged, and incoming parameters, with no task data and no persistent increase in model size. 
+
+Motivation 
+
+Not All Parameters Are Equally Safe to Merge 
+
+Let θ0 be a pretrained model and τt = θt − θ0 the task vector of the model fine-tuned on task t. We start from the premise that entries of τt overwrite the general knowledge encoded in θ0 to varying degrees. Below, we derive a data-free score for this overwrite risk and verify that its ordering indeed identifies a safe parameter subset. 
+
+Parameter risk from a second-order loss change. Let 
+
+Lg (θ) measure how well the general knowledge of the pre-trained model is preserved. Changing a single parameter θj
+
+by δj changes this loss, to second order, by 
+
+∆Lg,j = [ ∇L g (θ0)] j δj + 12
+
+∇2Lg (θ0) 
+
+> jj
+
+δ2 
+
+> j
+
++ o(δ2 
+
+> j
+
+). (1) Because θ0 is optimized for the pretraining objective, the first-order term vanishes and the change is governed by curvature: a perturbation of a given magnitude is cheap in a flat direction but costly in a sharp one. The risk of modifying a parameter is thus determined by the curvature of Lg along that parameter. 
+
+A computable surrogate for the curvature. We approx-imate the local preservation cost by the squared change in a linear layer’s response to general-domain inputs. Since (W (l)0 + ∆ W (l))x − W (l)0 x = ∆ W (l)x, this proxy is 
+
+R(l) 
+
+> g
+
+(∆ W ) = 12 Ex∼D g ∆W (l)x 22
+
+= 12 tr 
+
+
+
+∆W (l)C(l) 
+
+> g
+
+∆W (l)⊤
+
+.
+
+(2) Here C(l) 
+
+> g
+
+= E[xx ⊤] is the uncentered activation covariance. The proxy is zero and stationary at ∆W (l) = 0 , while C(l)
+
+> g
+
+plays the role of its curvature: a perturbation is costly in directions where C(l) 
+
+> g
+
+carries large energy. 
+
+Estimating the sensitive directions without data. In data-free merging, C(l) 
+
+> g
+
+is unavailable. Motivated by the observed correspondence between representation directions and the input-side singular directions of parameter updates (Qiu et al. 2026), we approximate its dominant subspace from the pretrained weight itself: treating θ(l)0 as a generalized update from the origin, we take its top-rp right singular vectors V (l)0
+
+and define 
+
+Q(l)0 = orth( V (l)0 ), bC(l) 
+
+> g
+
+= Q(l)0 Q(l)⊤ 
+
+> 0
+
+. (3) where orth( ·) returns an orthonormal basis for the column space of its argument. Note that this uses the pretrained weight only to recover candidate directions associated with general knowledge; it does not assume that pretraining started from zero. Substituting ∆W (l) = τ (l) 
+
+> t
+
+and bC(l) 
+
+> g
+
+into Eq. (2) and distributing the projected energy across entries then gives 
+
+R(l) 
+
+> g,ij
+
+=
+
+
+
+τ (l) 
+
+> t
+
+Q(l)0 Q(l)⊤
+
+> 0
+
+2
+
+> ij
+
+. (4) An entry scores high when its change aligns with the directions of the pretrained model, and is therefore likely to overwrite general knowledge. Keeping the lowest-scoring entries and zeroing out the rest yields a mask that admits the update only where it is safe. 
+
+Validating the general-risk score. We test whether the score in Eq. (4) correctly identifies which parameter updates damage pretrained general knowledge. For each keep ratio 
+
+ρ, we rank the entries of an incoming task vector by R(l) 
+
+> g,ij
+
+,retain the bottom-ρ fraction, and reset the remaining entries to their pretrained values. As a control, we reverse the ranking and retain the top-ρ fraction instead. We then evaluate on ImageNet, ImageNet-R, and ObjectNet as held-out probes of general visual knowledge. Fig. 1 confirms the score. We merge 8 tasks sequentially by adding only the masked portion of each incoming task vector to the running merged model. Retaining the lowest-risk parameter updates produces a broad flat region: performance stays close to the pretrained model on all three datasets even when up to 50% of each task vector is kept, while reversing the order causes a large drop under the same budget. Since the two selections differ only in which end of the ranking they keep, this gap validates the risk score rather than sparsity alone. As 
+
+ρ approaches 1, both converge to the full task vector, which substantially damages general performance. Thus, low-scored entries are genuinely safer, whereas high-scored entries carry greater overwrite risk. Zeroshot 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 
+
+> Keep ratio
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> Accuracy (%)
+> ImageNet
+> ImageNet-R
+> ObjectNet
+> positive
+> negative
+> zeroshot
+> zeroshot level
+
+Figure 1: Risk score protects general knowledge during continual merging. General-domain accuracy on ViT-B/32 after sequentially merging 8 tasks. At each step, we retain a fraction ρ of the incoming task vector selected by the general-risk score in Eq. (4), apply the resulting mask directly, and add the masked update to the running merged model. Positive selection (solid) retains low-risk parameter updates; negative selection (dashed) retains high-risk parameter updates. Both use exactly the same parameter budget. Stars and horizontal dashed lines mark pretrained zero-shot performance. 
+
+Method: SAFE-Merge 
+
+SAFE-Merge ( Sparse Risk-Aware Masking and Low-Rank Recovery For General-Knowledge Pr Eservation) addresses data-free continual merging in three steps: ❶ compute a binary mask Mt that admits parameter updates that are safe for general knowledge and useful for the incoming task; ❷
+
+learn a low-rank recovery over the parameter updates retained by the mask to restore task information suppressed by masking; and ❸ fold the masked update and the low-rank recovery term into the backbone. We write θmerged  
+
+> t
+
+for the merged backbone after task t is incorporated, with θmerged 0 = θ0. No task data are used and no extra parameters remain at inference time. 
+
+Step 1: Risk-Aware Masking 
+
+For layer l, recall the incoming task vector τ (l) 
+
+> t
+
+= θ(l) 
+
+> t
+
+− θ(l)0 .Let V (l)0 and V (l) 
+
+> t
+
+denote the top-rp right singular vectors of 
+
+θ(l)0 and τ (l) 
+
+> t
+
+, respectively. To separate directions shared with the pretrained model from those unique to the incoming task, we orthogonalize V (l) 
+
+> t
+
+against V (l)0 :
+
+Q(l)0 = orth( V (l)0 ),Q(l)new = orth 
+
+h
+
+(I − Q(l)0 Q(l)⊤ 
+
+> 0
+
+)V (l)
+
+> t
+
+i
+
+. (5) The projector Q(l)0 Q(l)⊤ 
+
+> 0
+
+captures directions associated with general knowledge, while Q(l)new Q(l)⊤ 
+
+> new
+
+captures task-distinctive directions. The score in Eq. (4) penalizes only overwrite risk; here we additionally reward task utility, so that a parameter update that is risky yet vital for the incoming task is not masked out. The per-entry risk score thus contrasts Compute   
+
+> curvature risk Threshold
+> Pretrained parameters 𝑾 𝟎
+
+Step2: Masked Low -Rank Recovery 
+
+Step1: Risk -Aware Masking                    
+
+> Risk matrix 𝑅 High(risk)
+> Low(safe)
+> Keep (1) Mask (0)
+> LoRA 𝐵 "𝐴 "Masked LoRA Recovery
+> 𝑀 "⨀𝐵 "𝐴 "
+> 𝑀 "∈0,1#!×#"
+> Shared low -
+> loss basin
+> 𝐿 =𝐿 %&'&()* +𝐿 ")+,
+> General
+> damages
+> 𝑑 #×𝑑 $
+> 𝑑 #×𝑑 $
+> Task update 𝝉 𝒕
+> 𝑑 #×𝑑 $
+> Task -specific directions 𝑸 𝒏𝒆𝒘
+> General directions 𝑸 𝟎
+> Apply mask
+
+Step3: fusion           
+
+> Masked task update
+> Apply mask
+> SAFE -Merged Model 𝑾 𝒕
+> 𝑊 "=𝑊 "12+∆"
+> Merge
+> 𝑑 #×𝑑 $𝑑 #×𝑑 $
+> 𝑑 #×𝑑 $
+> Previous Merged Model 𝑾 𝒕 1𝟏
+> 𝑑 #×𝑑 $
+> Safe update ∆"
+> 𝑑 #×𝑑 $
+> LoRA factors
+> 𝑑 #×𝑟 %
+> + 𝑟 %×𝑑 $
+> 𝐵 "
+> 𝐴 "
+> 𝑟 &×𝑑 $
+> 𝑟 &×𝑑 $
+> 𝑴 𝒕 ⨀𝝉 𝒕
+> Direction
+> Extraction
+> Direction
+> Extraction
+
++Figure 2: Overview of SAFE-Merge. SAFE-Merge identifies low-risk parameter updates in the incoming task vector, recovers task information over the retained subset using a masked low-rank update, and fuses the resulting update into the running merged model without retaining extra inference-time parameters. preservation cost against task utility: 
+
+R(l) 
+
+> ij
+
+=
+
+
+
+τ (l) 
+
+> t
+
+Q(l)0 Q(l)⊤
+
+> 0
+
+2
+
+> ij
+
+−
+
+
+
+τ (l) 
+
+> t
+
+Q(l)new Q(l)⊤
+
+> new
+
+2
+
+> ij
+
+. (6) Large projected energy along Q(l)0 indicates high overwrite risk, while energy along Q(l)new indicates task-specific value; a parameter update is masked only when the former outweighs the latter. Given a keep ratio ρ ∈ [0 , 1] , the mask retains the lowest-risk parameter updates: 
+
+M (l) 
+
+> t
+
+= I
+
+h
+
+R(l) 
+
+> ij
+
+≤ Quantile ρ(R(l) 
+
+> ij
+
+)
+
+i
+
+, (7) where I[·] is the indicator function and Quantile ρ(·) returns the ρ-th quantile over all parameter updates of the layer. 
+
+Step 2: Masked Low-Rank Recovery 
+
+Masking improves safety by zeroing out high-risk coordinates, yet the discarded portion of τ (l) 
+
+> t
+
+may contain information needed for the incoming task. We restore this information with a low-rank recovery term of rank rl, constrained to the same retained parameter updates: 
+
+∆(l) 
+
+> t
+
+= M (l) 
+
+> t
+
+⊙ τ (l) 
+
+> t
+
++ M (l) 
+
+> t
+
+⊙
+
+
+
+B(l) 
+
+> t
+
+A(l)
+
+> t
+
+
+
+, (8) where ⊙ denotes the element-wise product, A(l) 
+
+> t
+
+∈ Rrl×di
+
+and B(l) 
+
+> t
+
+∈ Rdo×rl . Note that the mask is applied after 
+
+forming the product B(l) 
+
+> t
+
+A(l) 
+
+> t
+
+, so the recovery term cannot modify any coordinate that masking rejected as high-risk: every masked-out parameter update remains exactly zero. The recovery factors are optimized without task data by projecting the update onto parameter-derived task subspaces, following the same direction-based proxy as Qiu et al. (2026). Specifically, the directions used by earlier tasks are estimated from the accumulated merged vector ¯τ (l) 
+
+> t−1
+
+= θmerged ,(l) 
+
+> t−1
+
+−θ(l)0 ,and those of the incoming task from τ (l) 
+
+> t
+
+itself: we take the top-rp right singular vectors V (l)old of ¯τ (l) 
+
+> t−1
+
+and the top-rv right singular vectors V (l)new of τ (l) 
+
+> t
+
+, and define the projectors 
+
+G(l)old = V (l)old V (l)⊤ 
+
+> old
+
+, G(l)new = V (l)new V (l)⊤ 
+
+> new
+
+. (9) The two recovery objectives act on complementary sub-spaces. To limit forgetting, we penalize the component of the recovered update that lies along previously accumulated task directions: 
+
+L(l)old = ∆(l) 
+
+> t
+
+G(l)old 
+
+> 2
+> F
+
+. (10) To restore plasticity, we match the merged update to the task vector on the new task’s dominant subspace: 
+
+L(l)new = τ (l) 
+
+> t
+
+G(l)new −
+
+
+
+¯τ (l) 
+
+> t−1
+
++ ∆ (l)
+
+> t
+
+
+
+G(l)new 
+
+> 2
+> F
+
+. (11) Intuitively, L(l)old pushes the update away from the subspaces of earlier tasks, while L(l)new pulls it toward the incoming task’s behavior on its own subspace. The full layer-wise objective combines these terms with a regularizer on the recovery magnitude: 
+
+L(l) = λL(l)new +(1 −λ)L(l)old +μ M (l) 
+
+> t
+
+⊙ B(l) 
+
+> t
+
+A(l)
+
+> t
+> 2
+> F
+
+, (12) Algorithm 1 SAFE-Merge Procedure 
+
+Input: θ0, {θt}Tt=1 , selected layers {1, . . . , L }, ranks {rp, r l, r v },keep ratio ρ, learning rate η, iterations K, weights λ, μ .
+
+Initialize: θmerged  
+
+> 0
+
+← θ0
+
+for each task t = 1 , . . . , T do for each selected layer l do 
+
+τ (l) 
+
+> t
+
+← θ(l) 
+
+> t
+
+− θ(l)0 ; ¯τ (l) 
+
+> t−1
+
+← θmerged ,(l) 
+
+> t−1
+
+− θ(l)0
+
+Build Q(l)0 , Q(l)new via Eq. (5) Compute R(l) 
+
+> ij
+
+via Eq. (6) and M (l) 
+
+> t
+
+via Eq. (7) Initialize A(l) 
+
+> t
+
+randomly, B(l) 
+
+> t
+
+← 0
+
+for k = 1 , . . . , K do for each selected layer l do 
+
+Build G(l)old from ¯τ (l) 
+
+> t−1
+
+(zero if t = 1 )Build G(l)new from τ (l)
+
+> t
+
+∆(l) 
+
+> t
+
+← M (l) 
+
+> t
+
+⊙  τ (l) 
+
+> t
+
++ B(l) 
+
+> t
+
+A(l)
+
+> t
+
+
+
+Update A(l) 
+
+> t
+
+, B (l) 
+
+> t
+
+by gradient descent on L(l) (Eq. (12)) 
+
+for each selected layer l do 
+
+θmerged ,(l) 
+
+> t
+
+← θmerged ,(l) 
+
+> t−1
+
++ M (l) 
+
+> t
+
+⊙  τ (l) 
+
+> t
+
++ B(l) 
+
+> t
+
+A(l)
+
+> t
+
+
+
+Output: θmerged 
+
+> T
+
+where λ ∈ [0 , 1] trades plasticity for stability and μ regularizes the recovery term. We optimize P 
+
+> l
+
+L(l) over selected layers by gradient descent without accessing any task data. 
+
+Step 3: Fusion 
+
+After optimizing the recovery factors, the final update is added to the previous merged weights: 
+
+θmerged ,(l) 
+
+> t
+
+= θmerged ,(l) 
+
+> t−1
+
++ ∆ (l) 
+
+> t
+
+. (13) The mask and low-rank factors are discarded after fusion, leaving the parameter count and inference cost unchanged. The full procedure is summarized in Alg. 1. 
+
+Experiments 
+
+Experimental Setups 
+
+Benchmarks and Protocols. Following (Ilharco et al. 2023; Wang et al. 2024), we adopt CLIP-ViT backbones (Radford et al. 2021) and construct three groups of 8, 14, and 20 image classification tasks. We use publicly available ViT-B/32, ViT-B/16, and ViT-L/14 checkpoints, each fine-tuned on up to 20 datasets (Tang et al. 2024a). To ensure robustness to task order, all vision experiments are repeated over 10 random permutations (seeds 42–51). For NLP, we fine-tune Flan-T5-base (Chung et al. 2024) on five GLUE tasks (Wang et al. 2019) (CoLA, MRPC, QQP, SST2, and STSB) and merge them once in alphabetical order; MNLI, QNLI, and RTE are held out as probes of general linguistic knowledge. For vision, we additionally evaluate the merged model on three held-out control datasets: ImageNet (IN) (Deng et al. 2009), ImageNet-R (IN-R) (Hendrycks et al. 2021), and ObjectNet (ObjNet) (Barbu et al. 2019). These datasets assess whether the merged model retains the general visual representations of the pre-trained backbone. 
+
+Implementation Details We apply risk-aware sparse mask-ing and low-rank recovery to selected attention and first feed-forward linear layers. Across all experiments, we share the subspace rank rp = 128 , recovery rank rl = 64 , and new-task recovery rank rv = 8 without task-specific tuning. For ViT-B/32, the keep ratio is set to ρ = 0 .5 for 8-task merging and ρ = 0 .3 for 14- and 20-task merging. For ViT-B/16 and ViT-L/14, the corresponding values are 0.7 and 0.5. We use 
+
+ρ = 0 .9 for Flan-T5 merging. We set the plasticity weight to 
+
+λ = 0 .8 and regularization weight to μ = 0 .1, and optimize the recovery factors with Adam for 50 iterations per task using a learning rate of 1 × 10 −3.
+
+Metrics and Baselines. We evaluate performance with four metrics: average accuracy (ACC), backward transfer (BWT) (Lin et al. 2022), general performance average (Gen. Avg.), and their harmonic mean (H-score). ACC is the mean accuracy of the final merged model across all tasks, ACC =
+
+> 1
+> T
+
+PTi=1 ai(θmerged  
+
+> T
+
+), where ai(·) denotes accuracy on task 
+
+i. BWT quantifies the effect of merging on past tasks by comparing their performance before and after the final merge: BWT = 1 
+
+> T−1
+
+PT −1
+
+> i=1
+
+h
+
+ai(θmerged  
+
+> T
+
+) − ai(θmerged  
+
+> i
+
+)
+
+i
+
+. Gen. Avg. measures the average performance on the held-out control datasets, which probe whether the merged model retains the general knowledge of the pre-trained backbone: Gen. Avg. =
+
+> 1
+> |G|
+
+P 
+
+> g∈G
+
+ag , where G is the set of held-out control datasets for each domain (IN, IN-R, and ObjNet for vision; MNLI, QNLI, and RTE for NLP). H-score is the harmonic mean of ACC and Gen. Avg., emphasizing that a strong continual merging method must achieve both high merging accuracy and strong general performance: H-score = 2·ACC ·Gen. Avg. ACC +Gen. Avg. .
+
+We compare against Task Arithmetic (Ilharco et al. 2023), Ties-Merging (Yadav et al. 2023), WUDI-Merging (Cheng et al. 2025), Iso-C (Marczak et al. 2025), KnOTS-TIES (Stoica et al. 2025), TSV-M (Gargiulo et al. 2025), OPCM (Tang et al. 2025), and NUFILT (Qiu et al. 2026). Detailed descriptions are provided in the supplementary material. 
+
+Main Results 
+
+Results on Vision Tasks . Tab. 1 summarizes the vision results. SAFE-Merge achieves the best H-score at every sequence length, exceeding the strongest H-score baseline by 3.1, 3.4, and 4.3 points for 8, 14, and 20 tasks. More importantly, on 14 and 20 tasks, it improves over NUFILT, the strongest ACC baseline, by 1.2/2.5 ACC points and 5.4/8.1 H-score points. These simultaneous gains show that the advantage is balanced rather than driven by a single metric, and grows as interference accumulates. 
+
+Results on NLP Tasks . Tab. 2 reports the Flan-T5-base results. NUFILT attains the highest ACC and least-negative BWT, while Task Arithmetic best preserves general perfor-mance, but neither optimizes their balance. SAFE-Merge instead achieves the best H-score (79.4), improving on NU-FILT by 0.6 points while remaining within 0.3 points of its ACC and improving Gen. by 1.4 points; it also obtains the best RTE accuracy. Moreover, after absorbing five tasks, SAFE-Merge keeps general performance slightly above the Pre-Trained reference, whereas individual fine-tuning erodes it by about four points. These results show that the H-score gain reflects balanced task acquisition and general-knowledge Table 1: Results on ViT-B/32 over ten task orders. We report continual merging accuracy (ACC) and backward transfer (BWT) on the merged tasks, general performance (Gen.) on held-out control datasets, and their harmonic mean (H-score). Best results are in 
+
+bold and second-best are underlined. 
+
+Method 8 Tasks 14 Tasks 20 Tasks ACC ↑ Gen. ↑ H-score ↑ BWT ↑ ACC ↑ Gen. ↑ H-score ↑ BWT ↑ ACC ↑ Gen. ↑ H-score ↑ BWT ↑
+
+Pre-Trained 48.1 58.8 52.9 – 56.9 58.8 57.8 – 55.6 58.8 57.1 –Individual 90.4 42.5 57.8 – 89.3 44.4 59.3 – 89.8 44.4 59.4 –Task Arithmetic 67.5 ±0.0 44.5 ±0.0 53.6 ±0.0 -9.6 ±1.5 66.5 ±0.0 57.3 ±0.0 61.6 ±0.0 -1.3 ±1.6 60.0 ±0.0 53.8 ±0.0 56.7 ±0.0 -3.4 ±1.0
+
+Ties-Merging 49.0 ±10 .2 21.3 ±7.7 29.5 ±8.8 -15.3 ±8.0 66.2 ±0.6 57.8 ±0.3 61.8 ±0.4 1.9 ±0.6 59.9 ±0.7 51.4 ±1.3 55.2 ±1.0 -1.5 ±0.7
+
+WUDI-Merging 74.7 ±6.6 43.5 ±7.3 54.9 ±7.5 -17.0 ±7.5 67.0 ±6.9 43.7 ±5.7 52.8 ±6.2 -22.8 ±7.3 63.7 ±3.8 45.0 ±4.1 52.2 ±3.9 -26.0 ±4.1
+
+Iso-C 71.7 ±1.2 55.5 ±0.6 62.9 ±0.5 -10.2 ±1.2 73.2 ±1.8 53.4 ±0.6 61.6 ±0.7 -10.4 ±1.9 67.6 ±0.8 48.8 ±0.9 56.6 ±0.6 -10.3 ±1.4
+
+KnOTS-TIES 54.4 ±6.9 22.5 ±6.1 31.6 ±7.2 -12.6 ±3.9 67.8 ±0.4 58.0 ±0.1 62.5 ±0.1 1.9 ±0.5 60.5 ±1.4 51.5 ±1.7 55.8 ±1.5 -1.3 ±0.7
+
+TSV-M 68.2 ±4.8 50.0 ±4.2 57.7 ±4.0 -24.0 ±5.6 63.3 ±4.8 50.3 ±4.1 56.4 ±4.3 -26.7 ±4.9 58.8 ±3.3 51.5 ±3.8 54.9 ±3.5 -31.7 ±3.4
+
+OPCM 75.5 ±0.5 51.8 ±0.4 61.4 ±0.4 -6.3 ±1.1 71.9 ±0.3 54.0 ±0.1 61.7 ±0.1 -6.0 ±1.0 65.7 ±0.2 53.1 ±0.3 58.6 ±0.3 -7.8 ±1.5
+
+NUFILT 83.6 ±0.2 52.3 ±0.3 64.3 ±0.2 -2.7 ±0.7 78.0 ±0.2 49.4 ±0.2 60.5 ±0.2 -5.7 ±0.9 71.0 ±0.9 44.5 ±0.4 54.8 ±0.3 -8.9 ±2.3
+
+SAFE-Merge 83.0 ±0.3 56.7 ±0.2 67.4 ±0.2 -3.5 ±0.6 79.2 ±0.4 56.4 ±0.2 65.9 ±0.2 -4.8 ±0.6 73.5 ±0.5 54.9 ±0.4 62.9 ±0.4 -8.2 ±1.3
+
+Table 2: Continual merging results on the 5-task NLP bench-mark (five GLUE tasks merged in alphabetical order). MNLI, QNLI, and RTE serve as held-out probes of general perfor-mance (Gen.). ACC and BWT are computed on the merged tasks, and H-score is the harmonic mean of ACC and Gen. Best results are in bold and second-best are underlined. 
+
+Method ACC ↑ MNLI QNLI RTE Gen. ↑ H-score ↑ BWT ↑
+
+Pre-Trained 76.2 56.5 88.4 80.1 75.0 75.6 –Individual 86.0 47.8 87.7 77.8 71.1 77.9 –Task Arithmetic 79.0 58.1 88.9 79.1 75.4 77.2 −1.1 Ties-Merging 79.7 54.2 89.5 79.4 74.4 77.0 −1.5 OPCM 80.6 54.8 89.3 80.5 74.8 77.6 −1.2 WUDI-Merging 84.2 52.1 88.6 78.3 73.0 78.2 −1.5 NUFILT 84.4 52.9 88.5 80.1 73.9 78.8 −0.6 SAFE-Merge 84.1 55.8 89.2 80.9 75.3 79.4 −1.4 preservation. 
+
+Ablation and Analysis Results 
+
+Ablation on Each Component. Tab. 3 disentangles risk-aware masking and masked low-rank recovery. Naive accu-mulation collapses as the sequence grows, with ACC/Gen. falling from 62.0/23.5 at 8 tasks to 34.2/10.1 at 20 tasks. Masking provides the largest contribution: at 20 tasks it im-proves ACC/Gen. by 29.1/33.9 points and BWT from −24 .9
+
+to −11 .1. Recovery alone is competitive at 8 tasks but de-grades to 38.0 ACC and −34 .0 BWT at 20 tasks with high variance, showing that an unconstrained correction can am-plify interference. Combining both components performs best throughout; relative to masking alone, recovery adds 10.2/10.9 ACC/Gen. points at 20 tasks and makes BWT less negative. It also reduces the 20-task ACC/BWT standard devi-ations from 13.7/12.4 to 0.5/1.3, confirming robustness to task order. Thus, masking defines a safe support while recovery re-stores discarded task information, with their complementarity 48 50 52 54 56 58 
+
+> Gen (%)
+> 70
+> 72
+> 74
+> 76
+> 78
+> 80
+> 82
+> 84
+> ACC (%)
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5 0.6 0.7 0.8 0.9
+> 0.1
+> 0.2
+> 0.3 0.4 0.5 0.6 0.7
+> 0.8
+> 0.9
+> 0.1
+> 0.2
+> 0.3 0.4 0.5 0.6
+> 0.7
+> 0.8
+> 0.9
+> 8 tasks
+> 14 tasks
+> 20 tasks
+
+(a) Mask keep ratio ρ−10 −8 −6 −4 −2 0 
+
+> BWT (%)
+> 70
+> 72
+> 74
+> 76
+> 78
+> 80
+> 82
+> 84
+> ACC (%)
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6 0.7 0.8 0.9
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5 0.6 0.7 0.8 0.9
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5 0.6 0.7 0.8 0.9
+> 8 tasks
+> 14 tasks
+> 20 tasks
+
+(b) Plasticity weight λ
+
+Figure 3: Analysis of risk-aware masking and stability– plasticity trade-off on CLIP ViT-B/32. (a) ACC–Gen trade-off when varying the mask keep ratio ρ over 8, 14, and 20 tasks. (b) ACC–BWT trade-off when varying the plasticity weight 
+
+λ over 8, 14, and 20 tasks. becoming more important in longer sequences. 
+
+Risk and Trade-off Analysis. Fig. 3 exposes two comple-mentary trade-offs. In (a), decreasing the keep ratio ρ consis-tently improves Gen., whereas ACC follows an inverted-U: retaining too many updates admits interference, while exces-sive sparsity removes task information. For 20 tasks, moving from ρ = 0 .9 to 0.5 raises ACC from about 71.5 to 73.9 and Gen. from 48.5 to 53.5, but ρ = 0 .1 reduces ACC below 72. The knees at ρ = 0 .3–0.5 motivate stronger sparsification for longer sequences. In (b), increasing λ emphasizes new-task recovery, raising ACC while making BWT more negative; at 20 tasks, λ = 0 .8 gains roughly three ACC points over 0.1, with BWT changing from about −1.6 to −8.0. The same ordered trend at 8 and 14 tasks shows that λ provides pre-64 128 256 512 
+
+> Rank
+> 76.0
+> 78.0
+> 80.0
+> 82.0
+> 84.0
+> 86.0
+> ACC (%)
+> ACC
+> BWT
+> -5.5
+> -5.0
+> -4.5
+> -4.0
+> -3.5
+> -3.0
+> BWT (%)
+
+(a) Scoring rank rp4 8 16 32  
+
+> Rank
+> 80.0
+> 81.0
+> 82.0
+> 83.0
+> 84.0
+> ACC (%)
+> ACC
+> BWT
+> -8.0
+> -6.0
+> -4.0
+> -2.0
+> BWT (%)
+
+(b) Task rank rv16 32 64 128  
+
+> Rank
+> 82.0
+> 82.5
+> 83.0
+> 83.5
+> 84.0
+> ACC (%)
+> ACC
+> BWT
+> -4.5
+> -4.0
+> -3.5
+> -3.0
+> BWT (%)
+
+(c) Recovery rank rl
+
+Figure 4: Rank sensitivity on CLIP ViT-B/32 under the 8-task continual merging protocol. We report ACC and BWT while varying the scoring rank rp, task-subspace rank rv , and masked low-rank recovery rank rl.Table 3: Ablation study of SAFE-Merge with CLIP ViT-B/32 over 8, 14, and 20 tasks. M/R indicates whether risk-aware masking (Mt) and low-rank recovery ( BtAt) are enabled. 
+
+Ablation Merged update ∆t
+
+8 Tasks 14 Tasks 20 Tasks ACC ↑ Gen. ↑ BWT ↑ ACC ↑ Gen. ↑ BWT ↑ ACC ↑ Gen. ↑ BWT ↑
+
+Naive accumulation (M/R : ✗/✗) τt 62.0 
+
+> ±0.0
+
+23.5 
+
+> ±0.0
+
+-18.9 
+
+> ±5.3
+
+46.4 
+
+> ±0.0
+
+19.1 
+
+> ±0.0
+
+-25.8 
+
+> ±2.5
+
+34.2 
+
+> ±0.0
+
+10.1 
+
+> ±0.0
+
+-24.9 
+
+> ±5.4
+
+Risk-aware mask only (M/R : ✓/✗) Mt ⊙ τt 80.7 
+
+> ±0.0
+
+52.3 
+
+> ±0.0
+
+-4.0 
+
+> ±0.9
+
+75.2 
+
+> ±0.0
+
+52.7 
+
+> ±0.0
+
+-5.6 
+
+> ±0.5
+
+63.3 
+
+> ±0.0
+
+44.0 
+
+> ±0.0
+
+-11.1 
+
+> ±2.2
+
+Low-rank recovery only (M/R : ✗/✓) τt + BtAt 79.1 
+
+> ±1.8
+
+47.2 
+
+> ±1.7
+
+-10.1 
+
+> ±2.4
+
+54.2 
+
+> ±8.4
+
+32.4 
+
+> ±5.5
+
+-22.2 
+
+> ±10.0
+
+38.0 
+
+> ±13.7
+
+19.5 
+
+> ±8.5
+
+-34.0 
+
+> ±12.4
+
+SAFE-Merge (M/R : ✓/✓) Mt ⊙ (τt + BtAt) 83.0 
+
+> ±0.3
+
+56.7 
+
+> ±0.2
+
+-3.5 
+
+> ±0.6
+
+79.2 
+
+> ±0.4
+
+56.4 
+
+> ±0.2
+
+-4.8 
+
+> ±0.6
+
+73.5 
+
+> ±0.5
+
+54.9 
+
+> ±0.4
+
+-8.2 
+
+> ±1.3
+
+Table 4: Overhead of ViT-B/32 under 8-task continual merg-ing: per-task iterations, solving time, total time, and peak GPU memory. 
+
+Model Iters. Solv. Tot. GPU Mem. H-score 
+
+Task Arithmetic - - 8.3s - 53.6 ± 0.0 
+
+OPCM - - 76.6s 1.3GB 61.4 ± 0.4 
+
+WUDI-Merging 50 28.9s 37.7s 2.0GB 54.9 ± 7.5 
+
+NUFILT 50 18.4s 138.9s 1.8GB 64.3 ±0.2 
+
+SAFE-Merge 50 21.3s 216.3s 2.3GB 67.4 ±0.2 
+
+dictable control as interference accumulates. These curves support our global choice λ = 0 .8, with masking limiting its overwrite risk. 
+
+Rank Sensitivity. Fig. 4 shows structured rather than uniform rank sensitivity. Compact scoring subspaces work best: increasing rp from 64–128 to 512 lowers ACC from about 83 to 77.5 and also worsens BWT. Likewise, rv = 8 
+
+gives the highest ACC and rv = 4 the least-negative BWT, whereas rv = 32 degrades both metrics by overemphasizing incoming-task directions. In contrast, recovery is robust to 
+
+rl: across 16–128, ACC varies by less than 0.3 points and BWT slightly improves with rank. This contrast shows that subspace selectivity matters more than simply increasing correction capacity. The choices rp = 128 , rv = 8 , and 
+
+rl = 64 therefore use compact scoring/task subspaces and place recovery in its broad stable region. 
+
+Computation Overhead. Tab. 4 shows that SAFE-Merge uses 216.3s and 2.3GB for eight tasks. Compared with NU-FILT, the additional 77.4s and 0.5GB yield a 3.1-point H-score gain (67.4 vs. 64.3), while training-free methods are faster but less accurate. This overhead is incurred only during offline merging: the recovery factors are folded into the backbone, adding no inference parameters or latency, and the one-time cost is amortized over subsequent deployment. 
+
+Conclusion 
+
+In this work, we addressed data-free continual model merging, where independently fine-tuned models must be integrated sequentially without task data or access to earlier checkpoints. The key challenge is to acquire new knowledge while pre-serving both prior tasks and general capabilities. To this end, we introduced SAFE-Merge, which scores each parameter update by balancing its potential to overwrite general knowl-edge against its task-specific utility. Guided by this score, it retains safe updates through sparse masking and recovers discarded task information with a constrained low-rank cor-rection. Experiments across vision and language benchmarks show that SAFE-Merge consistently achieves the best H-score, demonstrating a stronger balance between task acquisition and general-knowledge preservation. 
+
+References 
+
+Ainsworth, S. K.; Hayase, J.; and Srinivasa, S. 2022. Git re-basin: Merging models modulo permutation symmetries. 
+
+arXiv preprint arXiv:2209.04836 .Aljundi, R.; Babiloni, F.; Elhoseiny, M.; Rohrbach, M.; and Tuytelaars, T. 2018. Memory aware synapses: Learning what (not) to forget. In Proceedings of the European conference on computer vision (ECCV) , 139–154. Barbu, A.; Mayo, D.; Alverio, J.; Luo, W.; Wang, C.; Gut-freund, D.; Tenenbaum, J.; and Katz, B. 2019. ObjectNet: A Large-Scale Bias-Controlled Dataset for Pushing the Lim-its of Object Recognition Models. In Advances in Neural Information Processing Systems , volume 32. Bossard, L.; Guillaumin, M.; and Van Gool, L. 2014. Food-101–mining discriminative components with random forests. In European Conference on Computer Vision , 446–461. Springer. Cheng, G.; Han, J.; and Lu, X. 2017. Remote sensing image scene classification: Benchmark and state of the art. Proceed-ings of the IEEE , 105(10): 1865–1883. Cheng, R.; Xiong, F.; Wei, Y.; Zhu, W.; and Yuan, C. 2025. Whoever Started the interference Should End It: Guiding Data-Free Model Merging via Task Vectors. In Forty-second International Conference on Machine Learning .Chung, H. W.; Hou, L.; Longpre, S.; Zoph, B.; Tay, Y.; Fedus, W.; Li, Y.; Wang, X.; Dehghani, M.; Brahma, S.; et al. 2024. Scaling instruction-finetuned language models. Journal of Machine Learning Research , 25(70): 1–53. Cimpoi, M.; Maji, S.; Kokkinos, I.; Mohamed, S.; and Vedaldi, A. 2014. Describing textures in the wild. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition , 3606–3613. Clanuwat, T.; Bober-Irizar, M.; Kitamoto, A.; Lamb, A.; Yamamoto, K.; and Ha, D. 2018. Deep learning for classi-cal Japanese literature. In NeurIPS Workshop on Machine Learning for Creativity and Design .Coates, A.; Ng, A. Y.; and Lee, H. 2011. An analysis of single-layer networks in unsupervised feature learning. In Proceedings of the Fourteenth International Conference on Artificial Intelligence and Statistics , 215–223. JMLR Workshop and Conference Proceedings. Cohen, G.; Afshar, S.; Tapson, J.; and Van Schaik, A. 2017. EMNIST: Extending MNIST to handwritten letters. In 2017 International Joint Conference on Neural Networks (IJCNN) ,2921–2926. IEEE. Deng, J.; Dong, W.; Socher, R.; Li, L.-J.; Li, K.; and Fei-Fei, L. 2009. Imagenet: A large-scale hierarchical image database. In 2009 IEEE conference on computer vision and pattern recognition , 248–255. Ieee. Douillard, A.; Cord, M.; Ollion, C.; Robert, T.; and Valle, E. 2020. PODNet: Pooled Outputs Distillation for Small-Tasks Incremental Learning. European Conference on Computer Vision .Entezari, R.; Sedghi, H.; Saukh, O.; and Neyshabur, B. 2021. The role of permutation invariance in linear mode connectivity of neural networks. arXiv preprint arXiv:2110.06296 .Gargiulo, A. A.; Crisostomi, D.; Bucarelli, M. S.; Scardapane, S.; Silvestri, F.; and Rodola, E. 2025. Task singular vectors: Reducing task interference in model merging. In Proceedings of the Computer Vision and Pattern Recognition Conference ,18695–18705. Goodfellow, I. J.; Erhan, D.; Carrier, P.-L.; Courville, A.; Mirza, M.; Hamner, B.; Cukierski, W.; Tang, Y.; Thaler, D.; Lee, D.-H.; et al. 2013. Challenges in representation learning: A report on three machine learning contests. In 
+
+International Conference on Neural Information Processing ,117–124. Springer. Helber, P.; Bischke, B.; Dengel, A.; and Borth, D. 2019. Eurosat: A novel dataset and deep learning benchmark for land use and land cover classification. IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing , 12(7): 2217–2226. Hendrycks, D.; Basart, S.; Mu, N.; Kadavath, S.; Wang, F.; Dorundo, E.; Desai, R.; Zhu, T.; Parajuli, S.; Guo, M.; Song, D.; Steinhardt, J.; and Gilmer, J. 2021. The Many Faces of Robustness: A Critical Analysis of Out-of-Distribution Gen-eralization. In Proceedings of the IEEE/CVF International Conference on Computer Vision , 8340–8349. Hou, S.; Pan, X.; Loy, C. C.; Wang, Z.; and Lin, D. 2019. Learning a Unified Classifier Incrementally via Rebalancing. 
+
+2019 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , 831–839. Huang, L.; Cao, X.; Lu, H.; and Liu, X. 2024. Class-incremental learning with clip: Adaptive representation ad-justment and parameter fusion. In European Conference on Computer Vision , 214–231. Springer. Ilharco, G.; Ribeiro, M. T.; Wortsman, M.; Schmidt, L.; Hajishirzi, H.; and Farhadi, A. 2023. Editing models with task arithmetic. In The Eleventh International Conference on Learning Representations .Izmailov, P.; Podoprikhin, D.; Garipov, T.; Vetrov, D.; and Wilson, A. G. 2018. Averaging weights leads to wider optima and better generalization. In 34th Conference on Uncertainty in Artificial Intelligence 2018, UAI 2018 , 876– 885. Association For Uncertainty in Artificial Intelligence (AUAI). Jin, X.; Ren, X.; Preotiuc-Pietro, D.; and Cheng, P. 2023. Dataless Knowledge Fusion by Merging Weights of Lan-guage Models. In The Eleventh International Conference on Learning Representations .Kirkpatrick, J.; Pascanu, R.; Rabinowitz, N. C.; Veness, J.; Desjardins, G.; Rusu, A. A.; Milan, K.; Quan, J.; Ramalho, T.; Grabska-Barwinska, A.; Hassabis, D.; Clopath, C.; Kumaran, D.; and Hadsell, R. 2016. Overcoming catastrophic forgetting in neural networks. Proceedings of the National Academy of Sciences , 114: 3521 – 3526. Krause, J.; Stark, M.; Deng, J.; and Fei-Fei, L. 2013. 3D object representations for fine-grained categorization. In 
+
+2013 IEEE International Conference on Computer Vision Workshops , 554–561. IEEE. Krizhevsky, A.; and Hinton, G. 2009. Learning multiple layers of features from tiny images. Technical report, University of Toronto. LeCun, Y.; Bottou, L.; Bengio, Y.; and Haffner, P. 1998. Gradient-based learning applied to document recognition. 
+
+Proceedings of the IEEE , 86(11): 2278–2324. Lee, S.-W.; Kim, J.-H.; Jun, J.; Ha, J.-W.; and Zhang, B.-T. 2017. Overcoming catastrophic forgetting by incremental moment matching. Advances in neural information processing systems , 30. Lin, S.; Yang, L.; Fan, D.; and Zhang, J. 2022. Beyond not-forgetting: Continual learning with backward knowledge transfer. Advances in Neural Information Processing Systems ,35: 16165–16177. Liu, T. Y.; and Soatto, S. 2023. Tangent model composition for ensembling and continual fine-tuning. In Proceedings of the IEEE/CVF International Conference on Computer Vision ,18676–18686. Liu, Y.; Schiele, B.; and Sun, Q. 2021. Rmm: Reinforced mem-ory management for class-incremental learning. Advances in Neural Information Processing Systems , 34: 3478–3490. Marczak, D.; Magistri, S.; Cygert, S.; Twardowski, B.; Bag-danov, A. D.; and van de Weijer, J. 2025. No Task Left Behind: Isotropic Model Merging with Common and Task-Specific Subspaces. In Forty-second International Conference on Machine Learning .Marczak, D.; Twardowski, B.; Trzciński, T.; and Cygert, S. 2024. MagMax: Leveraging Model Merging for Seamless Continual Learning. In European Conference on Computer Vision (ECCV) .McCloskey, M.; and Cohen, N. J. 1989. Catastrophic inter-ference in connectionist networks: The sequential learning problem. In Psychology of learning and motivation , vol-ume 24, 109–165. Elsevier. Mirzadeh, S. I.; Farajtabar, M.; Gorur, D.; Pascanu, R.; and Ghasemzadeh, H. 2021. Linear Mode Connectivity in Multi-task and Continual Learning. In 9th International Conference on Learning Representations .Netzer, Y.; Wang, T.; Coates, A.; Bissacco, A.; Wu, B.; and Ng, A. Y. 2011. Reading digits in natural images with unsupervised feature learning. In NIPS Workshop on Deep Learning and Unsupervised Feature Learning .Nilsback, M.-E.; and Zisserman, A. 2008. Automated flower classification over a large number of classes. In 2008 Sixth Indian Conference on Computer Vision, Graphics & Image Processing , 722–729. IEEE. Ortiz-Jimenez, G.; Favero, A.; and Frossard, P. 2023. Task arithmetic in the tangent space: Improved editing of pre-trained models. Advances in Neural Information Processing Systems , 36: 66727–66754. Parkhi, O. M.; Vedaldi, A.; Zisserman, A.; and Jawahar, C. V. 2012. Cats and dogs. 2012 IEEE Conference on Computer Vision and Pattern Recognition , 3498–3505. Porrello, A.; Bonicelli, L.; Buzzega, P.; Millunzi, M.; Calder-ara, S.; and Cucchiara, R. 2025. A Second-Order Perspective on Model Compositionality and Incremental Learning. In 
+
+The Thirteenth International Conference on Learning Repre-sentations .Qiu, Z.; Wang, L.; Cao, Y.; ZHANG, R.; Su, B.; Xu, Y.; Meng, F.; Xu, L.; Wu, Q.; and Li, H. 2026. Null-Space Filtering for Data-free Continual Model Merging: Preserving Stabil-ity, Promoting Plasticity. In The Fourteenth International Conference on Learning Representations .Qiu, Z.; Xu, L.; Wang, Z.; Wu, Q.; Meng, F.; and Li, H. 2023. ISM-Net: Mining incremental semantics for class incremental learning. Neurocomputing , 523: 130–143. Qiu, Z.; Xu, Y.; He, C.; Meng, F.; Xu, L.; Wu, Q.; and Li, H. 2025. MINGLE: Mixture of Null-Space Gated Low-Rank Experts for Test-Time Continual Model Merging. In 
+
+The Thirty-ninth Annual Conference on Neural Information Processing Systems .Radford, A.; Kim, J. W.; Hallacy, C.; Ramesh, A.; Goh, G.; Agarwal, S.; Sastry, G.; Askell, A.; Mishkin, P.; Clark, J.; et al. 2021. Learning transferable visual models from natural language supervision. In International conference on machine learning , 8748–8763. PmLR. Rebuffi, S.-A.; Kolesnikov, A.; Sperl, G.; and Lampert, C. H. 2016. iCaRL: Incremental Classifier and Representation Learning. 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR) , 5533–5542. Shoemake, K. 1985. Animating rotation with quaternion curves. In Proceedings of the 12th annual conference on Computer graphics and interactive techniques , 245–254. Socher, R.; Perelygin, A.; Wu, J.; Chuang, J.; Manning, C. D.; Ng, A.; and Potts, C. 2013. Recursive deep models for semantic compositionality over a sentiment treebank. In 
+
+Proceedings of the 2013 Conference on Empirical Methods in Natural Language Processing , 1631–1642. Stallkamp, J.; Schlipsing, M.; Salmen, J.; and Igel, C. 2012. Man vs. computer: Benchmarking machine learning algo-rithms for traffic sign recognition. Neural Networks , 32: 323–332. Stoica, G.; Ramesh, P.; Ecsedi, B.; Choshen, L.; and Hoffman, J. 2025. Model merging with SVD to tie the Knots. In The Thirteenth International Conference on Learning Representa-tions .Tang, A.; Shen, L.; Luo, Y.; Hu, H.; Du, B.; and Tao, D. 2024a. FusionBench: A Comprehensive Benchmark of Deep Model Fusion. arxiv:2406.03280. Tang, A.; Shen, L.; Luo, Y.; Yin, N.; Zhang, L.; and Tao, D. 2024b. Merging Multi-Task Models via Weight-Ensembling Mixture of Experts. In International Conference on Machine Learning , 47778–47799. PMLR. Tang, A.; Yang, E.; Shen, L.; Luo, Y.; Hu, H.; Zhang, L.; Du, B.; and Tao, D. 2025. Merging on the Fly Without Retraining: A Sequential Approach to Scalable Continual Model Merging. In The Thirty-ninth Annual Conference on Neural Information Processing Systems .Utans, J. 1996. Weight averaging for neural networks and local resampling schemes. In Proc. AAAI-96 Workshop on Integrating Multiple Learned Models. AAAI Press , 133–138. Citeseer. Veeling, B. S.; Linmans, J.; Winkens, J.; Cohen, T. S.; and Welling, M. 2018. Rotation equivariant CNNs for digital pathology. arXiv preprint arXiv:1806.03962 .Wang, A.; Singh, A.; Michael, J.; Hill, F.; Levy, O.; and Bowman, S. R. 2019. Glue: A multi-task benchmark and analysis platform for natural language understanding. In 7th International Conference on Learning Representations, ICLR 2019 .Wang, K.; Dimitriadis, N.; Ortiz-Jimenez, G.; Fleuret, F.; and Frossard, P. 2024. Localizing Task Information for Improved Model Merging and Compression. In Forty-first International Conference on Machine Learning .Wen, H.; Cheng, H.; Qiu, H.; Wang, L.; Pan, L.; and Li, H. 2023. Optimizing mode connectivity for class incremental learning. In International Conference on Machine Learning ,36940–36957. PMLR. Xiao, H.; Rasul, K.; and Vollgraf, R. 2017. Fashion-MNIST: a novel image dataset for benchmarking machine learning algorithms. arXiv preprint arXiv:1708.07747 .Xiao, J.; Hays, J.; Ehinger, K. A.; Oliva, A.; and Torralba, A. 2010. Sun database: Large-scale scene recognition from abbey to zoo. In 2010 IEEE Conference on Computer Vision and Pattern Recognition , 3485–3492. IEEE. Yadav, P.; Tam, D.; Choshen, L.; Raffel, C. A.; and Bansal, M. 2023. Ties-merging: Resolving interference when merging models. Advances in Neural Information Processing Systems ,36: 7093–7115. Yang, E.; Wang, Z.; Shen, L.; Liu, S.; Guo, G.; Wang, X.; and Tao, D. 2024. AdaMerging: Adaptive Model Merging for Multi-Task Learning. In The Twelfth International Conference on Learning Representations .Yu, J.; Zhuge, Y.; Zhang, L.; Hu, P.; Wang, D.; Lu, H.; and He, Y. 2024a. Boosting continual learning of vision-language models via mixture-of-experts adapters. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 23219–23230. Yu, L.; Yu, B.; Yu, H.; Huang, F.; and Li, Y. 2024b. Language models are super mario: Absorbing abilities from homologous models as a free lunch. In Forty-first International Conference on Machine Learning .Zenke, F.; Poole, B.; and Ganguli, S. 2017. Continual learning through synaptic intelligence. International conference on machine learning , 3987–3995. Zhou, D.-W.; Sun, H.-L.; Ye, H.-J.; and Zhan, D.-C. 2024. Expandable subspace ensemble for pre-trained model-based class-incremental learning. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition ,23554–23564. Appendix 
+
+The appendix is organized into sections, each providing supplementary explanations and supporting details. 
+
+A Additional Descriptions . . . . . . . . . . . . . . . . . . . . A.1 From Loss Curvature to Response Sensitivity A.2 Recovery-Objective Derivation . . . . . . . . . . . . . A.3 Dataset Suite and Evaluation Protocol . . . . . . . A.4 Source Checkpoints and Fine-Tuning Setup . . A.5 Baseline Implementations . . . . . . . . . . . . . . . . . . A.6 Practical Hyperparameter Selection . . . . . . . . . 
+
+B Additional Results . . . . . . . . . . . . . . . . . . . . . . . . . B.1 Detailed Overall Performance Results . . . . . . . 
+
+C Discussions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . C.1 Limitations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . C.2 Broader Impacts . . . . . . . . . . . . . . . . . . . . . . . . . . C.3 LLM Usage 
+
+Additional Descriptions 
+
+From Loss Curvature to Response Sensitivity 
+
+We make explicit the connection between Eq. (1) and Eq. (2) of the main paper. For a perturbation ∆W (l) to a linear layer with input x, let C(l) 
+
+> g
+
+= E[xx ⊤]. The squared response-change proxy can be written as 
+
+R(l) 
+
+> g
+
+(∆ W ) = 12 E∥∆W (l)x∥22
+
+= 12 vec(∆ W (l))⊤ C(l) 
+
+> g
+
+⊗ I vec(∆ W (l)).
+
+Its gradient vanishes at ∆W (l) = 0 , and its Hessian with respect to vec(∆ W (l)) is C(l) 
+
+> g
+
+⊗I. If only entry (i, j ) changes by δij , then R(l) 
+
+> g
+
+= 12 [C(l) 
+
+> g
+
+]jj δ2 
+
+> ij
+
+, matching the quadratic form in Eq. (1). Thus, if response preservation proxies general-knowledge preservation, C(l) 
+
+> g
+
+⊗ I is a tractable layer-wise surrogate—not an exact identity—for the unknown loss Hes-sian. Without data, the main paper estimates the dominant input-side subspace of C(l) 
+
+> g
+
+from the pretrained weights. 
+
+Data-Free Derivation of the Recovery Objectives 
+
+We derive Eq. (10) and Eq. (11) of the main paper from response constraints that would be available if task data could be accessed. We omit the layer superscript for readability. For 
+
+s ∈ { o, n }, construct Xs = [ xs, 1, . . . , x s,N s ]⊤ ∈ RNs×di by stacking layer-input representations from earlier tasks ( s = o)or the incoming task ( s = n). Thus, the columns of DX ⊤ 
+
+> s
+
+=[Dx s, 1, . . . , Dx s,N s ] are the per-sample response changes induced by a weight difference D. Let ¯τt−1 = θmerged  
+
+> t−1
+
+− θ0
+
+and let ∆t be the recovered update. For a shared layer input, the weight differences governing the old- and new-task response errors are 
+
+Dold = ( θmerged  
+
+> t−1
+
++ ∆ t) − θmerged  
+
+> t−1
+
+= ∆ t,Dnew = ( θ0 + ¯ τt−1 + ∆ t) − (θ0 + τt) = ¯ τt−1 + ∆ t − τt.
+
+Using squared response distance and omitting dataset-size constants, the corresponding data-dependent losses are 
+
+J data old = ∥Dold X⊤ 
+
+> o
+
+∥2 
+
+> F
+
+, (S.1) 
+
+J data new = ∥Dnew X⊤ 
+
+> n
+
+∥2 
+
+> F
+
+. (S.2) The first loss keeps old-task layer responses unchanged, whereas the second matches the response of the individually fine-tuned incoming-task model. Neither can be evaluated in the data-free setting because Xo and Xn are unavailable. 
+
+Upper bound from prior work. Corollary 1 of Qiu et al. (2026) directly gives the data-free inequality used here. For a rank-rd representation matrix X, the parameter-derived right singular basis bV , and any D ∈ Rdo×di , the result states 
+
+∥DX ⊤∥2 
+
+> F
+
+≤ 2σ1(X)2 
+
+∥D bV ∥2 
+
+> F
+
++ rdζ2∥D∥22
+
+
+
+. (S.3) Here σ1(X) is the largest singular value of X, while ζ is the representation–parameter subspace misalignment term defined in that work. We use this previously established result under its stated conditions and only specialize it to the SAFE-Merge recovery variables below. We use Vold from ¯τt−1 as the proxy for the dominant right subspace of Xo, and Vnew from τt as the corresponding proxy for Xn. Applying Eq. (S.3) to Eq. (S.1) and Eq. (S.2) yields 
+
+J data old ≤ 2σ1(Xo)2  ∥Dold Vold ∥2 
+
+> F
+
++ roζ2 
+
+> o
+
+∥Dold ∥22
+
+ ,
+
+(S.4) 
+
+J data new ≤ 2σ1(Xn)2  ∥Dnew Vnew ∥2 
+
+> F
+
++ rnζ2
+
+> n
+
+∥Dnew ∥22
+
+ .
+
+(S.5) Because G = V V ⊤ and V ⊤V = I, ∥DG ∥2 
+
+> F
+
+= ∥DV ∥2 
+
+> F
+
+.The first terms on the right of Eq. (S.4) and Eq. (S.5) are therefore exactly the objectives in Eq. (10) and Eq. (11) of the main paper. 
+
+Connection to the recovery regularizer. The projection terms in Eq. (S.4) and Eq. (S.5) give Eq. (10) and Eq. (11), while each bound also contains a spectral-norm residual. In both residuals, the only trainable component is the masked recovery Mt ⊙ (BtAt); all remaining terms are fixed during recovery. Using ∥A + B∥22 ≤ 2∥A∥22 + 2 ∥B∥22 and ∥B∥2 ≤∥B∥F , each residual is bounded by a fixed term plus 2∥Mt ⊙
+
+(BtAt)∥2 
+
+> F
+
+. The latter is exactly the regularizer in Eq. (12). Together, Eq. (10), Eq. (11), and Eq. (12) minimize the optimizable part of the two upper bounds, with the unavailable data-dependent scales absorbed into the loss weights. The result motivates the recovery objective rather than providing a bound that can be evaluated without data. 
+
+Dataset Suite and Evaluation Protocol 
+
+Vision benchmark collection. Our vision evaluation uses 20 classification datasets drawn from markedly different do-mains, including natural images, satellite scenes, pathology patches, facial expressions, handwritten characters, and ren-dered text. Following the broad multi-domain protocol of prior continual-merging work (Tang et al. 2025), the col-lection also spans substantially different label granularities, from binary decisions to problems with hundreds of classes. The complete suite consists of SUN397 (Xiao et al. 2010), Stanford Cars (Krause et al. 2013), RESISC45 (Cheng, Han, and Lu 2017), EuroSAT (Helber et al. 2019), SVHN (Netzer et al. 2011), GTSRB (Stallkamp et al. 2012), MNIST (LeCun et al. 1998), DTD (Cimpoi et al. 2014), Flowers102 (Nils-back and Zisserman 2008), PCAM (Veeling et al. 2018), FER2013 (Goodfellow et al. 2013), Oxford-IIIT Pet (Parkhi et al. 2012), STL-10 (Coates, Ng, and Lee 2011), CIFAR-100 and CIFAR-10 (Krizhevsky and Hinton 2009), Food-101 (Bossard, Guillaumin, and Van Gool 2014), Fashion-MNIST (Xiao, Rasul, and Vollgraf 2017), EMNIST (Cohen et al. 2017), KMNIST (Clanuwat et al. 2018), and Rendered SST2 (Socher et al. 2013). 
+
+Language benchmark collection. For language, we adopt eight datasets from GLUE (Wang et al. 2019), covering grammatical acceptability, inference, paraphrase recognition, question-pair matching, sentiment, and semantic similarity. Exact-match accuracy is used for the classification tasks: CoLA, MNLI, MRPC, QNLI, QQP, RTE, and SST2. We evaluate STSB, the semantic-similarity task, with Spearman’s 
+
+ρ.
+
+Nested vision streams. The vision datasets form three nested streams containing 8, 14, or 20 tasks. We measure each stream with average accuracy (ACC) and backward transfer (BWT). For every stream length, ten independently sampled task permutations are evaluated, and all reported results aggregate their mean and standard deviation; the exact permutations appear in Tab. S.1. 
+
+• 8-task stream : (1) SUN397, (2) Stanford Cars, (3) RE-SISC45, (4) EuroSAT, (5) SVHN, (6) GTSRB, (7) MNIST, (8) DTD. 
+
+• 14-task stream : The preceding eight datasets are followed by (9) Flowers102, (10) PCAM, (11) FER2013, (12) Oxford-IIIT Pet, (13) STL-10, (14) CIFAR-100. 
+
+• 20-task stream : The remaining six datasets extend the 14-task stream: (15) CIFAR-10, (16) Food-101, (17) Fashion-MNIST, (18) EMNIST, (19) KMNIST, (20) Rendered SST2. The language protocol uses one deterministic sequence: CoLA, MRPC, QQP, SST2, and STSB are merged in alpha-betical order. MNLI, QNLI, and RTE are excluded from the merge stream and used exclusively to probe retained general linguistic knowledge. 
+
+Source Checkpoints and Fine-Tuning Setup 
+
+We next specify the pretrained references, task-specialized checkpoints, and optimization recipes used to construct the merge streams in both modalities. For vision, Tab. S.2 lists the zero-shot CLIP ViT references together with the test accuracy of every dataset-specific check-point. We obtain the specialized models from Hugging Face (https://huggingface.co/tanganke). Their training updates only the image encoder and leaves the text encoder frozen. All checkpoints use cross-entropy, Adam, cosine learning-rate decay, a learning rate of 1 × 10 −5, batch size 128, and 4000 optimization steps. The language experiments start from Flan-T5-base. Five GLUE checkpoints enter the continual merge, whereas MNLI, QNLI, and RTE remain held-out controls. Tab. S.3 records the pretrained reference and individual fine-tuning performance on all eight datasets. Each task model is optimized for 2000 steps with learning rate 4 × 10 −5 and batch size 16. 
+
+Baseline Implementations 
+
+The compared methods are instantiated as summarized below. 
+
+• Task Arithmetic. Each specialized checkpoint is con-verted into a displacement from the common pretrained model. Continual composition then adds a scaled ver-sion of the incoming displacement to the current merged parameters (Ilharco et al. 2023). 
+
+• Ties-Merging. Magnitude trimming and sign reconcilia-tion are added to task-vector composition to limit redun-dant or contradictory coordinates (Yadav et al. 2023). At step t, the incoming vector τt = θt − θ0 is combined with the accumulated Ties vector as τ Ties  
+
+> t
+
+= Ties  τ Ties 
+
+> t−1
+
+, τ t
+
+.The resulting parameters are θmerged  
+
+> t
+
+= θmerged  
+
+> t−1
+
++ λτ Ties  
+
+> t
+
+.
+
+• WUDI-Merging. This data-free baseline constrains resid-ual merge errors to be orthogonal to the task direc-tions (Cheng et al. 2025). For linear layer l, we form the history vector τ merged ,(l) 
+
+> t−1
+
+= θmerged ,(l) 
+
+> t−1
+
+− θ(l)0 and the new vector τ (l) 
+
+> t
+
+= θ(l) 
+
+> t
+
+− θ(l)0 . Its layerwise merged vector is optimized with L = P 
+
+> i1
+> ∥τi,l ∥2
+> F
+
+(τm,l − τi,l )( τi,l )⊤ 2 
+
+> F
+
+.After gradient-based optimization, the merged checkpoint is reconstructed as θmerged  
+
+> t
+
+= θ0 + τm.
+
+• Iso-C. Shared structure is separated from task-dependent subspaces, after which isotropic merging prevents individ-ual tasks from dominating the composition (Marczak et al. 2025). 
+
+• KnOTS-TIES. Task updates are first mapped into an SVD-derived aligned basis, followed by Ties-Merging over the aligned factors (Stoica et al. 2025). 
+
+• TSV-M. Model displacements are represented by compact task singular vectors, whose structured composition is designed to mitigate interference (Gargiulo et al. 2025). 
+
+• OPCM. Each arriving update is projected relative to directions stored by the running model, suppressing com-ponents that would conflict with accumulated tasks (Tang et al. 2025). 
+
+• NUFILT. Earlier knowledge is protected through null-space filtering, while a projection-aware adaptation stage restores plasticity for the incoming task (Qiu et al. 2026). 
+
+Configuration used in comparison. For SAFE-Merge, we use a learning rate of 10 −3, 50 optimization steps, 
+
+(rp, r l, r v ) = (128 , 64 , 8) , and (λ, μ ) = (0 .8, 0.1) in all CLIP experiments. We set ρ to 0.5 and 0.3 for ViT-B/32 on the 8-task and 14/20-task streams, respectively, and to 0.7 and 
+
+0.5 for ViT-B/16 and ViT-L/14 under the same two stream settings. These configurations are summarized in Tab. S.4. 
+
+Practical Hyperparameter Selection 
+
+We summarize the role of each SAFE-Merge hyperparameter and the configurations used in our experiments. Subspace and recovery ranks (rp, r l, r v ). The three ranks control different parts of the method: 
+
+• rp sets the dimension of the parameter subspace used for risk scoring and the representation of previously merged knowledge. 
+
+• rl determines the rank, and therefore the capacity, of the masked recovery update. 
+
+• rv specifies how many incoming-task directions participate in the projection-based recovery objective. The rank analysis in the main paper shows that rp and rv are more sensitive than rl, whose performance remains stable over the evaluated range. We therefore use (rp, r l, r v ) = (128 , 64 , 8) throughout all experiments. 
+
+Sparsity and loss weights. The keep ratio ρ directly sets the fraction of incoming coordinates retained by the mask. We choose 0.5 and 0.3 for ViT-B/32 under the 8-task and 14/20-task protocols, respectively. The corresponding values for ViT-B/16 and ViT-L/14 are 0.7 and 0.5, while Flan-T5 uses 0.9. In the recovery objective, λ controls the emphasis on learning the new task relative to preservation, and μ
+
+penalizes the low-rank correction. We fix (λ, μ ) = (0 .8, 0.1) 
+
+throughout; the main-paper sensitivity study further examines the effects of ρ and λ.
+
+Optimization length. We optimize the recovery factors for 50 steps with a learning rate of 10 −3 in every experiment, matching the configuration reported in Tab. S.4. 
+
+Transfer across model sizes. The same ranks, loss weights, and optimization settings are used for ViT-B/32, ViT-B/16, and ViT-L/14. Only the keep ratio is adjusted by backbone and stream length, as specified above. 
+
+Additional Results 
+
+This section provides detailed per-task results that comple-ment the aggregate metrics reported in the main paper. 
+
+Detailed Overall Performance Results 
+
+Tab. S.5 reports aggregate continual merging results for ViT-B/16 and ViT-L/14, complementing the ViT-B/32 results in the main paper. Across both backbones and all sequence lengths, SAFE-Merge achieves the highest H-score, consis-tently balancing merged-task accuracy with held-out general performance. 
+
+Discussions 
+
+Limitations 
+
+SAFE-Merge assumes that all checkpoints share the same pretrained initialization and architecture, enabling comparable task vectors and risk estimates. Extending it to mismatched initializations or heterogeneous backbones requires cross-model parameter or subspace alignment, which remains future work. 
+
+Broader Impacts 
+
+This paper aims to advance the Machine Learning field. Our work has potential societal impacts, but none require specific highlighting here. 
+
+LLM Usage 
+
+In preparing this submission, we used large language models (LLMs) solely as an assistive tool for sentence-level editing, including grammar correction, spelling adjustments, and minor word-choice refinements. The LLM was not involved in research ideation, methodological design, experimental analysis, or content generation beyond language editing. All substantive scientific contributions are solely those of the authors. Table S.1: Task permutations evaluated for the 8-, 14-, and 20-dataset vision streams. 
+
+Order Dataset Order (by ID) 
+
+> 8 tasks
+
+1 (04 → 05 → 07 → 08 → 03 → 06 → 01 → 02) 2 (07 → 08 → 05 → 04 → 02 → 06 → 03 → 01) 3 (03 → 06 → 04 → 02 → 01 → 08 → 05 → 07) 4 (06 → 08 → 02 → 01 → 03 → 07 → 04 → 05) 5 (07 → 06 → 03 → 08 → 05 → 01 → 04 → 02) 6 (07 → 02 → 03 → 08 → 05 → 04 → 01 → 06) 7 (07 → 01 → 04 → 03 → 08 → 05 → 02 → 06) 8 (08 → 05 → 06 → 07 → 01 → 04 → 03 → 02) 9 (01 → 04 → 05 → 02 → 06 → 03 → 07 → 08) 10 (08 → 03 → 01 → 02 → 06 → 05 → 07 → 04) 
+
+> 14 tasks
+
+1 (09 → 13 → 08 → 07 → 14 → 12 → 06 → 03 → 10 → 04 → 05 → 01 → 02 → 11) 2 (09 → 10 → 11 → 14 → 07 → 13 → 04 → 02 → 06 → 08 → 03 → 12 → 05 → 01) 3 (05 → 08 → 12 → 06 → 11 → 01 → 10 → 04 → 14 → 03 → 02 → 13 → 09 → 07) 4 (03 → 10 → 09 → 12 → 04 → 13 → 01 → 06 → 11 → 02 → 14 → 08 → 07 → 05) 5 (08 → 14 → 09 → 06 → 12 → 13 → 05 → 03 → 04 → 11 → 10 → 01 → 07 → 02) 6 (03 → 12 → 13 → 01 → 11 → 04 → 10 → 05 → 14 → 08 → 09 → 07 → 02 → 06) 7 (07 → 01 → 12 → 10 → 02 → 08 → 13 → 04 → 05 → 11 → 14 → 03 → 06 → 09) 8 (05 → 12 → 04 → 11 → 03 → 08 → 10 → 01 → 09 → 13 → 14 → 07 → 06 → 02) 9 (10 → 07 → 09 → 02 → 03 → 13 → 01 → 12 → 14 → 04 → 11 → 06 → 05 → 08) 10 (01 → 02 → 11 → 06 → 08 → 12 → 07 → 05 → 10 → 14 → 03 → 13 → 09 → 04) 
+
+> 20 tasks
+
+1 (20 → 06 → 15 → 05 → 10 → 14 → 16 → 19 → 07 → 13 → 18 → 11 → 02 → 12 → 03 → 17 → 08 → 09 → 01 → 04) 2 (09 → 14 → 06 → 03 → 07 → 04 → 18 → 01 → 17 → 19 → 08 → 20 → 13 → 16 → 11 → 12 → 15 → 05 → 10 → 02) 3 (09 → 15 → 16 → 11 → 03 → 13 → 08 → 10 → 12 → 02 → 20 → 01 → 05 → 19 → 07 → 06 → 04 → 18 → 17 → 14) 4 (17 → 04 → 11 → 19 → 18 → 10 → 07 → 15 → 12 → 13 → 08 → 02 → 01 → 06 → 05 → 03 → 20 → 16 → 14 → 09) 5 (14 → 16 → 04 → 20 → 15 → 17 → 07 → 11 → 06 → 18 → 12 → 01 → 19 → 09 → 10 → 05 → 08 → 02 → 13 → 03) 6 (02 → 06 → 17 → 04 → 19 → 18 → 08 → 16 → 20 → 01 → 10 → 13 → 07 → 09 → 05 → 11 → 15 → 14 → 03 → 12) 7 (19 → 01 → 09 → 14 → 06 → 20 → 17 → 04 → 08 → 02 → 15 → 03 → 16 → 13 → 12 → 07 → 10 → 05 → 11 → 18) 8 (15 → 07 → 08 → 02 → 10 → 06 → 17 → 20 → 05 → 19 → 16 → 01 → 18 → 09 → 13 → 11 → 04 → 14 → 12 → 03) 9 (10 → 05 → 07 → 11 → 01 → 03 → 17 → 15 → 18 → 04 → 14 → 19 → 02 → 06 → 13 → 20 → 08 → 12 → 09 → 16) 10 (01 → 11 → 02 → 15 → 03 → 10 → 12 → 19 → 16 → 13 → 07 → 05 → 09 → 04 → 14 → 20 → 06 → 18 → 17 → 08) Table S.2: Zero-shot CLIP accuracy and individual fine-tuning accuracy for the 20 vision datasets. 
+
+Model 
+
+> SUN397
+> Cars
+> RESISC45
+> EuroSAT
+> SVHN
+> GTSRB
+> MNIST
+> DTD
+> Flowers102
+> PCAM
+> Pre-Trained
+
+CLIP ViT-B/32 63.2 59.6 60.3 45.0 31.6 32.5 48.3 44.2 66.4 60.6 CLIP ViT-B/16 65.5 64.7 66.4 54.1 52.0 43.5 51.7 45.0 71.3 54.0 CLIP ViT-L/14 68.2 77.9 71.3 61.2 58.4 50.5 76.3 55.5 79.2 51.2 
+
+> Fine-tuned
+
+CLIP ViT-B/32 74.9 78.5 95.1 99.1 97.3 98.9 99.6 79.7 88.6 88.0 CLIP ViT-B/16 78.9 85.9 96.6 99.0 97.6 99.0 99.7 82.3 94.9 90.6 CLIP ViT-L/14 82.8 92.8 97.4 99.1 97.9 99.2 99.8 85.5 97.7 91.1 
+
+Model 
+
+> FER2013
+> OxfordIIITPet
+> STL10
+> CIFAR100
+> CIFAR10
+> Food101
+> FashionMNIST
+> EMNIST
+> KMNIST
+> RenderedSST2
+> Pre-Trained
+
+CLIP ViT-B/32 41.3 83.3 97.1 63.7 89.8 82.4 63.0 12.0 10.0 58.6 CLIP ViT-B/16 46.4 88.4 98.3 66.3 90.8 87.0 67.3 12.4 11.2 60.6 CLIP ViT-L/14 50.0 93.2 99.4 75.1 95.6 91.2 67.0 12.3 9.7 68.9 
+
+> Fine-tuned
+
+CLIP ViT-B/32 71.6 92.5 97.5 88.4 97.6 88.4 94.7 95.6 98.2 71.3 CLIP ViT-B/16 72.8 94.5 98.2 88.8 98.3 91.9 94.5 95.3 98.1 75.7 CLIP ViT-L/14 75.9 95.7 99.2 93.0 99.1 94.8 95.3 95.4 98.3 80.5 
+
+Table S.3: Flan-T5-base performance before adaptation and after separate fine-tuning on each GLUE dataset. 
+
+Model 
+
+> CoLA
+> MNLI
+> MRPC
+> QNLI
+> QQP
+> RTE
+> SST2
+> STSB
+
+Flan-T5-base (Pre-Trained) 69.1 56.5 76.2 88.4 82.1 80.1 91.2 62.2 Flan-T5-base (Fine-tuned) 75.0 83.4 87.5 91.5 85.4 85.9 93.6 88.7 Table S.4: Configurations used for CLIP continual merging; “–” marks parameters not used by a method. 
+
+Method Backbone Tasks Scale Factor α Top-k (%) LR Steps rp rl rv ρ λ μ
+
+Task Arithmetic All 8 0.3 – – – – – – – – – –14/20 0.1 – – – – – – – – – –Ties-Merging All 8 0.3 – 20 – – – – – – – –14/20 0.1 – 20 – – – – – – – –WUDI-Merging All 8/14/20 – – – 1e-5 50 – – – – – –Iso-C All 8/14/20 – – – – – – – – – – –KnOTS-TIES All 8 0.3 – 20 – – – – – – – –14/20 0.1 – 20 – – – – – – – –TSV-M All 8/14/20 – – – – – – – – – – –OPCM All 8/14/20 – 0.5 – – – – – – – – –NUFILT All 8 – – – 1e-3 50 128 64 8 – – –14/20 – – – 1e-3 50 128 64 8 – – –
+
+SAFE-Merge 
+
+ViT-B/32 8 – – – 1e-3 50 128 64 8 0.5 0.8 0.1 14/20 – – – 1e-3 50 128 64 8 0.3 0.8 0.1 ViT-B/16, L/14 8 – – – 1e-3 50 128 64 8 0.7 0.8 0.1 14/20 – – – 1e-3 50 128 64 8 0.5 0.8 0.1 Table S.5: Results on ViT-B/16 and ViT-L/14 over ten task orders. We report continual merging accuracy (ACC) and backward transfer (BWT) on the merged tasks, general performance (Gen.) on held-out control datasets, and their harmonic mean (H-score). Among merging methods, best results are in bold and second-best are underlined. 
+
+ViT-B/16 Method 8 Tasks 14 Tasks 20 Tasks ACC ↑ Gen. ↑ H-score ↑ BWT ↑ ACC ↑ Gen. ↑ H-score ↑ BWT ↑ ACC ↑ Gen. ↑ H-score ↑ BWT ↑
+
+Pre-Trained 55.4 66.4 60.4 – 62.0 66.4 64.1 – 59.8 66.4 62.9 –Individual 92.4 57.3 70.7 – 91.3 54.9 68.5 – 91.6 53.2 67.3 –Task Arithmetic 77.1 ±0.0 59.9 ±0.0 67.4 ±0.0 -4.2 ±1.0 70.9 ±0.0 65.7 ±0.0 68.2 ±0.0 -1.3 ±0.4 64.2 ±0.0 62.0 ±0.0 63.1 ±0.0 -3.6 ±0.4
+
+Ties-Merging 66.8 ±3.7 39.4 ±9.3 47.8 ±9.7 -5.5 ±0.4 70.3 ±0.7 66.1 ±0.6 68.1 ±0.6 1.4 ±0.7 63.0 ±1.6 59.7 ±1.7 61.5 ±1.5 -1.5 ±1.2
+
+WUDI-Merging 81.0 ±4.7 59.3 ±4.0 68.4 ±4.3 -12.6 ±5.4 75.0 ±4.1 58.1 ±2.9 65.5 ±3.3 -16.9 ±4.4 69.6 ±4.7 55.6 ±4.5 61.8 ±4.5 -18.5 ±14 .2
+
+Iso-C 78.5 ±1.2 66.3 ±0.2 72.1 ±0.5 -6.7 ±0.5 79.7 ±1.3 63.7 ±0.6 70.8 ±0.7 -7.1 ±1.1 73.0 ±1.1 60.0 ±0.6 65.7 ±0.7 -9.9 ±1.7
+
+KnOTS-TIES 57.9 ±8.4 35.3 ±7.6 44.9 ±8.4 -13.5 ±5.5 71.6 ±0.3 65.9 ±0.2 68.6 ±0.2 1.0 ±0.1 62.7 ±1.1 57.6 ±1.4 60.1 ±1.2 -2.3 ±0.6
+
+TSV-M 75.4 ±4.0 62.8 ±2.0 68.4 ±2.3 -18.5 ±4.6 69.2 ±3.1 62.0 ±1.7 65.6 ±2.2 -22.7 ±3.1 63.1 ±1.3 59.7 ±3.4 61.2 ±2.6 -28.2 ±1.8
+
+OPCM 81.8 ±0.3 64.4 ±0.3 72.0 ±0.3 -4.8 ±0.7 77.1 ±0.5 63.8 ±0.2 69.9 ±0.2 -5.1 ±1.4 70.3 ±0.2 62.7 ±0.4 66.2 ±0.4 -6.3 ±2.2
+
+NUFILT 87.3 ±0.1 65.1 ±0.1 74.6 ±0.1 -1.6 ±0.5 83.0 ±0.2 60.0 ±0.2 69.7 ±0.2 -3.5 ±0.6 78.1 ±0.9 54.6 ±0.5 64.2 ±0.5 -7.1 ±1.9
+
+SAFE-Merge (Ours) 86.2 ±0.3 66.6 ±0.2 75.1 ±0.2 -3.0 ±0.5 83.3 ±0.3 64.7 ±0.1 72.8 ±0.2 -4.3 ±0.5 78.4 ±0.6 62.0 ±0.4 69.2 ±0.4 -8.3 ±0.9
+
+ViT-L/14 Method 8 Tasks 14 Tasks 20 Tasks ACC ↑ Gen. ↑ H-score ↑ BWT ↑ ACC ↑ Gen. ↑ H-score ↑ BWT ↑ ACC ↑ Gen. ↑ H-score ↑ BWT ↑
+
+Pre-Trained 64.9 76.7 70.3 – 69.1 76.7 72.7 – 65.6 76.7 70.7 –Individual 94.3 68.8 79.5 – 93.4 69.7 79.8 – 93.5 69.4 79.6 –Task Arithmetic 80.5 ±0.0 70.0 ±0.0 74.9 ±0.0 -6.8 ±1.0 77.9 ±0.0 76.1 ±0.0 77.0 ±0.0 -1.8 ±0.3 70.3 ±0.0 73.6 ±0.0 71.9 ±0.0 -3.3 ±0.3
+
+Ties-Merging 64.3 ±7.0 52.0 ±7.0 57.1 ±7.3 -13.0 ±5.7 78.0 ±0.6 76.4 ±0.2 77.1 ±0.4 -1.1 ±0.4 68.3 ±0.9 70.8 ±0.9 69.5 ±0.8 -2.9 ±1.0
+
+WUDI-Merging 87.5 ±3.3 71.7 ±2.9 78.8 ±3.0 -7.3 ±3.7 84.2 ±3.7 71.5 ±2.8 77.3 ±3.1 -9.4 ±4.0 78.1 ±2.8 70.9 ±1.6 74.3 ±2.0 -15.8 ±2.9
+
+Iso-C 86.9 ±0.5 77.1 ±0.2 81.8 ±0.4 -3.7 ±0.6 86.9 ±1.8 76.1 ±0.5 81.2 ±0.8 -3.7 ±1.7 80.9 ±0.8 74.7 ±0.2 77.6 ±0.4 -5.5 ±1.3
+
+KnOTS-TIES 68.3 ±5.7 52.4 ±5.6 59.3 ±5.6 -11.6 ±3.6 78.8 ±0.3 76.4 ±0.1 77.6 ±0.1 0.3 ±0.3 69.7 ±0.8 71.3 ±0.7 70.6 ±0.6 -2.3 ±0.7
+
+TSV-M 82.2 ±3.6 73.8 ±1.5 77.7 ±2.0 -13.0 ±4.0 78.1 ±3.6 73.7 ±1.7 75.8 ±2.3 -15.6 ±3.9 70.5 ±1.2 73.1 ±0.9 71.8 ±1.0 -23.3 ±1.3
+
+OPCM 87.0 ±0.4 75.1 ±0.2 80.6 ±0.2 -2.6 ±1.0 83.5 ±0.2 75.1 ±0.2 79.1 ±0.2 -4.3 ±0.7 76.0 ±0.2 74.7 ±0.2 75.4 ±0.2 -6.5 ±1.8
+
+NUFILT 91.6 ±0.1 75.6 ±0.1 82.8 ±0.1 -1.1 ±0.3 89.2 ±0.1 73.2 ±0.1 80.3 ±0.1 -2.0 ±0.3 84.7 ±0.8 69.9 ±0.1 76.5 ±0.2 -4.6 ±0.7
+
+SAFE-Merge (Ours) 91.2 ±0.1 77.2 ±0.1 83.6 ±0.1 -1.8 ±0.3 89.3 ±0.2 76.5 ±0.1 82.4 ±0.1 -2.2 ±0.3 84.7 ±0.4 75.0 ±0.0 79.6 ±0.2 -6.3 ±0.4
+
+Table S.6: General performance on held-out control datasets (ImageNet, ImageNet-R, and ObjectNet) after continually merging 8, 14, and 20 tasks on ViT-B/32. Gen. Avg. is the average of the three datasets. Among merging methods, best results are in bold 
+
+and second-best are underlined. 
+
+Method 8 Tasks 14 Tasks 20 Tasks IN IN-R ObjNet Gen. Avg. IN IN-R ObjNet Gen. Avg. IN IN-R ObjNet Gen. Avg. 
+
+Pre-Trained 62.0 69.3 45.1 58.8 62.0 69.3 45.1 58.8 62.0 69.3 45.1 58.8 Individual 44.9 54.3 28.4 42.5 46.8 56.2 30.4 44.4 46.7 56.1 30.3 44.4 Task Arithmetic 45.9 ±0.0 57.7 ±0.0 29.8 ±0.0 44.5 ±0.0 60.1 ±0.0 69.9 ±0.0 41.9 ±0.0 57.3 ±0.0 56.3 ±0.0 67.4 ±0.0 37.9 ±0.0 53.8 ±0.0
+
+Ties-Merging 19.3 ±8.4 30.1 ±10 .3 14.6 ±4.3 21.3 ±7.7 61.0 ±0.2 70.3 ±0.2 42.1 ±0.4 57.8 ±0.3 53.6 ±1.5 65.1 ±1.1 35.5 ±1.5 51.4 ±1.3
+
+WUDI-Merging 45.4 ±8.0 54.0 ±7.7 31.1 ±6.4 43.5 ±7.3 45.4 ±6.4 55.0 ±5.9 30.7 ±5.1 43.7 ±5.7 46.5 ±3.8 56.6 ±4.0 31.9 ±4.8 45.0 ±4.1
+
+Iso-C 58.9 ±0.7 67.3 ±0.4 40.3 ±0.9 55.5 ±0.6 56.1 ±0.5 65.8 ±0.6 38.2 ±0.8 53.4 ±0.6 51.1 ±0.8 60.7 ±1.0 34.7 ±1.2 48.8 ±0.9
+
+KnOTS-TIES 20.1 ±7.0 31.4 ±7.8 15.9 ±3.5 22.5 ±6.1 60.8 ±0.1 70.1 ±0.1 43.0 ±0.1 58.0 ±0.1 53.8 ±1.9 65.0 ±1.4 35.8 ±1.7 51.5 ±1.7
+
+TSV-M 52.6 ±4.6 61.6 ±3.8 35.8 ±4.4 50.0 ±4.2 52.9 ±4.5 62.1 ±4.1 35.8 ±4.1 50.3 ±4.1 54.3 ±3.9 63.6 ±2.9 36.7 ±4.8 51.5 ±3.8
+
+OPCM 54.6 ±0.6 64.2 ±0.3 36.6 ±0.4 51.8 ±0.4 56.9 ±0.2 66.9 ±0.2 38.3 ±0.3 54.0 ±0.1 55.8 ±0.4 66.3 ±0.2 37.4 ±0.4 53.1 ±0.3
+
+NUFILT 55.5 ±0.3 62.6 ±0.4 38.6 ±0.2 52.3 ±0.3 52.0 ±0.2 60.6 ±0.4 35.7 ±0.4 49.4 ±0.2 46.4 ±0.5 55.5 ±0.5 31.7 ±0.3 44.5 ±0.4
+
+SAFE-Merge (Ours) 60.0 ±0.2 67.2 ±0.3 42.9 ±0.2 56.7 ±0.2 59.0 ±0.2 67.4 ±0.2 42.7 ±0.3 56.4 ±0.2 57.4 ±0.5 65.8 ±0.3 41.6 ±0.3 54.9 ±0.4

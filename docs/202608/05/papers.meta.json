@@ -1,0 +1,39 @@
+{
+  "label": "2026-08-05",
+  "date": "2026-08-05",
+  "generated_at": "2026-08-05T22:00:08",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202608/05/2608.02674v1-moving-the-safety-barrier-dynamic-routing-adaptive-alignment-against-white-box-attacks",
+      "section": "deep",
+      "title_en": "Moving the Safety Barrier: Dynamic Routing Adaptive Alignment Against White-Box Attacks",
+      "authors": "Shangze Li, Chuancheng Shi, Simiao Xie, Lingzhi He, Cheng Ji, Zifeng Cheng, Fei Shen, Chao Wu, Tat-Seng Chua",
+      "date": "2026-08-02",
+      "pdf": "https://arxiv.org/pdf/2608.02674v1",
+      "score": "9.0",
+      "evidence": "动态路由自适应对齐在白盒攻击下维持拒答行为",
+      "tldr": "大型基础模型在开放环境中面临从黑盒越狱向白盒攻击的转变，攻击者能直接定位并破坏内部安全神经元或路由。现有防御依赖静态安全单元或固定拒绝路径，脆弱性高。为此提出动态路由自适应对齐（DRAA），通过对比校准样本定位安全路由，掩码该路由制造失败案例，并挖掘失败感知偏好对来构建动态补偿路由。实验表明DRAA重构了安全路径依赖，显著增强对路线级白盒攻击的鲁棒性，同时保持通用性能。",
+      "tags": "query:model-edit",
+      "abstract_en": "With the widespread deployment of large foundation models (LFMs) in open environments, safety threats are shifting from black-box jailbreaks toward white-box attacks that directly identify and disrupt internal safety neurons or routes. However, existing safety defenses often rely on static safety units or fixed refusal pathways, leaving models highly vulnerable to targeted route-level white-box attacks. For that, we propose dynamic routing adaptive alignment (DRAA), a framework that introduces dynamic compensatory routes to preserve robust refusal behavior when the safety route is compromised. Specifically, we first identify and localize the model's safety route by contrasting internal activations between safe and unsafe calibration samples. DRAA then masks this safety route to induce causal failure cases and selectively mines the resulting defense failures, thereby constructing failure-aware preference pairs. Extensive experiments demonstrate that DRAA effectively restructures the underlying pathway dependence of model safety, substantially improving robustness against route-level white-box attacks, while preserving general utility.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/05/2608.01184v1-safe-merge-data-free-continual-model-merging-with-general-knowledge-preservation",
+      "section": "quick",
+      "title_en": "SAFE-Merge: Data-Free Continual Model Merging with General Knowledge Preservation",
+      "authors": "Zihuan Qiu, Zhiyang Liao, Chiyuan He, Yi Xu, Fanman Meng, Linfeng Xu, Qingbo Wu, Hongliang Li",
+      "date": "2026-08-02",
+      "pdf": "https://arxiv.org/pdf/2608.01184v1",
+      "score": "7.0",
+      "evidence": "无数据持续模型合并中风险感知地保留安全参数更新并保护通用知识，可迁移至模型编辑安全",
+      "tldr": "针对数据无关的持续模型合并，现有方法只抑制下游任务间干扰而忽视预训练知识的安全，导致泛化能力退化。SAFE-Merge提出先通过风险感知稀疏掩码选择对通用知识低风险且含任务信息的参数更新，再用掩码低秩恢复补偿丢失的任务信息，最后融合进骨干网络。在视觉和语言基准上均取得最佳H-score，长CLIP序列上显著优于NUFILT且准确率最高。",
+      "tags": "query:model-edit",
+      "abstract_en": "Data-free continual model merging must incorporate a stream of specialized models while retaining both pretrained general knowledge and previously acquired tasks, without access to task data. Existing methods mainly merge task updates by suppressing interference among downstream tasks; while this protects previously acquired tasks, it overlooks the safety of the pretrained knowledge itself, whose erosion degrades generalization to held-out distributions and weakens the foundation for future task acquisition. We propose SAFE-Merge, a simple data-free continual-merging framework that first decides which parameter updates are safe to retain, and then recovers the task information lost through masking. Specifically, to ensure safety, risk-aware sparse masking selects parameter updates that carry task-specific information while posing low risk to general knowledge. Masked low-rank recovery then compensates for the lost task information using only the same retained parameter updates, while leaving all masked-out parameters strictly unchanged. Finally, the combined update is fused into the backbone, incurring no additional inference cost. Across vision and language benchmarks, SAFE-Merge consistently achieves the best H-score. On longer CLIP task sequences, it substantially improves H-score over NUFILT while also achieving the highest accuracy.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

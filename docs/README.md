@@ -6,33 +6,26 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-08-04
-- 运行时间：2026-08-04 21:33:12 UTC
+- 最新运行日期：2026-08-05
+- 运行时间：2026-08-05 22:00:03 UTC
 - 运行状态：成功
-- 本次总论文数：4
-- 精读区：4
-- 速读区：0
+- 本次总论文数：2
+- 精读区：1
+- 速读区：1
 
 ### 今日简报（AI）
-今日精读2篇高分论文，聚焦大模型安全对齐与多模态遗忘技术。最值得关注的是通过超网络生成LoRA实现按需安全对齐，以及面向多模态大模型的细粒度属性遗忘新方法。建议普通读者关注大模型安全与隐私可控方向，后续可尝试应用相关开源工具。
-- 详情：[/202608/04/README](/202608/04/README)
+今日精读2篇论文，重点聚焦白盒攻击下的动态路由自适应对齐研究。最值得关注的是9.0分的《Moving the Safety Barrier》，揭示了安全屏障动态移动的新思路；另有模型合并方向7.0分工作可速览。建议普通读者优先精读高分论文，了解白盒攻防中的路由策略调整。
+- 详情：[/202608/05/README](/202608/05/README)
 
 ### 精读区论文标签
-1. [Compliance2LoRA: Personalizable On-Demand Safety Alignment on Arbitrary Policy Subsets via Hypernetwork-Generated LoRA Adapters](/202608/04/2607.27594v2-compliance2lora-personalizable-on-demand-safety-alignment-on-arbitrary-policy-subsets-via-hypernetwork-generated-lora-adapters)  
+1. [Moving the Safety Barrier: Dynamic Routing Adaptive Alignment Against White-Box Attacks](/202608/05/2608.02674v1-moving-the-safety-barrier-dynamic-routing-adaptive-alignment-against-white-box-attacks)  
    标签：评分：9.0/10、query:model-edit
-   evidence：基于LoRA适配器实现按需安全对齐
-2. [Toward Fine-Grained Forgetting:Attribute Unlearning for Multimodal Large Language Models](/202608/04/2608.01008v1-toward-fine-grained-forgettingattribute-unlearning-for-multimodal-large-language-models)  
-   标签：评分：9.0/10、query:model-edit
-   evidence：针对多模态大模型的属性级遗忘，移除敏感信息并保持模型效用
-3. [Learning What to Remember and What to Internalize in LLM Self-Evolution via Adaptive Memory-Parameter Coordination](/202608/04/2608.01234v1-learning-what-to-remember-and-what-to-internalize-in-llm-self-evolution-via-adaptive-memory-parameter-coordination)  
-   标签：评分：8.0/10、query:model-edit
-   evidence：通过自适应记忆-参数协调实现大模型编辑与自进化
-4. [Exploring and Bridging Knowledge Holes in Unlearned Multimodal Large Language Models](/202608/04/2608.01849v1-exploring-and-bridging-knowledge-holes-in-unlearned-multimodal-large-language-models)  
-   标签：评分：8.0/10、query:model-edit
-   evidence：通过机器遗忘移除不安全内容，探测遗忘后模型的良性输入退化
+   evidence：动态路由自适应对齐在白盒攻击下维持拒答行为
 
 ### 速读区论文标签
-- 本次无速读推荐。
+1. [SAFE-Merge: Data-Free Continual Model Merging with General Knowledge Preservation](/202608/05/2608.01184v1-safe-merge-data-free-continual-model-merging-with-general-knowledge-preservation)  
+   标签：评分：7.0/10、query:model-edit
+   evidence：无数据持续模型合并中风险感知地保留安全参数更新并保护通用知识，可迁移至模型编辑安全
 
 
 <div class="dpr-home-promo-card">

@@ -1,0 +1,103 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-08-05T21:57:29.844783+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2608.02674v1",
+      "source": "arxiv",
+      "title": "Moving the Safety Barrier: Dynamic Routing Adaptive Alignment Against White-Box Attacks",
+      "abstract": "With the widespread deployment of large foundation models (LFMs) in open environments, safety threats are shifting from black-box jailbreaks toward white-box attacks that directly identify and disrupt internal safety neurons or routes. However, existing safety defenses often rely on static safety units or fixed refusal pathways, leaving models highly vulnerable to targeted route-level white-box attacks. For that, we propose dynamic routing adaptive alignment (DRAA), a framework that introduces dynamic compensatory routes to preserve robust refusal behavior when the safety route is compromised. Specifically, we first identify and localize the model's safety route by contrasting internal activations between safe and unsafe calibration samples. DRAA then masks this safety route to induce causal failure cases and selectively mines the resulting defense failures, thereby constructing failure-aware preference pairs. Extensive experiments demonstrate that DRAA effectively restructures the underlying pathway dependence of model safety, substantially improving robustness against route-level white-box attacks, while preserving general utility.",
+      "authors": [
+        "Shangze Li",
+        "Chuancheng Shi",
+        "Simiao Xie",
+        "Lingzhi He",
+        "Cheng Ji",
+        "Zifeng Cheng",
+        "Fei Shen",
+        "Chao Wu",
+        "Tat-Seng Chua"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-08-02T17:45:20+00:00",
+      "link": "https://arxiv.org/pdf/2608.02674v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "dynamic routing adaptive alignment preserves refusal under white-box attacks",
+      "llm_evidence_cn": "动态路由自适应对齐在白盒攻击下维持拒答行为",
+      "llm_evidence": "动态路由自适应对齐在白盒攻击下维持拒答行为",
+      "canonical_evidence": "动态路由自适应对齐在白盒攻击下维持拒答行为",
+      "llm_tldr_en": "Proposes DRAA, which localizes the model safety route and dynamically introduces compensatory routes so refusal behavior remains robust even when white-box attacks compromise the original pathway.",
+      "llm_tldr_cn": "针对静态安全单元易被白盒攻击定位并破坏的问题，提出动态路由自适应对齐框架（DRAA）。该方法先通过安全与不安全激活对比定位模型安全路由，再设置动态补偿路由，在原安全路由被攻击时保持稳健拒答。实验表明该防御显著提升模型在路由级白盒攻击下的鲁棒性。该工作直接展示了模型编辑思想在安全防御中的有效应用。",
+      "llm_tldr": "针对静态安全单元易被白盒攻击定位并破坏的问题，提出动态路由自适应对齐框架（DRAA）。该方法先通过安全与不安全激活对比定位模型安全路由，再设置动态补偿路由，在原安全路由被攻击时保持稳健拒答。实验表明该防御显著提升模型在路由级白盒攻击下的鲁棒性。该工作直接展示了模型编辑思想在安全防御中的有效应用。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "How can model editing prevent attacks on large language models",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2608.01184v1",
+      "source": "arxiv",
+      "title": "SAFE-Merge: Data-Free Continual Model Merging with General Knowledge Preservation",
+      "abstract": "Data-free continual model merging must incorporate a stream of specialized models while retaining both pretrained general knowledge and previously acquired tasks, without access to task data. Existing methods mainly merge task updates by suppressing interference among downstream tasks; while this protects previously acquired tasks, it overlooks the safety of the pretrained knowledge itself, whose erosion degrades generalization to held-out distributions and weakens the foundation for future task acquisition. We propose SAFE-Merge, a simple data-free continual-merging framework that first decides which parameter updates are safe to retain, and then recovers the task information lost through masking. Specifically, to ensure safety, risk-aware sparse masking selects parameter updates that carry task-specific information while posing low risk to general knowledge. Masked low-rank recovery then compensates for the lost task information using only the same retained parameter updates, while leaving all masked-out parameters strictly unchanged. Finally, the combined update is fused into the backbone, incurring no additional inference cost. Across vision and language benchmarks, SAFE-Merge consistently achieves the best H-score. On longer CLIP task sequences, it substantially improves H-score over NUFILT while also achieving the highest accuracy.",
+      "authors": [
+        "Zihuan Qiu",
+        "Zhiyang Liao",
+        "Chiyuan He",
+        "Yi Xu",
+        "Fanman Meng",
+        "Linfeng Xu",
+        "Qingbo Wu",
+        "Hongliang Li"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-08-02T12:09:37+00:00",
+      "link": "https://arxiv.org/pdf/2608.01184v1",
+      "tags": [
+        "keyword:model-edit",
+        "query:model-edit"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Data-free continual model merging with risk-aware safe parameter updates and preserving general knowledge; transferable to model editing safety",
+      "llm_evidence_cn": "无数据持续模型合并中风险感知地保留安全参数更新并保护通用知识，可迁移至模型编辑安全",
+      "llm_evidence": "无数据持续模型合并中风险感知地保留安全参数更新并保护通用知识，可迁移至模型编辑安全",
+      "canonical_evidence": "无数据持续模型合并中风险感知地保留安全参数更新并保护通用知识，可迁移至模型编辑安全",
+      "llm_tldr_en": "SAFE-Merge uses risk-aware safe parameter retention and masking-based task recovery for data-free continual model merging, preserving general knowledge; its safety-aware update decisions are transferable to model-editing safety.",
+      "llm_tldr_cn": "持续模型合并中已有方法常忽略预训练通用知识的安全保留，导致泛化能力下降。SAFE-Merge先判断哪些参数更新可安全保留，再通过掩码恢复丢失的任务信息。实验显示其能更好保留通用知识与已学任务。这种安全优先的参数更新思路有助于提升模型编辑的安全性。",
+      "llm_tldr": "持续模型合并中已有方法常忽略预训练通用知识的安全保留，导致泛化能力下降。SAFE-Merge先判断哪些参数更新可安全保留，再通过掩码恢复丢失的任务信息。实验显示其能更好保留通用知识与已学任务。这种安全优先的参数更新思路有助于提升模型编辑的安全性。",
+      "llm_tags": [
+        "query:model-edit"
+      ],
+      "matched_query_tag": "query:model-edit",
+      "matched_query_text": "model editing safety",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
